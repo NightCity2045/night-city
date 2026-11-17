@@ -3,6 +3,9 @@
  * https://github.com/space-wizards/space-station-14/blob/master/LICENSE.TXT
  */
 
+// Stair surface tracking and transition grace adapted from KingdomDream #104,
+// commit b66ee37c2466c9556e021db68534db892ba0614b, CESharedZLevelsSystem.Update.cs (MIT).
+
 using Content.Shared._NC.ZLevels.Core.Components;
 using Content.Shared.Throwing;
 using Robust.Shared.Physics.Components;
@@ -11,6 +14,9 @@ namespace Content.Shared._NC.ZLevels.Core.EntitySystems;
 
 public abstract partial class NCSharedZLevelsSystem
 {
+    private const float ClimbHoldTime = 0.5f;
+    private const float ClimbDownGraceTime = 1f;
+
     public int UpdateCalls { get; private set; }
 
     public override void Update(float frameTime)
@@ -86,30 +92,80 @@ public abstract partial class NCSharedZLevelsSystem
 
         var oldVelocity = zPhysicsComponent.Velocity;
         var oldHeight = zPhysicsComponent.LocalPosition;
+        var oldHold = zPhysicsComponent.ClimbHoldTimer;
+        var oldGrace = zPhysicsComponent.ClimbDownGraceTimer;
 
-        if (zPhysicsComponent.VelocityGravity)
-            zPhysicsComponent.Velocity -= ZGravityForce * zPhysicsComponent.GravityMultiplier * frameTime;
-
-        if (zPhysicsComponent.VelocityRaiseEvent)
+        // Hold bodies on the transit map until arrival, including objects that leave the platform.
+        if (HasComp<NCZGridMotionMapComponent>(Transform(entity).MapUid))
         {
-            var velocityEvent = new NCGetZVelocityEvent((entity, zPhysicsComponent));
-            RaiseLocalEvent(entity, ref velocityEvent);
+            SetZPosition((entity.Owner, zPhysicsComponent), float.Max(0f, zPhysicsComponent.CachedGroundHeight));
+            SetZVelocity((entity.Owner, zPhysicsComponent), 0f);
+            return;
+        }
 
-            zPhysicsComponent.Velocity += velocityEvent.VelocityDelta * frameTime;
+        // A stair on the lower map must not hold someone above the opening indefinitely.
+        var dropThroughBelow = zPhysicsComponent.CachedGroundFromBelow &&
+            zPhysicsComponent.CachedGroundIsSlope && zPhysicsComponent.CachedGroundHeight > 0f && zPhysicsComponent.ClimbHoldTimer <= 0f;
+        var onStickySupport = zPhysicsComponent.AutoStep && zPhysicsComponent.CachedStickyGround &&
+            !dropThroughBelow && zPhysicsComponent.Velocity is > -2f and <= 0f;
+
+        if (!onStickySupport)
+        {
+            if (zPhysicsComponent.VelocityGravity)
+                zPhysicsComponent.Velocity -= ZGravityForce * zPhysicsComponent.GravityMultiplier * frameTime;
+
+            if (zPhysicsComponent.VelocityRaiseEvent)
+            {
+                var velocityEvent = new NCGetZVelocityEvent((entity, zPhysicsComponent));
+                RaiseLocalEvent(entity, ref velocityEvent);
+                zPhysicsComponent.Velocity += velocityEvent.VelocityDelta * frameTime;
+            }
         }
 
         zPhysicsComponent.LocalPosition += zPhysicsComponent.Velocity * frameTime;
         var distanceToGround = zPhysicsComponent.LocalPosition - zPhysicsComponent.CachedGroundHeight;
 
-        // NC-Edit-Start: walls are high ground too, but only slope prototypes are valid automatic steps.
-        if (zPhysicsComponent is { AutoStep: true, CachedGroundIsSlope: true } && distanceToGround < 0)
-            zPhysicsComponent.LocalPosition -= distanceToGround;
-        // NC-Edit-End
+        if (onStickySupport)
+        {
+            zPhysicsComponent.LocalPosition = zPhysicsComponent.CachedGroundHeight;
+            zPhysicsComponent.Velocity = 0f;
+            distanceToGround = 0f;
+        }
+        else if (zPhysicsComponent is { AutoStep: true, CachedGroundIsSlope: true } &&
+            distanceToGround < 0f && !dropThroughBelow)
+        {
+            // Walls remain high ground, but only explicitly traversable slopes allow auto-stepping.
+            zPhysicsComponent.LocalPosition = zPhysicsComponent.CachedGroundHeight;
+            distanceToGround = 0f;
+        }
 
-        if (zPhysicsComponent.CachedStickyGround)
-            zPhysicsComponent.LocalPosition -= distanceToGround;
+        if (zPhysicsComponent.ClimbHoldTimer > 0f)
+        {
+            zPhysicsComponent.ClimbHoldTimer = MathF.Max(0f, zPhysicsComponent.ClimbHoldTimer - frameTime);
+            if (zPhysicsComponent.CachedGroundHeight is > 0f and < 1f &&
+                zPhysicsComponent.CachedGroundIsSlope)
+            {
+                zPhysicsComponent.LocalPosition = zPhysicsComponent.CachedGroundHeight;
+                if (zPhysicsComponent.Velocity < 0f)
+                    zPhysicsComponent.Velocity = 0f;
+            }
+            else if (zPhysicsComponent.CachedGroundHeight < 0f)
+            {
+                zPhysicsComponent.LocalPosition = MathF.Max(0f, zPhysicsComponent.LocalPosition);
+                if (zPhysicsComponent.Velocity < 0f)
+                    zPhysicsComponent.Velocity = 0f;
+            }
+            else
+            {
+                zPhysicsComponent.ClimbHoldTimer = 0f;
+            }
+            distanceToGround = zPhysicsComponent.LocalPosition - zPhysicsComponent.CachedGroundHeight;
+        }
 
-        if (zPhysicsComponent is { Velocity: < 0, Fallable: true })
+        if (zPhysicsComponent.ClimbDownGraceTimer > 0f)
+            zPhysicsComponent.ClimbDownGraceTimer = MathF.Max(0f, zPhysicsComponent.ClimbDownGraceTimer - frameTime);
+
+        if (zPhysicsComponent is { Velocity: < 0, Fallable: true } && !dropThroughBelow)
         {
             if (distanceToGround <= 0.05f)
             {
@@ -137,7 +193,8 @@ public abstract partial class NCSharedZLevelsSystem
         // NC-Edit-Start: a solid floor on this level can never be tunnelled through. A fast landing overshoots the
         // floor within one physics step; without this clamp the body would be moved to the map below (sinking under
         // the ground) or, on the lowest map, deleted by the terminal fall.
-        if (zPhysicsComponent is { Fallable: true } && zPhysicsComponent.CachedGroundHeight >= 0f &&
+        if (zPhysicsComponent is { Fallable: true } && !dropThroughBelow &&
+            zPhysicsComponent.CachedGroundHeight >= 0f &&
             zPhysicsComponent.LocalPosition < 0f)
         {
             zPhysicsComponent.LocalPosition = 0f;
@@ -149,6 +206,8 @@ public abstract partial class NCSharedZLevelsSystem
         if (zPhysicsComponent.LocalPosition < 0 && TryMoveDownOrChasm(entity))
         {
             zPhysicsComponent.LocalPosition += 1;
+            zPhysicsComponent.ClimbHoldTimer = 0f;
+            zPhysicsComponent.ClimbDownGraceTimer = zPhysicsComponent.CachedGroundIsSlope ? ClimbDownGraceTime : 0f;
             if (zPhysicsComponent is { CachedStickyGround: false, Fallable: true })
             {
                 var fallEv = new NCZLevelFallMapEvent();
@@ -158,23 +217,34 @@ public abstract partial class NCSharedZLevelsSystem
 
         if (zPhysicsComponent.LocalPosition >= 1)
         {
-            if (HasTileAbove(entity))
+            if (HasTileAbove(entity) && !HasConnectedSlopeAbove(entity))
             {
-                if (float.Abs(zPhysicsComponent.Velocity) >= ImpactVelocityLimit)
+                if (zPhysicsComponent.AutoStep && zPhysicsComponent.CachedGroundIsSlope &&
+                    zPhysicsComponent.CachedGroundHeight >= 1f && zPhysicsComponent.Velocity <= 0f)
                 {
-                    var hitEv = new NCZLevelHitEvent(zPhysicsComponent.Velocity);
-                    RaiseLocalEvent(entity, ref hitEv);
-
-                    var land = new LandEvent(null, true);
-                    RaiseLocalEvent(entity, ref land);
+                    // Keep a supported climber on the stair surface instead of bouncing into the ceiling.
+                    zPhysicsComponent.LocalPosition = zPhysicsComponent.CachedGroundHeight;
                 }
-                zPhysicsComponent.LocalPosition = 1;
-                zPhysicsComponent.Velocity = -zPhysicsComponent.Velocity * zPhysicsComponent.Bounciness;
+                else
+                {
+                    if (float.Abs(zPhysicsComponent.Velocity) >= ImpactVelocityLimit)
+                    {
+                        var hitEv = new NCZLevelHitEvent(zPhysicsComponent.Velocity);
+                        RaiseLocalEvent(entity, ref hitEv);
+
+                        var land = new LandEvent(null, true);
+                        RaiseLocalEvent(entity, ref land);
+                    }
+                    zPhysicsComponent.LocalPosition = 1;
+                    zPhysicsComponent.Velocity = -zPhysicsComponent.Velocity * zPhysicsComponent.Bounciness;
+                }
             }
-            else
+            else if ((zPhysicsComponent.Velocity > 0f || zPhysicsComponent.ClimbDownGraceTimer <= 0f) &&
+                TryMoveUp(entity))
             {
-                if (TryMoveUp(entity))
-                    zPhysicsComponent.LocalPosition -= 1;
+                zPhysicsComponent.LocalPosition -= 1;
+                if (zPhysicsComponent.AutoStep && zPhysicsComponent.CachedGroundIsSlope)
+                    zPhysicsComponent.ClimbHoldTimer = ClimbHoldTime;
             }
         }
 
@@ -186,6 +256,11 @@ public abstract partial class NCSharedZLevelsSystem
 
         if (float.Abs(oldHeight - zPhysicsComponent.LocalPosition) > 0.001f)
             DirtyField(entity, zPhysicsComponent, nameof(NCZPhysicsComponent.LocalPosition));
+
+        if (!oldHold.Equals(zPhysicsComponent.ClimbHoldTimer))
+            DirtyField(entity, zPhysicsComponent, nameof(NCZPhysicsComponent.ClimbHoldTimer));
+        if (!oldGrace.Equals(zPhysicsComponent.ClimbDownGraceTimer))
+            DirtyField(entity, zPhysicsComponent, nameof(NCZPhysicsComponent.ClimbDownGraceTimer));
 
         if (zPhysicsComponent.VelocityGravity)
         {

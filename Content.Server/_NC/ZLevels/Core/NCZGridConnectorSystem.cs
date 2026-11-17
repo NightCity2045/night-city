@@ -149,6 +149,14 @@ public sealed partial class NCZGridConnectorSystem : EntitySystem
             }
         }
 
+        // A temporary map must not change the topology of a grid while it travels.
+        var moving = EntityQueryEnumerator<NCZGridMotionComponent, NCZGridComponent>();
+        while (moving.MoveNext(out var grid, out _, out var member))
+        {
+            if (member.Network.IsValid())
+                _gridToTargetNet[grid] = member.Network;
+        }
+
         // Removals first: any grid whose live network is not its target leaves (raises Unlinked).
         // This frees grids before they are re-added to a different network during a merge/split.
         _removeBuffer.Clear();
@@ -227,6 +235,8 @@ public sealed partial class NCZGridConnectorSystem : EntitySystem
                 continue; //We do not support connecting grid to planet maps right now
 
             var lowerGridUid = xform.GridUid.Value;
+            if (HasComp<NCZGridMotionComponent>(lowerGridUid))
+                continue;
             if (!_zMapQuery.TryComp(xform.MapUid.Value, out var zMap))
                 continue;
             if (!_zLevels.TryMapUp((xform.MapUid.Value, zMap), out var aboveMap))
@@ -235,7 +245,7 @@ public sealed partial class NCZGridConnectorSystem : EntitySystem
             var worldPos = _transform.GetWorldPosition(connectorUid);
             if (!_mapSystem.TryFindGridAt(aboveMap.Owner, worldPos, out var upperGridUid, out var upperGrid))
                 continue;
-            if (upperGridUid == lowerGridUid)
+            if (upperGridUid == lowerGridUid || HasComp<NCZGridMotionComponent>(upperGridUid))
                 continue;
 
             // TryFindGridAt matches by AABB — verify the tile at this position actually exists

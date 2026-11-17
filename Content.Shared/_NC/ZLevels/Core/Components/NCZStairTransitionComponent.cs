@@ -7,13 +7,13 @@ using Robust.Shared.GameStates;
 namespace Content.Shared._NC.ZLevels.Core.Components;
 
 /// <summary>
-/// Moves a body to an adjacent Z-level when it reaches the exit end of this stair tile.
+/// Legacy stair marker retained for loading existing maps. Movement now uses NCZLevelHighGround.
 /// </summary>
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
 public sealed partial class NCZStairTransitionComponent : Component
 {
     /// <summary>
-    /// Relative Z-level destination. Positive values move up; negative values move down.
+    /// Former Z-level destination, retained for map deserialization.
     /// </summary>
     [DataField, AutoNetworkedField]
     public int LevelOffset;

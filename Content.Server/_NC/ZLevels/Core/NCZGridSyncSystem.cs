@@ -110,7 +110,8 @@ public sealed partial class NCZGridSyncSystem : VirtualController
             && Math.Abs((ev.NewRotation - ev.OldRotation).Theta) < 1e-6)
             return;
 
-        if (!_zlevels.TryGetGridNetwork(ent.Owner, out var network) || network.Comp.Grids.Count < 2)
+        if (!_zlevels.TryGetGridNetwork(ent.Owner, out var network) ||
+            network.Comp.Grids.Count < 2 || HasMovingGrid(network.Comp))
             return;
 
         EnsureAnchor(network.Comp);
@@ -151,6 +152,16 @@ public sealed partial class NCZGridSyncSystem : VirtualController
     }
 
     // === Predicates / math helpers ===
+
+    private bool HasMovingGrid(NCZGridNetworkComponent network)
+    {
+        foreach (var grid in network.Grids)
+        {
+            if (HasComp<NCZGridMotionComponent>(grid))
+                return true;
+        }
+        return false;
+    }
 
     private bool IsStaticAnchor(EntityUid gridUid)
     {
@@ -388,7 +399,7 @@ public sealed partial class NCZGridSyncSystem : VirtualController
         var netEnum = EntityQueryEnumerator<NCZGridNetworkComponent>();
         while (netEnum.MoveNext(out _, out var net))
         {
-            if (net.Grids.Count < 2)
+            if (net.Grids.Count < 2 || HasMovingGrid(net))
                 continue;
 
             if (net.HasStaticAnchor)
@@ -420,7 +431,7 @@ public sealed partial class NCZGridSyncSystem : VirtualController
         var netEnum = EntityQueryEnumerator<NCZGridNetworkComponent>();
         while (netEnum.MoveNext(out _, out var net))
         {
-            if (net.Grids.Count < 2)
+            if (net.Grids.Count < 2 || HasMovingGrid(net))
                 continue;
 
             // Static networks are kept still by the velocity-zeroing pass in UpdateBeforeSolve; we do

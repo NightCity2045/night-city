@@ -21,6 +21,7 @@ public sealed partial class NCZLevelsSystem
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private SharedActionsSystem _actions = default!;
     [Dependency] private ViewSubscriberSystem _viewSubscriber = default!;
+    [Dependency] private SharedEyeSystem _viewEye = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
 
     private readonly EntProtoId _zEyeProto = "NCZLevelEye";
@@ -68,8 +69,20 @@ public sealed partial class NCZLevelsSystem
             foreach (var eye in viewer.Eyes)
             {
                 _transform.SetWorldPosition(eye, _transform.GetWorldPosition(xform));
+                UpdateViewerPvsScale(uid, eye);
             }
         }
+    }
+
+    /// <summary>Loads other floors over the same range as the player's current view.</summary>
+    private void UpdateViewerPvsScale(EntityUid viewer, EntityUid eye)
+    {
+        if (!TryComp<EyeComponent>(viewer, out var source) ||
+            source.PvsScale == 1f && !HasComp<EyeComponent>(eye))
+            return;
+
+        var viewEye = EnsureComp<EyeComponent>(eye);
+        _viewEye.SetPvsScale((eye, viewEye), source.PvsScale);
     }
 
     private void OnViewerInit(Entity<NCZLevelViewerComponent> ent, ref MapInitEvent args)
@@ -137,6 +150,7 @@ public sealed partial class NCZLevelsSystem
             var newEye = SpawnAtPosition(_zEyeProto, new EntityCoordinates(mapUidBelow, globalPos));
 
             Transform(newEye).GridTraversal = false;
+            UpdateViewerPvsScale(ent, newEye);
             _viewSubscriber.AddViewSubscriber(newEye, actor.PlayerSession);
             eyes.Add(newEye);
         }
@@ -147,6 +161,7 @@ public sealed partial class NCZLevelsSystem
             var newEye = SpawnAtPosition(_zEyeProto, new EntityCoordinates(aboveMapUid, globalPos));
 
             Transform(newEye).GridTraversal = false;
+            UpdateViewerPvsScale(ent, newEye);
             _viewSubscriber.AddViewSubscriber(newEye, actor.PlayerSession);
             eyes.Add(newEye);
         }

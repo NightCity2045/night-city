@@ -158,8 +158,24 @@ namespace Content.Client.Examine
             // since there's probably one open already if it's coming in from the server.
             var entity = GetEntity(ev.EntityUid);
 
+            // NC-Edit-Start
+            var message = ev.Message;
+            if (ev.IncludeClientDescription)
+            {
+                var description = MetaData(entity).EntityDescription;
+                if (!string.IsNullOrEmpty(description))
+                {
+                    var localizedMessage = FormattedMessage.FromMarkupOrThrow(description);
+                    if (!string.IsNullOrWhiteSpace(message.ToString()))
+                        localizedMessage.PushNewline();
+                    localizedMessage.AddMessage(message);
+                    message = localizedMessage;
+                }
+            }
+            // NC-Edit-End
+
             OpenTooltip(player.Value, entity, ev.CenterAtCursor, ev.OpenAtOldTooltip, ev.KnowTarget);
-            UpdateTooltipInfo(player.Value, entity, ev.Message, ev.Verbs, getVerbs: false);
+            UpdateTooltipInfo(player.Value, entity, message, ev.Verbs, getVerbs: false); // NC
         }
 
         public override void SendExamineTooltip(EntityUid player, EntityUid target, FormattedMessage message, bool getVerbs, bool centerAtCursor)

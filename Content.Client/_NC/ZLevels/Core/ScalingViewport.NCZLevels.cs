@@ -94,67 +94,71 @@ public sealed partial class ScalingViewport
             return;
 
         _fallbackEye = _eye;
-
-        // Cache frequently accessed components/systems
         _xformQuery ??= _entityManager.GetEntityQuery<TransformComponent>();
         _mapQuery ??= _entityManager.GetEntityQuery<MapComponent>();
-
-        // Cache systems and components
         _zLevels ??= _entityManager.System<NCClientZLevelsSystem>();
         _mapSystem ??= _entityManager.System<SharedMapSystem>();
 
-        if (_player.LocalEntity is null)
+        if (_player.LocalEntity is not { } player ||
+            !_entityManager.TryGetComponent<NCZLevelViewerComponent>(player, out var viewer) ||
+            !_xformQuery.Value.TryComp(player, out var playerTransform) ||
+            playerTransform.MapUid is not { } playerMap)
             return;
 
-        if (!_entityManager.TryGetComponent<NCZLevelViewerComponent>(_player.LocalEntity.Value, out var zLevelViewer))
-            return;
-
-        if (!_xformQuery.Value.TryComp(_player.LocalEntity, out var playerXform))
-            return;
-
-        if (playerXform.MapUid is null)
-            return;
-
-        var lookUp = zLevelViewer.LookUp ? 1 : 0;
+        EntityUid? riderGrid = null;
+        NCZGridMotionComponent? rider = null;
+        if (_entityManager.TryGetComponent<NCZGridMotionMapComponent>(playerMap, out var transit) &&
+            _entityManager.TryGetComponent<NCZGridMotionComponent>(transit.Grid, out var motion) &&
+            _entityManager.HasComponent<NCZMapComponent>(motion.SourceMap))
+        {
+            riderGrid = transit.Grid;
+            rider = motion;
+        }
+        var baseMap = rider?.SourceMap ?? playerMap;
+        var riderShift = rider == null ? 0f : GridMotionOffset(rider);
+        var lookUp = viewer.LookUp ? 1 : 0;
 
         var lowestDepth = 0;
-        for (var i = 0; i >= -NCSharedZLevelsSystem.MaxZLevelsBelowRendering; i--)
+        for (var depth = 0; depth >= -NCSharedZLevelsSystem.MaxZLevelsBelowRendering; depth--)
         {
-            var checkingMap = playerXform.MapUid.Value;
-
-            if (i != 0)
+            var checkingMap = baseMap;
+            if (depth != 0)
             {
-                if (!_zLevels.TryMapOffset(playerXform.MapUid.Value, i, out var mapUidBelow))
+                if (!_zLevels.TryMapOffset(baseMap, depth, out var lowerMap))
                     continue;
-
-                checkingMap = mapUidBelow;
+                checkingMap = lowerMap;
             }
-
-            lowestDepth = i;
-
+            lowestDepth = depth;
             if (!TryFindEmptyTiles(checkingMap))
                 break;
         }
 
-        //From the lowest depth to the highest, render each level
+        if (rider != null)
+            lowestDepth = Math.Min(lowestDepth, (int) MathF.Floor(riderShift));
+
         for (var depth = lowestDepth; depth <= lookUp; depth++)
         {
-            if (depth == 0)
+            var map = baseMap;
+            if (depth != 0)
+            {
+                if (!_zLevels.TryMapOffset(baseMap, depth, out var otherMap))
+                    continue;
+                map = otherMap;
+            }
+            if (!_mapQuery.Value.TryComp(map, out var mapComponent))
+                continue;
+
+            if (depth == 0 && rider == null)
+            {
                 viewport.Eye = _fallbackEye;
+            }
             else
             {
-                if (!_zLevels.TryMapOffset(playerXform.MapUid.Value, depth, out var mapUidBelow))
-                    continue;
-
-                if (!_mapQuery.Value.TryComp(mapUidBelow, out var mapComp))
-                    continue;
-
-                Angle rotation = _fallbackEye.Rotation * -1;
-                var offset = rotation.ToWorldVec() * NCClientZLevelsSystem.ZLevelOffset * depth;
-
+                var offset = (-_fallbackEye.Rotation).ToWorldVec() *
+                    NCClientZLevelsSystem.ZLevelOffset * (depth - riderShift);
                 viewport.Eye = new ZEye(lowestDepth, depth, lookUp)
                 {
-                    Position = new MapCoordinates(_fallbackEye.Position.Position, mapComp.MapId),
+                    Position = new MapCoordinates(_fallbackEye.Position.Position, mapComponent.MapId),
                     DrawFov = _fallbackEye.DrawFov && depth >= 0,
                     DrawLight = _fallbackEye.DrawLight,
                     Offset = _fallbackEye.Offset + offset,
@@ -165,9 +169,9 @@ public sealed partial class ScalingViewport
 
             viewport.ClearColor = depth == lowestDepth ? Color.Black : null;
             viewport.Render();
+            RenderMovingGrids(viewport, baseMap, depth, lowestDepth, lookUp, riderShift, riderGrid);
         }
 
-        // Restore the Eye
         Eye = _fallbackEye;
         viewport.Eye = Eye;
     }
@@ -177,5 +181,6 @@ public sealed partial class ScalingViewport
         public int LowestDepth = lowest;
         public int Depth = depth;
         public int HighestDepth = high;
+        public bool IsGridMotion;
     }
 }

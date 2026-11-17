@@ -3,6 +3,9 @@
  * https://github.com/space-wizards/space-station-14/blob/master/LICENSE.TXT
  */
 
+// Stair support adapted from KingdomDream #104, commit b66ee37c2466c9556e021db68534db892ba0614b.
+// Source: Content.Shared/_CE/ZLevels/Core/EntitySystems/CESharedZLevelsSystem.Movement.cs (MIT).
+
 using System.Numerics;
 using Content.Shared._NC.ZLevels.Core.Components;
 using Content.Shared.Chasm;
@@ -72,82 +75,12 @@ public abstract partial class NCSharedZLevelsSystem
 
         entity.Comp.CachedTile = tile;
 
-        // NC-Edit-Start: stairs are discrete map transitions and never participate in simulated Z-height.
-        if (TryGetStairTransition(entity, out var levelOffset, out var atExit))
-        {
-            if (atExit && !entity.Comp.StairTransitionLocked)
-            {
-                entity.Comp.StairTransitionLocked = true;
-                if (TryMove(entity, levelOffset))
-                {
-                    ResetVerticalStateAfterStairTransition(entity);
-                    return;
-                }
-
-                entity.Comp.StairTransitionLocked = false;
-            }
-        }
-        else
-        {
-            entity.Comp.StairTransitionLocked = false;
-        }
-        // NC-Edit-End
-
-        entity.Comp.CachedGroundHeight = ComputeGroundHeightInternal((entity, entity), out var sticky, out var slope);
+        entity.Comp.CachedGroundHeight = ComputeGroundHeightInternal((entity, entity),
+            out var sticky, out var slope, out var fromBelow);
         entity.Comp.CachedStickyGround = sticky;
         entity.Comp.CachedGroundIsSlope = slope;
+        entity.Comp.CachedGroundFromBelow = fromBelow;
     }
-
-    // NC-Edit-Start: resolve and execute the simple tile-based staircase transition.
-    private bool TryGetStairTransition(EntityUid target, out int levelOffset, out bool atExit)
-    {
-        levelOffset = 0;
-        atExit = false;
-
-        var xform = Transform(target);
-        if (xform.MapUid is not { } mapUid)
-            return false;
-
-        var worldPos = _transform.GetWorldPosition(xform);
-        if (!_map.TryFindGridAt(mapUid, worldPos, out var gridUid, out var grid))
-            return false;
-
-        var gridTile = _map.WorldToTile(gridUid, grid, worldPos);
-        var query = _map.GetAnchoredEntitiesEnumerator(gridUid, grid, gridTile);
-        while (query.MoveNext(out var uid))
-        {
-            if (!TryComp<NCZStairTransitionComponent>(uid, out var stair))
-                continue;
-
-            levelOffset = stair.LevelOffset;
-            if (levelOffset == 0)
-                return false;
-
-            // Ascending follows the stair facing; descending exits at the opposite end.
-            // Keep detecting the whole stair tile so the return lock cannot clear
-            // while walking along paired stairs.
-            var stairDirection = _transform.GetWorldRotation(uid.Value).ToWorldVec();
-            var relativePosition = worldPos - _transform.GetWorldPosition(uid.Value);
-            var progress = Vector2.Dot(relativePosition, stairDirection) * Math.Sign(levelOffset) / grid.TileSize;
-            atExit = progress >= 0.4f;
-            return true;
-        }
-
-        return false;
-    }
-
-    private void ResetVerticalStateAfterStairTransition(Entity<NCZPhysicsComponent> entity)
-    {
-        entity.Comp.LocalPosition = 0f;
-        entity.Comp.Velocity = 0f;
-        entity.Comp.CachedGroundHeight = 0f;
-        entity.Comp.CachedStickyGround = false;
-        entity.Comp.CachedGroundIsSlope = false;
-
-        DirtyField(entity, entity.Comp, nameof(NCZPhysicsComponent.LocalPosition));
-        DirtyField(entity, entity.Comp, nameof(NCZPhysicsComponent.Velocity));
-    }
-    // NC-Edit-End
 
     private void OnMoveEvent(Entity<NCZPhysicsComponent> entity, ref MoveEvent args)
     {
@@ -173,10 +106,12 @@ public abstract partial class NCSharedZLevelsSystem
         Entity<NCZPhysicsComponent?> target,
         out bool stickyGround,
         out bool slopeGround,
+        out bool groundFromBelow,
         int maxFloors = 1)
     {
         stickyGround = false;
         slopeGround = false; // NC
+        groundFromBelow = false;
 
         if (!Resolve(target, ref target.Comp, false))
             return 0;
@@ -213,10 +148,6 @@ public abstract partial class NCSharedZLevelsSystem
                 if (!_zHighGroundQuery.TryComp(uid, out var heightComp))
                     continue;
 
-                // NC-Edit-Start: only explicitly traversable slopes may carry a body between Z-level maps.
-                slopeGround = heightComp.Stick;
-                // NC-Edit-End
-
                 var dir = Transform(uid.Value).LocalRotation.GetCardinalDir();
 
                 var gridLocal = _map.WorldToLocal(gridUid, grid, worldPos);
@@ -237,6 +168,10 @@ public abstract partial class NCSharedZLevelsSystem
                 if (curve.Count == 0)
                     continue;
 
+                slopeGround = heightComp.Stick;
+                stickyGround = heightComp.Stick;
+                groundFromBelow = floor > 0;
+
                 if (curve.Count == 1)
                 {
                     var groundY = curve[0];
@@ -253,16 +188,16 @@ public abstract partial class NCSharedZLevelsSystem
 
                 var groundYInterp = MathHelper.Lerp(y0, y1, frac);
 
-                if (target.Comp.Velocity < 0 && target.Comp.Velocity > -2f && heightComp.Stick)
-                    stickyGround = true;
-
                 return -floor + groundYInterp;
             }
 
             //No ZEntities found, check floor tiles
             if (_map.TryGetTileRef(gridUid, grid, gridTile, out var tileRef) &&
                 !tileRef.Tile.IsEmpty)
+            {
+                groundFromBelow = floor > 0;
                 return -floor; // tile ground has groundY == 0 -> -floor
+            }
         }
 
         return -maxFloors;
@@ -334,6 +269,27 @@ public abstract partial class NCSharedZLevelsSystem
         return _map.TryGetTileRef(gridUid, grid, worldPos, out var tileRef) && !tileRef.Tile.IsEmpty;
     }
 
+    /// <summary>A continuing stair surface can connect levels even where its tile has a floor.</summary>
+    private bool HasConnectedSlopeAbove(EntityUid entity)
+    {
+        if (Transform(entity).MapUid is not { } map ||
+            !TryMapUp(map, out var above))
+            return false;
+
+        var position = _transform.GetWorldPosition(entity);
+        if (!_map.TryFindGridAt(above, position, out var gridUid, out var grid))
+            return false;
+
+        var tile = _map.WorldToTile(gridUid, grid, position);
+        var anchored = _map.GetAnchoredEntitiesEnumerator(gridUid, grid, tile);
+        while (anchored.MoveNext(out var uid))
+        {
+            if (_zHighGroundQuery.TryComp(uid, out var ground) && ground.Stick && ground.HeightCurve.Count > 0)
+                return true;
+        }
+        return false;
+    }
+
     [PublicAPI]
     public void SetZPosition(Entity<NCZPhysicsComponent?> ent, float newPosition)
     {
@@ -398,6 +354,9 @@ public abstract partial class NCSharedZLevelsSystem
     [PublicAPI]
     public bool TryMove(EntityUid ent, int offset, Entity<NCZMapComponent?>? map = null)
     {
+        if (HasComp<NCZGridMotionMapComponent>(Transform(ent).MapUid))
+            return false;
+
         map ??= Transform(ent).MapUid;
 
         if (map is null)
@@ -432,6 +391,9 @@ public abstract partial class NCSharedZLevelsSystem
     [PublicAPI]
     public bool TryMoveDownOrChasm(EntityUid ent)
     {
+        if (HasComp<NCZGridMotionMapComponent>(Transform(ent).MapUid))
+            return false;
+
         if (TryMoveDown(ent))
             return true;
 

@@ -2,21 +2,23 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-# Entering a stair tile transfers the body directly to the adjacent Z-level.
+# Smooth stair surface adapted from KingdomDream #104 (b66ee37c2466c9556e021db68534db892ba0614b).
+# The profile is reversed to retain NCStairsUp's existing ascending direction.
+# Place NCStairsUp on the lower level and leave a floor opening above its tile.
+# NCStairsDown is the optional visual marker at that opening; it does not cut the floor.
+# Continuing stairs on the upper level can also receive the ascending character.
 - type: entity
   id: NCStairsUp
   parent: Stairs
   name: stairs up
   description: Stairs leading to the Z-level above.
   components:
-  - type: NCZStairTransition
-    levelOffset: 1
+  - type: NCZLevelHighGround
+    stick: true
+    heightCurve: [0.1, 1.05, 1.05]
 
 - type: entity
   id: NCStairsDown
   parent: Stairs
   name: stairs down
   description: Stairs leading to the Z-level below.
-  components:
-  - type: NCZStairTransition
-    levelOffset: -1

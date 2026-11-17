@@ -69,9 +69,12 @@ namespace Content.Server.Examine
             if (request.GetVerbs)
                 verbs = _verbSystem.GetLocalVerbs(entity, playerEnt, typeof(ExamineVerb));
 
-            var text = GetExamineText(entity, player.AttachedEntity);
+            // NC-Edit-Start
+            // The client already has the entity description in its selected language.
+            var text = GetExamineText(entity, player.AttachedEntity, includeDescription: false);
             RaiseNetworkEvent(new ExamineSystemMessages.ExamineInfoResponseMessage(
-                request.NetEntity, request.Id, text, verbs?.ToList()), channel);
+                request.NetEntity, request.Id, text, verbs?.ToList(), includeClientDescription: true), channel);
+            // NC-Edit-End
         }
     }
 }

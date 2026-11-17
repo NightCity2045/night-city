@@ -43,10 +43,16 @@ public sealed partial class NavScreen : BoxContainer
     }
 
     // NC-Edit-Start
-    /// <summary>Removes docking presentation from the navigation display used by an AV.</summary>
+    /// <summary>Shows only flight readouts when the console controls an AV.</summary>
     public void SetAVMode(bool enabled)
     {
+        NavRadar.Visible = !enabled;
+        NavSettingsHeader.Visible = !enabled;
+        IFFToggle.Visible = !enabled;
         DockToggle.Visible = !enabled;
+        RightDisplayNav.HorizontalAlignment = enabled ? HAlignment.Stretch : HAlignment.Right;
+        RightDisplayNav.HorizontalExpand = enabled;
+        RightDisplayNav.MaxWidth = enabled ? float.PositiveInfinity : 256f;
         if (!enabled)
             return;
 

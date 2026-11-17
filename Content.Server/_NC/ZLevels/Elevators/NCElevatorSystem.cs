@@ -32,6 +32,7 @@ public sealed partial class NCElevatorSystem : EntitySystem
     private const float RailThickness = 0.08f;
 
     [Dependency] private NCSharedZLevelsSystem _zLevels = default!;
+    [Dependency] private NCZGridMotionSystem _gridMotion = default!;
     [Dependency] private SharedMapSystem _maps = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private SharedPhysicsSystem _physics = default!;
@@ -295,11 +296,16 @@ public sealed partial class NCElevatorSystem : EntitySystem
         // Held items and container contents remain children of their existing owners.
         AttachPassengers(cabin);
         cabin.Comp.Barrier = Spawn(cabin.Comp.Settings.BarrierPrototype, new EntityCoordinates(cabin, CabinCenter));
+        cabin.Comp.Motor = _audio.PlayPvs(cabin.Comp.Settings.MotorSound, cabin.Owner,
+            cabin.Comp.Settings.MotorSound.Params.WithLoop(true))?.Entity;
+        if (!_gridMotion.TryStart(cabin, offset, cabin.Comp.Settings.TravelTime))
+        {
+            StopTrip(cabin, "nc-elevator-trip-cancelled");
+            return false;
+        }
         cabin.Comp.TargetMap = targetMap;
         cabin.Comp.TargetDepth = targetDepth;
         cabin.Comp.ArrivesAt = _timing.CurTime + cabin.Comp.Settings.TravelTime;
-        cabin.Comp.Motor = _audio.PlayPvs(cabin.Comp.Settings.MotorSound, cabin.Owner,
-            cabin.Comp.Settings.MotorSound.Params.WithLoop(true))?.Entity;
         _moving.Add(cabin);
         UpdateCabinPanels(cabin);
         return true;
@@ -416,7 +422,7 @@ public sealed partial class NCElevatorSystem : EntitySystem
         // Include bodies that were dropped or otherwise appeared inside during the delay.
         AttachPassengers(cabin);
         var offset = targetDepth - zMap.Depth;
-        if (offset is not (1 or -1) || !_zLevels.TryMove(cabin, offset))
+        if (offset is not (1 or -1) || !_gridMotion.TryComplete(cabin))
         {
             StopTrip(cabin, "nc-elevator-trip-cancelled");
             return;
@@ -431,6 +437,7 @@ public sealed partial class NCElevatorSystem : EntitySystem
 
     private void StopTrip(Entity<NCElevatorComponent> cabin, string? feedback = null)
     {
+        _gridMotion.Cancel(cabin);
         _moving.Remove(cabin);
         if (cabin.Comp.Motor is { } motor)
             _audio.Stop(motor);
