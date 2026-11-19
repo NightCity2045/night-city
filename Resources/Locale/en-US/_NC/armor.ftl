@@ -7,6 +7,10 @@ nc-armor-section-armorjack-body = armorjack body layer
 nc-armor-section-plate-carrier = torso plate
 nc-armor-section-combat-helmet = combat helmet shell
 nc-armor-section-closed-helmet = sealed helmet shell
+nc-armor-section-trauma-armored-torso = Trauma Team torso plates
+nc-armor-section-trauma-armored-limbs = Trauma Team limb armor
+nc-armor-section-trauma-armored-helmet = Trauma Team armored helmet shell
+nc-armor-section-trauma-med-chest = Trauma Team medical chest armor
 nc-armor-section-subdermal = subdermal armor
 
 nc-armor-condition-intact = intact

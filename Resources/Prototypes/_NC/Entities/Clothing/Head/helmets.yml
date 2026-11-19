@@ -35,6 +35,8 @@
     sprite: _NC/Clothing/Head/Hardsuits/trauma_armored_helmet.rsi
   - type: Clothing
     sprite: _NC/Clothing/Head/Hardsuits/trauma_armored_helmet.rsi
+  - type: NCArmor
+    profile: NCArmorTraumaArmoredHelmet
 
 - type: entity
   parent: [ ClothingHeadHardsuitBase, ClothingHeadSuitWithLightBase]
@@ -47,6 +49,8 @@
     sprite: _NC/Clothing/Head/Hardsuits/trauma_helmet.rsi
   - type: Clothing
     sprite: _NC/Clothing/Head/Hardsuits/trauma_helmet.rsi
+  - type: NCArmor
+    profile: NCArmorCombatHelmet
 
 - type: entity
   parent: [ ClothingHeadHardsuitBase, ClothingHeadSuitWithLightBase ]
@@ -59,6 +63,8 @@
     sprite: _NC/Clothing/Head/Hardsuits/trauma_med_helmet.rsi
   - type: Clothing
     sprite: _NC/Clothing/Head/Hardsuits/trauma_med_helmet.rsi
+  - type: NCArmor
+    profile: NCArmorCombatHelmet
 
 - type: entity
   parent: ClothingHeadBase
