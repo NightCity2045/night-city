@@ -7,7 +7,7 @@
   id: NCElevatorSpawner
   name: elevator spawner
   suffix: 3x3
-  description: Creates a 3x3 elevator cabin centered here. Prepare an empty shaft at the same XY on each served Z-level.
+  description: Creates a 3x3 cabin. Place this marker in the center of a floor tile or a clear shaft. On the other floors, leave a clear shaft at the same XY.
   components:
   - type: Sprite
     layers:
@@ -47,7 +47,7 @@
     state: on
   - type: NCElevatorCallButton
 
-# A thin, visible safety railing inside the platform boundary. It exists only during a trip.
+# A thin safety railing that deploys inside the platform boundary during a trip.
 - type: entity
   id: NCElevatorTravelBarrier
   categories: [ HideSpawnMenu ]
@@ -59,6 +59,7 @@
     anchored: true
   - type: Physics
     bodyType: Static
+    canCollide: false
   - type: Fixtures
     fixtures:
       north:
@@ -84,12 +85,36 @@
     - state: closed
       scale: "3,0.08"
       offset: "0,1.46"
+      map: [ railNorth ]
+      visible: false
     - state: closed
       scale: "3,0.08"
       offset: "0,-1.46"
+      map: [ railSouth ]
+      visible: false
     - state: closed
       scale: "0.08,3"
       offset: "1.46,0"
+      map: [ railEast ]
+      visible: false
     - state: closed
       scale: "0.08,3"
       offset: "-1.46,0"
+      map: [ railWest ]
+      visible: false
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.NCElevatorBarrierVisuals.Deployed:
+        railNorth:
+          True: { visible: true }
+          False: { visible: false }
+        railSouth:
+          True: { visible: true }
+          False: { visible: false }
+        railEast:
+          True: { visible: true }
+          False: { visible: false }
+        railWest:
+          True: { visible: true }
+          False: { visible: false }

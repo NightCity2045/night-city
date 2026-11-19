@@ -1,0 +1,298 @@
+meta:
+  format: 7
+  category: Grid
+  engineVersion: 284.0.2
+  forkId: ""
+  forkVersion: ""
+  time: 11/19/2026 09:41:37
+  entityCount: 34
+maps: []
+grids:
+- 1
+orphans:
+- 1
+nullspace: []
+tilemap:
+  0: Space
+  4: FloorCarpetOffice
+  2: FloorGrayConcrete
+  3: FloorWhite
+  1: FloorWood
+entities:
+- proto: ""
+  entities:
+  - uid: 1
+    components:
+    - type: MetaData
+    - type: Transform
+      parent: invalid
+    - type: MapGrid
+      chunks:
+        0,0:
+          ind: 0,0
+          tiles: AwAAAAAAAAMAAAAAAAABAAAAAAAABAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAADAAAAAAAAAQAAAAAAAAQAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAAAAAAAAAwAAAAAAAAEAAAAAAAAEAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAEAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAABAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwAAAAAAAAMAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAADAAAAAAAAAQAAAAAAAAIAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAAAAAAAAAwAAAAAAAAEAAAAAAAACAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+          version: 7
+    - type: Broadphase
+    - type: Physics
+      linearDamping: 0.05
+      fixedRotation: False
+      bodyType: Dynamic
+      bodyStatus: InAir
+      angularDamping: 0.05
+    - type: Fixtures
+      fixtures: {}
+    - type: OccluderTree
+    - type: GridPathfinding
+    - type: Gravity
+      gravityShakeSound: !type:SoundPathSpecifier
+        path: /Audio/Effects/alert.ogg
+    - type: DecalGrid
+      chunkCollection:
+        version: 2
+        nodes: []
+    - type: SpreaderGrid
+    - type: ImplicitRoof
+    - type: TileHistory
+      chunkHistory: {}
+    - type: GridAtmosphere
+      version: 2
+      data:
+        chunkSize: 4
+    - type: GasTileOverlay
+    - type: Shuttle
+      dampingModifier: 0.25
+    - type: GravityShake
+      shakeTimes: 10
+      nextShake: 0
+    - type: ExplosionAirtightGrid
+    - type: RadiationGridResistance
+- proto: AlwaysPoweredLightSodium
+  entities:
+  - uid: 13
+    components:
+    - type: Transform
+      parent: 1
+      pos: 1.5,7.5
+    - type: PointLight
+      radius: 5
+      energy: 1.25
+- proto: AlwaysPoweredWallLight
+  entities:
+  - uid: 23
+    components:
+    - type: Transform
+      parent: 1
+      pos: 4.5,3.5
+  - uid: 28
+    components:
+    - type: Transform
+      parent: 1
+      rot: -1.5707963267948966 rad
+      pos: 1.5,1.5
+  - uid: 34
+    components:
+    - type: Transform
+      parent: 1
+      rot: 3.141592653589793 rad
+      pos: 2.5,5.5
+- proto: Ashtray
+  entities:
+  - uid: 10
+    components:
+    - type: Transform
+      parent: 1
+      pos: 1.5,5.5
+    - type: NCCityLocation
+- proto: Bed
+  entities:
+  - uid: 25
+    components:
+    - type: Transform
+      parent: 1
+      pos: 4.5,1.5
+    - type: NCCityLocation
+- proto: BookRandom
+  entities:
+  - uid: 27
+    components:
+    - type: Transform
+      parent: 1
+      pos: 3.5,0.5
+    - type: NCCityLocation
+- proto: BoxCardboard
+  entities:
+  - uid: 12
+    components:
+    - type: Transform
+      parent: 1
+      pos: 4.5,8.5
+    - type: NCCityLocation
+- proto: ComfyChair
+  entities:
+  - uid: 9
+    components:
+    - type: Transform
+      parent: 1
+      pos: 0.5,5.5
+    - type: NCCityLocation
+- proto: Dresser
+  entities:
+  - uid: 26
+    components:
+    - type: Transform
+      parent: 1
+      pos: 4.5,0.5
+    - type: NCCityLocation
+- proto: DrinkBeerCan
+  entities:
+  - uid: 11
+    components:
+    - type: Transform
+      parent: 1
+      pos: 1.5,5.5
+    - type: NCCityLocation
+- proto: FoodTinBeans
+  entities:
+  - uid: 8
+    components:
+    - type: Transform
+      parent: 1
+      pos: 0.5,7.5
+    - type: NCCityLocation
+- proto: KitchenMicrowave
+  entities:
+  - uid: 4
+    components:
+    - type: Transform
+      parent: 1
+      pos: 1.5,8.5
+    - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+- proto: NCMissionDynamicPointMarker
+  entities:
+  - uid: 29
+    components:
+    - type: Transform
+      parent: 1
+      pos: 2.5,6.5
+    - type: NCMissionDynamicPoint
+      poolId: LivingRoom
+  - uid: 30
+    components:
+    - type: Transform
+      parent: 1
+      pos: 3.5,2.5
+    - type: NCMissionDynamicPoint
+      poolId: Bedroom
+  - uid: 31
+    components:
+    - type: Transform
+      parent: 1
+      pos: 4.5,2.5
+    - type: NCMissionDynamicPoint
+      poolId: Recovery
+      extractionPolicy: CanBeExtracted
+- proto: NCMissionEvacuationPointMarker
+  entities:
+  - uid: 32
+    components:
+    - type: Transform
+      parent: 1
+      pos: 3.5,8.5
+    - type: NCMissionEvacuationPoint
+      exitOffset: 0,2
+- proto: Sink
+  entities:
+  - uid: 2
+    components:
+    - type: Transform
+      parent: 1
+      pos: 0.5,8.5
+  - uid: 3
+    components:
+    - type: Transform
+      parent: 1
+      pos: 0.5,2.5
+- proto: TableWood
+  entities:
+  - uid: 5
+    components:
+    - type: Transform
+      parent: 1
+      pos: 0.5,7.5
+  - uid: 6
+    components:
+    - type: Transform
+      parent: 1
+      pos: 1.5,5.5
+  - uid: 7
+    components:
+    - type: Transform
+      parent: 1
+      pos: 4.5,2.5
+- proto: ToiletEmpty
+  entities:
+  - uid: 24
+    components:
+    - type: Transform
+      parent: 1
+      pos: 0.5,0.5
+    - type: NCCityLocation
+- proto: WallWood
+  entities:
+  - uid: 14
+    components:
+    - type: Transform
+      parent: 1
+      pos: 0.5,4.5
+  - uid: 15
+    components:
+    - type: Transform
+      parent: 1
+      pos: 1.5,4.5
+  - uid: 16
+    components:
+    - type: Transform
+      parent: 1
+      pos: 2.5,4.5
+  - uid: 17
+    components:
+    - type: Transform
+      parent: 1
+      pos: 4.5,4.5
+  - uid: 18
+    components:
+    - type: Transform
+      parent: 1
+      pos: 0.5,3.5
+  - uid: 19
+    components:
+    - type: Transform
+      parent: 1
+      pos: 2.5,0.5
+  - uid: 20
+    components:
+    - type: Transform
+      parent: 1
+      pos: 2.5,1.5
+  - uid: 21
+    components:
+    - type: Transform
+      parent: 1
+      pos: 2.5,2.5
+- proto: WoodDoor
+  entities:
+  - uid: 22
+    components:
+    - type: Transform
+      parent: 1
+      pos: 3.5,4.5
+    - type: NCCityLocation
+  - uid: 33
+    components:
+    - type: Transform
+      parent: 1
+      pos: 2.5,3.5
+    - type: NCCityLocation
+...

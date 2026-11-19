@@ -1,0 +1,89 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncZoneTemplate
+  id: NCG101ImplantRecoveryLayout
+  name: nc-mission-g101-implant-name
+  targetZoneId: 2e8c8b5f-7835-4072-b8e5-de3d395f3117
+  kind: MissionLayout
+  revision: 1
+  compatibleZoneKinds:
+  - MissionSlot
+  floors:
+  - relativeZ: 0
+    mapPath: /Maps/_NC/Missions/G101MissionT2/ImplantRecovery.yml
+  tilePolicy: ReplaceNonEmpty
+  entityPolicy: InteriorOnly
+  cleanupPolicy: RestoreBaseline
+  cachePolicy: Always
+
+- type: ncMissionDefinition
+  id: NCG101ImplantRecovery
+  template: NCG101ImplantRecoveryLayout
+  deliveryObjective: NCG101StolenImplantCase
+  name: nc-mission-g101-implant-name
+  description: nc-mission-g101-implant-description
+  rewardDescription: nc-mission-g101-implant-reward
+  difficulty: Easy
+  recommendedPlayers: 1
+  maximumParticipants: 2
+  runDuration: 8m
+  evacuationTime: 90s
+  dynamicSpawnPools:
+    LivingRoom:
+    - NCG101ImplantGunman
+    Bedroom:
+    - NCG101ImplantBruiser
+    Recovery:
+    - Gauze
+
+- type: entity
+  parent: BaseItem
+  id: NCG101StolenImplantCase
+  name: sealed implant case
+  description: A medical shipping case with an intact numbered seal. Return it to the fixer who issued the job.
+  components:
+  - type: Sprite
+    sprite: Objects/Storage/Briefcases/briefcase_brown.rsi
+    state: icon
+  - type: Item
+    size: Large
+    sprite: Objects/Storage/Briefcases/briefcase_brown.rsi
+  - type: NCFixerMissionObjective
+
+- type: entity
+  parent: MobSyndicateFootsoldier
+  id: NCG101ImplantGunman
+  name: implant thief
+  description: One of the thieves holding the stolen implant.
+  components:
+  - type: Loadout
+    prototypes: [NCG101ImplantGunmanGear]
+
+- type: startingGear
+  id: NCG101ImplantGunmanGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorGrey
+    outerClothing: ClothingOuterCoatBomber
+    shoes: ClothingShoesBootsJack
+  inhand:
+  - WeaponPistolMk58
+
+- type: entity
+  parent: MobSyndicateFootsoldier
+  id: NCG101ImplantBruiser
+  name: implant thief
+  description: One of the thieves holding the stolen implant.
+  components:
+  - type: Loadout
+    prototypes: [NCG101ImplantBruiserGear]
+
+- type: startingGear
+  id: NCG101ImplantBruiserGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorBlack
+    outerClothing: ClothingOuterFlannelRed
+    shoes: ClothingShoesBootsJack
+  inhand:
+  - BaseBallBat

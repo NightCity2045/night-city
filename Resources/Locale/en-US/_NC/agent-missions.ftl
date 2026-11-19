@@ -57,3 +57,13 @@ ent-NCMissionGuardVeryHard = contract guard
     .desc = An armed guard defending the operation site.
 ent-NCMissionGuardExtreme = contract guard
     .desc = An armed guard defending the operation site.
+
+nc-mission-g101-implant-name = Stolen Implant
+nc-mission-g101-implant-description = Two thieves intercepted an implant shipment and took the sealed case to an apartment in G101. Use the stairs in the building lobby, launch the job at the apartment door, and bring the case back to Relay. The case is in the bedroom.
+nc-mission-g101-implant-reward = Relay pays 700 credits for the sealed implant case.
+ent-NCG101StolenImplantCase = sealed implant case
+    .desc = A medical shipping case with an intact numbered seal. Return it to the fixer who issued the job.
+ent-NCG101ImplantGunman = implant thief
+    .desc = One of the thieves holding the stolen implant.
+ent-NCG101ImplantBruiser = implant thief
+    .desc = One of the thieves holding the stolen implant.

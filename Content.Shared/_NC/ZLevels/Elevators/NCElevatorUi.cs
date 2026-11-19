@@ -15,6 +15,12 @@ public sealed partial class NCElevatorPanelComponent : Component;
 public sealed partial class NCElevatorCabinPartComponent : Component;
 
 [Serializable, NetSerializable]
+public enum NCElevatorBarrierVisuals : byte
+{
+    Deployed,
+}
+
+[Serializable, NetSerializable]
 public enum NCElevatorUiKey : byte
 {
     Key,

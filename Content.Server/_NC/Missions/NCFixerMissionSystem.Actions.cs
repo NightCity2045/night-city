@@ -74,8 +74,7 @@ public sealed partial class NCFixerMissionSystem
                     if (work.Epoch != epoch.Value || now.Ticks >= work.Deadline || definition.DeliveryObjective == null) return false;
                     if (!_prototypes.TryIndex(definition.Template, out var layout) ||
                         (planning && _missions.IsSiteBusy(new(layout.TargetZoneId))) ||
-                        _missions.FindEntrance(new(layout.TargetZoneId), user) is not { } entrance ||
-                        !_mobState.IsAlive(user) || !_interaction.InRangeUnobstructed(user, entrance)) return false;
+                        !_mobState.IsAlive(user)) return false;
                     // Save the run identity before requesting deployment. A repeated launch joins that exact run.
                     proposed = proposed with { State = NCFixerWorkState.Deploying, RunId = Guid.Parse(work.Id) };
                     if (!await SaveAsync(proposed, work.Version)) return false;
@@ -139,7 +138,6 @@ public sealed partial class NCFixerMissionSystem
 
     private async Task<WorkRecord?> TryPayAsync(EntityUid fixer, EntityUid user, WorkRecord work, NCFixerContactPrototype contact)
     {
-        var payer = NCPartyRef.ForActor(new(contact.ActorId));
         var payee = NCPartyRef.ForCharacter(new(work.Organizer));
         if (work.PaymentId == null)
         {
@@ -148,6 +146,11 @@ public sealed partial class NCFixerMissionSystem
             work = staged;
         }
         var handoffId = new NCCashHandoffId(work.PaymentId!.Value);
+        // A payout already staged on an older version must resume with its original ledger party.
+        var handoff = await _cash.GetAsync(handoffId, true);
+        if (handoff == null && await EnsureContactBudgetAsync(contact) == null)
+            return null;
+        var payer = handoff?.Snapshot.Party ?? ContactParty(contact);
         var result = await _cash.StartAsync(new(
             NCPersistentIdentity.Command("fixer-mission", "pay", handoffId.ToString()), handoffId,
             NCPersistentIdentity.Transaction("fixer-mission", "pay", handoffId.ToString()), payer,
@@ -200,7 +203,7 @@ public sealed partial class NCFixerMissionSystem
 
     private async Task<bool> ApplySocialAsync(WorkRecord work, NCFixerContactPrototype contact)
     {
-        var issuer = NCPartyRef.ForActor(new(contact.ActorId));
+        var issuer = ContactParty(contact);
         var present = work.Attended ?? [];
         var organized = present.Any(member => member != work.Organizer);
         foreach (var member in present.Concat(organized ? [work.Organizer] : Array.Empty<int>()).Distinct())
@@ -218,7 +221,7 @@ public sealed partial class NCFixerMissionSystem
             if (!organizing) continue;
             var trust = await _reputation.ApplyEffectAsync(new(
                 NCPersistentIdentity.Command("fixer-mission", "contact-trust", stable), subject,
-                new(NCReputationChannel.Personal, issuer), contact.SuccessEffect, Guid.Parse(work.Id),
+                new(NCReputationChannel.Professional, default, contact.TrustDomain), contact.SuccessEffect, Guid.Parse(work.Id),
                 1, issuer, Guid.Parse(work.Id), AuditSource: "verified-mission-organization"));
             if (trust.Status is not (NCReputationMutationStatus.Applied or NCReputationMutationStatus.Duplicate)) return false;
         }

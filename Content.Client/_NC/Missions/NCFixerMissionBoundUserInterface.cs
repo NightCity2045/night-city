@@ -16,7 +16,9 @@ public sealed class NCFixerMissionBoundUserInterface(EntityUid owner, Enum uiKey
         base.Open();
         _window = this.CreateWindow<NCFixerMissionWindow>();
         _window.WorkControl.OnRequest += SendMessage;
+        _window.WorkControl.SetData(new([], [], 0, false, "nc-fixer-contact-loading"));
         _window.OpenCentered();
+        SendMessage(new NCFixerMissionRefreshMessage());
     }
     protected override void ReceiveMessage(BoundUserInterfaceMessage message)
     {

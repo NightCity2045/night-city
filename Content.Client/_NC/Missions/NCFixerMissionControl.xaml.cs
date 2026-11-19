@@ -3,10 +3,6 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System.Linq;
-using System.Numerics;
-using Robust.Client.Player;
-using Content.Shared._NC.Coordinates.Systems;
-using Content.Shared.Interaction;
 using Content.Client._NC.Agent;
 using Content.Shared._NC.Agent.UI;
 using Content.Shared._NC.Missions.Prototypes;
@@ -24,11 +20,9 @@ namespace Content.Client._NC.Missions;
 public sealed partial class NCFixerMissionControl : BoxContainer
 {
     [Dependency] private IPrototypeManager _prototypes = default!;
-    [Dependency] private IPlayerManager _players = default!;
-    [Dependency] private IEntityManager _entities = default!;
     [Dependency] private IGameTiming _timing = default!;
     private TimeSpan _receivedAt;
-    private string? _arrivalRefreshed;
+    private bool _workActionPending;
     private int _lastTimerSecond = -1;
     public event Action<Content.Shared._NC.Coordinates.NCMapCoordinates, string>? OnMap;
     public event Action<BoundUserInterfaceMessage>? OnRequest;
@@ -65,6 +59,7 @@ public sealed partial class NCFixerMissionControl : BoxContainer
     {
         var selected = _work?.Id;
         _data = data;
+        _workActionPending = false;
         _receivedAt = receivedAt ?? _timing.RealTime;
         _work = null;
         _offer = null;
@@ -123,9 +118,10 @@ public sealed partial class NCFixerMissionControl : BoxContainer
 
     private void Act(NCFixerWorkAction action, int target = 0)
     {
-        if (_work is not { } work) return;
-        OnRequest?.Invoke(new NCFixerWorkActionMessage(work.Id, work.Version, action, target));
+        if (_work is not { } work || _workActionPending) return;
+        _workActionPending = true;
         InviteButton.Disabled = JoinButton.Disabled = DeclineButton.Disabled = LaunchButton.Disabled = CancelButton.Disabled = DeliverButton.Disabled = true;
+        OnRequest?.Invoke(new NCFixerWorkActionMessage(work.Id, work.Version, action, target));
     }
 
     private void RefreshWork()
@@ -143,7 +139,7 @@ public sealed partial class NCFixerMissionControl : BoxContainer
             ("organizer", work.OrganizerName), ("names", string.Join(", ", work.CrewNames))), work.Location);
         var organizer = work.Organizer == _data.Viewer;
         var planning = work.State == NCFixerWorkState.Planning;
-        EntranceButton.Visible = !_data.AtContact && planning && work.Entrance != null;
+        EntranceButton.Visible = !_data.AtContact && work.Entrance != null;
         InviteTarget.Clear();
         foreach (var contact in _contacts)
             if (!work.Crew.Contains(contact.CharacterId) && !work.Invited.Contains(contact.CharacterId))
@@ -152,13 +148,15 @@ public sealed partial class NCFixerMissionControl : BoxContainer
         if (InviteTarget.ItemCount > 0) InviteTarget.Select(0);
         JoinButton.Visible = planning && work.Invited.Contains(_data.Viewer);
         DeclineButton.Visible = planning && !organizer && (work.Invited.Contains(_data.Viewer) || work.Crew.Contains(_data.Viewer));
-        LaunchButton.Visible = !_data.AtContact && organizer && (planning || work.State == NCFixerWorkState.Deploying);
-        LaunchButton.Disabled = work.Entrance == null || (planning && work.Busy);
-        if (_prototypes.TryIndex<NCMissionDefinitionPrototype>(work.Definition, out var mission))
-            LaunchButton.Text = Loc.GetString("nc-fixer-start-here", ("minutes", (int) Math.Ceiling(mission.RunDuration.TotalMinutes)));
+        LaunchButton.Visible = organizer && (planning || work.State == NCFixerWorkState.Deploying);
+        var busy = planning && work.Busy;
+        LaunchButton.Disabled = _workActionPending || busy;
+        LaunchButton.ToolTip = busy ? Loc.GetString("nc-agent-missions-busy") : string.Empty;
+        LaunchButton.Text = _prototypes.TryIndex<NCMissionDefinitionPrototype>(work.Definition, out var mission)
+            ? Loc.GetString("nc-fixer-start-timed", ("minutes", (int) Math.Ceiling(mission.RunDuration.TotalMinutes)))
+            : Loc.GetString("nc-fixer-launch");
         if (planning && string.IsNullOrEmpty(_data.Notice))
-            NoticeLabel.SetMessage(Loc.GetString(work.Busy ? "nc-agent-missions-busy" :
-                work.Entrance == null ? "nc-agent-missions-unavailable" : "nc-fixer-travel"));
+            NoticeLabel.SetMessage(Loc.GetString(busy ? "nc-agent-missions-busy" : "nc-fixer-start-anywhere"));
         CancelButton.Visible = organizer && !work.Surrendered && work.State is not (NCFixerWorkState.Completed or NCFixerWorkState.Cancelled);
         DeliverButton.Visible = organizer && _data.AtContact && work.State is NCFixerWorkState.Active or NCFixerWorkState.Completed;
     }
@@ -170,22 +168,6 @@ public sealed partial class NCFixerMissionControl : BoxContainer
         var elapsed = (int) (_timing.RealTime - _receivedAt).TotalSeconds;
         if (_lastTimerSecond == elapsed) return;
         _lastTimerSecond = elapsed;
-        if (work.State == NCFixerWorkState.Planning && _data != null)
-        {
-            var atEntrance = !_data.AtContact && _data.Viewer == work.Organizer &&
-                work.Entrance is { } door && _players.LocalEntity is { } body &&
-                _entities.System<NCMapCoordinatesSystem>().TryGetCoordinates(body, out var here) &&
-                here.NetworkId == door.NetworkId && here.Z == door.Z &&
-                Vector2.DistanceSquared(here.Position, door.Position) <= SharedInteractionSystem.InteractionRangeSquared;
-            LaunchButton.Visible = atEntrance;
-            if (atEntrance && _arrivalRefreshed != work.Id)
-            {
-                _arrivalRefreshed = work.Id;
-                OnRequest?.Invoke(new NCFixerMissionRefreshMessage());
-            }
-            else if (!atEntrance)
-                _arrivalRefreshed = null;
-        }
         var delivery = Math.Max(0, work.DeliverySecondsRemaining - elapsed);
         var text = Loc.GetString("nc-fixer-delivery-time", ("minutes", (int) Math.Ceiling(delivery / 60.0)));
         if (work.SecondsRemaining is { } remaining)

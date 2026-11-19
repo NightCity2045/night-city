@@ -1,5 +1,5 @@
 ent-NCElevatorSpawner = elevator spawner
-    .desc = Creates a 3x3 elevator cabin centered here. Prepare an empty shaft at the same XY on each served Z-level.
+    .desc = Creates a 3x3 cabin. Place this marker in the center of a floor tile or a clear shaft. On the other floors, leave a clear shaft at the same XY.
     .suffix = 3x3
 ent-NCElevatorPanel = elevator panel
     .desc = Select up or down to travel one floor. Operates the cabin carrying this panel.

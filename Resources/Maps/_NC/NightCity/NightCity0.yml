@@ -5,7 +5,7 @@ meta:
   forkId: ""
   forkVersion: ""
   time: 11/14/2026 13:33:23
-  entityCount: 12888
+  entityCount: 12889
 maps:
 - 1
 grids:
@@ -11518,6 +11518,13 @@ entities:
       pos: 31.5,22.5
 - proto: NCStairsUp
   entities:
+  - uid: 12940
+    components:
+    - type: Transform
+      parent: 1
+      rot: -1.5707963267948966 rad
+      pos: -8.5,-19.5
+      anchored: true
   - uid: 11674
     components:
     - type: Transform
@@ -74860,7 +74867,7 @@ entities:
       anchored: true
     - type: NCMissionEntrance
       slotId: 7309c13f-4079-49bf-9704-f486c5172a13
-- proto: NCFixerContactAnchor
+- proto: NCStreetMissionFixerBody
   entities:
   - uid: 12939
     components:

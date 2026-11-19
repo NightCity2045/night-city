@@ -68,7 +68,7 @@ public sealed partial class NCElevatorComponent : Component
     [ViewVariables]
     public EntityUid? Motor;
 
-    [ViewVariables]
+    [DataField]
     public EntityUid? Barrier;
 }
 
