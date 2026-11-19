@@ -9,6 +9,7 @@ using Content.Shared._NC.ZLevels.Core.EntitySystems;
 using Content.Shared._NC.ZLevels.Elevators;
 using Content.Shared.ActionBlocker;
 using Content.Shared.Interaction;
+using Content.Shared.Popups;
 using Robust.Shared.Audio;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Map;
@@ -30,6 +31,8 @@ public sealed partial class NCElevatorSystem : EntitySystem
     private static readonly Vector2 CabinCenter = new(0.5f, 0.5f);
     private static readonly Box2 CabinBounds = new(-1f, -1f, 2f, 2f);
     private const float RailThickness = 0.08f;
+    // Ignore the collision skin of walls touching the outside of the shaft.
+    private const float BoundaryInset = PhysicsConstants.PolygonRadius * 3f;
 
     [Dependency] private NCSharedZLevelsSystem _zLevels = default!;
     [Dependency] private NCZGridMotionSystem _gridMotion = default!;
@@ -40,6 +43,7 @@ public sealed partial class NCElevatorSystem : EntitySystem
     [Dependency] private SharedUserInterfaceSystem _ui = default!;
     [Dependency] private SharedInteractionSystem _interaction = default!;
     [Dependency] private ActionBlockerSystem _blocker = default!;
+    [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private EntityLookupSystem _lookup = default!;
     [Dependency] private MetaDataSystem _metadata = default!;
     [Dependency] private ITileDefinitionManager _tiles = default!;
@@ -65,6 +69,7 @@ public sealed partial class NCElevatorSystem : EntitySystem
         SubscribeLocalEvent<NCElevatorPanelComponent, ComponentShutdown>(OnPanelShutdown);
         SubscribeLocalEvent<NCElevatorPanelComponent, BoundUIOpenedEvent>(OnUiOpened);
         SubscribeLocalEvent<NCElevatorPanelComponent, NCElevatorMoveMessage>(OnMoveRequested);
+        SubscribeLocalEvent<NCElevatorCallButtonComponent, ActivateInWorldEvent>(OnCallRequested);
     }
 
     private void OnSpawnerMapInit(Entity<NCElevatorSpawnerComponent> ent, ref MapInitEvent args)
@@ -123,6 +128,123 @@ public sealed partial class NCElevatorSystem : EntitySystem
     private void OnMoveRequested(Entity<NCElevatorPanelComponent> ent, ref NCElevatorMoveMessage args)
     {
         TryMove((ent.Owner, ent.Comp), args.Actor, args.Offset);
+    }
+
+    private void OnCallRequested(Entity<NCElevatorCallButtonComponent> ent, ref ActivateInWorldEvent args)
+    {
+        if (args.Handled || !args.Complex)
+            return;
+
+        args.Handled = true;
+        TryCall((ent.Owner, ent.Comp), args.User);
+    }
+
+    /// <summary>Calls the explicitly linked cabin to the button's own Z-level.</summary>
+    public bool TryCall(Entity<NCElevatorCallButtonComponent?> button, EntityUid user)
+    {
+        if (!Resolve(button, ref button.Comp, false) || !CanUseCallButton(button, user))
+            return false;
+
+        if (!TryGetCalledCabin((button.Owner, button.Comp), out var cabin, out var depth))
+        {
+            _popup.PopupEntity(Loc.GetString("nc-elevator-call-unlinked"), button, user);
+            return false;
+        }
+        if (cabin.Comp.TargetDepth != null)
+        {
+            _popup.PopupEntity(Loc.GetString("nc-elevator-busy"), button, user);
+            return false;
+        }
+        if (!CanCall(cabin, depth, out var offset, out var failure))
+        {
+            _popup.PopupEntity(Loc.GetString(failure!), button, user);
+            return false;
+        }
+        if (offset == 0)
+        {
+            _popup.PopupEntity(Loc.GetString("nc-elevator-call-here"), button, user);
+            return true;
+        }
+
+        cabin.Comp.CalledDepth = depth;
+        if (!TryStartTrip(cabin, offset, out failure))
+        {
+            StopTrip(cabin, failure);
+            _popup.PopupEntity(Loc.GetString(failure!), button, user);
+            return false;
+        }
+
+        _popup.PopupEntity(Loc.GetString("nc-elevator-call-accepted"), button, user);
+        return true;
+    }
+
+    private bool CanUseCallButton(EntityUid button, EntityUid user)
+    {
+        return !TerminatingOrDeleted(button) && !TerminatingOrDeleted(user) &&
+               Transform(button).Anchored &&
+               _blocker.CanConsciouslyPerformAction(user) &&
+               _interaction.InRangeUnobstructed(user, button);
+    }
+
+    private bool TryGetCalledCabin(Entity<NCElevatorCallButtonComponent> button,
+        out Entity<NCElevatorComponent> cabin, out int depth)
+    {
+        cabin = default;
+        depth = default;
+        if (string.IsNullOrWhiteSpace(button.Comp.ElevatorId) ||
+            !TryComp<NCZMapComponent>(Transform(button).MapUid, out var landing))
+            return false;
+
+        Entity<NCElevatorSpawnerComponent>? controller = null;
+        var markers = EntityQueryEnumerator<NCElevatorSpawnerComponent, TransformComponent>();
+        while (markers.MoveNext(out var uid, out var marker, out var transform))
+        {
+            if (marker.ElevatorId != button.Comp.ElevatorId || TerminatingOrDeleted(uid) ||
+                EntityManager.IsQueuedForDeletion(uid) ||
+                !TryComp<NCZMapComponent>(transform.MapUid, out var map) || map.NetworkUid != landing.NetworkUid)
+                continue;
+
+            // Duplicate IDs must not silently select a different cabin.
+            if (controller != null)
+                return false;
+            controller = (uid, marker);
+        }
+        if (controller is not { } selected || selected.Comp.Cabin is not { } grid ||
+            TerminatingOrDeleted(grid) || EntityManager.IsQueuedForDeletion(grid) ||
+            !TryComp<NCElevatorComponent>(grid, out var elevator))
+            return false;
+
+        cabin = (grid, elevator);
+        depth = landing.Depth;
+        return true;
+    }
+
+    private bool CanCall(Entity<NCElevatorComponent> cabin, int depth, out int offset, out string? failure)
+    {
+        offset = 0;
+        failure = "nc-elevator-call-no-route";
+        if (!TryComp<MapGridComponent>(cabin, out var grid) ||
+            Transform(cabin).MapUid is not { } map ||
+            !TryComp<NCZMapComponent>(map, out var currentZ) ||
+            cabin.Comp.Settings.Stops.Count > 0 && !cabin.Comp.Settings.Stops.Contains(depth))
+            return false;
+
+        offset = depth.CompareTo(currentZ.Depth);
+        Entity<NCZMapComponent> current = (map, currentZ);
+        while (current.Comp.Depth != depth)
+        {
+            if (!_zLevels.TryMapOffset((current.Owner, current.Comp), offset, out var next) ||
+                next.Comp.Depth != current.Comp.Depth + offset || next.Comp.NetworkUid != currentZ.NetworkUid)
+                return false;
+            if (!HasClearShaft((cabin.Owner, grid), next))
+            {
+                failure = "nc-elevator-shaft-blocked";
+                return false;
+            }
+            current = next;
+        }
+        failure = null;
+        return true;
     }
 
     public override void Update(float frameTime)
@@ -280,27 +402,36 @@ public sealed partial class NCElevatorSystem : EntitySystem
             return false;
         }
 
-        if (!CanMove((cabin.Owner, cabin.Comp), offset, out var targetMap, out var targetDepth, out var failure))
+        if (!TryStartTrip(cabin, offset, out var failure))
         {
             UpdatePanel(panel, failure);
             return false;
         }
+        return true;
+    }
 
-        if (!HasClearEdges(cabin))
+    private bool TryStartTrip(Entity<NCElevatorComponent> cabin, int offset, out string? failure)
+    {
+        if (!CanMove((cabin.Owner, cabin.Comp), offset, out var targetMap, out var targetDepth, out failure))
+            return false;
+
+        if (cabin.Comp.Barrier == null && !HasClearEdges(cabin))
         {
-            UpdatePanel(panel, "nc-elevator-edge-blocked");
+            failure = "nc-elevator-edge-blocked";
             return false;
         }
 
-        // Capture actual root bodies on the platform, including loose cargo.
-        // Held items and container contents remain children of their existing owners.
+        // The same trip path carries passengers for cabin controls and landing calls.
         AttachPassengers(cabin);
-        cabin.Comp.Barrier = Spawn(cabin.Comp.Settings.BarrierPrototype, new EntityCoordinates(cabin, CabinCenter));
-        cabin.Comp.Motor = _audio.PlayPvs(cabin.Comp.Settings.MotorSound, cabin.Owner,
-            cabin.Comp.Settings.MotorSound.Params.WithLoop(true))?.Entity;
+        if (cabin.Comp.Barrier == null)
+            cabin.Comp.Barrier = Spawn(cabin.Comp.Settings.BarrierPrototype, new EntityCoordinates(cabin, CabinCenter));
+        if (cabin.Comp.Motor == null)
+            cabin.Comp.Motor = _audio.PlayPvs(cabin.Comp.Settings.MotorSound, cabin.Owner,
+                cabin.Comp.Settings.MotorSound.Params.WithLoop(true))?.Entity;
         if (!_gridMotion.TryStart(cabin, offset, cabin.Comp.Settings.TravelTime))
         {
-            StopTrip(cabin, "nc-elevator-trip-cancelled");
+            failure = "nc-elevator-trip-cancelled";
+            StopTrip(cabin, failure);
             return false;
         }
         cabin.Comp.TargetMap = targetMap;
@@ -308,6 +439,7 @@ public sealed partial class NCElevatorSystem : EntitySystem
         cabin.Comp.ArrivesAt = _timing.CurTime + cabin.Comp.Settings.TravelTime;
         _moving.Add(cabin);
         UpdateCabinPanels(cabin);
+        failure = null;
         return true;
     }
 
@@ -347,13 +479,14 @@ public sealed partial class NCElevatorSystem : EntitySystem
         if (offset is not (1 or -1) ||
             Transform(cabin).MapUid is not { } map ||
             !TryComp<NCZMapComponent>(map, out var zMap) ||
-            !_zLevels.TryMapOffset((map, zMap), offset, out var target))
+            !_zLevels.TryMapOffset((map, zMap), offset, out var target) ||
+            target.Comp.Depth != zMap.Depth + offset)
         {
             failure = "nc-elevator-no-stop";
             return false;
         }
 
-        if (cabin.Comp.Settings.Stops.Count > 0 &&
+        if (cabin.Comp.CalledDepth == null && cabin.Comp.Settings.Stops.Count > 0 &&
             (!cabin.Comp.Settings.Stops.Contains(zMap.Depth) || !cabin.Comp.Settings.Stops.Contains(target.Comp.Depth)))
         {
             failure = "nc-elevator-no-stop";
@@ -429,8 +562,20 @@ public sealed partial class NCElevatorSystem : EntitySystem
         }
 
         SynchronizePassengerHeights(cabin, offset, targetDepth);
-        if (TryComp<NCElevatorSpawnerComponent>(cabin.Comp.Controller, out var controller))
+        // An interrupted call restores at the last served stop, never at a forbidden intermediate level.
+        if (TryComp<NCElevatorSpawnerComponent>(cabin.Comp.Controller, out var controller) &&
+            (cabin.Comp.Settings.Stops.Count == 0 || cabin.Comp.Settings.Stops.Contains(targetDepth)))
             controller.CurrentDepth = targetDepth;
+
+        if (cabin.Comp.CalledDepth is { } calledDepth && calledDepth != targetDepth)
+        {
+            cabin.Comp.TargetMap = null;
+            cabin.Comp.TargetDepth = null;
+            if (TryStartTrip(cabin, calledDepth.CompareTo(targetDepth), out var failure))
+                return;
+            StopTrip(cabin, failure);
+            return;
+        }
         StopTrip(cabin);
         _audio.PlayPvs(cabin.Comp.Settings.ArrivalSound, cabin.Owner);
     }
@@ -447,6 +592,7 @@ public sealed partial class NCElevatorSystem : EntitySystem
         cabin.Comp.Barrier = null;
         cabin.Comp.TargetMap = null;
         cabin.Comp.TargetDepth = null;
+        cabin.Comp.CalledDepth = null;
         if (!TerminatingOrDeleted(cabin))
             UpdateCabinPanels(cabin, feedback);
     }
@@ -526,7 +672,9 @@ public sealed partial class NCElevatorSystem : EntitySystem
             }
         }
 
-        foreach (var uid in _lookup.GetEntitiesIntersecting(Transform(map).MapID, bounds))
+        var bodyBounds = WorldBounds(cabin, CabinBounds.Enlarged(-BoundaryInset));
+        foreach (var uid in _lookup.GetEntitiesIntersecting(Transform(map).MapID, bodyBounds,
+                     LookupFlags.Dynamic | LookupFlags.Static))
         {
             if (TerminatingOrDeleted(uid) || EntityManager.IsQueuedForDeletion(uid) ||
                 uid == cabin.Owner || Transform(uid).GridUid == cabin.Owner ||
@@ -549,14 +697,20 @@ public sealed partial class NCElevatorSystem : EntitySystem
         var mapId = Transform(cabin).MapID;
         var strips = new[]
         {
-            new Box2(-1, -1, 2, -1 + RailThickness),
-            new Box2(-1, 2 - RailThickness, 2, 2),
-            new Box2(-1, -1, -1 + RailThickness, 2),
-            new Box2(2 - RailThickness, -1, 2, 2),
+            new Box2(-1 + BoundaryInset, -1 + BoundaryInset, 2 - BoundaryInset, -1 + RailThickness),
+            new Box2(-1 + BoundaryInset, 2 - RailThickness, 2 - BoundaryInset, 2 - BoundaryInset),
+            new Box2(-1 + BoundaryInset, -1 + BoundaryInset, -1 + RailThickness, 2 - BoundaryInset),
+            new Box2(2 - RailThickness, -1 + BoundaryInset, 2 - BoundaryInset, 2 - BoundaryInset),
         };
         foreach (var strip in strips)
-        foreach (var uid in _lookup.GetEntitiesIntersecting(mapId, WorldBounds(cabin, strip)))
+        foreach (var uid in _lookup.GetEntitiesIntersecting(mapId, WorldBounds(cabin, strip),
+                     LookupFlags.Dynamic | LookupFlags.Static))
         {
+            if (TerminatingOrDeleted(uid) || EntityManager.IsQueuedForDeletion(uid) ||
+                HasComp<MapComponent>(uid) || HasComp<NCElevatorCabinPartComponent>(uid) ||
+                Transform(uid).GridUid == cabin && Transform(uid).Anchored)
+                continue;
+
             if (uid != cabin && !HasComp<MapGridComponent>(uid) &&
                 TryComp<PhysicsComponent>(uid, out var body) && body.CanCollide && body.Hard)
             {

@@ -63,7 +63,7 @@ public sealed partial class NCVehicleServiceSystem : EntitySystem
         if (!args.CanAccess || !args.CanInteract)
             return;
         var user = args.User;
-        args.Verbs.Add(new InteractionVerb { Text = Loc.GetString("nc-vehicle-service"), Act = () => TryOpen(ent, user) });
+        args.Verbs.Add(new InteractionVerb { Text = Loc.GetString("nc-vehicle-service"), TextLocalizationId = "nc-vehicle-service", Act = () => TryOpen(ent, user) });
     }
 
     private void OnEquipmentVerbs(Entity<NCVehicleWorkshopEquipmentComponent> ent, ref GetVerbsEvent<InteractionVerb> args)
@@ -76,6 +76,7 @@ public sealed partial class NCVehicleServiceSystem : EntitySystem
             args.Verbs.Add(new InteractionVerb
             {
                 Text = Loc.GetString("nc-workshop-equipment-operate-lift"),
+                TextLocalizationId = "nc-workshop-equipment-operate-lift",
                 Act = () => TryOperateLift(ent, user),
             });
 
@@ -83,6 +84,7 @@ public sealed partial class NCVehicleServiceSystem : EntitySystem
             args.Verbs.Add(new InteractionVerb
             {
                 Text = Loc.GetString("nc-workshop-equipment-open-diagnostics"),
+                TextLocalizationId = "nc-workshop-equipment-open-diagnostics",
                 Act = () => TryOpenNearestVehicle(ent, user),
             });
     }

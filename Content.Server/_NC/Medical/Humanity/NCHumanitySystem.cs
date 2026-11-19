@@ -313,10 +313,6 @@ public sealed partial class NCHumanitySystem : EntitySystem
     private void OnGetVerbs(Entity<NCHumanityMonitorComponent> body, ref GetVerbsEvent<InteractionVerb> args)
     {
         AddEpisodeVerbs(body, ref args);
-        if (args.User != body.Owner || !TryGetStatus(body, out _)) return;
-        var uid = body.Owner;
-        args.Verbs.Add(new InteractionVerb { Text = Loc.GetString("nc-humanity-check"),
-            Act = () => { if (TryGetStatus(uid, out var status)) _popup.PopupEntity(StatusText(status), uid, uid, PopupType.Large); } });
     }
     private void OnExamined(Entity<NCHumanityMonitorComponent> body, ref ExaminedEvent args)
     {

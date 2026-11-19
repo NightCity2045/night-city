@@ -56,7 +56,7 @@ public sealed partial class NCVehicleRecoverySystem : EntitySystem
         if (!args.CanAccess || !args.CanInteract)
             return;
         var user = args.User;
-        args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString("nc-vehicle-winch"), Act = () => TryToggleWinch(ent, user) });
+        args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString("nc-vehicle-winch"), TextLocalizationId = "nc-vehicle-winch", Act = () => TryToggleWinch(ent, user) });
         foreach (var action in new[] { NCVehicleRecoveryAction.Load, NCVehicleRecoveryAction.Secure, NCVehicleRecoveryAction.Release, NCVehicleRecoveryAction.Unload })
         {
             var captured = action;
@@ -67,7 +67,7 @@ public sealed partial class NCVehicleRecoverySystem : EntitySystem
                 NCVehicleRecoveryAction.Release => "nc-vehicle-flatbed-release",
                 _ => "nc-vehicle-flatbed-unload",
             };
-            args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString(key), Act = () => TryStart(ent, user, captured) });
+            args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString(key), TextLocalizationId = key, Act = () => TryStart(ent, user, captured) });
         }
     }
 

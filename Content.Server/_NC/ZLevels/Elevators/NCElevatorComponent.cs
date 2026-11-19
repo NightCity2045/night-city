@@ -58,6 +58,10 @@ public sealed partial class NCElevatorComponent : Component
     [ViewVariables]
     public EntityUid? TargetMap;
 
+    /// <summary>One landing call destination; intermediate hops keep the cabin closed.</summary>
+    [ViewVariables]
+    public int? CalledDepth;
+
     [AutoPausedField]
     public TimeSpan ArrivesAt;
 
@@ -72,6 +76,10 @@ public sealed partial class NCElevatorComponent : Component
 [RegisterComponent]
 public sealed partial class NCElevatorSpawnerComponent : Component
 {
+    /// <summary>Matches landing call buttons within this Z-network.</summary>
+    [DataField]
+    public string ElevatorId = string.Empty;
+
     [DataField]
     public NCElevatorSettings Settings = new();
 
@@ -84,4 +92,12 @@ public sealed partial class NCElevatorSpawnerComponent : Component
 
     [ViewVariables]
     public EntityUid? Cabin;
+}
+
+/// <summary>Landing button linked to one persistent elevator controller.</summary>
+[RegisterComponent]
+public sealed partial class NCElevatorCallButtonComponent : Component
+{
+    [DataField]
+    public string ElevatorId = string.Empty;
 }

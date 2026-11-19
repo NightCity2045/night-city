@@ -26,7 +26,10 @@ public sealed partial class NCCyberEpisodeWindow : FancyWindow
         StageLabel.Text = Loc.GetString(NCCyberEpisodeClientSystem.StageKey(view.Status.Stage));
         Details.SetMessage(Loc.GetString("nc-psychosis-details", ("stress", MathF.Round(view.Status.Stress)),
             ("exhaustion", MathF.Round(view.Status.Exhaustion)), ("burden", MathF.Round(view.Status.Burden)),
-            ("support", MathF.Round(view.Status.SupportSeconds))));
+            ("support", MathF.Round(view.Status.SupportSeconds)),
+            ("current", MathF.Round(view.Status.Current, 1)),
+            ("maximum", MathF.Round(view.Status.Maximum, 1))));
+        SafeMode.Visible = view.CanDisableEnhancements;
         Advice.SetMessage(Loc.GetString("nc-psychosis-advice"));
         Support.Text = Loc.GetString(view.DeclinesSupport ? "nc-psychosis-allow-support" : "nc-psychosis-decline-support");
     }

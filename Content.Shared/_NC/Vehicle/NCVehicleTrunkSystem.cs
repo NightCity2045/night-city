@@ -76,6 +76,7 @@ public sealed partial class NCVehicleTrunkSystem : EntitySystem
         args.Verbs.Add(new InteractionVerb
         {
             Text = Loc.GetString("nc-vehicle-trunk-inventory"),
+            TextLocalizationId = "nc-vehicle-trunk-inventory",
             Act = () => _storage.OpenStorageUI(ent, user, inventory, false),
         });
     }

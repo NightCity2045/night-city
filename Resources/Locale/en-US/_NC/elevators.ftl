@@ -22,3 +22,10 @@ nc-elevator-edge-blocked = Clear the edges of the platform.
 nc-elevator-enter-cabin = Enter the cabin to use the panel.
 nc-elevator-invalid-setup = The elevator needs maintenance.
 nc-elevator-trip-cancelled = Travel cancelled. The cabin remains on this floor.
+
+ent-NCElevatorCallButton = elevator call button
+    .desc = Calls the linked elevator to this floor.
+nc-elevator-call-unlinked = The button is not connected to an elevator.
+nc-elevator-call-here = The elevator is already on this floor.
+nc-elevator-call-accepted = Elevator called.
+nc-elevator-call-no-route = The elevator cannot reach this floor.

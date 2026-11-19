@@ -120,7 +120,7 @@ public sealed partial class NCVehicleTowSystem : EntitySystem
         if (!args.CanAccess || !args.CanInteract)
             return;
         var user = args.User;
-        args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString("nc-vehicle-tow-detach"), Act = () => TryDetach(ent, user) });
+        args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString("nc-vehicle-tow-detach"), TextLocalizationId = "nc-vehicle-tow-detach", Act = () => TryDetach(ent, user) });
     }
 
     public bool TryDetach(EntityUid uid, EntityUid user)

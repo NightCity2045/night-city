@@ -159,7 +159,7 @@ public sealed partial class NCVehicleInfrastructureSystem : EntitySystem
         if (!args.CanAccess || !args.CanInteract || ent.Comp.Owner != args.User)
             return;
         var user = args.User;
-        args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString("nc-vehicle-parking-release"), Act = () => TryReleaseParking(ent, user) });
+        args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString("nc-vehicle-parking-release"), TextLocalizationId = "nc-vehicle-parking-release", Act = () => TryReleaseParking(ent, user) });
     }
 
     public bool TryReleaseParking(EntityUid bay, EntityUid user)

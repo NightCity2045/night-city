@@ -43,6 +43,7 @@ public sealed class NCCyberEpisodeViewEvent : EntityEventArgs
     public ProtoId<NCCyberSymptomPrototype>? Symptom;
     public uint Sequence;
     public bool DeclinesSupport;
+    public bool CanDisableEnhancements;
 }
 
 [Serializable, NetSerializable]

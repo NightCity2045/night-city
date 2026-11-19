@@ -34,6 +34,19 @@
   - type: ActivatableUI
     key: enum.NCElevatorUiKey.Key
 
+- type: entity
+  parent: BaseWallmount
+  id: NCElevatorCallButton
+  name: elevator call button
+  description: Calls the linked elevator to this floor.
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Sprite
+    sprite: Structures/Wallmounts/switch.rsi
+    state: on
+  - type: NCElevatorCallButton
+
 # A thin, visible safety railing inside the platform boundary. It exists only during a trip.
 - type: entity
   id: NCElevatorTravelBarrier

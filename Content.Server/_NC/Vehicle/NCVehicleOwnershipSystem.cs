@@ -49,12 +49,12 @@ public sealed partial class NCVehicleOwnershipSystem : EntitySystem
             return;
         var user = args.User;
         if (!ent.Comp.Registered)
-            args.Verbs.Add(new InteractionVerb { Text = Loc.GetString("nc-vehicle-register"), Act = () => TryRegister(ent, user) });
+            args.Verbs.Add(new InteractionVerb { Text = Loc.GetString("nc-vehicle-register"), TextLocalizationId = "nc-vehicle-register", Act = () => TryRegister(ent, user) });
         else
         {
-            args.Verbs.Add(new InteractionVerb { Text = Loc.GetString("nc-vehicle-ownership"), Act = () => TryOpen(ent, user) });
-            args.Verbs.Add(new InteractionVerb { Text = Loc.GetString("nc-vehicle-break-lock"), Act = () => TryStartTheft(ent, user, false) });
-            args.Verbs.Add(new InteractionVerb { Text = Loc.GetString("nc-vehicle-hotwire"), Act = () => TryStartTheft(ent, user, true) });
+            args.Verbs.Add(new InteractionVerb { Text = Loc.GetString("nc-vehicle-ownership"), TextLocalizationId = "nc-vehicle-ownership", Act = () => TryOpen(ent, user) });
+            args.Verbs.Add(new InteractionVerb { Text = Loc.GetString("nc-vehicle-break-lock"), TextLocalizationId = "nc-vehicle-break-lock", Act = () => TryStartTheft(ent, user, false) });
+            args.Verbs.Add(new InteractionVerb { Text = Loc.GetString("nc-vehicle-hotwire"), TextLocalizationId = "nc-vehicle-hotwire", Act = () => TryStartTheft(ent, user, true) });
         }
     }
 

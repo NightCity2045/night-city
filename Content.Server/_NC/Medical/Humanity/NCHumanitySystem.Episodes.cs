@@ -153,11 +153,7 @@ public sealed partial class NCHumanitySystem
                     perceivedTarget = GetNetEntity(candidate);
                     break;
                 }
-            RaiseNetworkEvent(new NCCyberEpisodeViewEvent
-            {
-                Body = GetNetEntity(body), PerceivedTarget = perceivedTarget, Status = status, Episode = state.Episode,
-                Symptom = presentation.Symptom, Sequence = presentation.Sequence, DeclinesSupport = state.DeclinesSupport,
-            }, actor.PlayerSession.Channel);
+            SendEpisodeView(body, actor.PlayerSession, status, state, presentation, perceivedTarget);
         }
         foreach (var body in _presentations.Keys.Where(body => !active.Contains(body)).ToArray()) _presentations.Remove(body);
     }
@@ -204,14 +200,63 @@ public sealed partial class NCHumanitySystem
         var helper = args.User;
         if (helper == patient)
         {
-            args.Verbs.Add(new InteractionVerb { Text = Loc.GetString("nc-psychosis-panel"), Act = () =>
-                { if (TryComp<ActorComponent>(patient, out var actor)) RaiseNetworkEvent(new NCCyberEpisodeOpenEvent(), actor.PlayerSession.Channel); } });
-            args.Verbs.Add(new InteractionVerb { Text = Loc.GetString("nc-psychosis-safe-mode"), Act = () => TryDisableEnhancements(patient) });
-            args.Verbs.Add(new InteractionVerb { Text = Loc.GetString(brain.Comp.State.DeclinesSupport ? "nc-psychosis-allow-support" : "nc-psychosis-decline-support"),
-                Act = () => { if (TryGetBrain(patient, out var current)) { current.Comp.State.DeclinesSupport = !current.Comp.State.DeclinesSupport; MarkChanged(patient); } } });
+            if (!IsAlert(patient) || !TryCollectPackages(patient, new(), out var modules) ||
+                modules.Count == 0 && brain.Comp.State.Stage == NCCyberCrisisStage.Stable &&
+                brain.Comp.State.Stress <= 0f && brain.Comp.State.Exhaustion <= 0f)
+                return;
+
+            args.Verbs.Add(new InteractionVerb
+            {
+                Text = Loc.GetString("nc-psychosis-panel"),
+                Act = () => TryOpenStabilityPanel(patient),
+            });
         }
         else if (CanGround(patient, helper))
             args.Verbs.Add(new InteractionVerb { Text = Loc.GetString("nc-psychosis-ground"), Act = () => TryGround(patient, helper) });
+    }
+
+    private bool TryOpenStabilityPanel(EntityUid patient)
+    {
+        if (!IsAlert(patient) || !TryComp<ActorComponent>(patient, out var actor) ||
+            !TryGetBrain(patient, out var brain) || !TryGetStatus(patient, out var status))
+            return false;
+
+        // Send only this owner's current state, including before the first periodic update.
+        if (!_presentations.TryGetValue(patient, out var presentation) || presentation.Brain != brain.Owner)
+        {
+            presentation = new EpisodePresentation { Brain = brain.Owner, Stage = brain.Comp.State.Stage };
+            _presentations[patient] = presentation;
+        }
+        SendEpisodeView(patient, actor.PlayerSession, status, brain.Comp.State, presentation);
+        RaiseNetworkEvent(new NCCyberEpisodeOpenEvent(), actor.PlayerSession.Channel);
+        return true;
+    }
+
+    private void SendEpisodeView(EntityUid body, ICommonSession session, NCHumanityStatus status,
+        NCHumanityStateSnapshot state, EpisodePresentation presentation, NetEntity? perceivedTarget = null)
+    {
+        RaiseNetworkEvent(new NCCyberEpisodeViewEvent
+        {
+            Body = GetNetEntity(body), PerceivedTarget = perceivedTarget, Status = status, Episode = state.Episode,
+            Symptom = presentation.Symptom, Sequence = presentation.Sequence, DeclinesSupport = state.DeclinesSupport,
+            CanDisableEnhancements = HasDisableableEnhancements(body),
+        }, session.Channel);
+    }
+
+    private bool HasDisableableEnhancements(EntityUid body)
+    {
+        if (!TryCollectPackages(body, new(), out var modules))
+            return false;
+
+        foreach (var (module, affected) in modules)
+        {
+            if (affected && TryComp<NCCyberwareComponent>(module, out var hardware) &&
+                hardware.FunctionalEfficiency > 0f &&
+                (HasComp<NCCyberwareAbilityComponent>(module) || hardware.Load > 0f))
+                return true;
+        }
+
+        return false;
     }
 
     private bool CanGround(EntityUid patient, EntityUid helper) => patient != helper && IsAlert(patient) && IsAlert(helper) &&

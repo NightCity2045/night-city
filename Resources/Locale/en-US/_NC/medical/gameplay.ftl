@@ -9,6 +9,7 @@ nc-medical-emergency-started = You begin the emergency intervention.
 nc-medical-emergency-complete = Emergency intervention completed.
 nc-medical-transfusion-complete = Transfusion completed. Circulating blood restored by {$percent}%.
 nc-medical-emergency-failed = Emergency intervention failed: {$reason}.
+nc-medical-cpr-verb = Perform CPR
 nc-medical-cpr-started = You begin chest compressions.
 nc-medical-surgery-start-failed = Surgery cannot be started: {$reason}.
 nc-medical-surgery-wrong-tool = This tool cannot perform the current surgery step.

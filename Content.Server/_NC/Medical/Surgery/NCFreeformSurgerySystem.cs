@@ -81,6 +81,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         ref GetVerbsEvent<AlternativeVerb> args)
     {
         if (!args.CanAccess || !args.CanInteract ||
+            !_hands.TryGetActiveItem(args.User, out var tool) || !HasComp<NCSurgeryToolComponent>(tool) ||
             !TryComp<NCMedicalBodyComponent>(patient, out var medical) ||
             !_prototypes.TryIndex(medical.Profile, out NCAnatomyProfilePrototype? anatomy) ||
             !_prototypes.HasIndex<NCFreeformSurgeryProfilePrototype>(anatomy.SurgicalField))
@@ -93,7 +94,11 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         {
             Text = Loc.GetString("nc-medical-freeform-surgery-verb"),
             Priority = 4,
-            Act = () => TryOpenSession(surgeon, patient.Owner),
+            Act = () =>
+            {
+                if (_hands.TryGetActiveItem(surgeon, out var held) && HasComp<NCSurgeryToolComponent>(held))
+                    TryOpenSession(surgeon, patient.Owner);
+            },
         });
     }
 

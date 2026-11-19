@@ -65,10 +65,11 @@ public sealed partial class NCVehicleOccupantSystem : EntitySystem
         var user = args.User;
         if (TryComp<NCVehicleOccupantComponent>(user, out var occupant) && occupant.Vehicle == ent.Owner)
         {
-            args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString("nc-vehicle-exit"), Act = () => TryExit(ent, user) });
-            args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString("nc-vehicle-belt"), Act = () => TryToggleBelt(ent, user) });
+            args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString("nc-vehicle-exit"), TextLocalizationId = "nc-vehicle-exit", Act = () => TryExit(ent, user) });
+            args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString("nc-vehicle-belt"), TextLocalizationId = "nc-vehicle-belt", Act = () => TryToggleBelt(ent, user) });
             if (ent.Comp.Driver == user)
                 args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString("nc-vehicle-dashboard"),
+                    TextLocalizationId = "nc-vehicle-dashboard",
                     Act = () => _ui.TryOpenUi(ent.Owner, NCVehicleUiKey.Driver, user) });
             return;
         }
@@ -78,6 +79,7 @@ public sealed partial class NCVehicleOccupantSystem : EntitySystem
         {
             var seatId = id;
             args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString(definition.Name),
+                TextLocalizationId = definition.Name.Id,
                 Act = () => TryEnter(ent, user, seatId) });
         }
     }

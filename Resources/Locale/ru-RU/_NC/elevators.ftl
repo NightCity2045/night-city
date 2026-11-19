@@ -22,3 +22,10 @@ nc-elevator-edge-blocked = Освободите края платформы.
 nc-elevator-enter-cabin = Войдите в кабину, чтобы воспользоваться панелью.
 nc-elevator-invalid-setup = Лифт нуждается в обслуживании.
 nc-elevator-trip-cancelled = Поездка отменена. Кабина осталась на этом этаже.
+
+ent-NCElevatorCallButton = кнопка вызова лифта
+    .desc = Вызывает привязанный лифт на этот этаж.
+nc-elevator-call-unlinked = Кнопка не подключена к лифту.
+nc-elevator-call-here = Лифт уже на этом этаже.
+nc-elevator-call-accepted = Лифт вызван.
+nc-elevator-call-no-route = Лифт не может добраться до этого этажа.
