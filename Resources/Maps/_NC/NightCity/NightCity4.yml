@@ -2,10 +2,10 @@ meta:
   format: 7
   category: Map
   engineVersion: 284.0.2
-  forkId: ""
-  forkVersion: ""
-  time: 11/14/2026 13:33:28
-  entityCount: 540
+  forkId: EchoCyber
+  forkVersion: d56614f0fd57dd66009c653fd1adc9b78fc68906
+  time: 11/20/2026 12:25:14
+  entityCount: 539
 maps:
 - 1
 grids:
@@ -46,7 +46,7 @@ entities:
   - uid: 1
     components:
     - type: MetaData
-      name: NightCity [4]
+      name: NC5 [4]
     - type: Transform
     - type: Map
       mapPaused: True
@@ -295,14 +295,6 @@ entities:
         nodes: []
     - type: ExplosionAirtightGrid
     - type: NCZLevelsLaddersCache
-- proto: NCStairsDown
-  entities:
-  - uid: 1045
-    components:
-    - type: Transform
-      parent: 1
-      pos: 115.5,188.5
-      anchored: False
 - proto: NCWallbeton
   entities:
   - uid: 85
