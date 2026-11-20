@@ -1,0 +1,13 @@
+- type: ncSkillTree
+  id: NCWeapons
+  name: nc-skill-tree-weapons
+
+- type: ncSkill
+  id: NCPistols
+  tree: NCWeapons
+  name: nc-skill-pistols
+  description: nc-skill-pistols-description
+  icon:
+    sprite: _NC/Objects/Weapons/Guns/Pistol/Mallorian_Arms/big.rsi
+    state: base
+  position: 0, 0

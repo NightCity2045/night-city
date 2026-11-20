@@ -3,7 +3,7 @@
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 # Smooth stair surface adapted from KingdomDream #104 (b66ee37c2466c9556e021db68534db892ba0614b).
-# The profile is reversed to retain NCStairsUp's existing ascending direction.
+# Sample from the sprite's upper end toward its lower end.
 # Place NCStairsUp on the lower level and leave a floor opening above its tile.
 # NCStairsDown is the optional visual marker at that opening; it does not cut the floor.
 # Continuing stairs on the upper level can also receive the ascending character.
@@ -15,7 +15,7 @@
   components:
   - type: NCZLevelHighGround
     stick: true
-    heightCurve: [0.1, 1.05, 1.05]
+    heightCurve: [1.05, 1.05, 0.1]
 
 - type: entity
   id: NCStairsDown

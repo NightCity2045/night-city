@@ -1,4 +1,5 @@
 using Content.Shared.Actions;
+using Content.Shared._NC.Skill; // NC
 using Content.Shared.Examine;
 using Content.Shared.Hands;
 using Content.Shared.Verbs;
@@ -63,7 +64,7 @@ public abstract partial class SharedGunSystem
 
     private void SelectFire(EntityUid uid, GunComponent component, SelectiveFire fire, EntityUid? user = null)
     {
-        if (component.SelectedMode == fire)
+        if (component.SelectedMode == fire || !NCWeaponUseAttemptEvent.CanUse(EntityManager, uid, user)) // NC
             return;
 
         DebugTools.Assert((component.AvailableModes & fire) != 0x0);

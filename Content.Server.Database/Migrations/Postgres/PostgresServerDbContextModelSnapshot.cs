@@ -1498,6 +1498,35 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.ToTable("nc_character_employment", (string)null);
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCCharacterSkillProgress", b =>
+                {
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("integer")
+                        .HasColumnName("profile_id");
+
+                    b.Property<long>("ActiveTicks")
+                        .HasColumnType("bigint")
+                        .HasColumnName("active_ticks");
+
+                    b.Property<int?>("LastSurvivedRound")
+                        .HasColumnType("integer")
+                        .HasColumnName("last_survived_round");
+
+                    b.Property<string>("LearnedSkills")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("learned_skills");
+
+                    b.Property<int>("SurvivedRounds")
+                        .HasColumnType("integer")
+                        .HasColumnName("survived_rounds");
+
+                    b.HasKey("ProfileId")
+                        .HasName("PK_nc_character_skill_progress");
+
+                    b.ToTable("nc_character_skill_progress", (string)null);
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCCitiNetComment", b =>
                 {
                     b.Property<long>("Id")
@@ -4449,6 +4478,18 @@ namespace Content.Server.Database.Migrations.Postgres
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_nc_character_employment_profile_profile_id");
+
+                    b.Navigation("Profile");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCCharacterSkillProgress", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", "Profile")
+                        .WithOne()
+                        .HasForeignKey("Content.Server.Database.NCCharacterSkillProgress", "ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_character_skill_progress_profile_profile_id");
 
                     b.Navigation("Profile");
                 });

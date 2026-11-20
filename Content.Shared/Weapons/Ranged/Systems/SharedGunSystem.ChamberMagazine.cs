@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using Content.Shared._NC.Skill; // NC
 using Content.Shared.Containers.ItemSlots;
 using Content.Shared.Examine;
 using Content.Shared.Interaction;
@@ -94,6 +95,9 @@ public abstract partial class SharedGunSystem
     /// </summary>
     public void UseChambered(EntityUid uid, ChamberMagazineAmmoProviderComponent component, EntityUid? user = null)
     {
+        if (!NCWeaponUseAttemptEvent.CanUse(EntityManager, uid, user)) // NC
+            return; // NC
+
         if (component.BoltClosed == false)
         {
             ToggleBolt(uid, component, user);
@@ -260,6 +264,9 @@ public abstract partial class SharedGunSystem
     /// </summary>
     public void ToggleBolt(EntityUid uid, ChamberMagazineAmmoProviderComponent component, EntityUid? user = null)
     {
+        if (!NCWeaponUseAttemptEvent.CanUse(EntityManager, uid, user)) // NC
+            return; // NC
+
         if (component.BoltClosed == null)
             return;
 

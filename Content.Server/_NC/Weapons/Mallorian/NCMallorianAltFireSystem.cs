@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using Content.Server._NC.Skill;
 using Content.Server.Weapons.Ranged.Systems;
 using Content.Shared._NC.Weapons.Mallorian;
 using Content.Shared.ActionBlocker;
@@ -29,6 +30,7 @@ public sealed partial class NCMallorianAltFireSystem : EntitySystem
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private IGameTiming _timing = default!;
+    [Dependency] private NCSkillSystem _skills = default!;
 
     public override void Initialize()
     {
@@ -44,7 +46,8 @@ public sealed partial class NCMallorianAltFireSystem : EntitySystem
         var user = args.Performer;
 
         // Item actions can remain visible for a frame during hand changes, so authority is revalidated here.
-        if (_hands.GetActiveItem(user) != weapon.Owner || !_actionBlocker.CanAttack(user) || !_gun.CanShoot(gun))
+        if (_hands.GetActiveItem(user) != weapon.Owner || !_actionBlocker.CanAttack(user) ||
+            !_skills.TryUseWeapon(weapon.Owner, user) || !_gun.CanShoot(gun))
             return;
 
         var fromCoordinates = Transform(user).Coordinates;

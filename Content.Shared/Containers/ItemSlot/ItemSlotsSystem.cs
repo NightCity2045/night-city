@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using Content.Shared._NC.Skill; // NC
 using Content.Shared.ActionBlocker;
 using Content.Shared.Administration.Logs;
 using Content.Shared.Database;
@@ -11,6 +12,7 @@ using Content.Shared.Materials;
 using Content.Shared.Popups;
 using Content.Shared.Verbs;
 using Content.Shared.Whitelist;
+using Content.Shared.Weapons.Ranged.Systems; // NC
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Containers;
 using Robust.Shared.GameStates;
@@ -255,11 +257,18 @@ namespace Content.Shared.Containers.ItemSlots
                 return;
             }
 
+            slots.Sort(SortEmpty); // NC
+            // NC-Edit-Start
+            if (!CanOperateWeaponSlot(uid, slots[0], args.User))
+            {
+                args.Handled = true;
+                return;
+            }
+            // NC-Edit-End
+
             // Drop the held item onto the floor. Return if the user cannot drop.
             if (!_handsSystem.TryDrop(args.User, args.Used))
                 return;
-
-            slots.Sort(SortEmpty);
 
             foreach (var slot in slots)
             {
@@ -375,7 +384,7 @@ namespace Content.Shared.Containers.ItemSlots
             EntityUid? user,
             bool excludeUserAudio = false)
         {
-            if (!CanInsert(uid, item, user, slot))
+            if (!CanInsert(uid, item, user, slot) || !CanOperateWeaponSlot(uid, slot, user)) // NC
                 return false;
 
             Insert(uid, slot, item, user, excludeUserAudio: excludeUserAudio);
@@ -399,7 +408,7 @@ namespace Content.Shared.Containers.ItemSlots
             if (!_handsSystem.TryGetActiveItem((user, hands), out var held))
                 return false;
 
-            if (!CanInsert(uid, held.Value, user, slot))
+            if (!CanInsert(uid, held.Value, user, slot) || !CanOperateWeaponSlot(uid, slot, user)) // NC
                 return false;
 
             // hands.Drop(item) checks CanDrop action blocker
@@ -436,7 +445,7 @@ namespace Content.Shared.Containers.ItemSlots
                     emptyOnly: true))
                 return false;
 
-            if (user != null && !_handsSystem.TryDrop(user.Value, item))
+            if (!CanOperateWeaponSlot(ent, itemSlot, user) || user != null && !_handsSystem.TryDrop(user.Value, item)) // NC
                 return false;
 
             Insert(ent, itemSlot, item, user, excludeUserAudio: excludeUserAudio);
@@ -490,6 +499,12 @@ namespace Content.Shared.Containers.ItemSlots
             itemSlot = slots[0];
             return true;
         }
+
+        // NC-Edit-Start
+        private bool CanOperateWeaponSlot(EntityUid uid, ItemSlot slot, EntityUid? user) =>
+            slot.ContainerSlot?.ID is not (SharedGunSystem.MagazineSlot or SharedGunSystem.ChamberSlot or "cell_slot") ||
+            NCWeaponUseAttemptEvent.CanUse(EntityManager, uid, user);
+        // NC-Edit-End
 
         private static int SortEmpty(ItemSlot a, ItemSlot b)
         {
@@ -568,7 +583,7 @@ namespace Content.Shared.Containers.ItemSlots
             item = null;
 
             // This handles logic with the slot itself
-            if (!CanEject(uid, user, slot))
+            if (!CanEject(uid, user, slot) || !CanOperateWeaponSlot(uid, slot, user)) // NC
                 return false;
 
             item = slot.Item;
@@ -675,7 +690,7 @@ namespace Content.Shared.Containers.ItemSlots
                     AlternativeVerb verb = new()
                     {
                         IconEntity = GetNetEntity(args.Using),
-                        Act = () => Insert(uid, slot, args.Using.Value, args.User, excludeUserAudio: true)
+                        Act = () => TryInsert(uid, slot, args.Using.Value, args.User, excludeUserAudio: true) // NC
                     };
 
                     if (slot.InsertVerbText != null)
@@ -798,7 +813,7 @@ namespace Content.Shared.Containers.ItemSlots
                 InteractionVerb insertVerb = new()
                 {
                     IconEntity = GetNetEntity(args.Using),
-                    Act = () => Insert(uid, slot, args.Using.Value, args.User, excludeUserAudio: true)
+                    Act = () => TryInsert(uid, slot, args.Using.Value, args.User, excludeUserAudio: true) // NC
                 };
 
                 if (slot.InsertVerbText != null)

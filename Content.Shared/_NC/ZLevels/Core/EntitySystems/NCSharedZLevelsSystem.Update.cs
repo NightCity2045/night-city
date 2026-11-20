@@ -103,11 +103,19 @@ public abstract partial class NCSharedZLevelsSystem
             return;
         }
 
-        // A stair on the lower map must not hold someone above the opening indefinitely.
-        var dropThroughBelow = zPhysicsComponent.CachedGroundFromBelow &&
-            zPhysicsComponent.CachedGroundIsSlope && zPhysicsComponent.CachedGroundHeight > 0f && zPhysicsComponent.ClimbHoldTimer <= 0f;
-        var onStickySupport = zPhysicsComponent.AutoStep && zPhysicsComponent.CachedStickyGround &&
-            !dropThroughBelow && zPhysicsComponent.Velocity is > -2f and <= 0f;
+        if (oldHold > 0f)
+            zPhysicsComponent.ClimbHoldTimer = MathF.Max(0f, oldHold - frameTime);
+
+        var climbHoldActive = zPhysicsComponent.ClimbHoldTimer > 0f;
+        var slopeFromBelow = zPhysicsComponent.CachedGroundFromBelow && zPhysicsComponent.CachedGroundIsSlope;
+        var canStickToGround = zPhysicsComponent.AutoStep && zPhysicsComponent.CachedStickyGround &&
+            oldVelocity is > -2f and <= 0f;
+        // Use the previous step's support state, before gravity runs against the newly sampled slope.
+        var followingStairDown = slopeFromBelow && oldHold <= 0f && canStickToGround &&
+            entity.Comp2.BodyStatus == BodyStatus.OnGround;
+        var dropThroughBelow = slopeFromBelow && zPhysicsComponent.CachedGroundHeight > 0f &&
+            !climbHoldActive && !followingStairDown;
+        var onStickySupport = canStickToGround && (!slopeFromBelow || climbHoldActive || followingStairDown);
 
         if (!onStickySupport)
         {
@@ -139,9 +147,9 @@ public abstract partial class NCSharedZLevelsSystem
             distanceToGround = 0f;
         }
 
-        if (zPhysicsComponent.ClimbHoldTimer > 0f)
+        var heldOverOpening = false;
+        if (climbHoldActive)
         {
-            zPhysicsComponent.ClimbHoldTimer = MathF.Max(0f, zPhysicsComponent.ClimbHoldTimer - frameTime);
             if (zPhysicsComponent.CachedGroundHeight is > 0f and < 1f &&
                 zPhysicsComponent.CachedGroundIsSlope)
             {
@@ -154,6 +162,8 @@ public abstract partial class NCSharedZLevelsSystem
                 zPhysicsComponent.LocalPosition = MathF.Max(0f, zPhysicsComponent.LocalPosition);
                 if (zPhysicsComponent.Velocity < 0f)
                     zPhysicsComponent.Velocity = 0f;
+
+                heldOverOpening = true;
             }
             else
             {
@@ -203,12 +213,25 @@ public abstract partial class NCSharedZLevelsSystem
         }
         // NC-Edit-End
 
-        if (zPhysicsComponent.LocalPosition < 0 && TryMoveDownOrChasm(entity))
+        var heightBeforeDescent = zPhysicsComponent.LocalPosition;
+        var steppedDownStair = followingStairDown && heightBeforeDescent < 0f && TryMoveDown(entity);
+        if (steppedDownStair || zPhysicsComponent.LocalPosition < 0f && TryMoveDownOrChasm(entity))
         {
-            zPhysicsComponent.LocalPosition += 1;
+            if (steppedDownStair)
+            {
+                zPhysicsComponent.LocalPosition = heightBeforeDescent + 1f;
+                zPhysicsComponent.Velocity = 0f;
+            }
+            else
+            {
+                zPhysicsComponent.LocalPosition += 1f;
+            }
+
             zPhysicsComponent.ClimbHoldTimer = 0f;
-            zPhysicsComponent.ClimbDownGraceTimer = zPhysicsComponent.CachedGroundIsSlope ? ClimbDownGraceTime : 0f;
-            if (zPhysicsComponent is { CachedStickyGround: false, Fallable: true })
+            zPhysicsComponent.ClimbDownGraceTimer = steppedDownStair || zPhysicsComponent.CachedGroundIsSlope
+                ? ClimbDownGraceTime
+                : 0f;
+            if (!steppedDownStair && zPhysicsComponent is { CachedStickyGround: false, Fallable: true })
             {
                 var fallEv = new NCZLevelFallMapEvent();
                 RaiseLocalEvent(entity, ref fallEv);
@@ -264,7 +287,11 @@ public abstract partial class NCSharedZLevelsSystem
 
         if (zPhysicsComponent.VelocityGravity)
         {
-            var targetStatus = distanceToGround > AirborneHeightThreshold ? BodyStatus.InAir : BodyStatus.OnGround;
+            // While held over an opening, use the upper floor's height for movement.
+            var distanceForMovement = heldOverOpening ? zPhysicsComponent.LocalPosition : distanceToGround;
+            var targetStatus = !steppedDownStair && (dropThroughBelow || distanceForMovement > AirborneHeightThreshold)
+                ? BodyStatus.InAir
+                : BodyStatus.OnGround;
             if (entity.Comp2.BodyStatus != targetStatus)
             {
                 _physicsSystem.SetBodyStatus(entity, entity.Comp2, targetStatus);
