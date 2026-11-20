@@ -5,10 +5,13 @@
 using System.Globalization;
 using System.Text.Json;
 using Content.Server._NC.LivingCity.Lifecycle;
+using Content.Server._NC.LivingCity.Time;
+using Content.Server._NC.Medical.Persistence;
 using Content.Server.Preferences.Managers;
 using Content.Shared._NC.Identity;
 using Content.Shared._NC.Medical.Physiology;
 using Content.Shared.GameTicking;
+using Robust.Shared.Asynchronous;
 using Robust.Shared.Network;
 using Robust.Shared.Player;
 
@@ -16,7 +19,7 @@ namespace Content.Server._NC.Persistence.RoundSnapshot;
 
 /// <summary>
 /// Decides character survival at the common capture boundary and refreshes preference caches after commit.
-/// The medical system owns death rules; this system only consumes its irreversible result.
+/// Clinical arrest becomes a profile deletion only at the end-of-round boundary.
 /// </summary>
 public sealed partial class NCCharacterLifecycleSnapshotSystem : EntitySystem
 {
@@ -26,10 +29,13 @@ public sealed partial class NCCharacterLifecycleSnapshotSystem : EntitySystem
 
     [Dependency] private IServerPreferencesManager _preferences = default!;
     [Dependency] private NCDeathSuccessionSystem _deathSuccession = default!;
+    [Dependency] private NCMedicalPersistenceSystem _medicalPersistence = default!;
+    [Dependency] private ITaskManager _taskManager = default!;
 
     private readonly Dictionary<EntityUid, CharacterBinding> _bindings = [];
     private readonly Dictionary<NCCharacterId, NetUserId> _owners = [];
     private readonly HashSet<NCCharacterId> _irreversiblyDead = [];
+    private readonly HashSet<NCCharacterId> _clinicalDeathsAtClose = [];
     private readonly Dictionary<NCCharacterId, EstatePreparation> _estatePreparations = [];
 
     public override void Initialize()
@@ -39,6 +45,7 @@ public sealed partial class NCCharacterLifecycleSnapshotSystem : EntitySystem
         SubscribeLocalEvent<PlayerDetachedEvent>(OnPlayerDetached);
         SubscribeLocalEvent<NCPhysiologyComponent, NCPhysiologyChangedEvent>(OnPhysiologyChanged);
         SubscribeLocalEvent<NCPhysiologyComponent, EntityTerminatingEvent>(OnBodyTerminating);
+        SubscribeLocalEvent<NCActiveWorldSessionClosingEvent>(OnSessionClosing, before: [typeof(NCRoundSnapshotCoordinatorSystem)]);
         SubscribeLocalEvent<NCRoundSnapshotCaptureEvent>(OnRoundSnapshotCapture);
         SubscribeLocalEvent<NCRoundSnapshotCommittedEvent>(OnRoundSnapshotCommitted);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundRestart);
@@ -74,15 +81,39 @@ public sealed partial class NCCharacterLifecycleSnapshotSystem : EntitySystem
             RememberDeath(entity.Owner, binding.CharacterId);
     }
 
+    private void OnSessionClosing(NCActiveWorldSessionClosingEvent args)
+    {
+        _clinicalDeathsAtClose.Clear();
+        foreach (var (characterId, body) in _medicalPersistence.GetRoundSnapshotPlayerBodies())
+        {
+            if (!_owners.ContainsKey(characterId) || !TryComp<NCPhysiologyComponent>(body, out var physiology))
+                continue;
+
+            if (physiology.Irreversible)
+                _irreversiblyDead.Add(characterId);
+            else if (physiology.Condition == NCPhysiologicalCondition.ClinicalArrest)
+                _clinicalDeathsAtClose.Add(characterId);
+        }
+
+        var preparations = new List<Task>();
+        foreach (var characterId in _irreversiblyDead.Union(_clinicalDeathsAtClose))
+        {
+            EnsureEstatePreparation(characterId);
+            preparations.Add(_estatePreparations[characterId].Task);
+        }
+
+        // Estate writes need the active-world clock. Finish them before closing it; capture checks their results.
+        if (preparations.Count != 0)
+            _taskManager.BlockWaitOnTask(Task.WhenAll(preparations));
+    }
+
     private void OnRoundSnapshotCapture(NCRoundSnapshotCaptureEvent args)
     {
-        foreach (var (body, binding) in _bindings)
-            RememberDeath(body, binding.CharacterId);
-
         foreach (var (characterId, _) in _owners)
         {
-            var deleted = _irreversiblyDead.Contains(characterId);
-            var payload = JsonSerializer.Serialize(new CharacterLifecycleDocument(deleted));
+            var irreversible = _irreversiblyDead.Contains(characterId);
+            var clinicalArrest = _clinicalDeathsAtClose.Contains(characterId);
+            var payload = JsonSerializer.Serialize(new CharacterLifecycleDocument(irreversible, clinicalArrest));
             args.TryAddSection(
                 SectionType,
                 OwnerType,
@@ -90,7 +121,7 @@ public sealed partial class NCCharacterLifecycleSnapshotSystem : EntitySystem
                 FormatVersion,
                 1,
                 payload);
-            if (deleted)
+            if (irreversible || clinicalArrest)
             {
                 if (!_estatePreparations.TryGetValue(characterId, out var preparation) ||
                     !preparation.Task.IsCompletedSuccessfully ||
@@ -150,10 +181,11 @@ public sealed partial class NCCharacterLifecycleSnapshotSystem : EntitySystem
         _bindings.Clear();
         _owners.Clear();
         _irreversiblyDead.Clear();
+        _clinicalDeathsAtClose.Clear();
         _estatePreparations.Clear();
     }
 
     private readonly record struct CharacterBinding(NCCharacterId CharacterId, NetUserId UserId);
     private readonly record struct EstatePreparation(Guid DeathEventId, Task<NCEstateRecord?> Task);
-    private sealed record CharacterLifecycleDocument(bool IrreversiblyDead);
+    private sealed record CharacterLifecycleDocument(bool IrreversiblyDead, bool ClinicalArrestAtClose);
 }

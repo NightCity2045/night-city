@@ -246,6 +246,25 @@ public sealed partial class NCMedicalPersistenceSystem
         _disconnectedMedicalBodies.Clear();
     }
 
+    public IEnumerable<(NCCharacterId CharacterId, EntityUid Body)> GetRoundSnapshotPlayerBodies()
+    {
+        foreach (var (characterId, body) in _boundCharacters)
+        {
+            if (!TerminatingOrDeleted(body))
+                yield return (characterId, body);
+        }
+
+        foreach (var (body, binding) in _disconnectedMedicalBodies)
+        {
+            if (!_boundCharacters.ContainsKey(binding.CharacterId) &&
+                _saveStates.GetValueOrDefault(binding.CharacterId) == binding.State &&
+                !TerminatingOrDeleted(body))
+            {
+                yield return (binding.CharacterId, body);
+            }
+        }
+    }
+
     private void OnRoundSnapshotCapture(NCRoundSnapshotCaptureEvent args)
     {
         foreach (var body in _playerBindings.Keys.Concat(_disconnectedMedicalBodies.Keys).Distinct().ToArray())

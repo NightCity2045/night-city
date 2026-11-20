@@ -23,9 +23,10 @@ Current section owners are:
 - `city-map-delta/world`: non-wall roots of the common city map, split into bounded chunks;
 - `system-metadata/world`: schema, map and active-world epoch metadata.
 
-An irreversibly dead character is deleted inside the snapshot transaction. If other profiles exist, the selected slot
-is moved to a survivor. If it was the account's final profile, the preference row is removed and the normal preference
-loader creates a fresh character. Connected preference caches are reloaded before round teardown completes.
+A character who is irreversibly dead or still in clinical arrest when the round ends is deleted inside the snapshot
+transaction. Clinical arrest remains treatable during the round. If other profiles exist, the selected slot is moved to
+a survivor. If it was the account's final profile, the preference row is removed and the normal preference loader creates
+a fresh character. Connected preference caches are reloaded before round teardown completes.
 
 Apartment snapshots intentionally exclude `Wall` entities and permanent property shells. The next round deploys the
 mapper-authored template first and overlays the saved renter contents, so destroyed apartment walls return while
