@@ -80,24 +80,24 @@ ent-NCSixthStreetMedicalPouchFilled = { ent-NCSixthStreetMedicalPouch }
 
 ent-NCMobHumanSixthStreetPatrol = патрульный «6-й улицы»
     .desc = Человек в экипировке «6-й улицы».
-    .suffix = Человек, без оружия
+    .suffix = НПС, с оружием
 
 ent-NCMobHumanSixthStreetGuard = охранник «6-й улицы»
     .desc = Человек в экипировке «6-й улицы».
-    .suffix = Человек, без оружия
+    .suffix = НПС, с оружием
 
 ent-NCMobHumanSixthStreetVeteran = ветеран «6-й улицы»
     .desc = Человек в экипировке «6-й улицы».
-    .suffix = Человек, без оружия
+    .suffix = НПС, с оружием
 
 ent-NCMobHumanSixthStreetScout = разведчик «6-й улицы»
     .desc = Человек в экипировке «6-й улицы».
-    .suffix = Человек, без оружия
+    .suffix = НПС, с оружием
 
 ent-NCMobHumanSixthStreetMedic = медик «6-й улицы»
     .desc = Человек в экипировке «6-й улицы».
-    .suffix = Человек, без оружия
+    .suffix = НПС, с оружием
 
 ent-NCMobHumanSixthStreetQuartermaster = снабженец «6-й улицы»
     .desc = Человек в экипировке «6-й улицы».
-    .suffix = Человек, без оружия
+    .suffix = НПС, с оружием

@@ -105,7 +105,6 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(OnSessionClosed);
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(OnClockFailed);
         SubscribeLocalEvent<NCCityLocalPerceptionComponent, ComponentShutdown>(OnShutdown);
-        SubscribeLocalEvent<NCPhysicalActorSpawnedEvent>(OnPhysicalActorSpawned);
         SubscribeLocalEvent<NCCityActorBindingChangedEvent>(OnBindingChanged);
         SubscribeLocalEvent<DamageableComponent, DamageDealtEvent>(OnDamageDealt);
         SubscribeLocalEvent<NCMedicalBodyComponent, NCCombatImpactConfirmedEvent>(OnCombatImpactConfirmed);
@@ -165,9 +164,6 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
 
     public void Unconfigure(EntityUid entityUid) => Cleanup(entityUid, true);
 
-    private void OnPhysicalActorSpawned(NCPhysicalActorSpawnedEvent args) =>
-        TryConfigureBoundActor(args.ActorId, args.EntityUid);
-
     private void OnBindingChanged(NCCityActorBindingChangedEvent args)
     {
         if (!args.Bound)
@@ -176,8 +172,6 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
             return;
         }
 
-        // Spawned actors are configured again by NCPhysicalActorSpawnedEvent after their body is fully restored.
-        // This early path also covers valid round-start/map bindings whose actor record is already cached.
         TryConfigureBoundActor(args.ActorId, args.EntityUid);
     }
 

@@ -120,8 +120,6 @@ public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterfac
         _menu.OnSetPin += (currentPin, newPin) => SendMessage(new NCAgentSetPinMessage(currentPin, newPin));
         _menu.OnDisablePin += currentPin => SendMessage(new NCAgentDisablePinMessage(currentPin));
         _menu.OnLockAgent += () => SendMessage(new NCAgentLockMessage());
-        _menu.OnCityAction += (action, id, version) =>
-            SendMessage(new NCAgentCityActionMessage(action, id, version));
 
     }
 
@@ -188,9 +186,6 @@ public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterfac
                 if (EntMan.TryGetComponent<TransformComponent>(Owner, out var trackingTransform))
                     _menu.SetMapSource(trackingTransform.GridUid);
                 _menu.UpdateMapTrackingData(trackingUpdate);
-                break;
-            case NCAgentCityUpdateMessage cityUpdate:
-                _menu.UpdateCityData(cityUpdate);
                 break;
         }
     }

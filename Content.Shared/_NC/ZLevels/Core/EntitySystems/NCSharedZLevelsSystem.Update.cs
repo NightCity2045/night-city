@@ -14,8 +14,8 @@ namespace Content.Shared._NC.ZLevels.Core.EntitySystems;
 
 public abstract partial class NCSharedZLevelsSystem
 {
-    private const float ClimbHoldTime = 0.5f;
-    private const float ClimbDownGraceTime = 1f;
+    private const float ClimbHoldTime = 3.0f;
+    private const float ClimbDownGraceTime = 3.0f;
 
     public int UpdateCalls { get; private set; }
 

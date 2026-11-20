@@ -80,24 +80,24 @@ ent-NCSixthStreetMedicalPouchFilled = { ent-NCSixthStreetMedicalPouch }
 
 ent-NCMobHumanSixthStreetPatrol = Sixth Street patrol member
     .desc = A human wearing a Sixth Street outfit.
-    .suffix = Human, Unarmed
+    .suffix = NPC, Armed
 
 ent-NCMobHumanSixthStreetGuard = Sixth Street guard
     .desc = A human wearing a Sixth Street outfit.
-    .suffix = Human, Unarmed
+    .suffix = NPC, Armed
 
 ent-NCMobHumanSixthStreetVeteran = Sixth Street veteran
     .desc = A human wearing a Sixth Street outfit.
-    .suffix = Human, Unarmed
+    .suffix = NPC, Armed
 
 ent-NCMobHumanSixthStreetScout = Sixth Street scout
     .desc = A human wearing a Sixth Street outfit.
-    .suffix = Human, Unarmed
+    .suffix = NPC, Armed
 
 ent-NCMobHumanSixthStreetMedic = Sixth Street medic
     .desc = A human wearing a Sixth Street outfit.
-    .suffix = Human, Unarmed
+    .suffix = NPC, Armed
 
 ent-NCMobHumanSixthStreetQuartermaster = Sixth Street quartermaster
     .desc = A human wearing a Sixth Street outfit.
-    .suffix = Human, Unarmed
+    .suffix = NPC, Armed

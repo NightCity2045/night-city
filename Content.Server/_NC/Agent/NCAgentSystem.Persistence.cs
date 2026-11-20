@@ -154,8 +154,6 @@ public sealed partial class NCAgentSystem
             view.FeedOffset = 0;
         if (args.App == NCAgentApp.Map)
             SendMapSnapshot(uid, user);
-        if (args.App == NCAgentApp.City)
-            _ = SendCitySnapshotAsync(uid, user, view.Owner);
         if (args.App == NCAgentApp.Missions)
             SendMissionSnapshot(uid, user);
         if (args.App == NCAgentApp.Contracts)

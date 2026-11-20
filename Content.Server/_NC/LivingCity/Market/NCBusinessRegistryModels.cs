@@ -9,6 +9,19 @@ using Content.Shared._NC.Persistence.Time;
 
 namespace Content.Server._NC.LivingCity.Market;
 
+public enum NCMarketMutationStatus : byte
+{
+    Applied,
+    Duplicate,
+    NotFound,
+    VersionConflict,
+    PartyUnavailable,
+    ClockUnavailable,
+    CapacityExceeded,
+    Rejected,
+    StorageFailure,
+}
+
 public sealed record NCBusinessRecord(
     NCBusinessSnapshot Snapshot,
     long AggregateVersion,

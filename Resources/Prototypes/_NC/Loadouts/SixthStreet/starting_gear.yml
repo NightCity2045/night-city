@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-# Unarmed outfits; preserve the separate top, pants, armor and jacket slots.
+# Weapons are spawned in hand with their standard full magazines.
 - type: startingGear
   id: NCSixthStreetPatrolGear
   equipment:
@@ -17,6 +17,8 @@
     belt: NCSixthStreetUtilityBelt
     head: NCSixthStreetFieldCap
     back: NCSixthStreetPatrolBackpack
+  inhand:
+  - NCWeaponSMGSaratoga
 
 - type: startingGear
   id: NCSixthStreetGuardGear
@@ -33,6 +35,8 @@
     mask: NCSixthStreetBandana
     head: NCSixthStreetCombatHelmet
     back: NCSixthStreetPatrolBackpack
+  inhand:
+  - NCWeaponRifleCopperhead
 
 - type: startingGear
   id: NCSixthStreetVeteranGear
@@ -47,6 +51,8 @@
     outerClothing: NCSixthStreetBomber
     head: NCSixthStreetVeteranBeret
     belt: NCSixthStreetUtilityBelt
+  inhand:
+  - NCWeaponRifleCopperhead
 
 - type: startingGear
   id: NCSixthStreetScoutGear
@@ -62,6 +68,8 @@
     outerClothing: NCSixthStreetFieldJacket
     back: NCSixthStreetPatrolBackpack
     head: NCSixthStreetFieldCap
+  inhand:
+  - NCWeaponSMGSaratoga
 
 - type: startingGear
   id: NCSixthStreetMedicGear
@@ -79,6 +87,8 @@
     mask: NCSixthStreetBandana
     head: NCSixthStreetVeteranBeret
     pocket1: NCSixthStreetMedicalPouchFilled
+  inhand:
+  - NCWeaponPistolP35
 
 - type: startingGear
   id: NCSixthStreetQuartermasterGear
@@ -94,3 +104,5 @@
     back: NCSixthStreetDuffel
     belt: NCSixthStreetUtilityBelt
     head: NCSixthStreetFieldCap
+  inhand:
+  - NCWeaponPistolP35

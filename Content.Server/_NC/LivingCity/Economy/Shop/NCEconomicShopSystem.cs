@@ -6,13 +6,11 @@ using System.Numerics;
 using Content.Server.Preferences.Managers;
 using Content.Server.Construction;
 using Content.Server._NC.LivingCity.Identity;
-using Content.Server._NC.LivingCity.Market;
 using Content.Server._NC.LivingCity.Time;
 using Content.Server._NC.Vehicle;
 using Content.Shared._NC.Identity;
 using Content.Shared._NC.LivingCity.Economy;
 using Content.Shared._NC.LivingCity.Economy.Shop;
-using Content.Shared._NC.LivingCity.Market;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
 using Content.Shared._NC.Vehicle.Components;
@@ -39,7 +37,6 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
     [Dependency] private NCPartyFinanceAdapterSystem _finance = default!;
     [Dependency] private NCPartyDirectorySystem _directory = default!;
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
-    [Dependency] private NCMarketRegistrySystem _market = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private ISharedPlayerManager _players = default!;
     [Dependency] private IServerPreferencesManager _preferences = default!;
@@ -330,9 +327,6 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
         {
             if (!TryDeliverPhysical(shop, user, purchasedDefinition))
                 return "nc-economic-shop-result-delivery-pending";
-
-            if (settlement.Transfer != null)
-                await FulfillItemDemandAsync(buyer, purchasedDefinition.ID, settlement.Transfer);
         }
         return purchasedDefinition == null
             ? "nc-economic-shop-result-success"
@@ -438,31 +432,6 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
         }
 
         return true;
-    }
-
-    /// <summary>
-    /// Closes the buyer's matching item demand after the durable asset transfer and physical delivery both succeed.
-    /// Failure here never rolls back an already-settled purchase.
-    /// </summary>
-    private async Task FulfillItemDemandAsync(
-        NCPartyRef buyer,
-        string definitionId,
-        NCEconomicAssetTransferRecord transfer)
-    {
-        var request = await _market.FindOpenRequestAsync(buyer, NCMarketRequestKind.UniqueItem, definitionId);
-        if (request == null)
-            return;
-        var stable = $"{transfer.Snapshot.TransferId}.{request.Snapshot.RequestId}";
-        await _market.ChangeRequestStatusAsync(new NCChangeMarketRequestStatusRequest(
-            NCPersistentIdentity.Command("economic-shop", "fulfill-item-demand", stable),
-            request.Snapshot.RequestId,
-            request.AggregateVersion,
-            NCMarketRequestStatus.Fulfilled,
-            null,
-            buyer,
-            NCPersistentIdentity.Correlation("economic-shop", "fulfill-item-demand", stable),
-            transfer.Snapshot.LastAppliedEventId,
-            "economic-shop-item-demand"));
     }
 
     private async Task<NCStockNodeRecord?> EnsureCharacterStockAsync(NCPartyRef buyer, NCStockNodeId nodeId)
