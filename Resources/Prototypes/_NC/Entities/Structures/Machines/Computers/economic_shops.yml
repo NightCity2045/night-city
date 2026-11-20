@@ -256,29 +256,35 @@
 - type: entity
   parent: NCShopkeeperDisplayBase
   id: NCShopkeeperGunStore
+  categories: [HideSpawnMenu]
   name: gun store clerk
 
 - type: entity
   parent: NCShopkeeperDisplayBase
   id: NCShopkeeperClothingStore
+  categories: [HideSpawnMenu]
   name: clothing store clerk
 
 - type: entity
   parent: NCShopkeeperDisplayBase
   id: NCShopkeeperFurnitureStore
+  categories: [HideSpawnMenu]
   name: furniture store clerk
 
 - type: entity
   parent: NCShopkeeperDisplayBase
   id: NCShopkeeperConstructionStore
+  categories: [HideSpawnMenu]
   name: construction supply clerk
 
 - type: entity
   parent: NCShopkeeperDisplayBase
   id: NCShopkeeperPharmacy
+  categories: [HideSpawnMenu]
   name: pharmacy clerk
 
 - type: entity
   parent: NCShopkeeperDisplayBase
   id: NCShopkeeperAutoStore
+  categories: [HideSpawnMenu]
   name: auto dealership clerk

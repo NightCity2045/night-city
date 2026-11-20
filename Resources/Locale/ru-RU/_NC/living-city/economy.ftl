@@ -134,6 +134,13 @@ ent-NCShopkeeperFurnitureStore = продавец мебельного мага�
 ent-NCShopkeeperConstructionStore = продавец стройматериалов
 ent-NCShopkeeperPharmacy = аптекарь
 ent-NCShopkeeperAutoStore = продавец автосалона
+
+ent-SpawnNCShopkeeperGunStore = маркер продавца оружейного магазина
+ent-SpawnNCShopkeeperClothingStore = маркер продавца магазина одежды
+ent-SpawnNCShopkeeperFurnitureStore = маркер продавца мебельного магазина
+ent-SpawnNCShopkeeperConstructionStore = маркер продавца стройматериалов
+ent-SpawnNCShopkeeperPharmacy = маркер аптекаря
+ent-SpawnNCShopkeeperAutoStore = маркер продавца автосалона
 ent-NCFurnitureChairFlatpack = флетпак стула
     .desc = Компактная упаковка обычного стула.
 ent-NCFurnitureOfficeChairFlatpack = флетпак офисного кресла
