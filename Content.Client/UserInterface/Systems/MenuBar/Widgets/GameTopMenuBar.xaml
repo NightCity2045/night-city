@@ -73,6 +73,12 @@
         HorizontalExpand="True"
         AppendStyleClass="{x:Static style:StyleClass.ButtonSquare}"
         />
+    <!-- NC-Edit-Start -->
+    <ui:MenuButton Name="SkillsButton" Access="Internal"
+        Icon="{xe:Tex '/Textures/Interface/VerbIcons/information.svg.192dpi.png'}"
+        ToolTip="{Loc 'nc-skill-title'}" MinSize="42 64" HorizontalExpand="True" ToggleMode="False"
+        AppendStyleClass="{x:Static style:StyleClass.ButtonSquare}" />
+    <!-- NC-Edit-End -->
     <ui:MenuButton
         Name="AdminButton"
         Access="Internal"

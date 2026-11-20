@@ -1,4 +1,5 @@
 using Content.Server.Acz;
+using Content.Server._NC.Skill; // NC
 using Content.Server.Administration;
 using Content.Server.Administration.Logs;
 using Content.Server.Administration.Managers;
@@ -194,6 +195,9 @@ namespace Content.Server.Entry
 
         protected override void Dispose(bool disposing)
         {
+            if (_entSys.TryGetEntitySystem<NCSkillSystem>(out var skills)) // NC
+                skills.FlushProgress(); // NC
+
             var dest = _cfg.GetCVar(CCVars.DestinationFile);
             if (!string.IsNullOrEmpty(dest))
             {

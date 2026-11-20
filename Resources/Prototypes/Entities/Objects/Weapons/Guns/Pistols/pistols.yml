@@ -5,6 +5,10 @@
   description: A rooty tooty point and shooty.
   abstract: true
   components:
+  # NC-Edit-Start
+  - type: NCRequiredSkill
+    skill: NCPistols
+  # NC-Edit-End
   - type: Sprite
     layers:
       - state: base

@@ -82,6 +82,8 @@
   parent: BaseItem
   id: NCIntegralArmPistol
   components:
+  - type: NCRequiredSkill
+    skill: NCPistols
   - type: Sprite
     sprite: _NC/Objects/Cyberware/arms.rsi
     state: pistol

@@ -95,6 +95,7 @@ public abstract partial class ServerDbContext
         ConfigureNCPoliceModels(modelBuilder);
         ConfigureNCAgentModels(modelBuilder);
         ConfigureNCMedicalModels(modelBuilder);
+        ConfigureNCSkillModels(modelBuilder);
 
         modelBuilder.Entity<NCCharacterEmployment>()
             .HasOne(employment => employment.Profile)

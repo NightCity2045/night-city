@@ -1,0 +1,38 @@
+<controls:FancyWindow xmlns="https://spacestation14.io"
+                      xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+                      xmlns:skill="clr-namespace:Content.Client._NC.Skill"
+                      Title="{Loc 'nc-skill-title'}" SetSize="850 540" MinSize="740 420">
+    <BoxContainer Orientation="Vertical" Margin="12" SeparationOverride="8">
+        <BoxContainer Orientation="Horizontal" SeparationOverride="8">
+            <OptionButton Name="TreeSelector" MinWidth="160" />
+            <Label Name="ProgressLabel" HorizontalExpand="True" />
+            <Button Name="CenterButton" Text="{Loc 'nc-skill-editor-center'}" />
+        </BoxContainer>
+        <BoxContainer Name="EditorTools" Orientation="Horizontal" SeparationOverride="6">
+            <LineEdit Name="Search" PlaceHolder="{Loc 'nc-skill-editor-search'}" HorizontalExpand="True" />
+            <OptionButton Name="AddSelector" MinWidth="100" />
+            <Button Name="RequiredButton" Text="{Loc 'nc-skill-editor-connect'}" />
+            <Button Name="AnyButton" Text="{Loc 'nc-skill-editor-connect-any'}" />
+            <LineEdit Name="AnyGroup" Text="1" MinWidth="28" ToolTip="{Loc 'nc-skill-editor-group'}" />
+        </BoxContainer>
+        <BoxContainer Orientation="Horizontal" VerticalExpand="True" SeparationOverride="10">
+            <skill:NCSkillGraph Name="Graph" HorizontalExpand="True" VerticalExpand="True" MinWidth="250" />
+            <BoxContainer Orientation="Vertical" MinWidth="220" MaxWidth="260" SeparationOverride="7">
+                <Label Name="SkillTitle" />
+                <ScrollContainer HScrollEnabled="False" VerticalExpand="True">
+                    <BoxContainer Orientation="Vertical" SeparationOverride="7">
+                        <RichTextLabel Name="Description" />
+                        <RichTextLabel Name="Requirements" />
+                    </BoxContainer>
+                </ScrollContainer>
+                <Button Name="LearnButton" Text="{Loc 'nc-skill-learn'}" />
+                <Button Name="RemoveButton" Text="{Loc 'nc-skill-editor-remove'}" />
+            </BoxContainer>
+        </BoxContainer>
+        <BoxContainer Orientation="Horizontal" SeparationOverride="8">
+            <Label Name="Status" HorizontalExpand="True" />
+            <Button Name="LoadButton" Text="{Loc 'nc-skill-editor-load'}" />
+            <Button Name="SaveButton" Text="{Loc 'nc-skill-editor-save'}" />
+        </BoxContainer>
+    </BoxContainer>
+</controls:FancyWindow>
