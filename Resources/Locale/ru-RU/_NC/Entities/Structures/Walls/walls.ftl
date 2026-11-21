@@ -24,3 +24,5 @@ ent-NCWallprofliste = профлист из меди
 
 ent-NCWallproflistg = профлист синий
     .desc = { ent-BaseWall.desc }
+
+ent-NCWallImpassable = непроходимая стена

@@ -1,0 +1,1 @@
+ent-NCWallImpassable = impassable wall
