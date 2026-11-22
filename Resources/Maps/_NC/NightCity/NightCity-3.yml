@@ -2,9 +2,9 @@ meta:
   format: 7
   category: Map
   engineVersion: 284.0.2
-  forkId: ""
-  forkVersion: ""
-  time: 11/14/2026 13:33:14
+  forkId: EchoCyber
+  forkVersion: 9834d7d198ecf296a2092e3b069ebf862b24409d
+  time: 11/22/2026 08:05:40
   entityCount: 245
 maps:
 - 1
@@ -23,7 +23,7 @@ entities:
   - uid: 1
     components:
     - type: MetaData
-      name: NightCity [-3]
+      name: NightCity4 [-3]
     - type: Transform
     - type: Map
       mapPaused: True
