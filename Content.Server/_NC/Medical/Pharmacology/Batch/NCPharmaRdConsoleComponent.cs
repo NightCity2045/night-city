@@ -19,6 +19,10 @@ public sealed partial class NCPharmaRdConsoleComponent : Component
     [DataField]
     public string ReagentSlot = "reagents";
 
+    /// <summary>The slot that holds the data chip with the research record.</summary>
+    [DataField]
+    public string ChipSlot = "chip";
+
     /// <summary>Units of each ingredient one invention uses up.</summary>
     [DataField]
     public float UnitsPerIngredient = 5f;

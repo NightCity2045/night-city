@@ -260,3 +260,6 @@ nc-guide-pharma-build-knowledge = [head=2]What the laboratory knows[/head]
 nc-guide-pharma-build-approve = [head=2]From idea to regular production[/head]
     A new version is [color=#58e6d9]experimental[/color]. Make a small batch, run QC and, where it matters, a vivarium study. Once a batch of the version is certified you can approve it, and it joins regular production. Notes in the laboratory journal are yours: say what you tried and what you concluded.
 guide-entry-nc-pharma-build = Building a formula
+
+nc-guide-pharma-build-chip = [head=2]The research chip[/head]
+    What a laboratory has studied is kept on a [color=#58e6d9]research chip[/color] in the console's chip slot. Without a chip nothing is studied and nothing can be built. A blank chip has studied nothing: every node on the map is untested and no compound can be a core yet. What the laboratory learns is written to the chips that stand in consoles at that moment: running quality control on a batch teaches the chip the compound and the nodes of that formula, and developing a formula marks the nodes it used. Take the chip out and the console is blank again; put it back and its record returns, but it learns nothing while it is out. A [color=#58e6d9]stock chip[/color] comes with the stock formulas already studied.

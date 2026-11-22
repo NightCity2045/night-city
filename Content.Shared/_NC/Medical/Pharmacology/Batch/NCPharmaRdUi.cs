@@ -21,7 +21,9 @@ public sealed class NCPharmaRdState(
     string[] cores,
     NCPharmaNodeKnowledge[] knowledge,
     bool hasBeaker,
-    NCPharmaReagentAmount[] beaker) : BoundUserInterfaceState
+    NCPharmaReagentAmount[] beaker,
+    bool hasChip,
+    int researched) : BoundUserInterfaceState
 {
     public readonly NCPharmaFormulaSummary[] Formulas = formulas;
     public readonly NCPharmaJournalSummary[] Journal = journal;
@@ -38,6 +40,12 @@ public sealed class NCPharmaRdState(
 
     /// <summary>What the beaker holds. Inventing a compound spends ingredients from it.</summary>
     public readonly NCPharmaReagentAmount[] Beaker = beaker;
+
+    /// <summary>Whether a research chip stands in the console. Without one nothing is studied.</summary>
+    public readonly bool HasChip = hasChip;
+
+    /// <summary>How many nodes of the tree the chip has studied.</summary>
+    public readonly int Researched = researched;
 }
 
 /// <summary>

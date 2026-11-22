@@ -91,7 +91,8 @@ public sealed partial class NCPharmaBatchSystem
         IReadOnlyList<string> modifierIds,
         string profileId,
         [NotNullWhen(true)] out NCPharmaFormulaPrototype? composed,
-        out NCPharmaRdNotice notice)
+        out NCPharmaRdNotice notice,
+        IReadOnlySet<string>? researched = null)
     {
         composed = null;
         notice = NCPharmaRdNotice.InvalidRequest;
@@ -112,6 +113,15 @@ public sealed partial class NCPharmaBatchSystem
         if (second != null && second.ID == first.ID)
         {
             notice = NCPharmaRdNotice.SameCore;
+            return false;
+        }
+
+        // NC: only what the research chip has studied can be built on.
+        if (researched != null &&
+            (!researched.Contains(NCPharmaNodeIds.Core(first.ID)) ||
+             (second != null && !researched.Contains(NCPharmaNodeIds.Core(second.ID)))))
+        {
+            notice = NCPharmaRdNotice.NotResearched;
             return false;
         }
 
@@ -207,7 +217,38 @@ public sealed partial class NCPharmaBatchSystem
             (second == null ? string.Empty : $" + {second.ID}") +
             $", {concentration:0.##} per dose, {modifierIds.Count} modifiers");
         notice = NCPharmaRdNotice.Created;
+        RaiseResearch(FormulaNodes(composed));
         return true;
+    }
+
+    /// <summary>The nodes of the tree a formula uses.</summary>
+    public static string[] FormulaNodes(NCPharmaFormulaPrototype formula)
+    {
+        var nodes = new List<string>();
+        foreach (var core in Cores(formula))
+            nodes.Add(NCPharmaNodeIds.Core(core.Id));
+        nodes.Add(NCPharmaNodeIds.Form(formula.DeliveryForm.Id));
+        nodes.Add(NCPharmaNodeIds.Profile(formula.DefaultProductionProfile.Id));
+        foreach (var modifier in formula.Modifiers)
+            nodes.Add(NCPharmaNodeIds.Modifier(modifier.Id));
+        return nodes.ToArray();
+    }
+
+    /// <summary>The nodes the stock formulas use. A stock chip starts with them studied.</summary>
+    public string[] StockNodes()
+    {
+        return AllFormulas
+            .Where(formula => !_derived.ContainsKey(formula.ID))
+            .SelectMany(FormulaNodes)
+            .Distinct()
+            .ToArray();
+    }
+
+    /// <summary>Tells every research console that the laboratory has learnt about these nodes.</summary>
+    public void RaiseResearch(string[] nodes)
+    {
+        var research = new NCPharmaResearchEvent(nodes);
+        RaiseLocalEvent(ref research);
     }
 
     private int CountLineages() => _derived.Values.Select(ResolveRoot).Distinct().Count();

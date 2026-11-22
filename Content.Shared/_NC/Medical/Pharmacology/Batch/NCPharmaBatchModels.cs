@@ -113,6 +113,8 @@ public enum NCPharmaRdNotice : byte
     Invented,
     InventionInvalid,
     NoReagents,
+    NoChip,
+    NotResearched,
 }
 
 public enum NCPharmaAuditKind : byte

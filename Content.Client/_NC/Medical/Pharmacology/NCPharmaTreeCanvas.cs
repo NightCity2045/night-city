@@ -42,11 +42,6 @@ public sealed partial class NCPharmaTreeCanvas : Control
     private const float HubRadius = 46f;
     private const float BranchRadius = 36f;
     private const float NodeRadius = 24f;
-    private const float BranchDistance = 160f;
-    private const float FirstRing = 290f;
-    private const float RingStep = 118f;
-    private const float NodeSpacing = 122f;
-    private const float SectorHalfAngle = 0.56f;
     private const int LabelWidth = 16;
 
     private static readonly Color Background = Color.FromHex("#10191D");
@@ -76,7 +71,7 @@ public sealed partial class NCPharmaTreeCanvas : Control
     public NCPharmaTreeCanvas()
     {
         IoCManager.InjectDependencies(this);
-        MinSize = new Vector2(520, 380);
+        MinSize = new Vector2(440, 340);
         HorizontalExpand = true;
         VerticalExpand = true;
         RectClipContent = true;
@@ -100,49 +95,23 @@ public sealed partial class NCPharmaTreeCanvas : Control
         _ => Color.FromHex("#FFC95C"),
     };
 
-    /// <summary>The direction of a branch from the hub, in radians. The core is on the left, where there is most room.</summary>
-    private static float BranchAngle(NCPharmaNodeBranch branch) => branch switch
-    {
-        NCPharmaNodeBranch.Core => MathF.PI,
-        NCPharmaNodeBranch.Delivery => MathF.PI * 1.4f,
-        NCPharmaNodeBranch.Kinetics => MathF.PI * 1.8f,
-        NCPharmaNodeBranch.Safety => MathF.PI * 0.2f,
-        _ => MathF.PI * 0.6f,
-    };
-
-    private static Vector2 Polar(float angle, float distance) => new(MathF.Cos(angle) * distance, MathF.Sin(angle) * distance);
-
     public void SetNodes(IReadOnlyList<NCPharmaTreeNode> nodes)
     {
         _nodes.Clear();
         _nodes.AddRange(nodes);
         _hover = null;
 
-        var farthest = 400f;
-        foreach (var branch in Enum.GetValues<NCPharmaNodeBranch>())
+        var branches = Enum.GetValues<NCPharmaNodeBranch>();
+        var groups = branches.Select(branch => _nodes.Where(node => node.Branch == branch).ToList()).ToList();
+        var (positions, children, extent) = NCPharmaTreeLayout.Compute(groups.Select(group => group.Count).ToList());
+        for (var branch = 0; branch < branches.Length; branch++)
         {
-            var angle = BranchAngle(branch);
-            _branchPositions[(int) branch] = Polar(angle, BranchDistance);
-            var children = _nodes.Where(node => node.Branch == branch).ToList();
-            var placed = 0;
-            for (var ring = 0; placed < children.Count; ring++)
-            {
-                var radius = FirstRing + ring * RingStep;
-                var arc = 2f * SectorHalfAngle * radius;
-                var capacity = Math.Max(1, (int) MathF.Floor(arc / NodeSpacing) + 1);
-                var count = Math.Min(capacity, children.Count - placed);
-                for (var i = 0; i < count; i++)
-                {
-                    var offset = count == 1 ? 0f : ((float) i / (count - 1) - 0.5f) * 2f * SectorHalfAngle;
-                    children[placed + i].World = Polar(angle + offset, radius);
-                }
-
-                placed += count;
-                farthest = MathF.Max(farthest, radius + NodeRadius + 40f);
-            }
+            _branchPositions[branch] = positions[branch];
+            for (var i = 0; i < groups[branch].Count; i++)
+                groups[branch][i].World = children[branch][i];
         }
 
-        _extent = farthest;
+        _extent = extent;
         _fit = true;
     }
 
@@ -159,7 +128,8 @@ public sealed partial class NCPharmaTreeCanvas : Control
         base.Draw(handle);
         if (_fit && PixelWidth > 0 && PixelHeight > 0)
         {
-            _zoom = Math.Clamp(MathF.Min(PixelWidth, PixelHeight) / UIScale / (_extent * 2f), 0.3f, 1.2f);
+            // Readable first: the whole map may not fit, and dragging and the wheel reach the rest.
+            _zoom = Math.Clamp(MathF.Min(PixelWidth, PixelHeight) / UIScale / (_extent * 2f), 0.6f, 1.1f);
             _pan = Vector2.Zero;
             _fit = false;
         }

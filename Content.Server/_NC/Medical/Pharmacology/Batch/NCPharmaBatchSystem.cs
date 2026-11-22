@@ -343,6 +343,8 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
         if (TryGetFormula(batch.Formula, out var analysedFormula))
             foreach (var core in Cores(analysedFormula))
                 RecordAnalysis(core, Content.Shared._NC.Medical.Pharmacology.Lab.NCAnalysisTier.Chemical);
+        if (TryGetFormula(batch.Formula, out var studied))
+            RaiseResearch(FormulaNodes(studied)); // NC
         if (TryGetFormula(batch.Formula, out var qcFormula) && IsTracked(qcFormula))
             AddJournal(NCPharmaJournalKind.QcPerformed, batch.Formula, batch.BatchCode, actor,
                 $"tests {report.Performed}, failed {report.Failed}, now {batch.QcState}");

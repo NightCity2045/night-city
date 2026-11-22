@@ -24,6 +24,7 @@
           amount: 4
         - id: NCLabSampleVial
           amount: 4
+        - id: NCPharmaResearchChip
 
 - type: entity
   parent: CrateMedical
@@ -48,6 +49,7 @@
           amount: 4
         - id: NCLabSampleVial
           amount: 4
+        - id: NCPharmaResearchChipStock
 
 - type: entity
   parent: BoxCardboard

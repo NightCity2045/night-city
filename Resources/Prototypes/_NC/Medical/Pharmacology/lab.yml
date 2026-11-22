@@ -832,6 +832,28 @@
   regulatoryStatus: ClinicalOnly
 
 # --- The research console (R&D mode) ----------------------------------------------------------------------
+# What a laboratory has studied lives on a data chip in the console. Without the chip nothing is studied; a blank chip
+# has studied nothing and learns from quality control and analysis; a stock chip comes with the stock formulas studied.
+- type: entity
+  parent: BaseItem
+  id: NCPharmaResearchChip
+  suffix: blank
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Research/researchdisk.rsi
+    state: icon
+  - type: Item
+    size: Tiny
+  - type: NCPharmaResearchChip
+
+- type: entity
+  parent: NCPharmaResearchChip
+  id: NCPharmaResearchChipStock
+  suffix: stock formulas
+  components:
+  - type: NCPharmaResearchChip
+    stock: true
+
 - type: entity
   parent: NCLabMachineBase
   id: NCPharmaRdConsole
@@ -839,6 +861,7 @@
   - type: ContainerContainer
     containers:
       reagents: !type:ContainerSlot
+      chip: !type:ContainerSlot
   - type: ItemSlots
     slots:
       reagents:
@@ -846,6 +869,12 @@
         whitelist:
           components:
           - DrainableSolution
+      chip:
+        name: nc-pharma-rd-chip-slot
+        startingItem: NCPharmaResearchChip
+        whitelist:
+          components:
+          - NCPharmaResearchChip
   - type: ActivatableUI
     key: enum.NCPharmaRdUiKey.Key
   - type: ActivatableUIRequiresPower

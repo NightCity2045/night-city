@@ -78,6 +78,7 @@ public sealed partial class NCPharmaBatchSystem
 
         var updated = NCCompoundDossierMath.Include(GetKnowledge(compound), performed);
         _knowledge[compound] = updated;
+        RaiseResearch([NCPharmaNodeIds.Core(compound.Id)]);
         return updated;
     }
 

@@ -34,7 +34,9 @@ public sealed class NCPharmaRdWindowTest : GameTest
         [],
         [],
         beaker,
-        beaker ? [new NCPharmaReagentAmount("Inaprovaline", 20f), new NCPharmaReagentAmount("Bicaridine", 3f)] : []);
+        beaker ? [new NCPharmaReagentAmount("Inaprovaline", 20f), new NCPharmaReagentAmount("Bicaridine", 3f)] : [],
+        true,
+        0);
 
     [Test]
     [RunOnSide(Side.Client)]

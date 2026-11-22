@@ -413,3 +413,15 @@ nc-pharma-rd-leaning-neutral = neutral: only takes harm away
 nc-pharma-rd-ingredient-row = {$name} · {$leaning} · in beaker: {$held}
 nc-pharma-rd-ingredient-leans = Leans towards {$action}, {$power}.
 nc-pharma-rd-ingredient-harm = Harm: {$harm}.
+
+# --- The research chip -------------------------------------------------------------------------------------
+nc-pharma-rd-chip-slot = research chip
+nc-pharma-research-chip-examine = Studied nodes of the formula tree: [bold]{$count}[/bold].
+nc-pharma-rd-notice-no-chip = There is no research chip in the console: nothing is studied. Put a chip into its slot.
+nc-pharma-rd-notice-not-researched = The chip has not studied a core of this formula yet. Study it first: make a batch and run quality control.
+nc-pharma-rd-no-chip = [color=#FF8A8A]No research chip.[/color] Everything is unstudied until a chip is put into the console.
+nc-pharma-rd-chip-blank = The chip has studied nothing yet. Make batches of the stock formulas and run quality control: what you learn is written to the chip.
+ent-NCPharmaResearchChip = research chip
+    .desc = A data chip that holds what a laboratory has studied. A blank one has studied nothing: put it into a research console and the research is written to it.
+ent-NCPharmaResearchChipStock = research chip (stock formulas)
+    .desc = A research chip with the stock formulas already studied. Put it into a research console to work with them at once.

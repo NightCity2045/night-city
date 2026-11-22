@@ -7,7 +7,7 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                       x:Class="Content.Client._NC.Medical.Pharmacology.NCPharmaRdWindow"
                       Title="{Loc 'nc-pharma-rd-title'}"
-                      SetSize="1320 800" MinSize="1100 680">
+                      SetSize="1120 720" MinSize="940 600">
     <BoxContainer Orientation="Vertical" Margin="8" SeparationOverride="6">
         <TabContainer Name="Tabs" VerticalExpand="True">
             <!-- The formula tree -->
@@ -22,7 +22,7 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                     </PanelContainer>
                 </BoxContainer>
                 <PanelContainer StyleClasses="LowDivider" />
-                <BoxContainer Orientation="Vertical" MinWidth="350" MaxWidth="350" SeparationOverride="4">
+                <BoxContainer Orientation="Vertical" MinWidth="310" MaxWidth="310" SeparationOverride="4">
                     <Label Text="{Loc 'nc-pharma-rd-composition'}" StyleClasses="LabelHeading" />
                     <RichTextLabel Name="CompositionLabel" />
                     <BoxContainer Orientation="Horizontal" SeparationOverride="4">

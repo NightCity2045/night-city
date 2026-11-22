@@ -50,6 +50,8 @@ public sealed partial class NCPharmaRdWindow : FancyWindow
     private string[] _availableCores = [];
     private NCPharmaReagentAmount[] _beaker = [];
     private bool _hasBeaker;
+    private bool _hasChip;
+    private int _researched;
     private int _selected = -1;
     private float _concentration;
     private bool _updating;
@@ -117,6 +119,8 @@ public sealed partial class NCPharmaRdWindow : FancyWindow
         _availableCores = state.Cores;
         _beaker = state.Beaker;
         _hasBeaker = state.HasBeaker;
+        _hasChip = state.HasChip;
+        _researched = state.Researched;
         _knowledge.Clear();
         foreach (var entry in state.Knowledge)
             _knowledge[entry.Id] = entry.State;
@@ -345,7 +349,7 @@ public sealed partial class NCPharmaRdWindow : FancyWindow
     {
         var formula = Selected();
         var complete = _chosenCores.Count > 0 && _chosenForm != null && _chosenProfile != null;
-        CreateButton.Disabled = !complete;
+        CreateButton.Disabled = !complete || !_hasChip;
         ApproveButton.Disabled = formula is not { CanApprove: true };
         ContinueButton.Disabled = formula == null;
         NoteButton.Disabled = formula == null;
@@ -353,7 +357,9 @@ public sealed partial class NCPharmaRdWindow : FancyWindow
             ? BuildCard(selected)
             : Loc.GetString("nc-pharma-rd-select-hint")));
         ConcentrationValue.Text = _chosenCores.Count == 0 ? "-" : _concentration.ToString("0.#");
-        TreeHint.SetMessage(FormattedMessage.FromMarkupPermissive(Loc.GetString("nc-pharma-rd-tree-hint")));
+        TreeHint.SetMessage(FormattedMessage.FromMarkupPermissive(Loc.GetString(!_hasChip
+            ? "nc-pharma-rd-no-chip"
+            : _researched == 0 ? "nc-pharma-rd-chip-blank" : "nc-pharma-rd-tree-hint")));
         CompositionLabel.SetMessage(FormattedMessage.FromMarkupPermissive(BuildComposition()));
         MaterialsLabel.SetMessage(FormattedMessage.FromMarkupPermissive(BuildMaterials()));
         SyncChosen();
@@ -569,7 +575,7 @@ public sealed partial class NCPharmaRdWindow : FancyWindow
             InventionPreview.SetMessage(FormattedMessage.FromMarkupPermissive(text.ToString()));
         }
 
-        InventButton.Disabled = traits.Count < NCPharmaInvention.MinimumIngredients || !_hasBeaker || !enough ||
+        InventButton.Disabled = !_hasChip || traits.Count < NCPharmaInvention.MinimumIngredients || !_hasBeaker || !enough ||
                                 !NCPharmaInvention.TryCombine(traits, out _);
     }
 
