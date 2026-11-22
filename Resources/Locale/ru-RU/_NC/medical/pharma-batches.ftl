@@ -6,7 +6,7 @@ ent-NCPharmaAutoinjector = автоинъектор с дозами
     .desc = Одноразовая упаковка доз препарата. На этикетке написано то, что заявляет производитель, а не то, что внутри.
     .suffix = { "" }
 
-nc-pharma-container-examine = Партия [bold]{$code}[/bold] — {$concentration} на дозу, чистота {$purity}, {$sterile}, класс: {$grade}. Осталось доз: {$doses}.
+nc-pharma-container-examine = Партия [bold]{$code}[/bold]: концентрация {$concentration}, чистота {$purity}, {$sterile}, класс: {$grade}. Осталось доз: {$doses}.
 nc-pharma-label-sterile = стерильно
 nc-pharma-label-not-sterile = не стерильно
 nc-pharma-grade-street = уличный

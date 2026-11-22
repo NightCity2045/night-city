@@ -38,6 +38,7 @@ public sealed class NCPharmaConsumablesTest : GameTest
     [SidedDependency(Side.Server)] private NCPharmaBatchSystem _batches = default!;
     [SidedDependency(Side.Server)] private NCPharmaSynthesisSystem _synthesis = default!;
     [SidedDependency(Side.Server)] private NCPharmaReactorSystem _reactor = default!;
+    [SidedDependency(Side.Server)] private NCLabSystem _lab = default!;
     [SidedDependency(Side.Server)] private ItemSlotsSystem _slots = default!;
     [SidedDependency(Side.Server)] private SharedMapSystem _maps = default!;
     [SidedDependency(Side.Server)] private SharedSolutionContainerSystem _solutions = default!;
@@ -200,5 +201,19 @@ public sealed class NCPharmaConsumablesTest : GameTest
         Assert.That(SEntMan.EntityExists(canister), Is.True, "the canister stays");
         Assert.That(Held(canister, WasteReagent), Is.EqualTo(0f), "the waste is burned");
     }
-}
 
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void ASampleIsRealFluidAndPouringItOutSpoilsIt()
+    {
+        var vial = SEntMan.SpawnEntity("NCLabSampleVial", Spot());
+        Assert.That(_lab.HasSampleFluid(vial), Is.False, "an empty vial is no sample");
+
+        Assert.That(_solutions.TryGetDrainableSolution(vial, out var solution, out _), Is.True);
+        Assert.That(_solutions.TryAddReagent(solution!.Value, "NCLabSampleFluid", 5f), Is.True);
+        Assert.That(_lab.HasSampleFluid(vial), Is.True);
+
+        _solutions.RemoveReagent(solution.Value, "NCLabSampleFluid", 5f);
+        Assert.That(_lab.HasSampleFluid(vial), Is.False, "poured out, the sample is spoiled");
+    }
+}

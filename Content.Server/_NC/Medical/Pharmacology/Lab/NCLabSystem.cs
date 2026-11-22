@@ -11,6 +11,8 @@ using Content.Shared._NC.Medical.Pharmacology.Batch;
 using Content.Shared._NC.Medical.Pharmacology.Lab;
 using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Wounds;
+using Content.Shared.Chemistry.EntitySystems;
+using Content.Shared.Chemistry.Reagent;
 using Content.Shared.Containers.ItemSlots;
 using Content.Shared.DoAfter;
 using Content.Shared.Hands.EntitySystems;
@@ -43,6 +45,15 @@ public sealed partial class NCLabSystem : EntitySystem
     [Dependency] private NCPharmacologySystem _pharmacology = default!;
     [Dependency] private NCPharmaBatchSystem _batches = default!;
     [Dependency] private NCBiotechActionSystem _actions = default!;
+    [Dependency] private SharedSolutionContainerSystem _solutions = default!;
+
+    /// <summary>Units of sample fluid a sample puts into its vial.</summary>
+    private static readonly ProtoId<ReagentPrototype> SampleFluidReagent = "NCLabSampleFluid";
+
+    private const float SampleFluidUnits = 5f;
+
+    /// <summary>Least sample fluid a vial must still hold for a laboratory to read it.</summary>
+    private const float SampleFluidMinimum = 1f;
 
     public override void Initialize()
     {
@@ -100,6 +111,9 @@ public sealed partial class NCLabSystem : EntitySystem
         sample.Kind = sampler.Comp.Kind;
         sample.Source = Name(patient);
         Dirty(vial, sample);
+        // The sample is a real fluid in a real vial: pour it out and it is gone.
+        if (_solutions.TryGetDrainableSolution(vial, out var fluid, out _))
+            _solutions.TryAddReagent(fluid.Value, SampleFluidReagent, SampleFluidUnits);
         var data = EnsureComp<NCLabSampleDataComponent>(vial);
         Capture(patient, data);
         // A clumsy draw spoils part of the sample: it reads weaker than the patient really is.
@@ -109,6 +123,13 @@ public sealed partial class NCLabSystem : EntitySystem
         data.WoundInfection *= quality;
         _hands.TryPickupAnyHand(args.User, vial);
         _popup.PopupEntity(Loc.GetString("nc-lab-sample-taken"), patient, args.User);
+    }
+
+    /// <summary>A sample is only worth reading while its vial still holds the sample fluid.</summary>
+    public bool HasSampleFluid(EntityUid vial)
+    {
+        return _solutions.TryGetDrainableSolution(vial, out _, out var contents) &&
+               (float) contents.GetTotalPrototypeQuantity(SampleFluidReagent) >= SampleFluidMinimum;
     }
 
     private void Capture(EntityUid patient, NCLabSampleDataComponent data)
@@ -178,6 +199,12 @@ public sealed partial class NCLabSystem : EntitySystem
 
         var report = new StringBuilder();
         string title;
+        if (HasComp<NCLabSampleComponent>(loaded) && !HasSampleFluid(loaded))
+        {
+            _popup.PopupEntity(Loc.GetString("nc-lab-sample-spoiled"), machine, args.User);
+            return;
+        }
+
         if (TryComp<NCLabSampleComponent>(loaded, out var sample) &&
             TryComp<NCLabSampleDataComponent>(loaded, out var data))
         {

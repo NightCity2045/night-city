@@ -6,6 +6,7 @@ using Content.Shared._NC.Medical.Pharmacology.Batch;
 using Content.Shared._NC.Medical.Pharmacology.Lab;
 using Content.Shared.Containers.ItemSlots;
 using Content.Shared.DoAfter;
+using Content.Shared.Examine;
 using Content.Shared.Interaction;
 using Content.Shared.Popups;
 using Content.Shared.Power.EntitySystems;
@@ -58,6 +59,18 @@ public sealed partial class NCPharmaPurifierSystem : EntitySystem
         SubscribeLocalEvent<NCPharmaPurifierComponent, ActivateInWorldEvent>(OnActivate);
         SubscribeLocalEvent<NCPharmaPurifierComponent, InteractUsingEvent>(OnInteractUsing);
         SubscribeLocalEvent<NCPharmaPurifierComponent, NCPharmaPurifyDoAfterEvent>(OnDone);
+        SubscribeLocalEvent<NCPharmaPurifierComponent, ExaminedEvent>(OnPurifierExamined);
+        SubscribeLocalEvent<NCPharmaFilterCartridgeComponent, ExaminedEvent>(OnCartridgeExamined);
+    }
+
+    private void OnPurifierExamined(Entity<NCPharmaPurifierComponent> purifier, ref ExaminedEvent args)
+    {
+        args.PushMarkup(Loc.GetString("nc-pharma-purifier-examine", ("charges", purifier.Comp.FilterCharges)));
+    }
+
+    private void OnCartridgeExamined(Entity<NCPharmaFilterCartridgeComponent> cartridge, ref ExaminedEvent args)
+    {
+        args.PushMarkup(Loc.GetString("nc-pharma-filter-examine", ("charges", cartridge.Comp.Charges)));
     }
 
     private void OnInteractUsing(Entity<NCPharmaPurifierComponent> purifier, ref InteractUsingEvent args)

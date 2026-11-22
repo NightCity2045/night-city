@@ -89,3 +89,15 @@
     - NCPharmaWasteCanister
   - type: NCPharmaWasteCanister
 
+# --- Samples ---------------------------------------------------------------------------------------------------
+# A sample is a real fluid in a real vial. Pour it out and the laboratory has nothing to read.
+
+- type: reagent
+  id: NCLabSampleFluid
+  name: reagent-name-nc-lab-sample-fluid
+  group: Biological
+  desc: reagent-desc-nc-lab-sample-fluid
+  physicalDesc: reagent-physical-desc-opaque
+  flavor: bitter
+  color: "#B04A55"
+

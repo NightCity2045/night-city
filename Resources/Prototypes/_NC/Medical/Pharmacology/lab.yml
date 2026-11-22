@@ -147,15 +147,9 @@
 
 # --- Samples, collection and the machines that read them -------------------------------------------------
 - type: entity
-  parent: BaseItem
+  parent: ChemistryEmptyVial
   id: NCLabSampleVial
   components:
-  - type: Sprite
-    sprite: Objects/Specific/Chemistry/vial.rsi
-    state: vial
-  - type: Item
-    size: Tiny
-    sprite: Objects/Specific/Chemistry/vial.rsi
   - type: NCLabSample
 
 - type: entity

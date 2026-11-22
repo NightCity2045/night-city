@@ -6,7 +6,7 @@ ent-NCPharmaAutoinjector = dose autoinjector
     .desc = A single-use pack of medication doses. The label states what the producer claims, not what is inside.
     .suffix = { "" }
 
-nc-pharma-container-examine = Batch [bold]{$code}[/bold] — {$concentration} per dose, purity {$purity}, {$sterile}, {$grade} grade. Doses left: {$doses}.
+nc-pharma-container-examine = Batch [bold]{$code}[/bold]: concentration {$concentration}, purity {$purity}, {$sterile}, {$grade} grade. Doses left: {$doses}.
 nc-pharma-label-sterile = sterile
 nc-pharma-label-not-sterile = not sterile
 nc-pharma-grade-street = street

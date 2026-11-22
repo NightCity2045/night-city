@@ -1,6 +1,4 @@
 # Laboratory samples, analysis reports, blood bank and tissue products.
-ent-NCLabSampleVial = sample vial
-    .desc = A sealed vial holding a sample taken from a patient. What is inside is only known to a laboratory.
 ent-NCLabBloodSampler = blood sampler
     .desc = A syringe that draws a small blood sample into a vial.
 ent-NCLabWoundSwabKit = wound swab kit
@@ -420,3 +418,12 @@ reagent-desc-nc-pharma-waste = Hazardous waste from a station. It poisons whoeve
 ent-NCPharmaWasteCanister = waste canister
     .desc = A jug for hazardous waste. Put it in a station's waste slot and the station pours its waste into it; a canister with waste in it leaks fumes if it is left lying around. Burn the waste in a powered incinerator.
 nc-pharma-waste-slot = waste canister
+
+# --- Samples and filters ----------------------------------------------------------------------------------
+reagent-name-nc-lab-sample-fluid = patient sample
+reagent-desc-nc-lab-sample-fluid = A sample taken from a patient. What it shows is only known to a laboratory.
+ent-NCLabSampleVial = sample vial
+    .desc = A small vial. A sample taken into it can be opened, poured out and moved like any vial, but a laboratory can read the sample only while the sample fluid is still in it.
+nc-lab-sample-spoiled = The vial holds no sample any more: it was poured out.
+nc-pharma-purifier-examine = The filter in the column has [bold]{$charges}[/bold] passes left.
+nc-pharma-filter-examine = Filter capacity: [bold]{$charges}[/bold] purifier passes.
