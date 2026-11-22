@@ -47,6 +47,7 @@ public static class NCPharmaTextKeys
         NCPharmaRdNotice.InvalidRequest => "nc-pharma-rd-notice-invalid",
         NCPharmaRdNotice.InvalidName => "nc-pharma-rd-notice-invalid-name",
         NCPharmaRdNotice.TooManyFormulas => "nc-pharma-rd-notice-too-many",
+        NCPharmaRdNotice.SameCore => "nc-pharma-rd-notice-same-core",
         NCPharmaRdNotice.NotExperimental => "nc-pharma-rd-notice-not-experimental",
         NCPharmaRdNotice.NotCertified => "nc-pharma-rd-notice-not-certified",
         NCPharmaRdNotice.Unidentified => "nc-pharma-rd-notice-unidentified",

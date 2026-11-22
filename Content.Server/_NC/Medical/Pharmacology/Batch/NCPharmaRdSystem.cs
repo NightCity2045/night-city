@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using System.Linq;
 using Content.Shared._NC.Medical.Pharmacology.Batch;
 using Robust.Server.GameObjects;
 
@@ -23,7 +24,7 @@ public sealed partial class NCPharmaRdSystem : EntitySystem
         base.Initialize();
 
         SubscribeLocalEvent<NCPharmaRdConsoleComponent, BoundUIOpenedEvent>(OnUiOpened);
-        SubscribeLocalEvent<NCPharmaRdConsoleComponent, NCPharmaRdDeriveMessage>(OnDerive);
+        SubscribeLocalEvent<NCPharmaRdConsoleComponent, NCPharmaRdComposeMessage>(OnCompose);
         SubscribeLocalEvent<NCPharmaRdConsoleComponent, NCPharmaRdApproveMessage>(OnApprove);
         SubscribeLocalEvent<NCPharmaRdConsoleComponent, NCPharmaRdSelectMessage>(OnSelect);
         SubscribeLocalEvent<NCPharmaRdConsoleComponent, NCPharmaRdNoteMessage>(OnNote);
@@ -40,21 +41,23 @@ public sealed partial class NCPharmaRdSystem : EntitySystem
         UpdateUi(console, NCPharmaRdNotice.None);
     }
 
-    private void OnDerive(Entity<NCPharmaRdConsoleComponent> console, ref NCPharmaRdDeriveMessage args)
+    private void OnCompose(Entity<NCPharmaRdConsoleComponent> console, ref NCPharmaRdComposeMessage args)
     {
         var notice = NCPharmaRdNotice.InvalidRequest;
         if (args.Modifiers != null &&
-            _batches.TryDeriveFormula(
+            _batches.TryComposeFormula(
                 args.Parent,
                 Name(args.Actor),
-                args.Name ?? string.Empty,
+                args.FirstCore,
+                args.SecondCore,
                 args.DeliveryForm,
                 args.Concentration,
                 args.Modifiers,
-                out var derived,
+                args.Profile,
+                out var composed,
                 out notice))
         {
-            console.Comp.Selected = derived.ID;
+            console.Comp.Selected = composed.ID;
         }
 
         UpdateUi(console, notice);
@@ -80,6 +83,8 @@ public sealed partial class NCPharmaRdSystem : EntitySystem
             new NCPharmaRdState(
                 _batches.BuildFormulaSummaries(false),
                 _batches.BuildJournalSummary(console.Comp.Selected, JournalLimit),
-                notice));
+                notice,
+                _batches.AvailableCores().Select(core => core.Id).ToArray(),
+                _batches.BuildNodeKnowledge()));
     }
 }

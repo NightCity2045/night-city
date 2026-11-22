@@ -17,27 +17,43 @@ public enum NCPharmaRdUiKey : byte
 public sealed class NCPharmaRdState(
     NCPharmaFormulaSummary[] formulas,
     NCPharmaJournalSummary[] journal,
-    NCPharmaRdNotice notice) : BoundUserInterfaceState
+    NCPharmaRdNotice notice,
+    string[] cores,
+    NCPharmaNodeKnowledge[] knowledge) : BoundUserInterfaceState
 {
     public readonly NCPharmaFormulaSummary[] Formulas = formulas;
     public readonly NCPharmaJournalSummary[] Journal = journal;
     public readonly NCPharmaRdNotice Notice = notice;
+
+    /// <summary>Compounds the laboratory may build a formula on: identified ones that some formula already uses.</summary>
+    public readonly string[] Cores = cores;
+
+    /// <summary>What the laboratory knows about each node. Anything not listed is unknown.</summary>
+    public readonly NCPharmaNodeKnowledge[] Knowledge = knowledge;
 }
 
-/// <summary>Develops a new experimental version of a formula. The server revalidates every field.</summary>
+/// <summary>
+/// Builds a formula from the tree: one or two cores, a delivery form, a concentration, up to two modifiers and
+/// a production mode. The parent only says which line the result continues; the name is never typed by the
+/// player. The server revalidates every field.
+/// </summary>
 [Serializable, NetSerializable]
-public sealed class NCPharmaRdDeriveMessage(
-    string parent,
-    string name,
+public sealed class NCPharmaRdComposeMessage(
+    string? parent,
+    string firstCore,
+    string? secondCore,
     string deliveryForm,
     float concentration,
-    string[] modifiers) : BoundUserInterfaceMessage
+    string[] modifiers,
+    string profile) : BoundUserInterfaceMessage
 {
-    public readonly string Parent = parent;
-    public readonly string Name = name;
+    public readonly string? Parent = parent;
+    public readonly string FirstCore = firstCore;
+    public readonly string? SecondCore = secondCore;
     public readonly string DeliveryForm = deliveryForm;
     public readonly float Concentration = concentration;
     public readonly string[] Modifiers = modifiers;
+    public readonly string Profile = profile;
 }
 
 /// <summary>Moves a verified experimental version to regular production.</summary>

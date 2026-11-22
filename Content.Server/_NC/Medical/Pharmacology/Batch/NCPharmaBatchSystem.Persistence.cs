@@ -287,26 +287,30 @@ public sealed partial class NCPharmaBatchSystem
     {
         var records = _derived.Values
             .OrderBy(formula => formula.ID, StringComparer.Ordinal)
-            .Select(formula => new NCPharmaFormulaSnapshot
-            {
-                Id = formula.ID,
-                Name = formula.Name.Id,
-                Version = formula.Version,
-                Compound = formula.Compound.Id,
-                DeliveryForm = formula.DeliveryForm.Id,
-                Target = formula.TargetConcentration,
-                Modifiers = formula.Modifiers.Select(modifier => modifier.Id).ToList(),
-                Profile = formula.DefaultProductionProfile.Id,
-                Stability = formula.BaseStability,
-                Status = formula.RegulatoryStatus,
-                DerivedFrom = formula.DerivedFrom,
-                CustomName = formula.CustomName,
-                Author = formula.Author,
-                Reaction = formula.Reaction?.Id,
-            })
+            .Select(SnapshotOf)
             .ToArray();
         AddSimpleSection(args, FormulaSectionType, records);
     }
+
+    /// <summary>The plain, entity-free shape in which a developed formula is saved.</summary>
+    public static NCPharmaFormulaSnapshot SnapshotOf(NCPharmaFormulaPrototype formula) => new()
+    {
+        Id = formula.ID,
+        Name = formula.Name.Id,
+        Version = formula.Version,
+        Compound = formula.Compound.Id,
+        SecondCompound = formula.SecondCompound?.Id,
+        DeliveryForm = formula.DeliveryForm.Id,
+        Target = formula.TargetConcentration,
+        Modifiers = formula.Modifiers.Select(modifier => modifier.Id).ToList(),
+        Profile = formula.DefaultProductionProfile.Id,
+        Stability = formula.BaseStability,
+        Status = formula.RegulatoryStatus,
+        DerivedFrom = formula.DerivedFrom,
+        CustomName = formula.CustomName,
+        Author = formula.Author,
+        Reaction = formula.Reaction?.Id,
+    };
 
     private void CaptureJournal(NCRoundSnapshotCaptureEvent args)
     {
@@ -404,12 +408,14 @@ public sealed partial class NCPharmaBatchSystem
         }
     }
 
-    private bool TryFormulaFromSnapshot(NCPharmaFormulaSnapshot value, out NCPharmaFormulaPrototype formula)
+    public bool TryFormulaFromSnapshot(NCPharmaFormulaSnapshot value, out NCPharmaFormulaPrototype formula)
     {
         formula = default!;
         if (!IsText(value.Id, 1) || !IsText(value.Name, 1) ||
             value.Version < 1 ||
             !_prototypes.HasIndex<NCDrugProfilePrototype>(value.Compound) ||
+            (value.SecondCompound != null && (value.SecondCompound == value.Compound ||
+                                              !_prototypes.HasIndex<NCDrugProfilePrototype>(value.SecondCompound))) ||
             !_prototypes.HasIndex<NCPharmaDeliveryFormPrototype>(value.DeliveryForm) ||
             !_prototypes.HasIndex<NCPharmaProductionProfilePrototype>(value.Profile) ||
             !IsRange(value.Target, 0.0001f, 1000f) ||
@@ -439,7 +445,8 @@ public sealed partial class NCPharmaBatchSystem
             value.DerivedFrom,
             value.CustomName,
             value.Author,
-            value.Reaction == null ? (ProtoId<NCPharmaReactionProfilePrototype>?) null : new ProtoId<NCPharmaReactionProfilePrototype>(value.Reaction));
+            value.Reaction == null ? (ProtoId<NCPharmaReactionProfilePrototype>?) null : new ProtoId<NCPharmaReactionProfilePrototype>(value.Reaction),
+            value.SecondCompound == null ? (ProtoId<NCDrugProfilePrototype>?) null : new ProtoId<NCDrugProfilePrototype>(value.SecondCompound));
         return true;
     }
 
@@ -502,6 +509,10 @@ public sealed class NCPharmaFormulaSnapshot
     public string Name { get; set; } = string.Empty;
     public int Version { get; set; }
     public string Compound { get; set; } = string.Empty;
+
+    /// <summary>Absent in saves made before formulas could have two cores.</summary>
+    public string? SecondCompound { get; set; }
+
     public string DeliveryForm { get; set; } = string.Empty;
     public float Target { get; set; }
     public List<string> Modifiers { get; set; } = [];

@@ -8,6 +8,7 @@ using Content.Shared._NC.Medical.Pharmacology;
 using Content.Shared._NC.Medical.Pharmacology.Batch;
 using Content.Shared._NC.Medical.Pharmacology.Lab;
 using Content.Shared._NC.Persistence.Time;
+using Robust.Shared.Prototypes;
 
 namespace Content.Server._NC.Medical.Pharmacology.Batch;
 
@@ -44,37 +45,99 @@ public sealed partial class NCPharmaBatchSystem
     }
 
     /// <summary>
-    /// Develops a new experimental version of a formula. Quantities are bounded against the version it comes
-    /// from and against the compound's own limits, so a version can be bold but never impossible.
+    /// The compounds a formula can be built on: those some formula already delivers. A compound that has not been
+    /// identified yet is not offered, and neither is one that cannot be made from any raw material.
     /// </summary>
-    public bool TryDeriveFormula(
-        string parentId,
+    public List<ProtoId<NCDrugProfilePrototype>> AvailableCores()
+    {
+        var cores = new List<ProtoId<NCDrugProfilePrototype>>();
+        foreach (var formula in AllFormulas.OrderBy(formula => formula.ID, StringComparer.Ordinal))
+        {
+            foreach (var core in Cores(formula))
+            {
+                if (!cores.Contains(core) &&
+                    _prototypes.TryIndex(core, out var compound) &&
+                    compound.Feedstock != null &&
+                    IsIdentified(core))
+                {
+                    cores.Add(core);
+                }
+            }
+        }
+
+        return cores;
+    }
+
+    /// <summary>The compounds a formula delivers, the main one first.</summary>
+    public static IEnumerable<ProtoId<NCDrugProfilePrototype>> Cores(NCPharmaFormulaPrototype formula)
+    {
+        yield return formula.Compound;
+        if (formula.SecondCompound is { } second)
+            yield return second;
+    }
+
+    /// <summary>
+    /// Builds a new experimental formula from the tree. A result with the same cores as the parent continues the
+    /// parent's line as its next version; any other combination starts a line of its own. The name is derived
+    /// from the cores and the version, so nobody can give a drug a misleading title.
+    /// </summary>
+    public bool TryComposeFormula(
+        string? parentId,
         string author,
-        string name,
+        string firstCoreId,
+        string? secondCoreId,
         string deliveryFormId,
         float concentration,
         IReadOnlyList<string> modifierIds,
-        [NotNullWhen(true)] out NCPharmaFormulaPrototype? derived,
+        string profileId,
+        [NotNullWhen(true)] out NCPharmaFormulaPrototype? composed,
         out NCPharmaRdNotice notice)
     {
-        derived = null;
+        composed = null;
         notice = NCPharmaRdNotice.InvalidRequest;
-        if (TryGetFormula(parentId, out var guardParent) && !IsIdentified(guardParent.Compound))
+        if (!TryGetTuning(out var tuning) ||
+            !_prototypes.TryIndex<NCDrugProfilePrototype>(firstCoreId, out var first) ||
+            !_prototypes.TryIndex<NCPharmaDeliveryFormPrototype>(deliveryFormId, out var form) ||
+            !_prototypes.HasIndex<NCPharmaProductionProfilePrototype>(profileId) ||
+            !float.IsFinite(concentration) ||
+            modifierIds.Count > NCPharmaBatchMath.MaximumModifiers ||
+            modifierIds.Distinct().Count() != modifierIds.Count)
         {
-            notice = NCPharmaRdNotice.Unidentified; // NC
             return false;
         }
 
-        if (!TryGetTuning(out var tuning) ||
-            !TryGetFormula(parentId, out var parent) ||
-            !_prototypes.TryIndex<NCPharmaDeliveryFormPrototype>(deliveryFormId, out var form) ||
-            !_prototypes.TryIndex(parent.Compound, out var compound) ||
-            !float.IsFinite(concentration) ||
-            modifierIds.Count > NCPharmaBatchMath.MaximumModifiers ||
-            modifierIds.Distinct().Count() != modifierIds.Count ||
-            concentration < parent.TargetConcentration * tuning.MinimumConcentrationRatio ||
-            concentration > parent.TargetConcentration * tuning.MaximumConcentrationRatio ||
-            concentration * form.ConcentrationMultiplier > compound.MaximumConcentration)
+        NCDrugProfilePrototype? second = null;
+        if (secondCoreId != null && !_prototypes.TryIndex(secondCoreId, out second))
+            return false;
+        if (second != null && second.ID == first.ID)
+        {
+            notice = NCPharmaRdNotice.SameCore;
+            return false;
+        }
+
+        var available = AvailableCores();
+        if (!IsIdentified(first.ID) || (second != null && !IsIdentified(second.ID)))
+        {
+            notice = NCPharmaRdNotice.Unidentified;
+            return false;
+        }
+
+        if (!available.Contains(first.ID) || (second != null && !available.Contains(second.ID)))
+            return false;
+
+        NCPharmaFormulaPrototype? parent = null;
+        if (parentId != null && !TryGetFormula(parentId, out parent))
+            return false;
+
+        var continuesLine = parent != null &&
+                            parent.Compound.Id == first.ID &&
+                            parent.SecondCompound?.Id == second?.ID;
+        var reference = continuesLine ? parent!.TargetConcentration : first.TherapeuticConcentration;
+        var share = second != null ? NCPharmaBatchMath.SecondCoreShare : 1f;
+        if (concentration < reference * tuning.MinimumConcentrationRatio ||
+            concentration > reference * tuning.MaximumConcentrationRatio ||
+            concentration * form.ConcentrationMultiplier * share > first.MaximumConcentration ||
+            (second != null && concentration * form.ConcentrationMultiplier * share > second.MaximumConcentration))
         {
             return false;
         }
@@ -87,52 +150,148 @@ public sealed partial class NCPharmaBatchSystem
             modifiers.Add(modifier);
         }
 
-        if (_derived.Count >= tuning.MaximumDerivedFormulas)
+        if (_derived.Count >= tuning.MaximumDerivedFormulas ||
+            (!continuesLine && CountLineages() >= tuning.MaximumLineages))
         {
             notice = NCPharmaRdNotice.TooManyFormulas;
             return false;
         }
 
-        // A local application only helps where the compound has a local action; otherwise it would be wasted.
+        // A local application only helps where a core has a local action; otherwise it would be wasted.
         if (NCPharmaBatchMath.ResolveLocalFraction(tuning, form, modifiers) > 0f &&
-            !NCPharmaBatchMath.HasLocalAction(compound))
+            !NCPharmaBatchMath.HasLocalAction(first) &&
+            (second == null || !NCPharmaBatchMath.HasLocalAction(second)))
         {
             return false;
         }
 
-        var cleanName = SanitizeFormulaName(name, tuning.MaximumFormulaNameLength);
-        if (cleanName == null)
+        string root;
+        int version;
+        if (continuesLine)
         {
-            notice = NCPharmaRdNotice.InvalidName;
-            return false;
+            root = ResolveRoot(parent!);
+            version = AllFormulas.Where(candidate => ResolveRoot(candidate) == root).Max(candidate => candidate.Version) + 1;
+        }
+        else
+        {
+            root = NextLineageId();
+            version = 1;
         }
 
-        var root = ResolveRoot(parent);
-        var version = AllFormulas.Where(candidate => ResolveRoot(candidate) == root).Max(candidate => candidate.Version) + 1;
         var id = $"{root}.v{version}";
         while (_derived.ContainsKey(id))
             id = $"{root}.v{++version}";
 
-        derived = NCPharmaFormulaPrototype.Create(
+        var name = continuesLine ? parent!.Name : new LocId(NCLabText.DrugKey(first.ID));
+        var stability = continuesLine ? parent!.BaseStability : ReferenceStability(first, second);
+        var reaction = continuesLine ? parent!.Reaction : ReferenceReaction(first);
+        composed = NCPharmaFormulaPrototype.Create(
             id,
-            parent.Name,
+            name,
             version,
-            parent.Compound,
+            first.ID,
             deliveryFormId,
             concentration,
-            [.. modifierIds.Select(value => new Robust.Shared.Prototypes.ProtoId<NCPharmaModifierPrototype>(value))],
-            parent.DefaultProductionProfile,
-            parent.BaseStability,
+            [.. modifierIds.Select(value => new ProtoId<NCPharmaModifierPrototype>(value))],
+            profileId,
+            stability,
             NCPharmaRegulatoryStatus.Experimental,
-            parent.ID,
-            cleanName,
+            continuesLine ? parent!.ID : null,
+            null,
             author,
-            parent.Reaction);
-        _derived.Add(id, derived);
+            reaction,
+            second == null ? null : second.ID);
+        _derived.Add(id, composed);
         AddJournal(NCPharmaJournalKind.VersionCreated, id, string.Empty, author,
-            $"derived from {parent.ID}: {concentration:0.##} per dose, {modifierIds.Count} modifiers");
+            $"{(continuesLine ? "continues " + parent!.ID : "new line")}: {first.ID}" +
+            (second == null ? string.Empty : $" + {second.ID}") +
+            $", {concentration:0.##} per dose, {modifierIds.Count} modifiers");
         notice = NCPharmaRdNotice.Created;
         return true;
+    }
+
+    private int CountLineages() => _derived.Values.Select(ResolveRoot).Distinct().Count();
+
+    private string NextLineageId()
+    {
+        var number = 1;
+        foreach (var id in _derived.Keys)
+        {
+            if (!id.StartsWith("NCRd", StringComparison.Ordinal))
+                continue;
+            var end = id.IndexOf('.', StringComparison.Ordinal);
+            if (int.TryParse(end < 0 ? id[4..] : id[4..end], out var existing) && existing >= number)
+                number = existing + 1;
+        }
+
+        return "NCRd" + number;
+    }
+
+    /// <summary>Stability a new line starts with: the weakest of the cores' own formulas, or a default.</summary>
+    private float ReferenceStability(NCDrugProfilePrototype first, NCDrugProfilePrototype? second)
+    {
+        var stability = 1f;
+        foreach (var core in new[] { first, second })
+        {
+            if (core == null)
+                continue;
+            var known = AllFormulas.FirstOrDefault(formula => formula.Compound.Id == core.ID);
+            stability = MathF.Min(stability, known?.BaseStability ?? 0.85f);
+        }
+
+        return stability;
+    }
+
+    private ProtoId<NCPharmaReactionProfilePrototype>? ReferenceReaction(NCDrugProfilePrototype first) =>
+        AllFormulas.FirstOrDefault(formula => formula.Compound.Id == first.ID)?.Reaction;
+
+    /// <summary>
+    /// What the laboratory knows about each node. Anything the stock of approved formulas uses is known; a node
+    /// used only by a version developed in game is suspected until a batch of such a version was certified.
+    /// </summary>
+    public NCPharmaNodeKnowledge[] BuildNodeKnowledge()
+    {
+        var states = new Dictionary<string, NCPharmaNodeState>();
+
+        void Raise(string id, NCPharmaNodeState state)
+        {
+            if (!states.TryGetValue(id, out var existing) || existing < state)
+                states[id] = state;
+        }
+
+        foreach (var formula in AllFormulas)
+        {
+            var stock = !_derived.ContainsKey(formula.ID);
+            var state = stock || HasCertifiedBatch(formula.ID)
+                ? NCPharmaNodeState.Confirmed
+                : NCPharmaNodeState.Suspected;
+            foreach (var core in Cores(formula))
+                Raise(NCPharmaNodeIds.Core(core.Id), stock || (GetKnowledge(core) & NCAnalysisTier.InVivo) != 0
+                    ? NCPharmaNodeState.Confirmed
+                    : state);
+            Raise(NCPharmaNodeIds.Form(formula.DeliveryForm.Id), state);
+            Raise(NCPharmaNodeIds.Profile(formula.DefaultProductionProfile.Id), state);
+            foreach (var modifier in formula.Modifiers)
+                Raise(NCPharmaNodeIds.Modifier(modifier.Id), state);
+        }
+
+        return states.Select(pair => new NCPharmaNodeKnowledge(pair.Key, pair.Value))
+            .OrderBy(entry => entry.Id, StringComparer.Ordinal)
+            .ToArray();
+    }
+
+    /// <summary>The share of doses a raw material gives for a formula: the worst of its cores, 0 when one cannot use it.</summary>
+    public float ResolveFeedstockYield(NCPharmaFormulaPrototype formula, string? feedstock)
+    {
+        var yield = 1f;
+        foreach (var core in Cores(formula))
+        {
+            if (!_prototypes.TryIndex(core, out var compound))
+                return 0f;
+            yield = MathF.Min(yield, NCPharmaBatchMath.FeedstockYield(compound, feedstock));
+        }
+
+        return yield;
     }
 
     /// <summary>
@@ -198,17 +357,29 @@ public sealed partial class NCPharmaBatchSystem
         formula.DerivedFrom,
         CanApprove(formula),
         _prototypes.TryIndex(formula.Compound, out var summaryCompound) ? summaryCompound.ToxicConcentration : 0f,
-        _prototypes.TryIndex(formula.Compound, out var feedstockCompound) ? FeedstockOptions(feedstockCompound) : null);
+        FeedstockOptions(formula),
+        formula.SecondCompound?.Id);
 
-    /// <summary>The raw materials a compound can be made from, the main one first, with their share of doses.</summary>
-    public static NCPharmaFeedstockOption[] FeedstockOptions(NCDrugProfilePrototype compound)
+    /// <summary>The raw materials a formula can be made from, the best first, with their share of doses.</summary>
+    public NCPharmaFeedstockOption[] FeedstockOptions(NCPharmaFormulaPrototype formula)
     {
-        var options = new List<NCPharmaFeedstockOption>();
-        if (compound.Feedstock is { } main)
-            options.Add(new NCPharmaFeedstockOption(main.Id, 1f));
-        foreach (var (id, share) in compound.AlternateFeedstocks.OrderByDescending(pair => pair.Value))
-            options.Add(new NCPharmaFeedstockOption(id.Id, share));
-        return options.ToArray();
+        var candidates = new HashSet<string>();
+        foreach (var core in Cores(formula))
+        {
+            if (!_prototypes.TryIndex(core, out var compound))
+                continue;
+            if (compound.Feedstock is { } main)
+                candidates.Add(main.Id);
+            foreach (var alternative in compound.AlternateFeedstocks.Keys)
+                candidates.Add(alternative.Id);
+        }
+
+        return candidates
+            .Select(id => new NCPharmaFeedstockOption(id, ResolveFeedstockYield(formula, id)))
+            .Where(option => option.Yield > 0f)
+            .OrderByDescending(option => option.Yield)
+            .ThenBy(option => option.Id, StringComparer.Ordinal)
+            .ToArray();
     }
 
     public NCPharmaFormulaSummary[] BuildFormulaSummaries(bool producibleOnly)
@@ -271,16 +442,5 @@ public sealed partial class NCPharmaBatchSystem
     {
         var cut = actor.IndexOf(" (", StringComparison.Ordinal);
         return cut > 0 ? actor[..cut] : actor;
-    }
-
-    private static string? SanitizeFormulaName(string name, int maximumLength)
-    {
-        var trimmed = string.Join(' ', name.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
-        if (trimmed.Length < 1 || trimmed.Length > maximumLength)
-            return null;
-
-        return trimmed.All(value => char.IsLetterOrDigit(value) || value is ' ' or '-' or '_' or '.' or ':')
-            ? trimmed
-            : null;
     }
 }

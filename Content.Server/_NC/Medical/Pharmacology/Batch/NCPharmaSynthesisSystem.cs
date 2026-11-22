@@ -107,9 +107,7 @@ public sealed partial class NCPharmaSynthesisSystem : EntitySystem
             return NCPharmaStationNotice.NotEnoughSource;
 
         // NC: the compound can only be made from the raw material it accepts; an alternative gives fewer doses.
-        var yield = _prototypes.TryIndex(formula.Compound, out var compound)
-            ? NCPharmaBatchMath.FeedstockYield(compound, source.Feedstock?.Id)
-            : 0f;
+        var yield = _batches.ResolveFeedstockYield(formula, source.Feedstock?.Id);
         if (yield <= 0f)
             return NCPharmaStationNotice.WrongFeedstock;
 

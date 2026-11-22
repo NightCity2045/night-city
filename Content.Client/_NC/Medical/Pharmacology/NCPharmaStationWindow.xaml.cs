@@ -94,8 +94,13 @@ public sealed partial class NCPharmaStationWindow : FancyWindow
             FormulaSelector.SelectId(index);
     }
 
-    private static string FormulaName(NCPharmaFormulaSummary formula) =>
-        formula.CustomName ?? (formula.NameKey == null ? formula.Id : Loc.GetString(formula.NameKey));
+    private static string FormulaName(NCPharmaFormulaSummary formula)
+    {
+        var name = formula.CustomName ?? (formula.NameKey == null ? formula.Id : Loc.GetString(formula.NameKey));
+        if (formula.SecondCompound is not { } second)
+            return name;
+        return name + " + " + (Loc.TryGetString(NCLabText.DrugKey(second), out var secondName) ? secondName : second);
+    }
 
     private string FeedstockName(string? id) =>
         id != null && _prototypes.TryIndex<NCPharmaFeedstockPrototype>(id, out var type)

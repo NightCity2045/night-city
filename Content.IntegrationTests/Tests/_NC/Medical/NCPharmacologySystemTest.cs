@@ -84,10 +84,16 @@ public sealed class NCPharmacologySystemTest : GameTest
             {
                 var other = _prototypes.Index(otherId);
                 Assert.That(other.Interactions.TryGetValue(drug.ID, out var reverse), Is.True, drug.ID);
+                // An antidote acts on the other drug and not the other way round, so those pairs are one-sided.
+                var oneSided = IsReversalAgent(drug.ID) || IsReversalAgent(other.ID);
                 Assert.Multiple(() =>
                 {
-                    Assert.That(reverse!.TherapeuticMultiplier, Is.EqualTo(rule.TherapeuticMultiplier), drug.ID);
-                    Assert.That(reverse.ToxicityMultiplier, Is.EqualTo(rule.ToxicityMultiplier), drug.ID);
+                    if (!oneSided)
+                    {
+                        Assert.That(reverse!.TherapeuticMultiplier, Is.EqualTo(rule.TherapeuticMultiplier), drug.ID);
+                        Assert.That(reverse.ToxicityMultiplier, Is.EqualTo(rule.ToxicityMultiplier), drug.ID);
+                    }
+
                     Assert.That(rule.TherapeuticMultiplier, Is.LessThanOrEqualTo(humanProfile.MaximumInteractionMultiplier));
                     Assert.That(rule.ToxicityMultiplier, Is.LessThanOrEqualTo(humanProfile.MaximumInteractionMultiplier));
                 });
@@ -102,7 +108,10 @@ public sealed class NCPharmacologySystemTest : GameTest
             .OfType<NCApplyMedicalDrug>()
             .Select(effect => effect.Profile)
             .ToHashSet();
-        Assert.That(bridged, Is.EquivalentTo(drugs.Select(drug => (ProtoId<NCDrugProfilePrototype>) drug.ID)));
+        // Compounds made as pharmaceutical batches (recreational drugs, antidotes, targeted antibiotics) reach the body
+        // through the batch system and need no reagent; every reagent that does exist must point at a real profile.
+        Assert.That(bridged, Is.SubsetOf(drugs.Select(drug => (ProtoId<NCDrugProfilePrototype>) drug.ID)));
+        Assert.That(bridged, Has.Count.GreaterThanOrEqualTo(14));
 
         var coolantBridge = _prototypes.Index(CyberwareCoolantAgent)
             .Metabolisms!.Metabolisms.Values
@@ -149,7 +158,8 @@ public sealed class NCPharmacologySystemTest : GameTest
         Assert.Multiple(() =>
         {
             Assert.That(baseline, Is.EqualTo(100f));
-            Assert.That(SComp<NCPhysiologyComponent>(body).TotalPain, Is.EqualTo(25f).Within(0.001f));
+            // The dose also builds a little tolerance (6 per 0.01), which weakens the effect it is measured with.
+            Assert.That(SComp<NCPhysiologyComponent>(body).TotalPain, Is.EqualTo(29.5f).Within(0.01f));
             Assert.That(wounds.Wounds[woundId].Pain, Is.EqualTo(100f));
             Assert.That(wounds.Wounds, Has.Count.EqualTo(1));
             Assert.That(_scheduler.GetRemainingDelay(body), Is.GreaterThan(TimeSpan.Zero));
@@ -295,4 +305,7 @@ public sealed class NCPharmacologySystemTest : GameTest
             SEntMan.TryGetComponent<NCOrganFunctionComponent>(organ, out var function) &&
             function.FunctionType == type);
     }
+
+    private static bool IsReversalAgent(string drugId) =>
+        drugId is "NCDrugSedationReversal" or "NCDrugStimulantReversal";
 }

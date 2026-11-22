@@ -17,8 +17,8 @@ public sealed partial class NCPharmaRdBoundUserInterface(EntityUid owner, Enum k
 
         _window = this.CreateWindow<NCPharmaRdWindow>();
         _window.SelectRequested += formula => SendMessage(new NCPharmaRdSelectMessage(formula));
-        _window.DeriveRequested += (parent, name, form, concentration, modifiers) =>
-            SendMessage(new NCPharmaRdDeriveMessage(parent, name, form, concentration, modifiers));
+        _window.ComposeRequested += (parent, firstCore, secondCore, form, concentration, modifiers, profile) =>
+            SendMessage(new NCPharmaRdComposeMessage(parent, firstCore, secondCore, form, concentration, modifiers, profile));
         _window.ApproveRequested += formula => SendMessage(new NCPharmaRdApproveMessage(formula));
         _window.NoteRequested += (formula, text) => SendMessage(new NCPharmaRdNoteMessage(formula, text));
     }

@@ -6,9 +6,9 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                       x:Class="Content.Client._NC.Medical.Pharmacology.NCPharmaRdWindow"
                       Title="{Loc 'nc-pharma-rd-title'}"
-                      SetSize="980 640" MinSize="820 520">
+                      SetSize="1280 780" MinSize="1020 620">
     <BoxContainer Orientation="Horizontal" Margin="10" SeparationOverride="10">
-        <BoxContainer Orientation="Vertical" MinWidth="260" MaxWidth="260" SeparationOverride="6">
+        <BoxContainer Orientation="Vertical" MinWidth="230" MaxWidth="230" SeparationOverride="6">
             <Label Text="{Loc 'nc-pharma-rd-formulas'}" StyleClasses="LabelHeading" />
             <ItemList Name="FormulaList" VerticalExpand="True" />
         </BoxContainer>
@@ -17,26 +17,10 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
             <Label Text="{Loc 'nc-pharma-rd-selected'}" StyleClasses="LabelHeading" />
             <RichTextLabel Name="SelectedCard" />
             <PanelContainer StyleClasses="LowDivider" />
-            <Label Text="{Loc 'nc-pharma-rd-new-version'}" StyleClasses="LabelHeading" />
-            <LineEdit Name="NameEdit" PlaceHolder="{Loc 'nc-pharma-rd-name-placeholder'}" />
-            <BoxContainer Orientation="Horizontal" SeparationOverride="6">
-                <Label Text="{Loc 'nc-pharma-rd-delivery'}" MinWidth="110" />
-                <OptionButton Name="DeliverySelector" HorizontalExpand="True" />
-            </BoxContainer>
-            <BoxContainer Orientation="Horizontal" SeparationOverride="6">
-                <Label Text="{Loc 'nc-pharma-rd-concentration'}" MinWidth="110" />
-                <Button Name="ConcentrationDown" Text="−" MinWidth="38" />
-                <Label Name="ConcentrationValue" MinWidth="60" Align="Center" />
-                <Button Name="ConcentrationUp" Text="+" MinWidth="38" />
-            </BoxContainer>
-            <BoxContainer Orientation="Horizontal" SeparationOverride="6">
-                <Label Text="{Loc 'nc-pharma-rd-modifier-first'}" MinWidth="110" />
-                <OptionButton Name="FirstModifier" HorizontalExpand="True" />
-            </BoxContainer>
-            <BoxContainer Orientation="Horizontal" SeparationOverride="6">
-                <Label Text="{Loc 'nc-pharma-rd-modifier-second'}" MinWidth="110" />
-                <OptionButton Name="SecondModifier" HorizontalExpand="True" />
-            </BoxContainer>
+            <Label Text="{Loc 'nc-pharma-rd-tree'}" StyleClasses="LabelHeading" />
+            <BoxContainer Name="TreeColumns" Orientation="Horizontal" SeparationOverride="6"
+                          VerticalExpand="True" MinHeight="250" />
+            <RichTextLabel Name="NodeInfo" />
             <RichTextLabel Name="ForecastLabel" />
             <BoxContainer Orientation="Horizontal" SeparationOverride="6">
                 <Button Name="CreateButton" Text="{Loc 'nc-pharma-rd-create'}" HorizontalExpand="True" />
@@ -47,9 +31,8 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                 <LineEdit Name="NoteEdit" HorizontalExpand="True" PlaceHolder="{Loc 'nc-pharma-rd-note-placeholder'}" />
                 <Button Name="NoteButton" Text="{Loc 'nc-pharma-rd-note-save'}" />
             </BoxContainer>
-            <PanelContainer StyleClasses="LowDivider" />
             <Label Text="{Loc 'nc-pharma-rd-journal'}" StyleClasses="LabelHeading" />
-            <ScrollContainer VerticalExpand="True" HScrollEnabled="False">
+            <ScrollContainer MinHeight="90" MaxHeight="130" HScrollEnabled="False">
                 <RichTextLabel Name="JournalLabel" />
             </ScrollContainer>
         </BoxContainer>

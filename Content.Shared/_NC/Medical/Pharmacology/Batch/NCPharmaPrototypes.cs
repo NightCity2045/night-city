@@ -87,6 +87,10 @@ public sealed partial class NCPharmaTuningPrototype : IPrototype
     [DataField]
     public int MaximumDerivedFormulas { get; private set; } = 256;
 
+    /// <summary>How many separate formula lines a laboratory can develop. Versions of one line are not counted.</summary>
+    [DataField]
+    public int MaximumLineages { get; private set; } = 30;
+
     [DataField]
     public int MaximumJournalEntries { get; private set; } = 2048;
 
@@ -257,6 +261,10 @@ public sealed partial class NCPharmaModifierPrototype : IPrototype
     [DataField(required: true)]
     public LocId Name { get; private set; }
 
+    /// <summary>Which branch of the formula tree this modifier belongs to.</summary>
+    [DataField]
+    public NCPharmaNodeBranch Branch { get; private set; } = NCPharmaNodeBranch.Kinetics;
+
     [DataField]
     public float ConcentrationMultiplier { get; private set; } = 1f;
 
@@ -364,6 +372,13 @@ public sealed partial class NCPharmaFormulaPrototype : IPrototype
     [DataField(required: true)]
     public ProtoId<NCDrugProfilePrototype> Compound { get; private set; }
 
+    /// <summary>
+    /// An optional second core. Both compounds are delivered at a share of the concentration and the pair is
+    /// more toxic than either alone, so it is a choice with a price, not an upgrade.
+    /// </summary>
+    [DataField]
+    public ProtoId<NCDrugProfilePrototype>? SecondCompound { get; private set; }
+
     [DataField(required: true)]
     public ProtoId<NCPharmaDeliveryFormPrototype> DeliveryForm { get; private set; }
 
@@ -413,7 +428,8 @@ public sealed partial class NCPharmaFormulaPrototype : IPrototype
         string? derivedFrom,
         string? customName,
         string? author,
-        ProtoId<NCPharmaReactionProfilePrototype>? reaction = null)
+        ProtoId<NCPharmaReactionProfilePrototype>? reaction = null,
+        ProtoId<NCDrugProfilePrototype>? secondCompound = null)
     {
 #pragma warning disable RA0039 // Derived formula versions are runtime objects and are never registered as prototypes.
         return new NCPharmaFormulaPrototype
@@ -422,6 +438,7 @@ public sealed partial class NCPharmaFormulaPrototype : IPrototype
             Name = name,
             Version = version,
             Compound = compound,
+            SecondCompound = secondCompound,
             DeliveryForm = deliveryForm,
             TargetConcentration = targetConcentration,
             Modifiers = modifiers,
@@ -439,5 +456,5 @@ public sealed partial class NCPharmaFormulaPrototype : IPrototype
     /// <summary>Same formula with another regulatory status, used when a version is approved or recalled.</summary>
     public NCPharmaFormulaPrototype WithStatus(NCPharmaRegulatoryStatus status) => Create(
         ID, Name, Version, Compound, DeliveryForm, TargetConcentration, [.. Modifiers],
-        DefaultProductionProfile, BaseStability, status, DerivedFrom, CustomName, Author, Reaction);
+        DefaultProductionProfile, BaseStability, status, DerivedFrom, CustomName, Author, Reaction, SecondCompound);
 }

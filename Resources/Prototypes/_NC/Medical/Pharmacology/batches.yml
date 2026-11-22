@@ -104,6 +104,7 @@
 - type: ncPharmaModifier
   id: NCPharmaModifierTissueTargeting
   name: nc-pharma-modifier-tissue-targeting
+  branch: Kinetics
   concentrationMultiplier: 0.9
   stabilityDelta: -0.03
   costMultiplier: 1.35
@@ -123,6 +124,7 @@
 - type: ncPharmaModifier
   id: NCPharmaModifierFastRelease
   name: nc-pharma-modifier-fast-release
+  branch: Kinetics
   concentrationMultiplier: 1.25
   stabilityDelta: -0.05
   toxicityMultiplier: 1.2
@@ -132,6 +134,7 @@
 - type: ncPharmaModifier
   id: NCPharmaModifierExtendedRelease
   name: nc-pharma-modifier-extended-release
+  branch: Kinetics
   concentrationMultiplier: 0.85
   stabilityDelta: 0.05
   costMultiplier: 1.15
@@ -140,6 +143,7 @@
 - type: ncPharmaModifier
   id: NCPharmaModifierProtectiveCarrier
   name: nc-pharma-modifier-protective-carrier
+  branch: Safety
   concentrationMultiplier: 0.9
   toxicityMultiplier: 0.6
   costMultiplier: 1.4
@@ -147,6 +151,7 @@
 - type: ncPharmaModifier
   id: NCPharmaModifierStabilizer
   name: nc-pharma-modifier-stabilizer
+  branch: Production
   purityDelta: -0.02
   stabilityDelta: 0.15
   costMultiplier: 1.2
@@ -154,6 +159,7 @@
 - type: ncPharmaModifier
   id: NCPharmaModifierBuffered
   name: nc-pharma-modifier-buffered
+  branch: Safety
   concentrationMultiplier: 0.95
   toxicityMultiplier: 0.8
   absorptionMultiplier: 1.3
@@ -162,6 +168,7 @@
 - type: ncPharmaModifier
   id: NCPharmaModifierConcentrated
   name: nc-pharma-modifier-concentrated
+  branch: Kinetics
   concentrationMultiplier: 1.4
   stabilityDelta: -0.1
   toxicityMultiplier: 1.3
@@ -170,12 +177,14 @@
 - type: ncPharmaModifier
   id: NCPharmaModifierPurified
   name: nc-pharma-modifier-purified
+  branch: Production
   purityDelta: 0.1
   costMultiplier: 1.6
 
 - type: ncPharmaModifier
   id: NCPharmaModifierColdSolvent
   name: nc-pharma-modifier-cold-solvent
+  branch: Production
   stabilityDelta: 0.1
   absorptionMultiplier: 0.8
   costMultiplier: 1.1
@@ -183,6 +192,7 @@
 - type: ncPharmaModifier
   id: NCPharmaModifierAbsorptionEnhancer
   name: nc-pharma-modifier-absorption-enhancer
+  branch: Kinetics
   concentrationMultiplier: 1.15
   toxicityMultiplier: 1.25
   absorptionMultiplier: 0.5
@@ -191,6 +201,7 @@
 - type: ncPharmaModifier
   id: NCPharmaModifierMaskingAgent
   name: nc-pharma-modifier-masking-agent
+  branch: Production
   purityDelta: -0.06
   toxicityMultiplier: 1.2
   costMultiplier: 1.3
@@ -199,6 +210,7 @@
 - type: ncPharmaModifier
   id: NCPharmaModifierPotentiator
   name: nc-pharma-modifier-potentiator
+  branch: Kinetics
   concentrationMultiplier: 1.3
   toxicityMultiplier: 1.15
   costMultiplier: 1.3
@@ -207,6 +219,7 @@
 - type: ncPharmaModifier
   id: NCPharmaModifierMetabolicBlocker
   name: nc-pharma-modifier-metabolic-blocker
+  branch: Kinetics
   stabilityDelta: -0.03
   toxicityMultiplier: 1.1
   clearanceMultiplier: 0.5

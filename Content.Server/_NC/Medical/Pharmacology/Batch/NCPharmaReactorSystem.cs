@@ -156,9 +156,7 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
         if (source.Units < units)
             return NCPharmaReactorNotice.NotEnoughSource;
         // NC: the compound can only be made from the raw material it accepts.
-        var yield = _prototypes.TryIndex(formula.Compound, out var compound)
-            ? NCPharmaBatchMath.FeedstockYield(compound, source.Feedstock?.Id)
-            : 0f;
+        var yield = _batches.ResolveFeedstockYield(formula, source.Feedstock?.Id);
         if (yield <= 0f)
             return NCPharmaReactorNotice.WrongFeedstock;
 
