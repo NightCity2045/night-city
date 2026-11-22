@@ -33,6 +33,27 @@ public static class NCPharmaBatchMath
     }
 
     /// <summary>
+    /// The share of doses a source gives for a compound: 1 for its main feedstock, the listed share for an
+    /// alternative, and 0 when the material cannot make it at all. A compound with no feedstock accepts anything.
+    /// </summary>
+    public static float FeedstockYield(NCDrugProfilePrototype compound, string? sourceFeedstock)
+    {
+        if (compound.Feedstock is not { } required)
+            return 1f;
+        if (sourceFeedstock == null)
+            return 0f;
+        if (required.Id == sourceFeedstock)
+            return 1f;
+        foreach (var (id, share) in compound.AlternateFeedstocks)
+        {
+            if (id.Id == sourceFeedstock)
+                return Math.Clamp(share, 0f, 1f);
+        }
+
+        return 0f;
+    }
+
+    /// <summary>
     /// Turns a formula, a production mode and the quality of inputs and equipment into a physical batch.
     /// Quality is a product of its inputs, so a better result must be paid for with yield, time or money.
     /// </summary>

@@ -33,6 +33,9 @@
 - type: ncDrugProfile
   id: NCDrugGramPositiveAntibiotic
   category: Antibiotic
+  feedstock: NCFeedstockMicrobial
+  alternateFeedstocks:
+    NCFeedstockImmune: 0.5
   maximumConcentration: 30
   removalConcentration: 0.05
   minimumEffectiveConcentration: 1
@@ -48,6 +51,9 @@
 - type: ncDrugProfile
   id: NCDrugGramNegativeAntibiotic
   category: Antibiotic
+  feedstock: NCFeedstockMicrobial
+  alternateFeedstocks:
+    NCFeedstockImmune: 0.5
   maximumConcentration: 30
   removalConcentration: 0.05
   minimumEffectiveConcentration: 1
@@ -63,6 +69,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaGramPositiveAntibiotic
   name: nc-pharma-formula-gram-positive-antibiotic
+  description: nc-pharma-formula-gram-positive-antibiotic-desc
   version: 1
   compound: NCDrugGramPositiveAntibiotic
   deliveryForm: NCPharmaDeliveryInfusion
@@ -75,6 +82,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaGramNegativeAntibiotic
   name: nc-pharma-formula-gram-negative-antibiotic
+  description: nc-pharma-formula-gram-negative-antibiotic-desc
   version: 1
   compound: NCDrugGramNegativeAntibiotic
   deliveryForm: NCPharmaDeliveryInfusion
@@ -102,6 +110,7 @@
 - type: ncDrugProfile
   id: NCDrugX17
   category: Stimulant
+  feedstock: NCFeedstockNeuro
   codename: nc-lab-codename-x17
   dependence: NCDependenceX17
   interactionsCharted: false
@@ -126,6 +135,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaX17
   name: nc-pharma-formula-x17
+  description: nc-pharma-formula-x17-desc
   version: 1
   compound: NCDrugX17
   deliveryForm: NCPharmaDeliveryAutoinjector
@@ -469,6 +479,7 @@
 
 # --- Raw material, stations and waste ----------------------------------------------------------------------
 - type: entity
+  abstract: true
   parent: BaseItem
   id: NCPharmaRawBiomass
   components:
@@ -486,6 +497,7 @@
     output: NCPharmaSourceCanisterStreet
 
 - type: entity
+  abstract: true
   parent: NCPharmaRawBiomass
   id: NCPharmaRawCorporateStock
   components:
@@ -613,6 +625,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaSyntheticBlood
   name: nc-pharma-formula-synthetic-blood
+  description: nc-pharma-formula-synthetic-blood-desc
   version: 1
   compound: NCDrugSyntheticOxygenCarrier
   deliveryForm: NCPharmaDeliveryTransfusion
@@ -637,6 +650,7 @@
 - type: ncDrugProfile
   id: NCDrugPlasmaFactors
   category: Procoagulant
+  feedstock: NCFeedstockHemato
   maximumConcentration: 25
   removalConcentration: 0.05
   minimumEffectiveConcentration: 0.75
@@ -652,6 +666,7 @@
 - type: ncDrugProfile
   id: NCDrugRedCells
   category: SyntheticOxygenCarrier
+  feedstock: NCFeedstockHemato
   maximumConcentration: 25
   removalConcentration: 0.05
   minimumEffectiveConcentration: 0.75
@@ -808,6 +823,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaImmunosuppressant
   name: nc-pharma-formula-immunosuppressant
+  description: nc-pharma-formula-immunosuppressant-desc
   version: 1
   compound: NCDrugImmunosuppressant
   deliveryForm: NCPharmaDeliveryInfusion
@@ -835,6 +851,9 @@
 - type: ncDrugProfile
   id: NCDrugSedationReversal
   category: Antitoxin
+  feedstock: NCFeedstockImmune
+  alternateFeedstocks:
+    NCFeedstockNeuro: 0.6
   maximumConcentration: 25
   removalConcentration: 0.05
   minimumEffectiveConcentration: 0.75
@@ -862,6 +881,9 @@
 - type: ncDrugProfile
   id: NCDrugStimulantReversal
   category: Antitoxin
+  feedstock: NCFeedstockImmune
+  alternateFeedstocks:
+    NCFeedstockNeuro: 0.6
   maximumConcentration: 25
   removalConcentration: 0.05
   minimumEffectiveConcentration: 0.75
@@ -887,6 +909,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaSurgicalAnesthetic
   name: nc-pharma-formula-surgical-anesthetic
+  description: nc-pharma-formula-surgical-anesthetic-desc
   version: 1
   compound: NCDrugSurgicalAnesthetic
   deliveryForm: NCPharmaDeliveryInfusion
@@ -899,6 +922,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaSedative
   name: nc-pharma-formula-sedative
+  description: nc-pharma-formula-sedative-desc
   version: 1
   compound: NCDrugSedative
   deliveryForm: NCPharmaDeliveryInfusion
@@ -911,6 +935,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaVasopressor
   name: nc-pharma-formula-vasopressor
+  description: nc-pharma-formula-vasopressor-desc
   version: 1
   compound: NCDrugVasopressor
   deliveryForm: NCPharmaDeliveryInfusion
@@ -923,6 +948,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaVasodilator
   name: nc-pharma-formula-vasodilator
+  description: nc-pharma-formula-vasodilator-desc
   version: 1
   compound: NCDrugVasodilator
   deliveryForm: NCPharmaDeliveryInfusion
@@ -935,6 +961,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaAntiarrhythmic
   name: nc-pharma-formula-antiarrhythmic
+  description: nc-pharma-formula-antiarrhythmic-desc
   version: 1
   compound: NCDrugAntiarrhythmic
   deliveryForm: NCPharmaDeliveryInfusion
@@ -947,6 +974,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaRespiratoryStimulant
   name: nc-pharma-formula-respiratory-stimulant
+  description: nc-pharma-formula-respiratory-stimulant-desc
   version: 1
   compound: NCDrugRespiratoryStimulant
   deliveryForm: NCPharmaDeliveryAutoinjector
@@ -959,6 +987,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaAntitoxin
   name: nc-pharma-formula-antitoxin
+  description: nc-pharma-formula-antitoxin-desc
   version: 1
   compound: NCDrugAntitoxin
   deliveryForm: NCPharmaDeliveryAutoinjector
@@ -971,6 +1000,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaProcoagulant
   name: nc-pharma-formula-procoagulant
+  description: nc-pharma-formula-procoagulant-desc
   version: 1
   compound: NCDrugProcoagulant
   deliveryForm: NCPharmaDeliveryAutoinjector
@@ -983,6 +1013,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaAnticoagulant
   name: nc-pharma-formula-anticoagulant
+  description: nc-pharma-formula-anticoagulant-desc
   version: 1
   compound: NCDrugAnticoagulant
   deliveryForm: NCPharmaDeliveryInfusion
@@ -995,6 +1026,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaSedationReversal
   name: nc-pharma-formula-sedation-reversal
+  description: nc-pharma-formula-sedation-reversal-desc
   version: 1
   compound: NCDrugSedationReversal
   deliveryForm: NCPharmaDeliveryAutoinjector
@@ -1007,6 +1039,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaStimulantReversal
   name: nc-pharma-formula-stimulant-reversal
+  description: nc-pharma-formula-stimulant-reversal-desc
   version: 1
   compound: NCDrugStimulantReversal
   deliveryForm: NCPharmaDeliveryAutoinjector
@@ -1172,6 +1205,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaVasopressorAutoinjector
   name: nc-pharma-formula-vasopressor-autoinjector
+  description: nc-pharma-formula-vasopressor-autoinjector-desc
   version: 1
   compound: NCDrugVasopressor
   deliveryForm: NCPharmaDeliveryAutoinjector

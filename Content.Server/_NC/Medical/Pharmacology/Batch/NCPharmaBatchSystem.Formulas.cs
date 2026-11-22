@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Content.Shared._NC.Medical.Pharmacology;
 using Content.Shared._NC.Medical.Pharmacology.Batch;
+using Content.Shared._NC.Medical.Pharmacology.Lab;
 using Content.Shared._NC.Persistence.Time;
 
 namespace Content.Server._NC.Medical.Pharmacology.Batch;
@@ -196,7 +197,19 @@ public sealed partial class NCPharmaBatchSystem
         formula.RegulatoryStatus,
         formula.DerivedFrom,
         CanApprove(formula),
-        _prototypes.TryIndex(formula.Compound, out var summaryCompound) ? summaryCompound.ToxicConcentration : 0f);
+        _prototypes.TryIndex(formula.Compound, out var summaryCompound) ? summaryCompound.ToxicConcentration : 0f,
+        _prototypes.TryIndex(formula.Compound, out var feedstockCompound) ? FeedstockOptions(feedstockCompound) : null);
+
+    /// <summary>The raw materials a compound can be made from, the main one first, with their share of doses.</summary>
+    public static NCPharmaFeedstockOption[] FeedstockOptions(NCDrugProfilePrototype compound)
+    {
+        var options = new List<NCPharmaFeedstockOption>();
+        if (compound.Feedstock is { } main)
+            options.Add(new NCPharmaFeedstockOption(main.Id, 1f));
+        foreach (var (id, share) in compound.AlternateFeedstocks.OrderByDescending(pair => pair.Value))
+            options.Add(new NCPharmaFeedstockOption(id.Id, share));
+        return options.ToArray();
+    }
 
     public NCPharmaFormulaSummary[] BuildFormulaSummaries(bool producibleOnly)
     {

@@ -50,6 +50,9 @@ public sealed partial class NCPharmaReactorRunComponent : Component
     public float SourcePurity;
     public float SourceContaminants;
     public int Units;
+
+    /// <summary>Share of the doses the raw material gives for this formula; below 1 for an alternative feedstock.</summary>
+    public float FeedstockYield = 1f;
     public string Operator = string.Empty;
     public TimeSpan NextStep;
     public bool Warned;

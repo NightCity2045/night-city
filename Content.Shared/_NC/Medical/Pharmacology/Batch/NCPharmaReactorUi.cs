@@ -19,6 +19,7 @@ public enum NCPharmaReactorNotice : byte
     NoSource,
     NotEnoughSource,
     InvalidRequest,
+    WrongFeedstock,
     NotExperimental,
     UnitsLimit,
     Busy,

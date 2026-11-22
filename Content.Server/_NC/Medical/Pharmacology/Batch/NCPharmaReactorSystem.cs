@@ -155,6 +155,12 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
             return NCPharmaReactorNotice.UnitsLimit;
         if (source.Units < units)
             return NCPharmaReactorNotice.NotEnoughSource;
+        // NC: the compound can only be made from the raw material it accepts.
+        var yield = _prototypes.TryIndex(formula.Compound, out var compound)
+            ? NCPharmaBatchMath.FeedstockYield(compound, source.Feedstock?.Id)
+            : 0f;
+        if (yield <= 0f)
+            return NCPharmaReactorNotice.WrongFeedstock;
 
         var reactionId = formula.Reaction ?? tuning.DefaultReaction;
         if (!_prototypes.TryIndex(reactionId, out var profile))
@@ -175,6 +181,7 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
         run.SourcePurity = source.Purity;
         run.SourceContaminants = TryComp<NCPharmaSourceHiddenComponent>(sourceUid, out var hidden) ? hidden.Contaminants : 0f; // NC
         run.Units = units;
+        run.FeedstockYield = yield;
         run.Operator = ToPrettyString(user);
         run.NextStep = _timing.CurTime + Step;
         run.Warned = false;
@@ -281,7 +288,7 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
     {
         var formula = run.Formula;
         var outcome = NCReactorMath.Evaluate(run.State);
-        var units = (int) MathF.Floor(run.Units * outcome.YieldFactor);
+        var units = (int) MathF.Floor(run.Units * run.FeedstockYield * outcome.YieldFactor);
         var sourcePurity = run.SourcePurity;
         var sourceContaminants = run.SourceContaminants;
         var producer = run.Operator;

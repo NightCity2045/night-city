@@ -20,22 +20,24 @@ nc-guide-pharma-overview-dose = [head=2]Dosing the patient[/head]
     A dose is scaled to the patient's body mass. The same dose acts weaker on a heavy patient and harder on a light one. Check the patient's active drugs and toxic burden before administering anything, and repeat the scan afterwards. See also the Clinical Pharmacology page for the effects of each drug class.
 guide-entry-nc-pharma-overview = Pharmacology: overview
 nc-guide-pharma-brewing-h = [head=1]Brewing raw material[/head]
-nc-guide-pharma-brewing-intro = Raw material does not have to be bought. Players can brew it in an ordinary beaker or the chem master from two harmless precursors. The precursors do nothing inside a body: they only become useful once brewed and extracted.
+nc-guide-pharma-brewing-intro = Raw material does not have to be bought. Players can brew it in an ordinary beaker or the chem master. Raw material comes in [color=#58e6d9]kinds[/color]: neuro-organic, cardio-enzyme, hemo-factor, microbial and immuno-modulator. Every kind has its own substrate, and the solvent is plain [color=#58e6d9]ethanol[/color] from the chemical dispenser. The substrates do nothing inside a body: they only become useful once brewed and extracted.
 nc-guide-pharma-brewing-recipe = [head=2]Recipes[/head]
-    {""}[color=#58e6d9]Raw broth[/color]: 2 parts [color=#58e6d9]bio-substrate[/color] + 1 part [color=#58e6d9]sterile solvent[/color], kept warm between 330 K and 380 K. 3 parts of broth result.
-    {""}[color=#58e6d9]Brew sludge[/color]: broth heated above 400 K spoils into sludge. Stir, heat gently and take it off the heat in time.
+    {""}[color=#58e6d9]Broth[/color]: 2 parts of a [color=#58e6d9]substrate[/color] + 1 part of [color=#58e6d9]ethanol[/color], kept warm between 330 K and 380 K. 3 parts of the broth of the substrate's kind result.
+    {""}[color=#58e6d9]Brew sludge[/color]: a broth heated above 400 K spoils into sludge. Heat gently and take it off the heat in time.
     A cold mixture does not react at all.
-nc-guide-pharma-brewing-source = [head=2]Where to get precursors[/head]
-    Bio-substrate and sterile solvent come in precursor jugs. A jug holds 150 units of one precursor.
+nc-guide-pharma-brewing-source = [head=2]Where to get the ingredients[/head]
+    Each substrate comes in its own jug of 150 units. Ethanol comes from the chemical dispenser, so a lab always has the solvent but has to find the substrates.
 nc-guide-pharma-brewing-extract = [head=2]From the beaker to a source canister[/head]
     Put the beaker with the brew into the [color=#58e6d9]extraction station[/color] and start it. The extractor reads the beaker itself:
-    • the share of broth in the whole solution is the [color=#58e6d9]purity[/color] (never above 80% for a home brew);
+    • the [color=#58e6d9]kind[/color] of the extract is the broth there is most of;
+    • the share of that broth in the whole solution is the [color=#58e6d9]purity[/color] (never above 80% for a home brew), so a mixture of kinds or leftover ingredients dilute it;
     • the share of sludge becomes hidden [color=#58e6d9]contamination[/color] in the extract, on top of a small base amount;
     • every unit of broth gives about 0.6 units of raw material before extraction losses.
     The beaker stays in the machine and is emptied. A solution without enough broth is refused.
     Home brew always yields street-grade source material.
 nc-guide-pharma-brewing-tips = [head=2]Brewing tips[/head]
-    • Use exact ratios: leftover precursors dilute the broth and lower purity.
+    • Use exact ratios: leftover ingredients dilute the broth and lower purity.
+    • Do not mix kinds: the lesser broth only dilutes the greater one.
     • Do not overheat: sludge goes straight into the contamination of the extract.
     • To raise purity further, pass the canister through the [color=#58e6d9]purifier[/color].
     • Never trust your own brew without QC: contamination is hidden from the label.

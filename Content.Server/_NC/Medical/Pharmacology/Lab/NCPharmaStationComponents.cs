@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Server._NC.Medical.Pharmacology.Batch;
+using Content.Shared._NC.Medical.Pharmacology.Lab;
 using Content.Shared.Chemistry.Reagent;
 using Robust.Shared.Prototypes;
 
@@ -27,6 +28,10 @@ public sealed partial class NCPharmaRawMaterialComponent : Component
     /// <summary>Where it came from, as a localization id shown when examined.</summary>
     [DataField]
     public LocId Origin = "nc-pharma-origin-unknown";
+
+    /// <summary>What the material is. Empty for an unidentified sample: its compound brings its own.</summary>
+    [DataField]
+    public ProtoId<NCPharmaFeedstockPrototype>? Feedstock;
 
     /// <summary>The source canister the extraction yields.</summary>
     [DataField]
@@ -62,10 +67,6 @@ public sealed partial class NCPharmaExtractorComponent : Component
 
     // ---- brewed raw material ------------------------------------------------------------------------
     // A container whose solution holds the brewed broth is accepted instead of ready-made raw material.
-
-    /// <summary>The reagent players brew from precursors. Its share of the solution is the extract purity.</summary>
-    [DataField]
-    public ProtoId<ReagentPrototype> BrewReagent = "NCPharmaRawBroth";
 
     /// <summary>The by-product of a ruined brew. Its share of the solution becomes hidden contamination.</summary>
     [DataField]

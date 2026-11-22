@@ -23,9 +23,10 @@ namespace Content.IntegrationTests.Tests._NC.Medical;
 [TestFixture]
 public sealed class NCPharmaBrewingTest : GameTest
 {
-    private static readonly ProtoId<ReagentPrototype> Substrate = "NCPharmaPrecursorSubstrate";
-    private static readonly ProtoId<ReagentPrototype> Solvent = "NCPharmaPrecursorSolvent";
-    private static readonly ProtoId<ReagentPrototype> Broth = "NCPharmaRawBroth";
+    private static readonly ProtoId<ReagentPrototype> Substrate = "NCPharmaSubstrateNeuro";
+    private static readonly ProtoId<ReagentPrototype> Solvent = "Ethanol";
+    private static readonly ProtoId<ReagentPrototype> Broth = "NCPharmaBrothNeuro";
+    private static readonly ProtoId<ReagentPrototype> OtherBroth = "NCPharmaBrothCardio";
     private static readonly ProtoId<ReagentPrototype> Sludge = "NCPharmaSludge";
 
     [SidedDependency(Side.Server)] private SharedSolutionContainerSystem _solutions = default!;
@@ -91,4 +92,22 @@ public sealed class NCPharmaBrewingTest : GameTest
             Assert.That((float) solution.GetTotalPrototypeQuantity(Broth), Is.LessThan(30f));
         });
     }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void EachKindOfSubstrateBrewsItsOwnBroth()
+    {
+        var soln = Beaker();
+        _solutions.SetTemperature(soln, 345f);
+        Assert.That(_solutions.TryAddReagent(soln, "NCPharmaSubstrateCardio", 20), Is.True);
+        Assert.That(_solutions.TryAddReagent(soln, Solvent, 10), Is.True);
+
+        var solution = soln.Comp.Solution;
+        Assert.Multiple(() =>
+        {
+            Assert.That((float) solution.GetTotalPrototypeQuantity(OtherBroth), Is.EqualTo(30f).Within(0.5f));
+            Assert.That((float) solution.GetTotalPrototypeQuantity(Broth), Is.EqualTo(0f));
+        });
+    }
 }
+

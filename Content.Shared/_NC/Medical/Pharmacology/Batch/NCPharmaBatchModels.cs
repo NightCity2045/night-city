@@ -5,6 +5,8 @@
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
 
+using Content.Shared._NC.Medical.Pharmacology.Lab;
+
 namespace Content.Shared._NC.Medical.Pharmacology.Batch;
 
 /// <summary>Market-facing class of a batch. It describes measured parameters, it never multiplies strength.</summary>
@@ -186,7 +188,8 @@ public readonly record struct NCPharmaFormulaSummary(
     NCPharmaRegulatoryStatus Status,
     string? DerivedFrom,
     bool CanApprove,
-    float ToxicConcentration = 0f);
+    float ToxicConcentration = 0f,
+    NCPharmaFeedstockOption[]? Feedstocks = null);
 
 [Serializable, NetSerializable]
 public readonly record struct NCPharmaJournalSummary(

@@ -353,6 +353,10 @@ public sealed partial class NCPharmaFormulaPrototype : IPrototype
     [DataField(required: true)]
     public LocId Name { get; private set; }
 
+    /// <summary>What the formula is for, in a sentence or two. Absent for versions developed in game.</summary>
+    [DataField]
+    public LocId? Description { get; private set; }
+
     [DataField]
     public int Version { get; private set; } = 1;
 

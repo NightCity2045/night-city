@@ -12,10 +12,10 @@
     containers:
       entity_storage: !type:AllSelector
         children:
-        - id: NCPharmaSourceCanisterStreet
-          amount: 2
-        - id: NCPharmaRawBiomass
-          amount: 2
+        - id: NCPharmaRawBiomassNeuro
+        - id: NCPharmaRawBiomassCardio
+        - id: NCPharmaRawBiomassHemato
+        - id: NCPharmaRawBiomassMicrobial
         - id: NCPharmaFilterCartridge
           amount: 2
         - id: NCPharmaWasteCanister
@@ -31,10 +31,11 @@
     containers:
       entity_storage: !type:AllSelector
         children:
-        - id: NCPharmaSourceCanisterClinical
-          amount: 2
-        - id: NCPharmaRawCorporateStock
-          amount: 2
+        - id: NCPharmaRawCorporateNeuro
+        - id: NCPharmaRawCorporateCardio
+        - id: NCPharmaRawCorporateHemato
+        - id: NCPharmaRawCorporateMicrobial
+        - id: NCPharmaRawCorporateImmune
         - id: NCPharmaFilterCartridge
           amount: 2
         - id: NCPharmaWasteCanister

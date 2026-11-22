@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using Content.Shared._NC.Medical.Pharmacology.Lab;
 using Robust.Shared.GameStates;
+using Robust.Shared.Prototypes;
 
 namespace Content.Shared._NC.Medical.Pharmacology.Batch;
 
@@ -20,4 +22,8 @@ public sealed partial class NCPharmaSourceComponent : Component
     /// <summary>Share of the material that is the wanted compound, as the supplier states it.</summary>
     [DataField, AutoNetworkedField]
     public float Purity = 0.9f;
+
+    /// <summary>What the material is made of. A compound can only be made from the feedstocks it accepts.</summary>
+    [DataField, AutoNetworkedField]
+    public ProtoId<NCPharmaFeedstockPrototype>? Feedstock;
 }

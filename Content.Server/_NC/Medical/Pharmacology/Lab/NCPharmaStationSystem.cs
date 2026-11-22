@@ -36,12 +36,14 @@ public sealed partial class NCPharmaStationSystem : EntitySystem
     [Dependency] private NCBiotechActionSystem _actions = default!;
     [Dependency] private NCPharmaWasteSystem _waste = default!;
     [Dependency] private SharedSolutionContainerSystem _solutions = default!;
+    [Dependency] private IPrototypeManager _prototypes = default!;
 
     public override void Initialize()
     {
         base.Initialize();
 
         SubscribeLocalEvent<NCPharmaRawMaterialComponent, ExaminedEvent>(OnRawExamined);
+        SubscribeLocalEvent<NCPharmaSourceComponent, ExaminedEvent>(OnSourceExamined);
         SubscribeLocalEvent<NCPharmaExtractorComponent, ActivateInWorldEvent>(OnExtractorActivate);
         SubscribeLocalEvent<NCPharmaExtractorComponent, NCPharmaExtractDoAfterEvent>(OnExtractDone);
         SubscribeLocalEvent<NCPharmaTreatmentStationComponent, ActivateInWorldEvent>(OnTreatActivate);
@@ -53,6 +55,14 @@ public sealed partial class NCPharmaStationSystem : EntitySystem
     private void OnRawExamined(Entity<NCPharmaRawMaterialComponent> raw, ref ExaminedEvent args)
     {
         args.PushMarkup(Loc.GetString("nc-pharma-raw-examine", ("origin", Loc.GetString(raw.Comp.Origin))));
+        if (raw.Comp.Feedstock is { } feedstock && _prototypes.TryIndex(feedstock, out var type))
+            args.PushMarkup(Loc.GetString("nc-pharma-feedstock-examine", ("type", Loc.GetString(type.Name))));
+    }
+
+    private void OnSourceExamined(Entity<NCPharmaSourceComponent> source, ref ExaminedEvent args)
+    {
+        if (source.Comp.Feedstock is { } feedstock && _prototypes.TryIndex(feedstock, out var type))
+            args.PushMarkup(Loc.GetString("nc-pharma-feedstock-examine", ("type", Loc.GetString(type.Name))));
     }
 
     private EntityUid? GetLoaded(EntityUid machine, string slotId)
@@ -127,15 +137,17 @@ public sealed partial class NCPharmaStationSystem : EntitySystem
         float units, purity, contaminants;
         EntProtoId output;
         string? unknownPool = null;
+        ProtoId<NCPharmaFeedstockPrototype>? feedstock = null;
         Entity<SolutionComponent>? brew = null;
         if (TryComp<NCPharmaRawMaterialComponent>(item, out var raw))
         {
-            (units, purity, contaminants, output, unknownPool) =
-                (raw.Units, raw.Purity, raw.Contaminants, raw.Output, raw.UnknownPool);
+            (units, purity, contaminants, output, unknownPool, feedstock) =
+                (raw.Units, raw.Purity, raw.Contaminants, raw.Output, raw.UnknownPool, raw.Feedstock);
         }
         else if (TryReadBrew(machine.Comp, item, out var read))
         {
-            (units, purity, contaminants, output) = (read.Units, read.Purity, read.Contaminants, machine.Comp.BrewOutput);
+            (units, purity, contaminants, output, feedstock) =
+                (read.Units, read.Purity, read.Contaminants, machine.Comp.BrewOutput, read.Feedstock);
             brew = read.Solution;
         }
         else
@@ -166,6 +178,7 @@ public sealed partial class NCPharmaStationSystem : EntitySystem
         {
             source.Units = units * machine.Comp.Efficiency * quality;
             source.Purity = Math.Clamp(purity * machine.Comp.PurityRetention, 0f, 1f);
+            source.Feedstock = feedstock;
             Dirty(extract, source);
         }
 
@@ -182,28 +195,43 @@ public sealed partial class NCPharmaStationSystem : EntitySystem
     }
 
     /// <summary>
-    /// Reads a player-brewed solution. The share of broth in the whole solution is its purity, the share of
-    /// sludge its hidden contamination, so a clean reaction gives a clean extract and a ruined one does not.
+    /// Reads a player-brewed solution. The kind of raw material is the broth there is most of. The share of that
+    /// broth in the whole solution is its purity and the share of sludge its hidden contamination, so a clean
+    /// reaction gives a clean extract, a ruined one does not, and a mixture of kinds dilutes the result.
     /// </summary>
     private bool TryReadBrew(
         NCPharmaExtractorComponent extractor,
         EntityUid container,
-        out (float Units, float Purity, float Contaminants, Entity<SolutionComponent> Solution) brew)
+        out (float Units, float Purity, float Contaminants, ProtoId<NCPharmaFeedstockPrototype> Feedstock,
+            Entity<SolutionComponent> Solution) brew)
     {
         brew = default;
         if (!_solutions.TryGetDrainableSolution(container, out var soln, out var solution))
             return false;
 
-        var broth = (float) solution.GetTotalPrototypeQuantity(extractor.BrewReagent);
         var total = (float) solution.Volume;
-        if (broth < extractor.MinimumBrew || total <= 0f)
+        if (total <= 0f)
+            return false;
+
+        NCPharmaFeedstockPrototype? best = null;
+        var broth = 0f;
+        foreach (var candidate in _prototypes.EnumeratePrototypes<NCPharmaFeedstockPrototype>())
+        {
+            var amount = (float) solution.GetTotalPrototypeQuantity(candidate.Broth);
+            if (amount <= broth)
+                continue;
+            best = candidate;
+            broth = amount;
+        }
+
+        if (best == null || broth < extractor.MinimumBrew)
             return false;
 
         var sludge = (float) solution.GetTotalPrototypeQuantity(extractor.SludgeReagent);
         var purity = Math.Clamp(broth / total, 0f, 1f) * extractor.BrewPurityCeiling;
         var contaminants = Math.Clamp(
             extractor.BrewBaseContaminants + sludge / total * extractor.SludgeContamination, 0f, 1f);
-        brew = (broth * extractor.UnitsPerReagent, purity, contaminants, soln.Value);
+        brew = (broth * extractor.UnitsPerReagent, purity, contaminants, best.ID, soln.Value);
         return true;
     }
 

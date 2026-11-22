@@ -36,6 +36,17 @@ public static class NCCompoundGenerator
 
     private static readonly string[] Dependencies = ["NCDependenceSocial", "NCDependenceEuphoric", "NCDependenceX17"];
 
+    /// <summary>
+    /// The raw material a generated compound is made from. It follows from what the compound does, so the same
+    /// seed and key always give the same answer and nothing extra has to be rolled or stored.
+    /// </summary>
+    public static string FeedstockFor(string category) => category switch
+    {
+        "Antibiotic" => "NCFeedstockMicrobial",
+        "Immunosuppressant" or "Antitoxin" => "NCFeedstockImmune",
+        _ => "NCFeedstockNeuro",
+    };
+
     /// <summary>Prototype id of the compound a material turns out to be.</summary>
     public static string IdFor(uint seed, string key) => "NCDrugGen" + Hash(seed, key).ToString("X8", CultureInfo.InvariantCulture);
 
@@ -64,6 +75,7 @@ public static class NCCompoundGenerator
         builder.AppendLine("- type: ncDrugProfile");
         builder.AppendLine($"  id: {IdFor(seed, key)}");
         builder.AppendLine($"  category: {action.Category}");
+        builder.AppendLine($"  feedstock: {FeedstockFor(action.Category)}");
         builder.AppendLine("  codename: nc-lab-codename-generated");
         builder.AppendLine($"  codenameCode: {CodeFor(seed, key)}");
         builder.AppendLine("  interactionsCharted: false");
