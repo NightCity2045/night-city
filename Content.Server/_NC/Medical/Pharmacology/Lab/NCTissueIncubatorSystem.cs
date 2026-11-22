@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using Content.Shared._NC.Medical.Pharmacology.Lab;
 using Content.Shared.Containers.ItemSlots;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Interaction;
@@ -52,6 +53,10 @@ public sealed partial class NCTissueIncubatorComponent : Component
 
     [DataField]
     public EntProtoId? Output;
+
+    /// <summary>How long the current growth takes in all, for the progress shown in the window.</summary>
+    [DataField]
+    public TimeSpan Total;
 }
 
 public sealed partial class NCTissueIncubatorSystem : EntitySystem
@@ -68,12 +73,13 @@ public sealed partial class NCTissueIncubatorSystem : EntitySystem
     {
         base.Initialize();
 
-        SubscribeLocalEvent<NCTissueIncubatorComponent, ActivateInWorldEvent>(OnActivate);
+        SubscribeLocalEvent<NCTissueIncubatorComponent, NCLabMachineStartEvent>(OnActivate);
+        SubscribeLocalEvent<NCTissueIncubatorComponent, NCLabMachineStatusEvent>(OnStatus);
     }
 
-    private void OnActivate(Entity<NCTissueIncubatorComponent> incubator, ref ActivateInWorldEvent args)
+    private void OnActivate(Entity<NCTissueIncubatorComponent> incubator, ref NCLabMachineStartEvent args)
     {
-        if (args.Handled || !args.Complex)
+        if (args.Handled)
             return;
 
         args.Handled = true;
@@ -96,6 +102,26 @@ public sealed partial class NCTissueIncubatorSystem : EntitySystem
         }
     }
 
+    private void OnStatus(Entity<NCTissueIncubatorComponent> incubator, ref NCLabMachineStatusEvent args)
+    {
+        switch (incubator.Comp.Phase)
+        {
+            case NCTissuePhase.Growing:
+                args.Phase = NCLabMachinePhase.Working;
+                args.Remaining = Math.Max(0, (int) Math.Ceiling(incubator.Comp.Remaining.TotalSeconds));
+                args.Progress = incubator.Comp.Total > TimeSpan.Zero
+                    ? (float) Math.Clamp(1d - incubator.Comp.Remaining / incubator.Comp.Total, 0d, 1d)
+                    : 0f;
+                args.CanStart = false;
+                break;
+            case NCTissuePhase.Ready:
+                args.Phase = NCLabMachinePhase.Ready;
+                args.Progress = 1f;
+                args.StartKey = "nc-lab-machine-ui-collect";
+                break;
+        }
+    }
+
     private void TryStart(Entity<NCTissueIncubatorComponent> incubator, EntityUid user)
     {
         if (!_power.IsPowered(incubator.Owner))
@@ -113,6 +139,7 @@ public sealed partial class NCTissueIncubatorSystem : EntitySystem
 
         incubator.Comp.Phase = NCTissuePhase.Growing;
         incubator.Comp.Remaining = seedData.Duration;
+        incubator.Comp.Total = seedData.Duration;
         incubator.Comp.Output = seedData.Output;
         QueueDel(seed);
         _popup.PopupEntity(Loc.GetString("nc-lab-incubator-started"), incubator, user);

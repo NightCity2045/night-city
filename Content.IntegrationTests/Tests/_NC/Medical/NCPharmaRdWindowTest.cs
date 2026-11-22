@@ -9,6 +9,7 @@ using Content.Client._NC.Medical.Pharmacology;
 using Content.IntegrationTests.Fixtures;
 using Content.IntegrationTests.Fixtures.Attributes;
 using Content.Shared._NC.Medical.Pharmacology.Batch;
+using Content.Shared._NC.Medical.Pharmacology.Lab;
 using Robust.Client.UserInterface.Controls;
 
 namespace Content.IntegrationTests.Tests._NC.Medical;
@@ -73,6 +74,32 @@ public sealed class NCPharmaRdWindowTest : GameTest
 
         window.UpdateState(State(beaker: false));
         Assert.That(window.FindControl<Button>("InventButton").Disabled, Is.True, "no beaker, no invention");
+        window.Close();
+    }
+
+    [Test]
+    [RunOnSide(Side.Client)]
+    public void TheMachineWindowShowsStatusSlotsAndReadings()
+    {
+        var window = new NCLabMachineWindow();
+        string? ejected = null;
+        window.EjectRequested += slot => ejected = slot;
+        window.UpdateState(new NCLabMachineState(
+            true,
+            NCLabMachinePhase.Working,
+            0.4f,
+            12,
+            false,
+            "nc-lab-machine-ui-start",
+            [new NCLabMachineSlot("source", "nc-lab-machine-empty", null)],
+            [new NCLabMachineReadout("nc-lab-machine-ui-filter", "7")]));
+        window.OpenCentered();
+
+        Assert.That(window.FindControl<Button>("StartButton").Disabled, Is.True, "a machine at work cannot be started again");
+        Assert.That(window.FindControl<Button>("CancelButton").Visible, Is.True);
+        Assert.That(window.FindControl<BoxContainer>("SlotList").ChildCount, Is.EqualTo(1));
+        Assert.That(window.FindControl<BoxContainer>("ReadoutList").ChildCount, Is.EqualTo(1));
+        Assert.That(ejected, Is.Null);
         window.Close();
     }
 }

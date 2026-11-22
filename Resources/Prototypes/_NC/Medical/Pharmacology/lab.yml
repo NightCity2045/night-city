@@ -270,7 +270,7 @@
           False: { visible: false }
 
 - type: entity
-  parent: NCLabMachineBase
+  parent: NCLabMachineWithUi
   id: NCLabCultureStation
   components:
   - type: ContainerContainer
@@ -288,7 +288,7 @@
     method: Culture
 
 - type: entity
-  parent: NCLabMachineBase
+  parent: NCLabMachineWithUi
   id: NCLabMetabolicAnalyzer
   components:
   - type: ContainerContainer
@@ -306,7 +306,7 @@
 
 # --- Tissue ----------------------------------------------------------------------------------------------
 - type: entity
-  parent: NCLabMachineBase
+  parent: NCLabMachineWithUi
   id: NCLabTissueIncubator
   components:
   - type: ContainerContainer
@@ -370,7 +370,7 @@
 
 # --- Purification of raw material ------------------------------------------------------------------------
 - type: entity
-  parent: NCLabMachineBase
+  parent: NCLabMachineWithUi
   id: NCPharmaPurifier
   components:
   - type: ContainerContainer
@@ -477,6 +477,18 @@
     sprite: Objects/Specific/Chemistry/dropper.rsi
   - type: NCPharmaContainer
 
+# --- A machine that is operated through a window ----------------------------------------------------------
+- type: entity
+  abstract: true
+  parent: NCLabMachineBase
+  id: NCLabMachineWithUi
+  components:
+  - type: UserInterface
+    interfaces:
+      enum.NCLabMachineUiKey.Key:
+        type: NCLabMachineBoundUserInterface
+  - type: NCLabMachineUi
+
 # --- Raw material, stations and waste ----------------------------------------------------------------------
 # Ready-made raw material is a jug of broth. Each kind is a child of one of these with its own broth in the jug.
 - type: entity
@@ -514,7 +526,7 @@
     unknownPool: street
 
 - type: entity
-  parent: NCLabMachineBase
+  parent: NCLabMachineWithUi
   id: NCPharmaExtractor
   components:
   - type: ContainerContainer
@@ -537,7 +549,7 @@
   - type: NCPharmaWasteTank
   - type: NCPharmaExtractor
 - type: entity
-  parent: NCLabMachineBase
+  parent: NCLabMachineWithUi
   id: NCPharmaSterileCabinet
   components:
   - type: ContainerContainer
@@ -560,7 +572,7 @@
   - type: NCPharmaTreatmentStation
     treatment: Sterilize
 - type: entity
-  parent: NCLabMachineBase
+  parent: NCLabMachineWithUi
   id: NCPharmaFormulationStation
   components:
   - type: ContainerContainer
@@ -585,7 +597,7 @@
     gapClosed: 0.65
     stabilityCost: 0.02
 - type: entity
-  parent: NCLabMachineBase
+  parent: NCLabMachineWithUi
   id: NCPharmaFillingStation
   components:
   - type: ContainerContainer
@@ -607,9 +619,19 @@
   - type: NCPharmaWasteTank
   - type: NCPharmaFillingStation
 - type: entity
-  parent: NCLabMachineBase
+  parent: NCLabMachineWithUi
   id: NCPharmaWasteBin
   components:
+  - type: ContainerContainer
+    containers:
+      canister: !type:ContainerSlot
+  - type: ItemSlots
+    slots:
+      canister:
+        name: nc-pharma-waste-slot
+        whitelist:
+          tags:
+          - NCPharmaWasteCanister
   - type: NCPharmaWasteBin
 
 # --- Vivarium: an observation post; the test subjects are real bodies, players and NPCs ----------------------
@@ -692,7 +714,7 @@
     component: Plasma
 
 - type: entity
-  parent: NCLabMachineBase
+  parent: NCLabMachineWithUi
   id: NCBloodCentrifuge
   components:
   - type: ContainerContainer

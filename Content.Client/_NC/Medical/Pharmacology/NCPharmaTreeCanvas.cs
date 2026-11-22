@@ -71,7 +71,7 @@ public sealed partial class NCPharmaTreeCanvas : Control
     public NCPharmaTreeCanvas()
     {
         IoCManager.InjectDependencies(this);
-        MinSize = new Vector2(260, 260);
+        MinSize = new Vector2(160, 200);
         HorizontalExpand = true;
         VerticalExpand = true;
         RectClipContent = true;
