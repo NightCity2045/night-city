@@ -70,15 +70,6 @@
 
 - type: ncItemDefinition
   parent: NCShopWeaponDefinitionBase
-  id: NCItemWeaponStukach
-  displayName: ent-NCWeaponPistolStukach
-  stableKey: weapon.nc-stukach
-  domainPrototypeId: NCWeaponPistolStukach
-  materializedPrototype: NCWeaponPistolStukach
-  basePrice: 850
-
-- type: ncItemDefinition
-  parent: NCShopWeaponDefinitionBase
   id: NCItemWeaponOverlord
   displayName: ent-NCWeaponPistolOverlord
   stableKey: weapon.nc-overlord
