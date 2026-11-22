@@ -2,6 +2,7 @@
 
 - type: ncMetaHardware
   id: NCMetaEmbedded
+  linkCapacity: 4
   gasPerWindow: 50000
   idleWatts: 1
   activeWatts: 4
@@ -35,6 +36,7 @@
 
 - type: ncMetaHardware
   id: NCMetaServer
+  linkCapacity: 64
   gasPerWindow: 500000
   idleWatts: 100
   activeWatts: 400

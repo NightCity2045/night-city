@@ -44,3 +44,4 @@ ent-NCMetaDoorPanel = дверная панель META
 nc-meta-claim-device = Привязать устройство META
 nc-meta-device-claimed = Владение устройством META сохранено.
 nc-meta-device-id = ID устройства META: { $id }
+nc-meta-error-link-capacity = У хоста нет свободной ёмкости связей для этих устройств. Сократите кабель или освободите связь.

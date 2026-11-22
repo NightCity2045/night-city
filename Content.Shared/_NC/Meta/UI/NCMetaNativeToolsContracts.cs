@@ -8,7 +8,7 @@ namespace Content.Shared._NC.Meta.UI;
 public sealed record NCMetaHardwareSummary(string DeviceId, string Name, string Profile,
     string PowerKey, string HealthKey, bool Powered, bool Maintenance, int Processes, int MaximumProcesses,
     long ReservedMemoryBytes, long MemoryBytes, long WindowGas, long GasPerWindow, int ThrottlePermille,
-    float LoadFactor, float AppliedWatts, float? TemperatureKelvin);
+    float LoadFactor, float AppliedWatts, float? TemperatureKelvin, int LinkReserve = 0, int LinkCapacity = 0);
 
 /// <summary>Native modes reuse the ordinary installer, license, consent and recovery operations.</summary>
 [Serializable, NetSerializable]

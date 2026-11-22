@@ -143,6 +143,13 @@ public sealed partial class MetaApiCatalog
         Method("meta.doors.Door", "setOpen", "result<meta.doors.DoorState>", "door.control", true, "bool");
         Event("meta.doors.Door", "stateChanged", "meta.doors.DoorState", "door.observe");
         Event("meta.doors.DoorPanel", "requested", "meta.doors.DoorRequest", "doorpanel.observe", "Ordered", 16);
+        Dto("meta.access", "Subject", "name:string", "key:string");
+        Enum("meta.doors", "AccessOutcome", "Allowed", "Denied", "TimedOut", "Unavailable");
+        Dto("meta.doors", "AccessRequest", "requestId:string", "subject:meta.access.Subject", "open:bool", "stamp:" + S + "SampleStamp");
+        Dto("meta.doors", "AccessResolution", "requestId:string", "subject:meta.access.Subject", "outcome:meta.doors.AccessOutcome", "stamp:" + S + "SampleStamp");
+        Event("meta.doors.Door", "accessRequested", "meta.doors.AccessRequest", "door.access", "Ordered", 16);
+        Method("meta.doors.Door", "answerAccess", "result<meta.doors.DoorState>", "door.access.answer", true, "string", "bool");
+        Event("meta.doors.Door", "accessResolved", "meta.doors.AccessResolution", "door.access", "Ordered", 16);
         Capability("meta.security", "Camera"); Capability("meta.security", "Alarm");
         Dto("meta.security", "Detection", "confidence:float", "stamp:" + S + "SampleStamp");
         Dto("meta.security", "AlarmState", "requestedActive:bool", "stamp:" + S + "SampleStamp");

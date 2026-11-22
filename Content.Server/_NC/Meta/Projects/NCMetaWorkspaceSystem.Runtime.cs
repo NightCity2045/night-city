@@ -262,7 +262,7 @@ public sealed partial class NCMetaWorkspaceSystem
                 { state.Notice = Loc.GetString("nc-meta-error-revision"); return; }
                 installation = installation with { AutoStart = true, Revision = checked(installation.Revision + 1) };
             }
-            state.Notice = Loc.GetString(await OnMainAsync(() =>
+            var started = await OnMainAsync(() =>
             {
                 if (!IsCurrent(context) || installation == null ||
                     !_runtime.TryStart(host.Value, context.User, installation, artifact, retainForInvocations: app.Application != null,
@@ -271,7 +271,10 @@ public sealed partial class NCMetaWorkspaceSystem
                     !_runtime.TryGetInstallation(host.Value, context.Owner, installation.Id, out var runtime)) return false;
                 return app.Application == null || _applications.TryRegister(host.Value, context.User, app.Application,
                     NCMetaAppPolicy.OwnerOnly with { GrantedScopes = serviceAdmission.GetGrantedScopes().ToImmutableHashSet(StringComparer.Ordinal) }, runtime.Generation);
-            }) ? "nc-meta-started" : "nc-meta-error-access");
+            });
+            state.Notice = Loc.GetString(started ? "nc-meta-started" :
+                await OnMainAsync(() => installation != null && _runtime.IsLinkCapacityExceeded(host.Value, installation))
+                    ? "nc-meta-error-link-capacity" : "nc-meta-error-access");
             return;
         }
         NCMetaBinding[] bindings;

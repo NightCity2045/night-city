@@ -4,6 +4,9 @@
   parent: Airlock
   id: NCMetaDoor
   components:
+  - type: AccessReader
+    enabled: false
+  - type: NCMetaDoorAccess
   - type: NCMetaDevice
     interfaces: [meta.doors.Door]
     allowClaim: true
@@ -14,8 +17,6 @@
     allowClaim: true
   - type: NCMetaStorage
   - type: NCMetaTerminal
-  - type: ActivatableUI
-    key: enum.NCMetaUiKey.Workspace
   - type: UserInterface
     interfaces:
       enum.NCMetaUiKey.Workspace:

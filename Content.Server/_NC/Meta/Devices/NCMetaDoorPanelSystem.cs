@@ -20,6 +20,7 @@ public sealed partial class NCMetaDoorPanelSystem : EntitySystem
     [Dependency] private NCMetaDeviceRegistrySystem _devices = default!;
     [Dependency] private NCMetaRuntimeSystem _runtime = default!;
     [Dependency] private SharedDoorSystem _doors = default!;
+    [Dependency] private NCMetaDoorAccessSystem _access = default!;
     [Dependency] private SharedInteractionSystem _interaction = default!;
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private NCMetaNetworkSystem _network = default!;
@@ -112,5 +113,5 @@ public sealed partial class NCMetaDoorPanelSystem : EntitySystem
         }
     }
     private bool TryNative(EntityUid door, EntityUid user, bool open) => _doors.HasAccess(door, user) &&
-        (open ? _doors.TryOpen(door, user: user, quiet: true) : _doors.TryClose(door, user: user));
+        (open ? _access.TryOpenAuthorized(door, null, user) : _doors.TryClose(door, user: user));
 }

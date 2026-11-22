@@ -65,6 +65,8 @@ public sealed partial class NCMetaHardwareProfilePrototype : IPrototype
     [DataField] public int MemoryBytes = 256 * 1024;
     [DataField] public int StorageBytes = 1024 * 1024;
     [DataField] public int MaxProcesses = 1;
+    /// <summary>Link capacity units. Each device a host's programs are bound to reserves units by medium and distance.</summary>
+    [DataField] public int LinkCapacity = 16;
     [DataField] public int MaxFrames = 64;
     [DataField] public int CpuWeight = 1;
     [DataField] public int GasPerWindow = 50000;

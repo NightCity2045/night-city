@@ -47,6 +47,7 @@ public sealed partial class NCMetaNetworkSystem : EntitySystem, INCMetaDeviceAda
     [Dependency] private NCMetaRuntimeSystem _runtime = default!;
     [Dependency] private NCMetaPersistenceSystem _persistence = default!;
     [Dependency] private NCMetaDeviceRegistrySystem _devices = default!;
+    [Dependency] private NCMetaDataCableSystem _dataCables = default!;
     [Dependency] private DeviceNetworkSystem _network = default!;
     [Dependency] private SharedInteractionSystem _interaction = default!;
     [Dependency] private SharedPowerReceiverSystem _power = default!;
@@ -97,6 +98,7 @@ public sealed partial class NCMetaNetworkSystem : EntitySystem, INCMetaDeviceAda
     public override void Shutdown()
     {
         _devices.Changed -= OnRoutingDeviceChanged;
+        _dataCables.Changed -= OnDataCablesChanged;
         _runtime.RuntimeStopped -= OnRuntimeStopped;
         foreach (var process in _subscribed) process.EventContextReleased -= ReleaseContext;
         _subscribed.Clear(); _envelopes.Clear(); _chains.Clear();
@@ -230,6 +232,7 @@ public sealed partial class NCMetaNetworkSystem : EntitySystem, INCMetaDeviceAda
         if (from == to) return Online(from);
         if (!Online(from) || !Online(to) || !TryComp<NCMetaPortComponent>(from, out var source) || !TryComp<NCMetaPortComponent>(to, out var destination)) return false;
         if (AllowedSegment(from, to) && CanRadio(from, to, source, destination)) return true;
+        if (AllowedSegment(from, to) && _dataCables.AreConnected(from, to)) return true;
         var visited = new HashSet<EntityUid> { from }; var queue = new Queue<EntityUid>(); queue.Enqueue(from);
         while (queue.TryDequeue(out var current) && visited.Count <= 64)
         {

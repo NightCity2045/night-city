@@ -8,6 +8,7 @@ nc-meta-tools-description = Install a licensed product, review its connections a
 nc-meta-tools-refresh = Refresh measurements
 nc-meta-tools-hardware-row = {$name}: {$power}, {$health}
 nc-meta-tools-processes = Processes: {$used} / {$limit}
+nc-meta-tools-links = Link capacity: {$used} / {$limit}
 nc-meta-tools-memory = Reserved memory: {$used} / {$limit} bytes
 nc-meta-tools-gas = Admitted work this window: {$used} / {$limit} gas
 nc-meta-tools-load = Load: {$load}; throttle: {$throttle} / 1000

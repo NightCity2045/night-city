@@ -8,6 +8,7 @@ nc-meta-tools-description = Установите лицензированный 
 nc-meta-tools-refresh = Обновить измерения
 nc-meta-tools-hardware-row = {$name}: {$power}, {$health}
 nc-meta-tools-processes = Процессы: {$used} / {$limit}
+nc-meta-tools-links = Ёмкость связей: {$used} / {$limit}
 nc-meta-tools-memory = Зарезервированная память: {$used} / {$limit} байт
 nc-meta-tools-gas = Принятая работа за окно: {$used} / {$limit} газа
 nc-meta-tools-load = Нагрузка: {$load}; ограничение: {$throttle} / 1000

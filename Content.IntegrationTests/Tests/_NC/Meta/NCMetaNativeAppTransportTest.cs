@@ -124,6 +124,24 @@ public sealed class NCMetaNativeAppTransportTest : GameTest
         });
     }
 
+    [Test]
+    public async Task HardwareMonitorShowsTheLinkCapacityOfAHost()
+    {
+        await Client.WaitAssertion(() =>
+        {
+            using var window = new NCMetaWorkspaceWindow();
+            window.OpenCentered();
+            var summary = new NCMetaHardwareSummary("device", "Server", "NCMetaServer", "nc-meta-tools-power-on",
+                "nc-meta-tools-health-operational", true, false, 1, 4, 0, 1024, 0, 1000, 0, 0f, 0f, null, 7, 64);
+            window.ApplyState(new NCMetaWorkspaceState { NativeTools = new("hardware", [summary]) });
+            var measurements = window.FindControl<ItemList>("ToolsMeasurements");
+            var rows = measurements.Select(item => item.Text ?? "").ToArray();
+            Assert.That(rows.Any(row => row.Contains("7") && row.Contains("64")), Is.True,
+                "The link capacity row is missing. Rows: " + string.Join(" | ", rows));
+            window.Close();
+        });
+    }
+
     private async Task Until(Func<bool> check, int maximumTicks = 900, [CallerArgumentExpression(nameof(check))] string condition = "")
     {
         for (var tick = 0; tick < maximumTicks; tick++)

@@ -115,6 +115,7 @@ public sealed partial class NCMetaRuntimeSystem : EntitySystem
     [Dependency] private NCMetaDeviceRegistrySystem _devices = default!;
     [Dependency] private NCMetaPersistenceSystem _persistence = default!;
     [Dependency] private SharedDoorSystem _doors = default!;
+    [Dependency] private NCMetaDoorAccessSystem _doorAccess = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private NCMetaNetworkSystem _network = default!;
@@ -337,6 +338,7 @@ public sealed partial class NCMetaRuntimeSystem : EntitySystem
         var count = GetProcessCount(host) - (old == null ? 0 : 1);
         if (!MetaMemoryAdmission.TryPlan(profile.MemoryBytes, profile.MaxProcesses, artifact.ResidentMemoryBytes,
             artifact.MinimumProcessMemoryBytes, installation.MemoryLimitBytes, reserved, out var memory)) return false;
+        if (!CanReserveLinks(host, profile, installation, old)) return false;
         if (count >= profile.MaxProcesses ||
             artifact.MaximumConstantStringBytes > 32768 ||
             installation.SlotKind == "Firmware" && _hosts.TryGetValue(host, out var slots) &&
@@ -596,7 +598,7 @@ public sealed partial class NCMetaRuntimeSystem : EntitySystem
                 if (actor == null && !service || actor != null && !_doors.HasAccess(intent.Binding.Device.Entity, actor, door))
                 { Complete(intent, process.CreateErrorResult(import.ReturnType!.Value, "AccessDenied")); return; }
                 var accepted = intent.Request.Arguments[0].AsBool()
-                    ? _doors.TryOpen(intent.Binding.Device.Entity, door, actor, quiet: true)
+                    ? _doorAccess.TryOpenAuthorized(intent.Binding.Device.Entity, door, actor)
                     : _doors.TryClose(intent.Binding.Device.Entity, door, actor);
                 if (accepted) DoorCommandAccepted?.Invoke(intent.Binding.Device.Entity, actor, intent.Request.Arguments[0].AsBool());
                 Complete(intent, accepted ? process.CreateResult(import.ReturnType!.Value, DoorStateValue(process, door))

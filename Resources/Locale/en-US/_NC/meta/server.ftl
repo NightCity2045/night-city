@@ -44,3 +44,4 @@ ent-NCMetaDoorPanel = META door panel
 nc-meta-claim-device = Claim META device
 nc-meta-device-claimed = META ownership committed.
 nc-meta-device-id = META device ID: { $id }
+nc-meta-error-link-capacity = The host has no free link capacity for these devices. Shorten the cable or free a link.

@@ -21,6 +21,7 @@ public sealed partial class MetaApiCatalog
     public static MetaApiCatalog ResolveTrustedCatalog(string hash)
     {
         if (hash == Default.Hash) return Default;
+        if (hash == PreDoorAccessCatalogHash) return PreDoorAccess.Value;
         if (hash == PreNeuralCatalogHash) return PreNeural.Value;
         if (hash == PreOpticCatalogHash) return PreOptic.Value;
         if (hash == PreMedicalCatalogHash) return PreMedical.Value;

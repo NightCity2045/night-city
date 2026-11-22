@@ -79,3 +79,14 @@ ent-NCMetaDemoNetBlackIce = local NET Black ICE
     .desc = A dangerous native defense. Its threat timer continues while META software is paused or stopped.
 ent-NCMetaMarketplaceService = CitiNet software gateway
     .desc = A powered native software service. Connect a local data cable to browse, license and activate software through CitiNet.
+
+stack-nc-meta-data-cable = {$amount ->
+    [1] META data cable
+    *[other] META data cables
+}
+ent-NCMetaDataCableStack = META data cable coil
+    .desc = A coil of data cable. Pry up a floor tile and lay it under the floor to link META devices.
+ent-NCMetaDataCableStack10 = META data cable coil
+ent-NCMetaDataCableStack1 = META data cable coil
+ent-NCMetaDataCable = META data cable
+    .desc = A data cable laid under the floor. Cutting it breaks every link that runs through it.

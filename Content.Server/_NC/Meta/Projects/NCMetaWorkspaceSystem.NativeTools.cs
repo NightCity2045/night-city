@@ -104,6 +104,7 @@ public sealed partial class NCMetaWorkspaceSystem
                 !TryComp<NCMetaHostComponent>(entry.Entity, out var host) || !_hardwareProfiles.TryIndex(host.Profile, out var profile)) continue;
             TryComp<NCMetaHardwareStateComponent>(entry.Entity, out var physical);
             _runtime.TryGetHardwareUsage(entry.Id, out var usage);
+            _runtime.TryGetLinkUsage(entry.Entity, out var linkReserve, out var linkCapacity);
             var power = physical?.Power switch
             {
                 NCMetaPowerState.Off => "off", NCMetaPowerState.Booting => "booting", NCMetaPowerState.On => "on",
@@ -119,7 +120,7 @@ public sealed partial class NCMetaWorkspaceSystem
                 "nc-meta-tools-health-" + health, _devices.IsPowered(entry.Entity), physical?.Maintenance ?? false,
                 _runtime.GetProcessCount(entry.Entity), profile.MaxProcesses, _runtime.GetReservedMemoryBytes(entry.Entity),
                 profile.MemoryBytes, usage?.WindowGas ?? 0, profile.GasPerWindow, physical?.ThrottlePermille ?? 0,
-                physical?.LoadFactor ?? 0, physical?.AppliedWatts ?? 0, physical?.TemperatureKelvin));
+                physical?.LoadFactor ?? 0, physical?.AppliedWatts ?? 0, physical?.TemperatureKelvin, linkReserve, linkCapacity));
         }
         state.NativeTools = new(view, hardware);
         state.Files.Clear(); state.Contents.Clear(); state.DebugVariables.Clear();

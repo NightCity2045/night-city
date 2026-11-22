@@ -117,6 +117,7 @@ public sealed partial class NCMetaWorkspaceWindow
             ToolsMeasurements.AddItem(Loc.GetString("nc-meta-tools-hardware-row", ("name", row.Name),
                 ("power", Loc.GetString(row.PowerKey)), ("health", Loc.GetString(row.HealthKey))), selectable: false);
             ToolsMeasurements.AddItem(Loc.GetString("nc-meta-tools-processes", ("used", row.Processes), ("limit", row.MaximumProcesses)), selectable: false);
+            ToolsMeasurements.AddItem(Loc.GetString("nc-meta-tools-links", ("used", row.LinkReserve), ("limit", row.LinkCapacity)), selectable: false);
             ToolsMeasurements.AddItem(Loc.GetString("nc-meta-tools-memory", ("used", row.ReservedMemoryBytes), ("limit", row.MemoryBytes)), selectable: false);
             ToolsMeasurements.AddItem(Loc.GetString("nc-meta-tools-gas", ("used", row.WindowGas), ("limit", row.GasPerWindow)), selectable: false);
             ToolsMeasurements.AddItem(Loc.GetString("nc-meta-tools-load", ("load", row.LoadFactor), ("throttle", row.ThrottlePermille)), selectable: false);
