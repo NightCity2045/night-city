@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Shared._NC.Medical.Systemic;
+using Content.Shared.Chemistry.Reagent;
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared._NC.Medical.Pharmacology.Batch;
@@ -266,11 +267,15 @@ public sealed partial class NCPharmaModifierPrototype : IPrototype
     public NCPharmaNodeBranch Branch { get; private set; } = NCPharmaNodeBranch.Kinetics;
 
     /// <summary>
-    /// An additive the production run uses up, such as a vial of stabilizer. A formula with this modifier cannot be
-    /// produced without it, so the modifier has a price that is not only money.
+    /// A reagent the production run uses up from a vial in the synthesizer's additive slot, such as the stabilizer. A
+    /// formula with this modifier cannot be produced without it, so the modifier has a price that is not only money.
     /// </summary>
     [DataField]
-    public EntProtoId? RequiredItem { get; private set; }
+    public ProtoId<ReagentPrototype>? RequiredReagent { get; private set; }
+
+    /// <summary>How many units of <see cref="RequiredReagent"/> one production run uses up.</summary>
+    [DataField]
+    public float RequiredAmount { get; private set; } = 5f;
 
     [DataField]
     public float ConcentrationMultiplier { get; private set; } = 1f;

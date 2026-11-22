@@ -152,7 +152,8 @@
   id: NCPharmaModifierStabilizer
   name: nc-pharma-modifier-stabilizer
   branch: Production
-  requiredItem: NCPharmaStabilizerVial
+  requiredReagent: NCPharmaStabilizer
+  requiredAmount: 5
   purityDelta: -0.02
   stabilityDelta: 0.15
   costMultiplier: 1.2
@@ -413,8 +414,8 @@
       additive:
         name: nc-pharma-station-additive-slot
         whitelist:
-          components:
-          - NCPharmaAdditive
+          tags:
+          - CentrifugeCompatible
   - type: Appearance
   - type: GenericVisualizer
     visuals:
@@ -657,8 +658,8 @@
       catalyst:
         name: nc-pharma-reactor-catalyst-slot
         whitelist:
-          components:
-          - NCPharmaCatalyst
+          tags:
+          - CentrifugeCompatible
   - type: Appearance
   - type: GenericVisualizer
     visuals:

@@ -241,6 +241,10 @@ public readonly record struct NCPharmaStudyResult(
     float Toxin,
     float Sepsis);
 
+/// <summary>A reagent and how much of it a container holds.</summary>
+[Serializable, NetSerializable]
+public readonly record struct NCPharmaReagentAmount(string Id, float Amount);
+
 /// <summary>Stable text ids of the nodes of the formula tree, shared by the server and the client.</summary>
 public static class NCPharmaNodeIds
 {

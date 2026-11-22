@@ -381,9 +381,15 @@
   components:
   - type: ContainerContainer
     containers:
+      waste: !type:ContainerSlot
       source: !type:ContainerSlot
   - type: ItemSlots
     slots:
+      waste:
+        name: nc-pharma-waste-slot
+        whitelist:
+          tags:
+          - NCPharmaWasteCanister
       source:
         name: nc-pharma-purifier-slot
         whitelist:
@@ -524,9 +530,15 @@
   components:
   - type: ContainerContainer
     containers:
+      waste: !type:ContainerSlot
       material: !type:ContainerSlot
   - type: ItemSlots
     slots:
+      waste:
+        name: nc-pharma-waste-slot
+        whitelist:
+          tags:
+          - NCPharmaWasteCanister
       material:
         name: nc-pharma-material-slot
         whitelist:
@@ -541,9 +553,15 @@
   components:
   - type: ContainerContainer
     containers:
+      waste: !type:ContainerSlot
       pack: !type:ContainerSlot
   - type: ItemSlots
     slots:
+      waste:
+        name: nc-pharma-waste-slot
+        whitelist:
+          tags:
+          - NCPharmaWasteCanister
       pack:
         name: nc-pharma-pack-slot
         whitelist:
@@ -558,9 +576,15 @@
   components:
   - type: ContainerContainer
     containers:
+      waste: !type:ContainerSlot
       pack: !type:ContainerSlot
   - type: ItemSlots
     slots:
+      waste:
+        name: nc-pharma-waste-slot
+        whitelist:
+          tags:
+          - NCPharmaWasteCanister
       pack:
         name: nc-pharma-pack-slot
         whitelist:
@@ -577,9 +601,15 @@
   components:
   - type: ContainerContainer
     containers:
+      waste: !type:ContainerSlot
       pack: !type:ContainerSlot
   - type: ItemSlots
     slots:
+      waste:
+        name: nc-pharma-waste-slot
+        whitelist:
+          tags:
+          - NCPharmaWasteCanister
       pack:
         name: nc-pharma-pack-slot
         whitelist:
@@ -592,27 +622,6 @@
   id: NCPharmaWasteBin
   components:
   - type: NCPharmaWasteBin
-
-- type: entity
-  parent: BaseItem
-  id: NCPharmaWasteCanister
-  components:
-  - type: Sprite
-    sprite: Objects/Specific/Chemistry/jug.rsi
-    state: icon_empty
-  - type: Item
-    size: Normal
-    sprite: Objects/Specific/Chemistry/jug.rsi
-  - type: NCPharmaWasteCanister
-    filledPrototype: NCPharmaWasteCanisterFull
-
-- type: entity
-  parent: NCPharmaWasteCanister
-  id: NCPharmaWasteCanisterFull
-  components:
-  - type: NCPharmaWasteCanister
-    filled: true
-    emptyPrototype: NCPharmaWasteCanister
 
 # --- Vivarium: an observation post; the test subjects are real bodies, players and NPCs ----------------------
 - type: entity
@@ -1214,31 +1223,3 @@
   baseStability: 0.86
   reaction: NCPharmaReactionStable
   regulatoryStatus: ClinicalOnly
-
-# --- Process consumables -------------------------------------------------------------------------------------
-- type: entity
-  parent: BaseItem
-  id: NCPharmaCatalystVial
-  components:
-  - type: Sprite
-    sprite: Objects/Specific/Chemistry/vial.rsi
-    state: vial
-    color: "#E0A94B"
-  - type: Item
-    size: Tiny
-    sprite: Objects/Specific/Chemistry/vial.rsi
-  - type: NCPharmaCatalyst
-    charges: 2
-
-- type: entity
-  parent: BaseItem
-  id: NCPharmaStabilizerVial
-  components:
-  - type: Sprite
-    sprite: Objects/Specific/Chemistry/vial.rsi
-    state: vial
-    color: "#6FB6D9"
-  - type: Item
-    size: Tiny
-    sprite: Objects/Specific/Chemistry/vial.rsi
-  - type: NCPharmaAdditive

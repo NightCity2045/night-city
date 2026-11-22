@@ -72,9 +72,9 @@ nc-guide-pharma-stations-kits = [head=2]Starter kits[/head]
     {""}[color=#58e6d9]Implant preparation kit[/color] — seed cultures for coating, antibacterial material, tissue interface, neural gel and regenerative matrix.
     {""}[color=#58e6d9]Unlabelled sample box[/color] — raw samples with no label; nobody knows what they hold.
 nc-guide-pharma-stations-consumables = [head=2]Process consumables[/head]
-    {""}[color=#58e6d9]Catalyst vial[/color] — goes into the thermoreactor's catalyst slot. The run takes it when it starts, and the operator can then add catalyst as many times as the vial has charges. Without a vial there is no catalyst to add.
-    {""}[color=#58e6d9]Stabilizer vial[/color] — goes into the synthesizer's additive slot. A formula with the stabilizer modifier needs one and uses one up on every run. The formula card says what it uses up.
-    Ordinary stations need only power and waste room; a standard batch by hand takes about ten minutes from raw material to a tested pack.
+    {""}[color=#58e6d9]Catalyst vial[/color] — an ordinary chemistry vial with reaction catalyst in it. Put it in the thermoreactor's catalyst slot. The run draws two units out of it for every charge, at most two charges, and the vial stays: top it up, pour it out or move it like any vial.
+    {""}[color=#58e6d9]Stabilizer vial[/color] — a vial of stabilizer for the synthesizer's additive slot. A formula with the stabilizer modifier needs five units in it for every run and uses them up; the formula card says so.
+    Ordinary stations need only power and a waste canister with room in it; a standard batch by hand takes about ten minutes from raw material to a tested pack.
 guide-entry-nc-pharma-stations = Stations and equipment
 nc-guide-pharma-formulary-h = [head=1]Formulary and production options[/head]
 nc-guide-pharma-formulary-formulas = [head=2]Known formulas[/head]
@@ -92,7 +92,7 @@ nc-guide-pharma-formulary-modifiers = [head=2]Modifiers[/head]
     • [color=#58e6d9]Fast release[/color] — stronger and faster, shorter-lived, a little more toxic.
     • [color=#58e6d9]Extended release[/color] — weaker and much slower, more stable.
     • [color=#58e6d9]Protective carrier[/color] — much less toxic, a little weaker.
-    • [color=#58e6d9]Stabilizer[/color] and [color=#58e6d9]Cold solvent[/color] — raise stability. The stabilizer also uses up a stabilizer vial on every production run.
+    • [color=#58e6d9]Stabilizer[/color] and [color=#58e6d9]Cold solvent[/color] — raise stability. The stabilizer also uses up five units from a stabilizer vial on every production run.
     • [color=#58e6d9]Buffered[/color] — less toxic, absorbed slightly slower.
     • [color=#58e6d9]Concentrated[/color] and [color=#58e6d9]Potentiator[/color] — stronger but more toxic and less stable.
     • [color=#58e6d9]Purified[/color] — higher purity, expensive.
@@ -138,7 +138,7 @@ nc-guide-pharma-quality-impurities = [head=2]Impurities[/head]
 nc-guide-pharma-quality-cold = [head=2]Cold chain[/head]
     Some formulas are unstable and spoil at room temperature; examining a pack of such a formula says it must be kept refrigerated. [color=#58e6d9]Cold storage[/color] stops the spoilage while the batch is inside and the cabinet has power. A stabilizer, a cold solvent and clean synthesis all make a batch more stable. Keep unstable batches cold from the moment they are made.
 nc-guide-pharma-quality-waste = [head=2]Waste[/head]
-    Every station makes hazardous waste into its own tank and refuses to work when the tank is full. Swap in an empty [color=#58e6d9]waste canister[/color] and burn the full one in the [color=#58e6d9]waste incinerator[/color], which needs power.
+    Every station makes hazardous waste and pours it into the [color=#58e6d9]waste canister[/color] standing in its waste slot. Without a canister with room in it the station will not run. The canister is an ordinary jug: carry it, pour it, spill it, but the waste is poisonous. Take it to the [color=#58e6d9]waste incinerator[/color] (it needs power): the incinerator burns the waste and leaves you the empty canister. A canister with waste in it that is left lying around leaks toxic fumes.
 guide-entry-nc-pharma-quality = Quality control and storage
 nc-guide-pharma-reactor-h = [head=1]Thermoreactor and experimental formulas[/head]
 nc-guide-pharma-reactor-rd = [head=2]The research console[/head]

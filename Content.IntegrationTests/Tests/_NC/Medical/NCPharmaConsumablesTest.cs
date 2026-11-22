@@ -9,9 +9,12 @@ using System.Numerics;
 using Content.IntegrationTests.Fixtures;
 using Content.IntegrationTests.Fixtures.Attributes;
 using Content.Server._NC.Medical.Pharmacology.Batch;
+using Content.Server._NC.Medical.Pharmacology.Lab;
 using Content.Shared._NC.Medical.Pharmacology.Batch;
 using Content.Shared.Chemistry.Components;
 using Content.Shared.Chemistry.Components.SolutionManager;
+using Content.Shared.Chemistry.EntitySystems;
+using Content.Shared.Chemistry.Reagent;
 using Content.Shared.Containers.ItemSlots;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
@@ -37,6 +40,16 @@ public sealed class NCPharmaConsumablesTest : GameTest
     [SidedDependency(Side.Server)] private NCPharmaReactorSystem _reactor = default!;
     [SidedDependency(Side.Server)] private ItemSlotsSystem _slots = default!;
     [SidedDependency(Side.Server)] private SharedMapSystem _maps = default!;
+    [SidedDependency(Side.Server)] private SharedSolutionContainerSystem _solutions = default!;
+
+    private static readonly ProtoId<ReagentPrototype> StabilizerReagent = "NCPharmaStabilizer";
+    private static readonly ProtoId<ReagentPrototype> CatalystReagent = "NCPharmaCatalyst";
+
+    private float Held(EntityUid vial, ProtoId<ReagentPrototype> reagent)
+    {
+        Assert.That(_solutions.TryGetDrainableSolution(vial, out _, out var contents), Is.True);
+        return (float) contents!.GetTotalPrototypeQuantity(reagent);
+    }
 
     public override PoolSettings PoolSettings => new() { Connected = false };
 
@@ -76,10 +89,12 @@ public sealed class NCPharmaConsumablesTest : GameTest
             Is.EqualTo(NCPharmaStationNotice.MissingAdditive));
 
         var vial = SEntMan.SpawnEntity("NCPharmaStabilizerVial", at);
+        var before = Held(vial, StabilizerReagent);
         Assert.That(_slots.TryInsert(station, "additive", vial, user), Is.True);
         Assert.That(_synthesis.TryStartRun(station1, user, formula.ID, Standard, 5),
             Is.EqualTo(NCPharmaStationNotice.Started));
-        Assert.That(SEntMan.IsQueuedForDeletion(vial) || SEntMan.Deleted(vial), Is.True, "the stabilizer must be used up");
+        Assert.That(SEntMan.EntityExists(vial), Is.True, "the vial stays; only the reagent is used up");
+        Assert.That(Held(vial, StabilizerReagent), Is.EqualTo(before - 5f).Within(0.01f));
     }
 
     [Test]
@@ -111,10 +126,13 @@ public sealed class NCPharmaConsumablesTest : GameTest
 
         var stocked = SEntMan.SpawnEntity("NCPharmaReactor", at);
         Assert.That(_slots.TryInsert(stocked, "source", Canister(at), user), Is.True);
-        Assert.That(_slots.TryInsert(stocked, "catalyst", SEntMan.SpawnEntity("NCPharmaCatalystVial", at), user), Is.True);
+        var vial = SEntMan.SpawnEntity("NCPharmaCatalystVial", at);
+        var held = Held(vial, CatalystReagent);
+        Assert.That(_slots.TryInsert(stocked, "catalyst", vial, user), Is.True);
         Assert.That(_reactor.TryStartRun((stocked, SComp<NCPharmaReactorComponent>(stocked)), user, formula.ID, 3),
             Is.EqualTo(NCPharmaReactorNotice.Started));
         Assert.That(SComp<NCPharmaReactorRunComponent>(stocked).CatalystLeft, Is.EqualTo(2));
+        Assert.That(Held(vial, CatalystReagent), Is.EqualTo(held - 4f).Within(0.01f), "two charges take four units");
     }
 
     [Test]
@@ -139,4 +157,48 @@ public sealed class NCPharmaConsumablesTest : GameTest
             });
         }
     }
+
+    private static readonly ProtoId<ReagentPrototype> WasteReagent = "NCPharmaWaste";
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void AStationPoursItsWasteIntoTheCanisterAndStopsWhenThereIsNoRoom()
+    {
+        var at = Spot();
+        var user = SEntMan.SpawnEntity("MobHuman", at);
+        var extractor = SEntMan.SpawnEntity("NCPharmaExtractor", at);
+        var waste = SEntMan.System<NCPharmaWasteSystem>();
+
+        Assert.That(waste.CanTake(extractor, 2f), Is.False, "no canister, no work");
+        var canister = SEntMan.SpawnEntity("NCPharmaWasteCanister", at);
+        Assert.That(_slots.TryInsert(extractor, "waste", canister, user), Is.True);
+        Assert.That(waste.CanTake(extractor, 2f), Is.True);
+
+        waste.Add(extractor, 2f);
+        Assert.That(Held(canister, WasteReagent), Is.EqualTo(2f).Within(0.01f), "the waste is a real reagent");
+
+        waste.Add(extractor, 100f);
+        Assert.That(waste.CanTake(extractor, 2f), Is.False, "a full canister stops the station");
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void TheIncineratorBurnsTheWasteAndLeavesTheCanister()
+    {
+        var at = Spot();
+        var user = SEntMan.SpawnEntity("MobHuman", at);
+        var bin = SEntMan.SpawnEntity("NCPharmaWasteBin", at);
+        var canister = SEntMan.SpawnEntity("NCPharmaWasteCanister", at);
+        Assert.That(_solutions.TryGetDrainableSolution(canister, out var soln, out _), Is.True);
+        Assert.That(_solutions.TryAddReagent(soln!.Value, WasteReagent, 20), Is.True);
+
+        SEntMan.GetComponent<Content.Server.Power.Components.ApcPowerReceiverComponent>(bin).Powered = true;
+        Assert.That(SEntMan.System<Content.Shared.Power.EntitySystems.SharedPowerReceiverSystem>().IsPowered(bin), Is.True, "the incinerator must count as powered");
+        var used = new Content.Shared.Interaction.InteractUsingEvent(user, canister, bin, SEntMan.GetComponent<TransformComponent>(bin).Coordinates);
+        SEntMan.EventBus.RaiseLocalEvent(bin, used);
+
+        Assert.That(SEntMan.EntityExists(canister), Is.True, "the canister stays");
+        Assert.That(Held(canister, WasteReagent), Is.EqualTo(0f), "the waste is burned");
+    }
 }
+

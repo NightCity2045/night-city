@@ -3,6 +3,10 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System.Linq;
+using Content.Shared.Chemistry.Components;
+using Content.Shared.Chemistry.EntitySystems;
+using Content.Shared.Chemistry.Reagent;
+using Content.Shared.FixedPoint;
 using Content.Shared._NC.Medical.Pharmacology.Batch;
 using Content.Shared.Containers.ItemSlots;
 using Content.Shared.Popups;
@@ -23,6 +27,7 @@ public sealed partial class NCPharmaSynthesisSystem : EntitySystem
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private ItemSlotsSystem _itemSlots = default!;
+    [Dependency] private SharedSolutionContainerSystem _solutions = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private UserInterfaceSystem _ui = default!;
     [Dependency] private NCPharmaBatchSystem _batches = default!;
@@ -112,16 +117,28 @@ public sealed partial class NCPharmaSynthesisSystem : EntitySystem
         if (yield <= 0f)
             return NCPharmaStationNotice.WrongFeedstock;
 
-        // NC: a modifier may ask for an additive; the run uses one up when it starts.
-        var requiredItem = formula.Modifiers
-            .Select(modifier => _prototypes.TryIndex(modifier, out var found) ? found.RequiredItem : null)
-            .FirstOrDefault(item => item != null);
-        EntityUid? additive = null;
-        if (requiredItem != null)
+        // NC: a modifier may ask for a reagent from the vial in the additive slot; the run uses it up when it starts.
+        ProtoId<ReagentPrototype>? requiredReagent = null;
+        var requiredAmount = 0f;
+        foreach (var modifierId in formula.Modifiers)
         {
-            additive = GetAdditive(station);
-            if (additive == null || MetaData(additive.Value).EntityPrototype?.ID != requiredItem.Value.Id)
+            if (_prototypes.TryIndex(modifierId, out var found) && found.RequiredReagent is { } reagent)
+            {
+                requiredReagent = reagent;
+                requiredAmount = found.RequiredAmount;
+                break;
+            }
+        }
+
+        Entity<SolutionComponent>? additiveSolution = null;
+        if (requiredReagent is { } needed)
+        {
+            if (GetAdditive(station) is not { } vial ||
+                !_solutions.TryGetDrainableSolution(vial, out additiveSolution, out var vialContents) ||
+                (float) vialContents.GetTotalPrototypeQuantity(needed) < requiredAmount)
+            {
                 return NCPharmaStationNotice.MissingAdditive;
+            }
         }
 
         var inputs = new NCPharmaProductionInputs(
@@ -136,8 +153,8 @@ public sealed partial class NCPharmaSynthesisSystem : EntitySystem
         Dirty(sourceUid, source);
         if (source.Units <= 0f)
             QueueDel(sourceUid);
-        if (additive is { } used)
-            QueueDel(used);
+        if (additiveSolution is { } drawn && requiredReagent is { } used)
+            _solutions.RemoveReagent(drawn, used.Id, FixedPoint2.New(requiredAmount));
 
         var run = EnsureComp<NCPharmaSynthesisRunComponent>(station);
         run.Formula = formula.ID;
@@ -181,12 +198,19 @@ public sealed partial class NCPharmaSynthesisSystem : EntitySystem
         UpdateUi(station, NCPharmaStationNotice.Finished);
     }
 
+    private NCPharmaReagentAmount[] AdditiveContents(Entity<NCPharmaSynthesizerComponent> station)
+    {
+        if (GetAdditive(station) is not { } vial || !_solutions.TryGetDrainableSolution(vial, out _, out var contents))
+            return [];
+
+        return contents.Contents
+            .Select(reagent => new NCPharmaReagentAmount(reagent.Reagent.Prototype, (float) reagent.Quantity))
+            .ToArray();
+    }
+
     private EntityUid? GetAdditive(Entity<NCPharmaSynthesizerComponent> station)
     {
-        return _itemSlots.TryGetSlot(station, station.Comp.AdditiveSlot, out var slot) &&
-               slot.Item is { } item && HasComp<NCPharmaAdditiveComponent>(item)
-            ? item
-            : null;
+        return _itemSlots.TryGetSlot(station, station.Comp.AdditiveSlot, out var slot) ? slot.Item : null;
     }
 
     private bool TryGetSource(
@@ -231,6 +255,6 @@ public sealed partial class NCPharmaSynthesisSystem : EntitySystem
                 notice,
                 _batches.BuildFormulaSummaries(true),
                 hasSource ? source.Feedstock?.Id : null,
-                GetAdditive(station) is { } slotted ? MetaData(slotted).EntityPrototype?.ID : null));
+                AdditiveContents(station)));
     }
 }

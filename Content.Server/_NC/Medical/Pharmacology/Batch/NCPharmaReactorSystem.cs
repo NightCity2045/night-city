@@ -5,6 +5,7 @@
 using System.Linq;
 using Content.Shared._NC.Medical.Pharmacology.Batch;
 using Content.Shared.Chemistry.Components;
+using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Containers.ItemSlots;
 using Content.Shared.FixedPoint;
 using Content.Shared.Popups;
@@ -32,6 +33,7 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private ItemSlotsSystem _itemSlots = default!;
+    [Dependency] private SharedSolutionContainerSystem _solutions = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private UserInterfaceSystem _ui = default!;
     [Dependency] private SmokeSystem _smoke = default!;
@@ -175,14 +177,23 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
         run.State = NCReactorMath.Start(profile);
         run.Controls = default;
         run.Ventilation = false;
-        // NC: the catalyst is a real vial in the catalyst slot. The run takes it; with none there is nothing to add.
+        // NC: the catalyst is a reagent in a real vial in the catalyst slot. The run draws its charges out of the vial
+        // and the vial stays, to be refilled or emptied like any other; with no catalyst in it there is nothing to add.
         run.CatalystLeft = 0;
         if (_itemSlots.TryGetSlot(reactor, reactor.Comp.CatalystSlot, out var catalystSlot) &&
-            catalystSlot.Item is { } vial && TryComp<NCPharmaCatalystComponent>(vial, out var catalyst))
+            catalystSlot.Item is { } vial &&
+            _solutions.TryGetDrainableSolution(vial, out var vialSolution, out var contents))
         {
-            run.CatalystLeft = Math.Min(catalyst.Charges, tuning.CatalystCharges);
-            QueueDel(vial);
+            var available = (float) contents.GetTotalPrototypeQuantity(reactor.Comp.CatalystReagent);
+            var charges = Math.Min((int) MathF.Floor(available / reactor.Comp.UnitsPerCharge), tuning.CatalystCharges);
+            if (charges > 0)
+            {
+                _solutions.RemoveReagent(
+                    vialSolution.Value, reactor.Comp.CatalystReagent.Id, FixedPoint2.New(charges * reactor.Comp.UnitsPerCharge));
+                run.CatalystLeft = charges;
+            }
         }
+
         run.SourcePurity = source.Purity;
         run.SourceContaminants = TryComp<NCPharmaSourceHiddenComponent>(sourceUid, out var hidden) ? hidden.Contaminants : 0f; // NC
         run.Units = units;

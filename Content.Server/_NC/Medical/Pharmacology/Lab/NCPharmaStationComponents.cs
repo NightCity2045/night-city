@@ -137,36 +137,42 @@ public sealed partial class NCPharmaFillingStationComponent : Component
     public int DosesPerPack = 1;
 }
 
-/// <summary>Hazardous waste a machine accumulates. A full tank stops the machine until it is emptied.</summary>
+/// <summary>
+/// A machine that makes hazardous waste. The waste is poured, as a reagent, into the canister standing in its waste
+/// slot; without a canister with room in it the machine will not run.
+/// </summary>
 [RegisterComponent, Access(typeof(NCPharmaWasteSystem))]
 public sealed partial class NCPharmaWasteTankComponent : Component
 {
     [DataField]
-    public float Level;
+    public string Slot = "waste";
 
     [DataField]
-    public float Capacity = 10f;
+    public ProtoId<ReagentPrototype> Reagent = "NCPharmaWaste";
+
+    /// <summary>Units of waste reagent one unit of waste makes.</summary>
+    [DataField]
+    public float UnitsPerWaste = 1f;
 }
 
-/// <summary>A canister for carrying waste to disposal. A filled canister leaks if it is left lying around.</summary>
+/// <summary>
+/// A canister for carrying waste to disposal. It is an ordinary reagent container; once it holds waste it leaks toxic
+/// fumes if it is left lying around.
+/// </summary>
 [RegisterComponent, Access(typeof(NCPharmaWasteSystem))]
 public sealed partial class NCPharmaWasteCanisterComponent : Component
 {
     [DataField]
-    public bool Filled;
-
-    /// <summary>What an empty canister turns into when it is filled.</summary>
-    [DataField]
-    public EntProtoId? FilledPrototype;
-
-    /// <summary>What a filled canister turns into when it is emptied.</summary>
-    [DataField]
-    public EntProtoId? EmptyPrototype;
+    public ProtoId<ReagentPrototype> Reagent = "NCPharmaWaste";
 
     [DataField]
     public TimeSpan LeakAfter = TimeSpan.FromMinutes(15);
 
-    /// <summary>How long the filled canister has been lying around. Persistent, so a restart does not reset it.</summary>
+    /// <summary>Units of waste a leak lets out.</summary>
+    [DataField]
+    public float LeakUnits = 5f;
+
+    /// <summary>How long the canister has been lying around with waste in it. Persistent, so a restart does not reset it.</summary>
     [DataField]
     public TimeSpan Age;
 }

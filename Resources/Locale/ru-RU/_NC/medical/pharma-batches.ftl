@@ -340,4 +340,4 @@ nc-pharma-rd-effect-window = терапевтическая {$therapeutic}, то
 nc-pharma-rd-forecast-unknown = Прогноза нет: форма доставки или режим производства не проверены.
 nc-pharma-rd-forecast-excluded = Прогноз не учитывает непроверенные узлы: {$nodes}. Реальная партия их учтёт.
 nc-pharma-rd-notice-same-core = Два ядра должны быть разными соединениями.
-nc-pharma-rd-effect-requires = расходует {$item} за запуск
+nc-pharma-rd-effect-requires = расходует {$amount} ед. ({$item}) за запуск
