@@ -1,16 +1,18 @@
 using System.Linq;
+using Content.Client._NC.Skill; // NC
 using Content.Client.CharacterInfo;
 using Content.Client.Gameplay;
 using Content.Client.Stylesheets;
 using Content.Client.UserInterface.Controls;
-using Content.Client.UserInterface.Systems.Character.Controls;
 using Content.Client.UserInterface.Systems.Character.Windows;
 using Content.Client.UserInterface.Systems.Objectives.Controls;
+using Content.Shared._NC.Skill; // NC
 using Content.Shared.Input;
 using Content.Shared.Mind;
 using Content.Shared.Mind.Components;
 using Content.Shared.Roles;
 using JetBrains.Annotations;
+using Robust.Client.Console; // NC
 using Robust.Client.GameObjects;
 using Robust.Client.Player;
 using Robust.Client.UserInterface;
@@ -25,11 +27,13 @@ using static Robust.Client.UserInterface.Controls.BaseButton;
 namespace Content.Client.UserInterface.Systems.Character;
 
 [UsedImplicitly]
-public sealed partial class CharacterUIController : UIController, IOnStateEntered<GameplayState>, IOnStateExited<GameplayState>, IOnSystemChanged<CharacterInfoSystem>
+public sealed partial class CharacterUIController : UIController, IOnStateEntered<GameplayState>, IOnStateExited<GameplayState>,
+    IOnSystemChanged<CharacterInfoSystem>, IOnSystemChanged<NCSkillClientSystem> // NC
 {
     [Dependency] private IEntityManager _ent = default!;
     [Dependency] private IPlayerManager _player = default!;
     [Dependency] private IPrototypeManager _prototypeManager = default!;
+    [Dependency] private IClientConsoleHost _console = default!; // NC
 
     [UISystemDependency] private readonly CharacterInfoSystem _characterInfo = default!;
     [UISystemDependency] private readonly SpriteSystem _sprite = default!;
@@ -53,6 +57,8 @@ public sealed partial class CharacterUIController : UIController, IOnStateEntere
 
         _window.OnClose += DeactivateButton;
         _window.OnOpen += ActivateButton;
+        _window.SkillsPressed += OpenSkills; // NC
+        _window.Relocalized += UpdateRoleType; // NC
 
         CommandBinds.Builder
             .Bind(ContentKeyFunctions.OpenCharacterMenu,
@@ -82,6 +88,31 @@ public sealed partial class CharacterUIController : UIController, IOnStateEntere
         system.OnCharacterUpdate -= CharacterUpdated;
         _player.LocalPlayerDetached -= CharacterDetached;
     }
+
+    // NC-Edit-Start
+    public void OnSystemLoaded(NCSkillClientSystem system)
+    {
+        system.ProgressChanged += RefreshProgress;
+    }
+
+    public void OnSystemUnloaded(NCSkillClientSystem system)
+    {
+        system.ProgressChanged -= RefreshProgress;
+    }
+
+    private void RefreshProgress()
+    {
+        if (_window is not { IsOpen: true } window)
+            return;
+
+        if (_ent.TryGetComponent<NCSkillPermissionsComponent>(_player.LocalEntity, out var skills))
+            window.SetProgress(skills.Experience, skills.Learned.Length);
+        else
+            window.SetProgress(-1, 0);
+    }
+
+    private void OpenSkills() => _console.RemoteExecuteCommand(null, "ncskills");
+    // NC-Edit-End
 
     public void UnloadButton()
     {
@@ -125,28 +156,31 @@ public sealed partial class CharacterUIController : UIController, IOnStateEntere
 
     private void CharacterUpdated(CharacterData data)
     {
-        if (_window == null)
+        if (_window == null || _player.LocalEntity != data.Entity) // NC
         {
             return;
         }
 
         var (entity, job, objectives, briefing, entityName) = data;
 
-        _window.SpriteView.SetEntity(entity);
-
+        // NC-Edit-Start
+        _window.SetIdentity(entity, entityName, job);
         UpdateRoleType();
-
-        _window.NameLabel.Text = entityName;
-        _window.SubText.Text = job;
+        _window.BriefingSection.Visible = !string.IsNullOrWhiteSpace(briefing);
+        _window.BriefingText.SetMessage(briefing ?? string.Empty);
         _window.Objectives.RemoveAllChildren();
-        _window.ObjectivesLabel.Visible = objectives.Any();
+        var controls = _characterInfo.GetCharacterInfoControls(entity);
+        var empty = objectives.Count == 0 && !_window.BriefingSection.Visible && controls.Count == 0;
+        _window.ObjectivesSection.Visible = objectives.Count > 0 || empty;
+        _window.EmptyObjectives.Visible = empty;
+        // NC-Edit-End
 
         foreach (var (groupId, conditions) in objectives)
         {
-            var objectiveControl = new CharacterObjectiveControl
+            var objectiveControl = new BoxContainer // NC
             {
                 Orientation = BoxContainer.LayoutOrientation.Vertical,
-                Modulate = Color.Gray
+                SeparationOverride = 4 // NC
             };
 
 
@@ -180,23 +214,14 @@ public sealed partial class CharacterUIController : UIController, IOnStateEntere
             _window.Objectives.AddChild(objectiveControl);
         }
 
-        if (briefing != null)
-        {
-            var briefingControl = new ObjectiveBriefingControl();
-            var text = new FormattedMessage();
-            text.PushColor(Color.Yellow);
-            text.AddText(briefing);
-            briefingControl.Label.SetMessage(text);
-            _window.Objectives.AddChild(briefingControl);
-        }
-
-        var controls = _characterInfo.GetCharacterInfoControls(entity);
+        // NC-Edit-Start
+        _window.AdditionalInfo.RemoveAllChildren();
+        _window.AdditionalSection.Visible = controls.Count > 0;
         foreach (var control in controls)
         {
-            _window.Objectives.AddChild(control);
+            _window.AdditionalInfo.AddChild(control);
         }
-
-        _window.RolePlaceholder.Visible = briefing == null && !controls.Any() && !objectives.Any();
+        // NC-Edit-End
     }
 
     private void OnRoleTypeChanged(MindRoleTypeChangedEvent ev, EntitySessionEventArgs _)
@@ -209,23 +234,27 @@ public sealed partial class CharacterUIController : UIController, IOnStateEntere
         if (_window == null || !_window.IsOpen)
             return;
 
-        if (!_ent.TryGetComponent<MindContainerComponent>(_player.LocalEntity, out var container)
-            || container.Mind is null)
+        // NC-Edit-Start
+        if (!_ent.TryGetComponent<MindContainerComponent>(_player.LocalEntity, out var container) ||
+            !_ent.TryGetComponent<MindComponent>(container.Mind, out var mind))
+        {
+            _window.RoleType.Visible = false;
             return;
-
-        if (!_ent.TryGetComponent<MindComponent>(container.Mind.Value, out var mind))
-            return;
+        }
+        // NC-Edit-End
 
         if (!_prototypeManager.TryIndex(mind.RoleType, out var proto))
             Log.Error($"Player '{_player.LocalSession}' has invalid Role Type '{mind.RoleType}'. Displaying default instead");
 
         _window.RoleType.Text = Loc.GetString(proto?.Name ?? "role-type-crew-aligned-name");
         _window.RoleType.FontColorOverride = proto?.Color ?? Color.White;
+        _window.RoleType.Visible = true; // NC
     }
 
     private void CharacterDetached(EntityUid uid)
     {
         CloseWindow();
+        _window?.ResetCharacter(); // NC
     }
 
     private void CharacterButtonPressed(ButtonEventArgs args)
@@ -251,8 +280,9 @@ public sealed partial class CharacterUIController : UIController, IOnStateEntere
         }
         else
         {
-            _characterInfo.RequestCharacterInfo();
             _window.Open();
+            RefreshProgress(); // NC
+            _characterInfo.RequestCharacterInfo();
         }
     }
 }

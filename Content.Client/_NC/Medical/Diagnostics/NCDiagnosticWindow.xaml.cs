@@ -120,8 +120,12 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
             _selectedCyberware = null;
         }
 
-        var sameSnapshot = _snapshot?.MedicalRevision == snapshot.MedicalRevision && _patient == patient &&
-                           _snapshot?.Disclosures == snapshot.Disclosures && _snapshot?.Tier == snapshot.Tier;
+        // A fresh scan can report a different wound or bleeding band at the same medical revision.
+        var sameSnapshot = _snapshot is { } previous && _patient == patient &&
+                           previous.MedicalRevision == snapshot.MedicalRevision &&
+                           previous.Disclosures == snapshot.Disclosures && previous.Tier == snapshot.Tier &&
+                           previous.WoundsOmitted == snapshot.WoundsOmitted &&
+                           previous.Wounds.SequenceEqual(snapshot.Wounds);
         _snapshot = snapshot;
         _patient = patient;
         _secondsSinceUpdate = 0f;

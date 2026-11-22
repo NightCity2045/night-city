@@ -14,7 +14,7 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
         </PanelContainer.PanelOverride>
         <BoxContainer Margin="10 6" Orientation="Vertical" SeparationOverride="6">
             <BoxContainer Orientation="Horizontal" HorizontalExpand="True">
-                <Label Text="{Loc 'nc-av-console-header'}" FontColorOverride="#79FFF5" HorizontalExpand="True" />
+                <RichTextLabel Text="{Loc 'nc-av-console-header'}" Modulate="#79FFF5" HorizontalExpand="True" />
                 <Label Text="{Loc 'nc-av-console-channel'}" FontColorOverride="#517E84" Margin="0 0 10 0" />
                 <Label Name="StatusLabel" FontColorOverride="#F3BA58" />
             </BoxContainer>
@@ -54,8 +54,8 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                 </PanelContainer>
             </BoxContainer>
 
-            <BoxContainer Orientation="Horizontal" HorizontalExpand="True">
-                <Label Name="WarningLabel" Visible="False" FontColorOverride="#FF657D" HorizontalExpand="True" />
+            <BoxContainer Orientation="Vertical" HorizontalExpand="True" SeparationOverride="3">
+                <RichTextLabel Name="WarningLabel" Visible="False" Modulate="#FF657D" HorizontalExpand="True" />
                 <Label Text="{Loc 'nc-av-console-controls'}" FontColorOverride="#729297" />
             </BoxContainer>
         </BoxContainer>

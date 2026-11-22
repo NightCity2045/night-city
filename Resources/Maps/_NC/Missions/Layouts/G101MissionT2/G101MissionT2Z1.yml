@@ -1,0 +1,282 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# G101 apartment mission. Target zone: 2e8c8b5f-7835-4072-b8e5-de3d395f3117 at Z=1.
+# City origin: -17,-32. The shell and entrance belong to NightCity1.
+meta:
+  format: 7
+  category: Grid
+  engineVersion: 284.0.2
+  forkId: ''
+  forkVersion: ''
+  time: 11/19/2026 00:00:00
+  entityCount: 33
+maps: []
+grids:
+- 2
+orphans:
+- 2
+nullspace: []
+tilemap:
+  0: Space
+  1: FloorWood
+  2: FloorGrayConcrete
+  3: FloorWhite
+  4: FloorCarpetOffice
+entities:
+- proto: ''
+  entities:
+  - uid: 2
+    components:
+    - type: MetaData
+    - type: Transform
+      parent: invalid
+    - type: MapGrid
+      chunks:
+        0,0:
+          ind: 0,0
+          tiles: AwAAAAAAAAMAAAAAAAABAAAAAAAABAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAADAAAAAAAAAQAAAAAAAAQAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAAAAAAAAAwAAAAAAAAEAAAAAAAAEAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAEAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAABAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwAAAAAAAAMAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAADAAAAAAAAAQAAAAAAAAIAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAAAAAAAAAwAAAAAAAAEAAAAAAAACAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+          version: 7
+    - type: Broadphase
+    - type: Physics
+      linearDamping: 0.05
+      fixedRotation: false
+      bodyType: Dynamic
+      bodyStatus: InAir
+      angularDamping: 0.05
+    - type: Fixtures
+      fixtures: {}
+    - type: OccluderTree
+    - type: GridPathfinding
+    - type: Gravity
+      enabled: true
+    - type: DecalGrid
+      chunkCollection:
+        version: 2
+        nodes: []
+    - type: SpreaderGrid
+    - type: ImplicitRoof
+    - type: TileHistory
+      chunkHistory: {}
+- proto: Sink
+  entities:
+  - uid: 3
+    components:
+    - type: Transform
+      pos: 0.5,8.5
+      parent: 2
+  - uid: 24
+    components:
+    - type: Transform
+      pos: 0.5,2.5
+      parent: 2
+- proto: KitchenMicrowave
+  entities:
+  - uid: 4
+    components:
+    - type: Transform
+      pos: 1.5,8.5
+      parent: 2
+    - type: ApcPowerReceiver
+      needsPower: false
+- proto: TableWood
+  entities:
+  - uid: 5
+    components:
+    - type: Transform
+      pos: 0.5,7.5
+      parent: 2
+  - uid: 7
+    components:
+    - type: Transform
+      pos: 1.5,5.5
+      parent: 2
+  - uid: 27
+    components:
+    - type: Transform
+      pos: 4.5,2.5
+      parent: 2
+- proto: FoodTinBeans
+  entities:
+  - uid: 6
+    components:
+    - type: Transform
+      pos: 0.5,7.5
+      parent: 2
+- proto: ComfyChair
+  entities:
+  - uid: 8
+    components:
+    - type: Transform
+      pos: 0.5,5.5
+      parent: 2
+- proto: Ashtray
+  entities:
+  - uid: 9
+    components:
+    - type: Transform
+      pos: 1.5,5.5
+      parent: 2
+- proto: DrinkBeerCan
+  entities:
+  - uid: 10
+    components:
+    - type: Transform
+      pos: 1.5,5.5
+      parent: 2
+- proto: BoxCardboard
+  entities:
+  - uid: 11
+    components:
+    - type: Transform
+      pos: 4.5,8.5
+      parent: 2
+- proto: AlwaysPoweredLightSodium
+  entities:
+  - uid: 12
+    components:
+    - type: Transform
+      pos: 1.5,7.5
+      parent: 2
+    - type: PointLight
+      radius: 5
+      energy: 1.25
+- proto: WallWood
+  entities:
+  - uid: 13
+    components:
+    - type: Transform
+      pos: 0.5,4.5
+      parent: 2
+  - uid: 14
+    components:
+    - type: Transform
+      pos: 1.5,4.5
+      parent: 2
+  - uid: 15
+    components:
+    - type: Transform
+      pos: 2.5,4.5
+      parent: 2
+  - uid: 16
+    components:
+    - type: Transform
+      pos: 4.5,4.5
+      parent: 2
+  - uid: 18
+    components:
+    - type: Transform
+      pos: 0.5,3.5
+      parent: 2
+  - uid: 19
+    components:
+    - type: Transform
+      pos: 2.5,0.5
+      parent: 2
+  - uid: 20
+    components:
+    - type: Transform
+      pos: 2.5,1.5
+      parent: 2
+  - uid: 21
+    components:
+    - type: Transform
+      pos: 2.5,2.5
+      parent: 2
+- proto: WoodDoor
+  entities:
+  - uid: 17
+    components:
+    - type: Transform
+      pos: 3.5,4.5
+      parent: 2
+      anchored: true
+  - uid: 22
+    components:
+    - type: Transform
+      pos: 1.5,3.5
+      parent: 2
+      anchored: true
+- proto: ToiletEmpty
+  entities:
+  - uid: 23
+    components:
+    - type: Transform
+      pos: 0.5,0.5
+      parent: 2
+- proto: Bed
+  entities:
+  - uid: 25
+    components:
+    - type: Transform
+      pos: 4.5,1.5
+      parent: 2
+- proto: Dresser
+  entities:
+  - uid: 26
+    components:
+    - type: Transform
+      pos: 4.5,0.5
+      parent: 2
+- proto: BookRandom
+  entities:
+  - uid: 28
+    components:
+    - type: Transform
+      pos: 3.5,0.5
+      parent: 2
+- proto: AlwaysPoweredWallLight
+  entities:
+  - uid: 29
+    components:
+    - type: Transform
+      pos: 3.5,3.5
+      parent: 2
+    - type: PointLight
+      radius: 4
+      energy: 1.15
+  - uid: 30
+    components:
+    - type: Transform
+      pos: 1.5,2.5
+      parent: 2
+    - type: PointLight
+      radius: 3
+      energy: 0.85
+- proto: NCMissionDynamicPointMarker
+  entities:
+  - uid: 31
+    components:
+    - type: Transform
+      pos: 2.5,6.5
+      parent: 2
+    - type: NCMissionDynamicPoint
+      poolId: LivingRoom
+      extractionPolicy: DeleteOnCleanup
+  - uid: 32
+    components:
+    - type: Transform
+      pos: 3.5,2.5
+      parent: 2
+    - type: NCMissionDynamicPoint
+      poolId: Bedroom
+      extractionPolicy: DeleteOnCleanup
+  - uid: 33
+    components:
+    - type: Transform
+      pos: 4.5,2.5
+      parent: 2
+    - type: NCMissionDynamicPoint
+      poolId: Recovery
+      extractionPolicy: CanBeExtracted
+- proto: NCMissionEvacuationPointMarker
+  entities:
+  - uid: 34
+    components:
+    - type: Transform
+      pos: 3.5,8.5
+      parent: 2
+    - type: NCMissionEvacuationPoint
+      exitOffset: 0,2
+...

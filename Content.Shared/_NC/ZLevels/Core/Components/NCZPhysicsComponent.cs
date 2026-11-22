@@ -103,12 +103,17 @@ public sealed partial class NCZPhysicsComponent : Component
     [ViewVariables]
     public bool CachedGroundIsSlope;
 
-    /// <summary>
-    /// Prevents paired stairs at the same coordinates from immediately moving the body back.
-    /// The lock clears after the body leaves every stair tile.
-    /// </summary>
+    /// <summary>Whether the cached surface belongs to the map below an opening.</summary>
     [ViewVariables]
-    public bool StairTransitionLocked;
+    public bool CachedGroundFromBelow;
+
+    /// <summary>Time left to walk off an opening after climbing onto the upper level.</summary>
+    [AutoNetworkedField]
+    public float ClimbHoldTimer;
+
+    /// <summary>Prevents the top of a descending stair from immediately moving the body back up.</summary>
+    [AutoNetworkedField]
+    public float ClimbDownGraceTimer;
     // NC-Edit-End
 
     #endregion

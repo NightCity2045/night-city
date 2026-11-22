@@ -41,6 +41,8 @@
   name: AV pilot console
   description: An autonomous flight console for piloting an AV.
   components:
+  - type: ShuttleConsole
+    zoom: 3, 3
   - type: ApcPowerReceiver
     needsPower: false
 

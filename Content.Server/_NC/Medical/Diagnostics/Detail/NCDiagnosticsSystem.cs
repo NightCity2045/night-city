@@ -9,6 +9,7 @@ using Content.Server.Power.EntitySystems;
 using Content.Server.Players.RateLimiting;
 using Content.Server._NC.Medical.Cyberware;
 using Content.Server._NC.Medical.Cyberware.Internal;
+using Content.Server._NC.Medical.Emergency;
 using Content.Server._NC.Medical.Pharmacology;
 using Content.Server._NC.Medical.Systemic;
 using Content.Server._NC.Medical.Diagnostics.Scanner;
@@ -70,6 +71,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
     [Dependency] private Content.Server._NC.Medical.Humanity.NCHumanitySystem _humanity = default!;
     [Dependency] private NCSystemicSystem _systemic = default!;
     [Dependency] private NCBodyScannerConsoleSystem _bodyScanner = default!;
+    [Dependency] private NCEmergencyCareInteractionSystem _emergencyInteraction = default!;
 
     private readonly Dictionary<NCDiagnosticTier, ProtoId<NCDiagnosticCapabilityPrototype>> _unassisted = [];
 
@@ -1374,6 +1376,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
         ref GetVerbsEvent<AlternativeVerb> args)
     {
         _medicalImplants.AddPatientVerbs(entity, ref args);
+        _emergencyInteraction.AddPatientVerbs(entity, ref args);
         if (!args.CanAccess || !TryComp<ActorComponent>(args.User, out var actor))
             return;
 
@@ -1382,20 +1385,13 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
         var session = actor.PlayerSession;
         var verbs = args.Verbs;
 
-        if (user == patient)
-        {
-            AddDiagnosticVerb(
-                "nc-medical-diagnostics-self-assessment-verb",
-                NCDiagnosticTier.SelfSensations,
-                3);
-        }
-
+        // Visual disclosure already includes subjective symptoms; one entry covers self inspection.
         AddDiagnosticVerb(
             "nc-medical-diagnostics-visual-examination-verb",
             NCDiagnosticTier.Visual,
             1);
 
-        if (args.CanInteract)
+        if (args.CanInteract && user != patient)
         {
             AddDiagnosticVerb(
                 "nc-medical-diagnostics-manual-examination-verb",

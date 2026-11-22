@@ -30,7 +30,7 @@
   - type: ToggleableClothing
     clothingPrototype: ClothingHeadHelmetHardsuitTraumaArmored
   - type: NCArmor
-    profile: NCArmorPlateCarrier
+    profile: NCArmorTraumaArmoredSuit
 
 - type: entity
   parent: ClothingOuterHardsuitBase
@@ -60,4 +60,4 @@
   - type: ToggleableClothing
     clothingPrototype: ClothingHeadHelmetHardsuitTraumaMed
   - type: NCArmor
-    profile: NCArmorLightArmorjack
+    profile: NCArmorTraumaMedSuit

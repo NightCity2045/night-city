@@ -43,7 +43,7 @@ public sealed class NCRoundSnapshotCaptureEvent(
     public IReadOnlySet<int> DeletedCharacterIds => _deletedCharacterIds;
 
     /// <summary>
-    /// Marks an irreversibly dead profile for deletion in the same transaction that publishes this snapshot.
+    /// Marks a profile for deletion in the same transaction that publishes this snapshot.
     /// </summary>
     public void DeleteCharacter(int characterId)
     {

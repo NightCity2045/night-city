@@ -4,11 +4,13 @@
 
 using System.Numerics;
 using Content.Server._NC.Vehicle.AV.Components;
+using Content.Server._NC.ZLevels.Core;
 using Content.Server.Shuttles.Components;
 using Content.Server.Shuttles.Systems;
 using Content.Shared._NC.Vehicle.AV.Components;
 using Content.Shared._NC.ZLevels.Core.Components;
 using Content.Shared._NC.ZLevels.Core.EntitySystems;
+using Content.Shared.Camera;
 using Content.Shared.Movement.Systems;
 using Content.Shared.Power.EntitySystems;
 using Content.Shared.Shuttles.Components;
@@ -18,6 +20,7 @@ using Robust.Shared.Physics;
 using Robust.Shared.Physics.Components;
 using Robust.Shared.Physics.Events;
 using Robust.Shared.Physics.Systems;
+using Robust.Shared.Timing;
 
 namespace Content.Server._NC.Vehicle.AV.Systems;
 
@@ -36,6 +39,8 @@ public sealed partial class NCAVSystem : EntitySystem
     [Dependency] private SharedPowerReceiverSystem _power = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private ShuttleSystem _shuttles = default!;
+    [Dependency] private NCZGridMotionSystem _gridMotion = default!;
+    [Dependency] private IGameTiming _motionTiming = default!;
 
     [Dependency] private EntityQuery<MapGridComponent> _gridQuery = default!;
     [Dependency] private EntityQuery<PhysicsComponent> _physicsQuery = default!;
@@ -65,6 +70,7 @@ public sealed partial class NCAVSystem : EntitySystem
         SubscribeLocalEvent<NCAVLifterComponent, ComponentShutdown>(OnLifterShutdown);
         SubscribeLocalEvent<NCAVPilotComponent, ComponentStartup>(OnPilotStartup);
         SubscribeLocalEvent<NCAVPilotComponent, ComponentShutdown>(OnPilotShutdown);
+        SubscribeLocalEvent<PilotComponent, GetEyePvsScaleEvent>(OnPilotPvsScale);
         SubscribeLocalEvent<PhysicsUpdateBeforeSolveEvent>(OnPhysicsStep);
     }
 
@@ -86,6 +92,7 @@ public sealed partial class NCAVSystem : EntitySystem
 
     private void OnAVShutdown(Entity<NCAVComponent> ent, ref ComponentShutdown args)
     {
+        _gridMotion.Cancel(ent);
         _avs.Remove(ent);
         _availableLift.Remove(ent);
         _verticalInput.Remove(ent);
@@ -98,6 +105,18 @@ public sealed partial class NCAVSystem : EntitySystem
     private void OnLifterShutdown(Entity<NCAVLifterComponent> ent, ref ComponentShutdown args) => _lifters.Remove(ent);
     private void OnPilotStartup(Entity<NCAVPilotComponent> ent, ref ComponentStartup args) => _pilots.Add(ent);
     private void OnPilotShutdown(Entity<NCAVPilotComponent> ent, ref ComponentShutdown args) => _pilots.Remove(ent);
+
+    /// <summary>Keeps world updates in range of the AV pilot's zoomed-out view.</summary>
+    private void OnPilotPvsScale(Entity<PilotComponent> ent, ref GetEyePvsScaleEvent args)
+    {
+        if (ent.Comp.Console is not { } console ||
+            !TryComp<ShuttleConsoleComponent>(console, out var controls) ||
+            Transform(console).GridUid is not { } grid ||
+            !HasComp<NCAVComponent>(grid))
+            return;
+
+        args.Scale += MathF.Max(0f, MathF.Max(controls.Zoom.X, controls.Zoom.Y) - 1f);
+    }
 
     public override void Update(float frameTime)
     {
@@ -112,6 +131,15 @@ public sealed partial class NCAVSystem : EntitySystem
 
         foreach (var (uid, offset) in _transitionScratch)
             ProcessLevelTransition(uid, offset);
+
+        _transitionScratch.Clear();
+        foreach (var uid in _avs)
+        {
+            if (TryComp<NCZGridMotionComponent>(uid, out var motion) && _motionTiming.CurTime >= motion.ArrivesAt)
+                _transitionScratch.Add((uid, motion.Direction));
+        }
+        foreach (var (uid, offset) in _transitionScratch)
+            CompleteLevelTransition(uid, offset);
     }
 
     /// <summary>Updates the vertical input for a pilot only when their console belongs to an AV grid.</summary>
@@ -160,7 +188,7 @@ public sealed partial class NCAVSystem : EntitySystem
             if (liftChanged)
                 av.AvailableLift = lift;
 
-            if (_pendingTransitions.ContainsKey(uid))
+            if (_pendingTransitions.ContainsKey(uid) || HasComp<NCZGridMotionComponent>(uid))
             {
                 if (liftChanged)
                     Dirty(uid, av);
@@ -537,7 +565,7 @@ public sealed partial class NCAVSystem : EntitySystem
             !av.Airborne ||
             !_gridQuery.TryComp(uid, out var grid) ||
             !CanEnterAdjacentLevel((uid, grid), offset) ||
-            !_zLevels.TryMove(uid, offset))
+            !_gridMotion.TryStart(uid, offset, TimeSpan.FromSeconds(0.35)))
         {
             if (av != null)
             {
@@ -546,6 +574,23 @@ public sealed partial class NCAVSystem : EntitySystem
                 Dirty(uid, av);
             }
 
+            return;
+        }
+    }
+
+    private void CompleteLevelTransition(EntityUid uid, int offset)
+    {
+        if (!TryComp<NCAVComponent>(uid, out var av) || !_gridQuery.TryComp(uid, out var grid))
+        {
+            _gridMotion.Cancel(uid);
+            return;
+        }
+        if (!CanEnterAdjacentLevel((uid, grid), offset) || !_gridMotion.TryComplete(uid))
+        {
+            _gridMotion.Cancel(uid);
+            av.VerticalVelocity = 0f;
+            av.LandingBlocked = offset < 0;
+            Dirty(uid, av);
             return;
         }
 

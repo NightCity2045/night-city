@@ -44,7 +44,8 @@
             <Label Text="{Loc 'shuttle-console-angular-velocity'}" />
             <Label Name="GridAngularVelocity" Text="0.0" HorizontalExpand="True" Align="Right" />
         </GridContainer>
-        <controls:StripeBack MinSize="48 48">
+        <!-- NC: Hide the entire radar settings header in AV mode. -->
+        <controls:StripeBack Name="NavSettingsHeader" MinSize="48 48">
             <Label
                 Name="NavSettingsLabel"
                 Text="{Loc 'shuttle-console-nav-settings'}"

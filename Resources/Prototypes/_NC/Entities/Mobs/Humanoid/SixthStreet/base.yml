@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-# Human bodies for manual spawning/possession. No AI, ghost roles or population registration.
 - type: entity
   abstract: true
   parent: MobHuman
@@ -11,3 +10,10 @@
   - type: RandomHumanoidAppearance
     randomizeName: false
     allowedMarkingLayers: [ Hair, FacialHair, UndergarmentTop, UndergarmentBottom ]
+  - type: NpcFactionMember
+    factions: [NCSixthStreet]
+  - type: FactionException
+  - type: NPCRetaliation
+  - type: HTN
+    rootTask:
+      task: SimpleHumanoidHostileCompound

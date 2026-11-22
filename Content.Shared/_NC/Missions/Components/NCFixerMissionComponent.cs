@@ -7,14 +7,14 @@ using Robust.Shared.Prototypes;
 
 namespace Content.Shared._NC.Missions.Components;
 
-/// <summary>Service on a real persistent actor. Binding and physical interaction are checked by the server.</summary>
+/// <summary>Mission service on a physical contact. The server validates proximity and the configured body prototype.</summary>
 [RegisterComponent]
 public sealed partial class NCFixerMissionComponent : Component
 {
     [DataField(required: true)] public ProtoId<NCFixerContactPrototype> Contact;
 }
 
-/// <summary>Mapper anchor for the existing physical actor lifecycle; never a substitute NPC body.</summary>
+/// <summary>Legacy mapper anchor that places the configured physical mission contact.</summary>
 [RegisterComponent]
 public sealed partial class NCFixerContactAnchorComponent : Component
 {

@@ -202,10 +202,6 @@ public sealed partial class ChatSystem
             return;
 
         SendInVoiceRange(ChatChannel.Emotes, action, wrappedMessage, source, range, author);
-        // NC-Edit-Start: allow Living City listeners to perceive successful free-form emotes without treating them as speech.
-        var ncEmote = new Content.Server._NC.LivingCity.Neural.NCNeuralLocalEmoteEvent(source, action);
-        RaiseLocalEvent(source, ncEmote, true);
-        // NC-Edit-End
         if (!hideLog)
             if (name != Name(source))
                 _adminLogger.Add(LogType.Chat, LogImpact.Low, $"Emote from {source} as {name}: {action}");

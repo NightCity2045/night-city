@@ -1,5 +1,6 @@
 using Content.Shared.DoAfter;
 using Content.Shared.Emp;
+using Content.Shared._NC.Skill; // NC
 using Content.Shared.Examine;
 using Content.Shared.Interaction;
 using Content.Shared.Interaction.Events;
@@ -185,7 +186,7 @@ public abstract partial class SharedGunSystem
 
     private void ManualCycle(Entity<BallisticAmmoProviderComponent> ent, MapCoordinates coordinates, EntityUid? user = null, GunComponent? gunComp = null)
     {
-        if (!ent.Comp.Cycleable)
+        if (!ent.Comp.Cycleable || !NCWeaponUseAttemptEvent.CanUse(EntityManager, ent.Owner, user)) // NC
             return;
 
         // Reset shotting for cycling
@@ -325,6 +326,9 @@ public abstract partial class SharedGunSystem
         bool suppressInsertionSound = false
     )
     {
+        if (!NCWeaponUseAttemptEvent.CanUse(EntityManager, entity.Owner, user)) // NC
+            return false; // NC
+
         inserted = _stack.GetOne(inserted);
         var ammoEv = new BeforeAmmoLoadedEvent();
         RaiseLocalEvent(inserted, ref ammoEv);

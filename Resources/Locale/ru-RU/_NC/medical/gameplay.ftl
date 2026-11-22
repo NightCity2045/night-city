@@ -9,6 +9,7 @@ nc-medical-emergency-started = Вы начинаете экстренное вм
 nc-medical-emergency-complete = Экстренное вмешательство завершено.
 nc-medical-transfusion-complete = Переливание завершено. Объём циркулирующей крови восстановлен на {$percent}%.
 nc-medical-emergency-failed = Экстренное вмешательство не удалось: {$reason}.
+nc-medical-cpr-verb = Провести СЛР
 nc-medical-cpr-started = Вы начинаете непрямой массаж сердца.
 nc-medical-surgery-start-failed = Операцию нельзя начать: {$reason}.
 nc-medical-surgery-wrong-tool = Этот инструмент не подходит для текущего этапа операции.

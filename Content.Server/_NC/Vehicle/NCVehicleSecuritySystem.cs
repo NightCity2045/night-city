@@ -63,7 +63,8 @@ public sealed partial class NCVehicleSecuritySystem : EntitySystem
     {
         if (!args.CanAccess || !args.CanInteract || !CanSetArmed(ent.Owner, args.User)) return;
         var user = args.User; var armed = ent.Comp.Armed;
-        args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString(armed ? "nc-vehicle-security-disarm" : "nc-vehicle-security-arm"),
+        var key = armed ? "nc-vehicle-security-disarm" : "nc-vehicle-security-arm";
+        args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString(key), TextLocalizationId = key,
             Act = () => TrySetArmed(ent.Owner, user, !armed) });
     }
     public bool HasHardware(EntityUid uid) => HasComp<NCVehicleSecurityComponent>(uid) && HasComp<LockComponent>(uid) &&

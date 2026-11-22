@@ -37,8 +37,16 @@ namespace Content.Shared.Examine
 
             public readonly bool KnowTarget;
 
+            // NC-Edit-Start
+            /// <summary>
+            /// The message contains only examine details; prepend the client's localized entity description.
+            /// </summary>
+            public readonly bool IncludeClientDescription;
+            // NC-Edit-End
+
             public ExamineInfoResponseMessage(NetEntity entityUid, int id, FormattedMessage message, List<Verb>? verbs=null,
-                bool centerAtCursor=true, bool openAtOldTooltip=true, bool knowTarget = true)
+                bool centerAtCursor=true, bool openAtOldTooltip=true, bool knowTarget = true,
+                bool includeClientDescription = false) // NC
             {
                 EntityUid = entityUid;
                 Id = id;
@@ -47,6 +55,7 @@ namespace Content.Shared.Examine
                 CenterAtCursor = centerAtCursor;
                 OpenAtOldTooltip = openAtOldTooltip;
                 KnowTarget = knowTarget;
+                IncludeClientDescription = includeClientDescription; // NC
             }
         }
     }

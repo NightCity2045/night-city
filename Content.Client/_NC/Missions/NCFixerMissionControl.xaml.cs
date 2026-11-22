@@ -22,7 +22,9 @@ public sealed partial class NCFixerMissionControl : BoxContainer
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IGameTiming _timing = default!;
     private TimeSpan _receivedAt;
+    private bool _workActionPending;
     private int _lastTimerSecond = -1;
+    public event Action<Content.Shared._NC.Coordinates.NCMapCoordinates, string>? OnMap;
     public event Action<BoundUserInterfaceMessage>? OnRequest;
     private NCFixerMissionUpdateMessage? _data;
     private NCFixerWorkEntry? _work;
@@ -35,6 +37,7 @@ public sealed partial class NCFixerMissionControl : BoxContainer
         RobustXamlLoader.Load(this);
         NCAgentAppTheme.Apply(this);
         ReputationButton.OnPressed += _ => ReputationPanel.Visible = !ReputationPanel.Visible;
+        EntranceButton.OnPressed += _ => { if (_work?.Entrance is { } point) OnMap?.Invoke(point, _work.Location); };
         RefreshButton.OnPressed += _ => OnRequest?.Invoke(new NCFixerMissionRefreshMessage());
         AcceptOfferButton.OnPressed += _ =>
         {
@@ -56,6 +59,7 @@ public sealed partial class NCFixerMissionControl : BoxContainer
     {
         var selected = _work?.Id;
         _data = data;
+        _workActionPending = false;
         _receivedAt = receivedAt ?? _timing.RealTime;
         _work = null;
         _offer = null;
@@ -72,6 +76,14 @@ public sealed partial class NCFixerMissionControl : BoxContainer
                 ("executor", score.Executor), ("organizer", score.Organizer), ("trust", score.Trust),
                 ("threshold", score.OrganizerThreshold), ("available", score.AvailableTiers), ("total", score.TotalTiers)));
             reputationText.PushNewline();
+        }
+        Directions.RemoveAllChildren();
+        foreach (var fixer in data?.Reputation ?? [])
+        {
+            if (data?.AtContact != false || fixer.AvailableTiers == 0 || fixer.Position is not { } point) continue;
+            var button = new Button { Text = Loc.GetString("nc-fixer-map-contact", ("name", fixer.ContactName)) };
+            button.OnPressed += _ => OnMap?.Invoke(point, fixer.ContactName);
+            Directions.AddChild(button);
         }
         ReputationLabel.SetMessage(reputationText);
         EmptyLabel.Visible = data?.Work.Count == 0;
@@ -100,15 +112,16 @@ public sealed partial class NCFixerMissionControl : BoxContainer
                 if (work.Id == selected) _work = work;
             }
         }
-        _work ??= data?.Work.FirstOrDefault();
+        _work ??= data?.Work.FirstOrDefault(w => w.State == NCFixerWorkState.Planning) ?? data?.Work.FirstOrDefault();
         RefreshWork();
     }
 
     private void Act(NCFixerWorkAction action, int target = 0)
     {
-        if (_work is not { } work) return;
-        OnRequest?.Invoke(new NCFixerWorkActionMessage(work.Id, work.Version, action, target));
+        if (_work is not { } work || _workActionPending) return;
+        _workActionPending = true;
         InviteButton.Disabled = JoinButton.Disabled = DeclineButton.Disabled = LaunchButton.Disabled = CancelButton.Disabled = DeliverButton.Disabled = true;
+        OnRequest?.Invoke(new NCFixerWorkActionMessage(work.Id, work.Version, action, target));
     }
 
     private void RefreshWork()
@@ -116,6 +129,7 @@ public sealed partial class NCFixerMissionControl : BoxContainer
         _lastTimerSecond = -1;
         InviteRow.Visible = JoinButton.Visible = DeclineButton.Visible = LaunchButton.Visible = CancelButton.Visible = DeliverButton.Visible = false;
         InviteButton.Disabled = JoinButton.Disabled = DeclineButton.Disabled = LaunchButton.Disabled = CancelButton.Disabled = DeliverButton.Disabled = false;
+        EntranceButton.Visible = false;
         DetailsLabel.SetMessage(string.Empty);
         TimeLabel.SetMessage(string.Empty);
         if (_work is not { } work || _data == null) return;
@@ -125,6 +139,7 @@ public sealed partial class NCFixerMissionControl : BoxContainer
             ("organizer", work.OrganizerName), ("names", string.Join(", ", work.CrewNames))), work.Location);
         var organizer = work.Organizer == _data.Viewer;
         var planning = work.State == NCFixerWorkState.Planning;
+        EntranceButton.Visible = !_data.AtContact && work.Entrance != null;
         InviteTarget.Clear();
         foreach (var contact in _contacts)
             if (!work.Crew.Contains(contact.CharacterId) && !work.Invited.Contains(contact.CharacterId))
@@ -133,7 +148,15 @@ public sealed partial class NCFixerMissionControl : BoxContainer
         if (InviteTarget.ItemCount > 0) InviteTarget.Select(0);
         JoinButton.Visible = planning && work.Invited.Contains(_data.Viewer);
         DeclineButton.Visible = planning && !organizer && (work.Invited.Contains(_data.Viewer) || work.Crew.Contains(_data.Viewer));
-        LaunchButton.Visible = organizer && work.State is NCFixerWorkState.Planning or NCFixerWorkState.Deploying;
+        LaunchButton.Visible = organizer && (planning || work.State == NCFixerWorkState.Deploying);
+        var busy = planning && work.Busy;
+        LaunchButton.Disabled = _workActionPending || busy;
+        LaunchButton.ToolTip = busy ? Loc.GetString("nc-agent-missions-busy") : string.Empty;
+        LaunchButton.Text = _prototypes.TryIndex<NCMissionDefinitionPrototype>(work.Definition, out var mission)
+            ? Loc.GetString("nc-fixer-start-timed", ("minutes", (int) Math.Ceiling(mission.RunDuration.TotalMinutes)))
+            : Loc.GetString("nc-fixer-launch");
+        if (planning && string.IsNullOrEmpty(_data.Notice))
+            NoticeLabel.SetMessage(Loc.GetString(busy ? "nc-agent-missions-busy" : "nc-fixer-start-anywhere"));
         CancelButton.Visible = organizer && !work.Surrendered && work.State is not (NCFixerWorkState.Completed or NCFixerWorkState.Cancelled);
         DeliverButton.Visible = organizer && _data.AtContact && work.State is NCFixerWorkState.Active or NCFixerWorkState.Completed;
     }

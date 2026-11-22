@@ -134,6 +134,13 @@ ent-NCShopkeeperFurnitureStore = furniture store clerk
 ent-NCShopkeeperConstructionStore = construction supply clerk
 ent-NCShopkeeperPharmacy = pharmacy clerk
 ent-NCShopkeeperAutoStore = auto dealership clerk
+
+ent-SpawnNCShopkeeperGunStore = gun store clerk spawner
+ent-SpawnNCShopkeeperClothingStore = clothing store clerk spawner
+ent-SpawnNCShopkeeperFurnitureStore = furniture store clerk spawner
+ent-SpawnNCShopkeeperConstructionStore = construction supply clerk spawner
+ent-SpawnNCShopkeeperPharmacy = pharmacy clerk spawner
+ent-SpawnNCShopkeeperAutoStore = auto dealership clerk spawner
 ent-NCFurnitureChairFlatpack = chair flatpack
     .desc = A compact package containing a basic chair.
 ent-NCFurnitureOfficeChairFlatpack = office chair flatpack

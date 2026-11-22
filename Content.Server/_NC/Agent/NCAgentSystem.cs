@@ -27,7 +27,6 @@ public sealed partial class NCAgentSystem : EntitySystem
         InitializeCalls();
         InitializeCommunication();
         InitializeLocks();
-        InitializeCity();
         InitializeMissions();
         InitializeContracts();
         InitializeTraumaTeam();

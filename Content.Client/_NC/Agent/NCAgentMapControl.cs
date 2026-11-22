@@ -923,8 +923,25 @@ public sealed partial class NCAgentMapControl : LayoutContainer
         handle.DrawLine(marker + new Vector2(0f, 7f), marker + new Vector2(0f, 13f), SignalColor.WithAlpha(0.7f));
     }
 
+    private NCAgentMapMarker? _mission;
+    public void FocusMission(NCAgentMapMarker? destination)
+    {
+        _mission = destination;
+        if (destination is { } point && point.NetworkId == _networkId)
+            _targetCenter = _viewCenter = point.Position;
+    }
+
     private void DrawOperationalMarkers(DrawingHandleScreen handle)
     {
+        if (_mission is { } point && point.NetworkId == _networkId)
+        {
+            var at = MapToScreen(point.Position);
+            if (IsInCanvas(at))
+            {
+                handle.DrawCircle(at, 5f, TraumaLastKnownColor);
+                handle.DrawString(_smallFont, at + new Vector2(8f, -7f), $"{point.Label} · Z {point.Z}", TraumaLastKnownColor);
+            }
+        }
         foreach (var tracked in _markers)
         {
             if (tracked.Z != _z || !string.Equals(tracked.NetworkId, _networkId, StringComparison.Ordinal))

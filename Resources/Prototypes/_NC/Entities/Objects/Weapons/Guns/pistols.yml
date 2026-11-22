@@ -161,17 +161,6 @@
     sprite: _NC/Objects/Weapons/Guns/Pistol/mustang_arms_markIII.rsi
 
 - type: entity
-  id: NCWeaponPistolStukach
-  parent: NCBaseWeaponPistol11mm
-  name: Stukach
-  description: A heavy 11mm pistol common among street enforcers.
-  components:
-  - type: Sprite
-    sprite: _NC/Objects/Weapons/Guns/Pistol/stukach.rsi
-  - type: Clothing
-    sprite: _NC/Objects/Weapons/Guns/Pistol/stukach.rsi
-
-- type: entity
   id: NCWeaponPistolOverlord
   parent: NCBaseWeaponPistol12mm
   name: Overlord
@@ -190,6 +179,7 @@
   components:
   - type: Sprite
     sprite: _NC/Objects/Weapons/Guns/Pistol/Militech_Boomer_Buster/big.rsi
+    scale: "0.7, 0.7"
   - type: Item
     sprite: _NC/Objects/Weapons/Guns/Pistol/Militech_Boomer_Buster/tiny.rsi
   - type: Clothing
@@ -203,6 +193,7 @@
   components:
   - type: Sprite
     sprite: _NC/Objects/Weapons/Guns/Pistol/Mallorian_Arms/big.rsi
+    scale: "0.7, 0.7"
     layers:
     - state: base
       map: [ "enum.GunVisualLayers.Base" ]

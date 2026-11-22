@@ -3,3 +3,6 @@
   id: NCZLevelEye
   save: false
   categories: [ HideSpawnMenu ]
+  components:
+  - type: Transform
+    gridTraversal: false

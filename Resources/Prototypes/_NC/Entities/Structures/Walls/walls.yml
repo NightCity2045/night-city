@@ -118,3 +118,16 @@
   - type: IconSmooth
     key: walls
     base: proflistg
+
+- type: entity
+  parent: BaseWall
+  id: NCWallImpassable
+  name: impassable wall
+  components:
+  - type: Sprite
+    sprite: Structures/Walls/solid.rsi
+  - type: Icon
+    sprite: Structures/Walls/solid.rsi
+  - type: IconSmooth
+    key: walls
+    base: solid

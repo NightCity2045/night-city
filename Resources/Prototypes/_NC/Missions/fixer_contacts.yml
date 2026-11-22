@@ -2,48 +2,6 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-- type: ncFixerContact
-  id: NCStreetMissionFixer
-  actorId: 7052d63b-a804-4ea7-8bfc-487c844a1045
-  name: nc-fixer-street-name
-  archetype: NCStreetMissionFixerActor
-  persona: NCResidentPersonaPragmatic
-  openingBudget: 50000
-  organizerTrustThreshold: 50
-  offerCooldown: 5m
-  deliveryWindow: 60m
-  presenceCheckInterval: 1s
-  successEffect: ReputationReliableAction
-  executorDomain: NCMissionExecutor
-  organizerDomain: NCMissionOrganizer
-  missions:
-    NCAgentCombatEasy: 500
-    NCAgentCombatMedium: 1000
-    NCAgentCombatHard: 1800
-    NCAgentCombatVeryHard: 2800
-    NCAgentCombatExtreme: 4000
-
-- type: ncCityActorArchetype
-  id: NCStreetMissionFixerActor
-  entityPrototype: NCStreetMissionFixerBody
-  spawnCandidateProfile: NCPedestrianSpawnCandidates
-  travelMode: Pedestrian
-
-- type: entity
-  parent: NCLivingCityCivilian
-  id: NCStreetMissionFixerBody
-  name: street fixer
-  description: A local contact who finds crews for dangerous work.
-  components:
-  - type: NCFixerMission
-    contact: NCStreetMissionFixer
-  - type: UserInterface
-    interfaces:
-      enum.NCFixerMissionUiKey.Key:
-        type: NCFixerMissionBoundUserInterface
-  - type: ActivatableUI
-    key: enum.NCFixerMissionUiKey.Key
-
 - type: entity
   parent: MarkerBase
   id: NCFixerContactAnchor

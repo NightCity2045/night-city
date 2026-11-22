@@ -35,7 +35,7 @@ public sealed partial class NCZLevelBlurOverlay : Overlay
         if (args.Viewport.Eye is not ScalingViewport.ZEye zeye)
             return false;
 
-        if (zeye.Depth >= 0)
+        if (zeye.Depth >= 0 || zeye.IsGridMotion)
             return false;
 
         if (args.MapId == MapId.Nullspace)

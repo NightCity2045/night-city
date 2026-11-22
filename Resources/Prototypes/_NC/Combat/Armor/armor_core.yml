@@ -118,6 +118,64 @@
   conditionProfile: NCArmorConditionStandard
   ablationGroup: subdermal
 
+- type: ncArmorSection
+  id: NCArmorSectionTraumaArmoredTorso
+  displayName: nc-armor-section-trauma-armored-torso
+  coveredZones: [ NCZoneChest, NCZoneAbdomen, NCZoneGroin ]
+  maxSp: 16
+  applicableDamageClasses: [ Ballistic, Blunt, Slash, Pierce, Blast ]
+  conditionProfile: NCArmorConditionStandard
+  ablationGroup: torsoPlate
+  rigid: true
+  repairProfile: NCArmorRepairPlateField
+
+- type: ncArmorSection
+  id: NCArmorSectionTraumaArmoredLimbs
+  displayName: nc-armor-section-trauma-armored-limbs
+  coveredZones: [ NCZoneArmLeft, NCZoneArmRight, NCZoneLegLeft, NCZoneLegRight ]
+  maxSp: 11
+  applicableDamageClasses: [ Ballistic, Blunt, Slash, Pierce, Blast ]
+  conditionProfile: NCArmorConditionStandard
+  ablationGroup: body
+  repairProfile: NCArmorRepairFabricField
+
+- type: ncArmorSection
+  id: NCArmorSectionTraumaArmoredHelmet
+  displayName: nc-armor-section-trauma-armored-helmet
+  coveredZones: [ NCZoneHead ]
+  maxSp: 16
+  applicableDamageClasses: [ Ballistic, Blunt, Slash, Pierce, Blast ]
+  conditionProfile: NCArmorConditionStandard
+  ablationGroup: head
+  rigid: true
+  repairProfile: NCArmorRepairCompositeField
+
+- type: ncArmorSection
+  id: NCArmorSectionTraumaMedChest
+  displayName: nc-armor-section-trauma-med-chest
+  coveredZones: [ NCZoneChest ]
+  maxSp: 16
+  applicableDamageClasses: [ Ballistic, Blunt, Slash, Pierce, Blast ]
+  conditionProfile: NCArmorConditionStandard
+  ablationGroup: chest
+  repairProfile: NCArmorRepairFabricField
+
+- type: ncArmorSection
+  id: NCArmorSectionTraumaMedBody
+  displayName: nc-armor-section-armorjack-body
+  coveredZones:
+  - NCZoneAbdomen
+  - NCZoneGroin
+  - NCZoneArmLeft
+  - NCZoneArmRight
+  - NCZoneLegLeft
+  - NCZoneLegRight
+  maxSp: 11
+  applicableDamageClasses: [ Ballistic, Blunt, Slash, Pierce, Blast ]
+  conditionProfile: NCArmorConditionStandard
+  ablationGroup: body
+  repairProfile: NCArmorRepairFabricField
+
 - type: ncArmorProfile
   id: NCArmorKevlar
   sections: [ NCArmorSectionKevlarBody ]
@@ -141,6 +199,18 @@
 - type: ncArmorProfile
   id: NCArmorSubdermal
   sections: [ NCArmorSectionSubdermal ]
+
+- type: ncArmorProfile
+  id: NCArmorTraumaArmoredSuit
+  sections: [ NCArmorSectionTraumaArmoredTorso, NCArmorSectionTraumaArmoredLimbs ]
+
+- type: ncArmorProfile
+  id: NCArmorTraumaArmoredHelmet
+  sections: [ NCArmorSectionTraumaArmoredHelmet ]
+
+- type: ncArmorProfile
+  id: NCArmorTraumaMedSuit
+  sections: [ NCArmorSectionTraumaMedChest, NCArmorSectionTraumaMedBody ]
 
 # Consumable field service kit. It can patch common fabric, plate and composite sections to 75% of MaxSP.
 - type: entity

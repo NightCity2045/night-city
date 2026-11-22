@@ -1944,10 +1944,14 @@
     - kind: Polygon
       z: 0
       vertices:
-      - -47,-56
-      - -47,-72
+      - -75,-55
+      - -73,-55
+      - -73,-56
+      - -66,-56
+      - -66,-72
       - -77,-72
       - -77,-56
+      - -75,-56
   - id: 33100ff7-7f3a-43e9-a582-4aa8f8c1e1af
     kind: Apartment
     parent: b47a903b-d4ba-41d2-8c07-a333e2767cfe
@@ -2231,3 +2235,16 @@
       - -15,-52
       - -15,-48
       - -14,-48
+  - id: 722aaad2-b9bf-46bf-aa35-5cf33a07544b
+    kind: Building
+    parent: 4f59226c-9e3f-4300-b981-7b1951a9f7c1
+    name: "G Potomac Ave. building 04"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -41,-15
+      - -50,-15
+      - -50,0
+      - -34,0
+      - -34,-15

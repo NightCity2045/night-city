@@ -1,0 +1,120 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: MarkerBase
+  id: NCElevatorSpawner
+  name: elevator spawner
+  suffix: 3x3
+  description: Creates a 3x3 cabin. Place this marker in the center of a floor tile or a clear shaft. On the other floors, leave a clear shaft at the same XY.
+  components:
+  - type: Sprite
+    layers:
+    - state: blue
+  - type: NCElevatorSpawner
+
+- type: entity
+  parent: BaseWallmount
+  id: NCElevatorPanel
+  name: elevator panel
+  description: Select up or down to travel one floor. Operates the cabin carrying this panel.
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Sprite
+    sprite: Structures/Wallmounts/switch.rsi
+    state: on
+  - type: NCElevatorPanel
+  - type: NCElevatorCabinPart
+  - type: UserInterface
+    interfaces:
+      enum.NCElevatorUiKey.Key:
+        type: NCElevatorBoundUserInterface
+  - type: ActivatableUI
+    key: enum.NCElevatorUiKey.Key
+
+- type: entity
+  parent: BaseWallmount
+  id: NCElevatorCallButton
+  name: elevator call button
+  description: Calls the linked elevator to this floor.
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Sprite
+    sprite: Structures/Wallmounts/switch.rsi
+    state: on
+  - type: NCElevatorCallButton
+
+# A thin safety railing that deploys inside the platform boundary during a trip.
+- type: entity
+  id: NCElevatorTravelBarrier
+  categories: [ HideSpawnMenu ]
+  name: elevator safety railing
+  description: Retractable safety rails keep the cabin enclosed during travel.
+  components:
+  - type: NCElevatorCabinPart
+  - type: Transform
+    anchored: true
+  - type: Physics
+    bodyType: Static
+    canCollide: false
+  - type: Fixtures
+    fixtures:
+      north:
+        shape: !type:PhysShapeAabb
+          bounds: "-1.5,1.42,1.5,1.5"
+        layer: [ Impassable, HighImpassable, MidImpassable, LowImpassable ]
+      south:
+        shape: !type:PhysShapeAabb
+          bounds: "-1.5,-1.5,1.5,-1.42"
+        layer: [ Impassable, HighImpassable, MidImpassable, LowImpassable ]
+      east:
+        shape: !type:PhysShapeAabb
+          bounds: "1.42,-1.5,1.5,1.5"
+        layer: [ Impassable, HighImpassable, MidImpassable, LowImpassable ]
+      west:
+        shape: !type:PhysShapeAabb
+          bounds: "-1.5,-1.5,-1.42,1.5"
+        layer: [ Impassable, HighImpassable, MidImpassable, LowImpassable ]
+  - type: Sprite
+    sprite: Structures/Doors/Shutters/shutters.rsi
+    drawdepth: Overdoors
+    layers:
+    - state: closed
+      scale: "3,0.08"
+      offset: "0,1.46"
+      map: [ railNorth ]
+      visible: false
+    - state: closed
+      scale: "3,0.08"
+      offset: "0,-1.46"
+      map: [ railSouth ]
+      visible: false
+    - state: closed
+      scale: "0.08,3"
+      offset: "1.46,0"
+      map: [ railEast ]
+      visible: false
+    - state: closed
+      scale: "0.08,3"
+      offset: "-1.46,0"
+      map: [ railWest ]
+      visible: false
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.NCElevatorBarrierVisuals.Deployed:
+        railNorth:
+          True: { visible: true }
+          False: { visible: false }
+        railSouth:
+          True: { visible: true }
+          False: { visible: false }
+        railEast:
+          True: { visible: true }
+          False: { visible: false }
+        railWest:
+          True: { visible: true }
+          False: { visible: false }

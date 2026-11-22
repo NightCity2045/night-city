@@ -17,6 +17,8 @@ using Content.Shared.Medical;
 using Content.Shared.Popups;
 using Content.Shared.Standing;
 using Content.Shared.Stacks;
+using Content.Shared.Verbs;
+using Content.Shared.ActionBlocker;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
@@ -35,6 +37,7 @@ public sealed partial class NCEmergencyCareInteractionSystem : EntitySystem
     [Dependency] private SharedInteractionSystem _interaction = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private StandingStateSystem _standing = default!;
+    [Dependency] private ActionBlockerSystem _actionBlocker = default!;
     [Dependency] private NCEmergencyCareSystem _emergency = default!;
     [Dependency] private NCTreatmentInteractionSystem _treatment = default!;
 
@@ -143,6 +146,35 @@ public sealed partial class NCEmergencyCareInteractionSystem : EntitySystem
             _popup.PopupEntity(Loc.GetString("nc-medical-interaction-invalidated"), patient.Owner, args.User);
     }
 
+    /// <summary>Contributes to the diagnostic system's single medical-body verb subscription.</summary>
+    public void AddPatientVerbs(Entity<NCMedicalBodyComponent> patient, ref GetVerbsEvent<AlternativeVerb> args)
+    {
+        if (!args.CanAccess || !args.CanInteract || !CanStartCpr(args.User, patient.Owner, out _))
+            return;
+
+        var user = args.User;
+        args.Verbs.Add(new AlternativeVerb
+        {
+            Text = Loc.GetString("nc-medical-cpr-verb"),
+            Priority = 3,
+            Act = () => TryStartCpr(user, patient.Owner, out _, out _),
+        });
+    }
+
+    private bool CanStartCpr(EntityUid user, EntityUid patient, out NCEmergencyCareProfilePrototype profile)
+    {
+        profile = _prototypes.EnumeratePrototypes<NCEmergencyCareProfilePrototype>()
+            .Where(candidate => candidate.DefaultForHumans)
+            .OrderBy(candidate => candidate.ID, StringComparer.Ordinal)
+            .FirstOrDefault()!;
+        return user != patient && !Deleted(user) && !Deleted(patient) &&
+               HasComp<NCMedicalBodyComponent>(patient) && _standing.IsDown(patient) &&
+               _hands.GetEmptyHandCount(user) > 0 && !_hands.TryGetActiveItem(user, out _) &&
+               _actionBlocker.CanInteract(user, patient) &&
+               profile != null && profile.CprApplicationDuration > TimeSpan.Zero &&
+               _interaction.InRangeUnobstructed(user, patient, profile.CprInteractionRange);
+    }
+
     /// <summary>
     /// Starts the shared physical CPR interaction used by players and autonomous clinicians. The emergency
     /// resolver remains authoritative and revalidates the patient, free hand, range and physiology on completion.
@@ -155,16 +187,7 @@ public sealed partial class NCEmergencyCareInteractionSystem : EntitySystem
     {
         resolutionId = default;
         duration = TimeSpan.Zero;
-        var profile = _prototypes.EnumeratePrototypes<NCEmergencyCareProfilePrototype>()
-            .Where(candidate => candidate.DefaultForHumans)
-            .OrderBy(candidate => candidate.ID, StringComparer.Ordinal)
-            .FirstOrDefault();
-        if (user == patient || Deleted(user) || Deleted(patient) ||
-            !HasComp<NCMedicalBodyComponent>(patient) ||
-            !_standing.IsDown(patient) ||
-            _hands.TryGetActiveItem(user, out _) ||
-            profile == null || profile.CprApplicationDuration <= TimeSpan.Zero ||
-            !_interaction.InRangeUnobstructed(user, patient, profile.CprInteractionRange))
+        if (!CanStartCpr(user, patient, out var profile))
         {
             return false;
         }
@@ -203,14 +226,7 @@ public sealed partial class NCEmergencyCareInteractionSystem : EntitySystem
             return;
 
         args.Handled = true;
-        var profile = _prototypes.EnumeratePrototypes<NCEmergencyCareProfilePrototype>()
-            .Where(candidate => candidate.DefaultForHumans)
-            .OrderBy(candidate => candidate.ID, StringComparer.Ordinal)
-            .FirstOrDefault();
-        if (profile == null ||
-            !_standing.IsDown(patient.Owner) ||
-            _hands.TryGetActiveItem(args.User, out _) ||
-            !_interaction.InRangeUnobstructed(args.User, patient.Owner, profile.CprInteractionRange))
+        if (!CanStartCpr(args.User, patient.Owner, out _))
         {
             _popup.PopupEntity(Loc.GetString("nc-medical-interaction-invalidated"), patient.Owner, args.User);
             return;

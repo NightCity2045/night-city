@@ -326,6 +326,7 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
         _alertsSystem.ShowAlert(entity, pilotComponent.PilotingAlert);
 
         pilotComponent.Console = uid;
+        _eyeSystem.UpdatePvsScale(entity); // NC
         ActionBlockerSystem.UpdateCanMove(entity);
         pilotComponent.Position = Transform(entity).Coordinates;
         Dirty(entity, pilotComponent);

@@ -1,23 +1,73 @@
 <windows:CharacterWindow
     xmlns="https://spacestation14.io"
-    xmlns:cc="clr-namespace:Content.Client.UserInterface.Controls"
+    xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
     xmlns:windows="clr-namespace:Content.Client.UserInterface.Systems.Character.Windows"
-    Title="{Loc 'character-info-title'}"
-    MinWidth="400"
-    MinHeight="545">
-    <ScrollContainer>
-        <BoxContainer Orientation="Vertical">
-            <Label Name="RoleType" VerticalAlignment="Top" Margin="0 6 0 10" HorizontalAlignment="Center" StyleClasses="LabelHeading" Access="Public"/>
-            <BoxContainer Orientation="Horizontal">
-                <SpriteView OverrideDirection="South" Scale="2 2" Name="SpriteView" Access="Public" SetSize="64 64"/>
-                <BoxContainer Orientation="Vertical" VerticalAlignment="Top">
-                    <Label Name="NameLabel" Access="Public"/>
-                    <Label Name="SubText" VerticalAlignment="Top" StyleClasses="LabelSubText" Access="Public"/>
+    SetSize="460 430" MinSize="390 300">
+    <!-- NC-Edit-Start -->
+    <PanelContainer>
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#181D23" />
+        </PanelContainer.PanelOverride>
+        <BoxContainer Orientation="Vertical" Margin="12" SeparationOverride="12">
+            <BoxContainer Orientation="Horizontal" SeparationOverride="12">
+                <PanelContainer SetSize="76 76" VerticalAlignment="Top">
+                    <PanelContainer.PanelOverride>
+                        <gfx:StyleBoxFlat BackgroundColor="#101419" BorderColor="#384449" BorderThickness="1" />
+                    </PanelContainer.PanelOverride>
+                    <SpriteView Name="SpriteView" OverrideDirection="South" Scale="2 2" SetSize="64 64"
+                                HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </PanelContainer>
+                <BoxContainer Orientation="Vertical" VerticalAlignment="Center" HorizontalExpand="True" SeparationOverride="3">
+                    <RichTextLabel Name="NameLabel" HorizontalExpand="True" />
+                    <RichTextLabel Name="JobLabel" HorizontalExpand="True" />
+                    <Label Name="RoleType" Access="Public" Visible="False" />
                 </BoxContainer>
             </BoxContainer>
-            <Label Name="ObjectivesLabel" Access="Public" Text="{Loc 'character-info-objectives-label'}" HorizontalAlignment="Center"/>
-            <BoxContainer Orientation="Vertical" Name="Objectives" Access="Public"/>
-            <cc:Placeholder Name="RolePlaceholder" Access="Public" PlaceholderText="{Loc 'character-info-roles-antagonist-text'}"/>
+
+            <PanelContainer>
+                <PanelContainer.PanelOverride>
+                    <gfx:StyleBoxFlat BackgroundColor="#20282F" BorderColor="#46605E" BorderThickness="1" />
+                </PanelContainer.PanelOverride>
+                <BoxContainer Orientation="Vertical" Margin="10" SeparationOverride="7">
+                    <BoxContainer Name="ProgressSummary" Orientation="Horizontal" SeparationOverride="8" Visible="False">
+                        <Label Name="LevelLabel" StyleClasses="LabelHeading" HorizontalExpand="True" />
+                        <Label Name="PointsLabel" FontColorOverride="#B9D3CF" />
+                    </BoxContainer>
+                    <BoxContainer Orientation="Horizontal" SeparationOverride="10">
+                        <BoxContainer Orientation="Vertical" VerticalAlignment="Center" HorizontalExpand="True" SeparationOverride="4">
+                            <ProgressBar Name="ExperienceBar" HorizontalExpand="True" SetHeight="6" Visible="False">
+                                <ProgressBar.BackgroundStyleBoxOverride>
+                                    <gfx:StyleBoxFlat BackgroundColor="#11181E" />
+                                </ProgressBar.BackgroundStyleBoxOverride>
+                                <ProgressBar.ForegroundStyleBoxOverride>
+                                    <gfx:StyleBoxFlat BackgroundColor="#5DADA3" />
+                                </ProgressBar.ForegroundStyleBoxOverride>
+                            </ProgressBar>
+                            <Label Name="ExperienceLabel" FontColorOverride="#B9D3CF" />
+                        </BoxContainer>
+                        <Button Name="SkillsButton" Disabled="True" />
+                    </BoxContainer>
+                </BoxContainer>
+            </PanelContainer>
+
+            <ScrollContainer Name="DetailsScroll" VerticalExpand="True" HScrollEnabled="False">
+                <BoxContainer Orientation="Vertical" HorizontalExpand="True" SeparationOverride="12">
+                    <BoxContainer Name="BriefingSection" Access="Public" Orientation="Vertical" SeparationOverride="4" Visible="False">
+                        <Label Name="BriefingTitle" StyleClasses="LabelHeading" FontColorOverride="#8CCFC4" />
+                        <RichTextLabel Name="BriefingText" Access="Public" HorizontalExpand="True" />
+                    </BoxContainer>
+                    <BoxContainer Name="ObjectivesSection" Access="Public" Orientation="Vertical" SeparationOverride="4" Visible="False">
+                        <Label Name="ObjectivesTitle" StyleClasses="LabelHeading" FontColorOverride="#8CCFC4" />
+                        <Label Name="EmptyObjectives" Access="Public" FontColorOverride="#9CAAB1" Visible="False" />
+                        <BoxContainer Name="Objectives" Access="Public" Orientation="Vertical" SeparationOverride="6" />
+                    </BoxContainer>
+                    <BoxContainer Name="AdditionalSection" Access="Public" Orientation="Vertical" SeparationOverride="4" Visible="False">
+                        <Label Name="AdditionalTitle" StyleClasses="LabelHeading" FontColorOverride="#8CCFC4" />
+                        <BoxContainer Name="AdditionalInfo" Access="Public" Orientation="Vertical" SeparationOverride="4" />
+                    </BoxContainer>
+                </BoxContainer>
+            </ScrollContainer>
         </BoxContainer>
-    </ScrollContainer>
+    </PanelContainer>
+    <!-- NC-Edit-End -->
 </windows:CharacterWindow>

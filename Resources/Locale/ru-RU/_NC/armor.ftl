@@ -7,6 +7,10 @@ nc-armor-section-armorjack-body = секция лёгкого бронекост
 nc-armor-section-plate-carrier = грудная бронепластина
 nc-armor-section-combat-helmet = корпус боевого шлема
 nc-armor-section-closed-helmet = корпус закрытого шлема
+nc-armor-section-trauma-armored-torso = бронеплиты корпуса Trauma Team
+nc-armor-section-trauma-armored-limbs = защита рук и ног Trauma Team
+nc-armor-section-trauma-armored-helmet = корпус бронированного шлема Trauma Team
+nc-armor-section-trauma-med-chest = защита груди медика Trauma Team
 nc-armor-section-subdermal = подкожная броня
 
 nc-armor-condition-intact = цела

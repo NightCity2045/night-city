@@ -24,8 +24,7 @@ namespace Content.Server._NC.LivingCity.Navigation;
 /// </summary>
 public sealed partial class NCStationSemanticDestinationSystem : EntitySystem
 {
-    public static readonly ProtoId<NCStationSemanticDestinationPolicyPrototype> DefaultPolicy =
-        new("NCDefaultStationSemanticDestinations");
+    private const string DefaultPolicyId = "NCDefaultStationSemanticDestinations";
 
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
@@ -56,7 +55,7 @@ public sealed partial class NCStationSemanticDestinationSystem : EntitySystem
     /// Returns zero when the actor is not on a station or the station has no usable authored anchors.
     /// </summary>
     public int BuildFor(EntityUid actor, List<NCStationSemanticDestination> output) =>
-        BuildFor(actor, DefaultPolicy, output);
+        BuildFor(actor, new ProtoId<NCStationSemanticDestinationPolicyPrototype>(DefaultPolicyId), output);
 
     public int BuildFor(
         EntityUid actor,

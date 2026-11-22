@@ -2,6 +2,11 @@
 
 # AGENTS.md
 
+## User Request Scope
+
+- Work only within the scope of the user's request. A question or a request to investigate authorizes diagnosis and an answer. Apply fixes only when the user asks for changes.
+- When the user says they handled an issue themselves, stop work on it. Resume edits or run further verification only if they ask.
+
 ## How To Use Repo Guidance
 
 At the start of a task:

@@ -21,7 +21,9 @@ public sealed partial class ShuttleConsoleWindow : FancyWindow,
     private ShuttleConsoleMode _mode = ShuttleConsoleMode.Nav;
     // NC-Edit-Start
     private const float AVRefreshInterval = 0.1f;
+    private static readonly Vector2 AVWindowSize = new(760, 380);
 
+    private readonly Vector2 _shuttleWindowSize;
     private EntityUid? _shuttleEntity;
     private bool _avMode;
     private float _avRefreshAccumulator;
@@ -37,6 +39,7 @@ public sealed partial class ShuttleConsoleWindow : FancyWindow,
     {
         RobustXamlLoader.Load(this);
         IoCManager.InjectDependencies(this);
+        _shuttleWindowSize = MinSize; // NC
 
         // Mode switching
         NavModeButton.OnPressed += NavPressed;
@@ -181,6 +184,9 @@ public sealed partial class ShuttleConsoleWindow : FancyWindow,
         {
             _avMode = isAV;
             AVFlightPanel.Visible = isAV;
+            ModeButtons.Visible = !isAV;
+            MinSize = isAV ? AVWindowSize : _shuttleWindowSize;
+            SetSize = MinSize;
             MapModeButton.Visible = !isAV;
             DockModeButton.Visible = !isAV;
             NavContainer.SetAVMode(isAV);

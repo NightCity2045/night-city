@@ -363,7 +363,7 @@ namespace Content.Shared.Examine
         /// <summary>
         /// Generate the examine message for a pair of examiner and an entity.
         /// </summary>
-        public FormattedMessage GetExamineText(EntityUid entity, EntityUid? examiner)
+        public FormattedMessage GetExamineText(EntityUid entity, EntityUid? examiner, bool includeDescription = true) // NC
         {
             var message = new FormattedMessage();
 
@@ -376,7 +376,7 @@ namespace Content.Shared.Examine
             var metadata = MetaData(entity);
 
             //Add an entity description if one is declared
-            if (!string.IsNullOrEmpty(metadata.EntityDescription))
+            if (includeDescription && !string.IsNullOrEmpty(metadata.EntityDescription)) // NC
             {
                 message.AddMarkupOrThrow(metadata.EntityDescription);
                 hasDescription = true;

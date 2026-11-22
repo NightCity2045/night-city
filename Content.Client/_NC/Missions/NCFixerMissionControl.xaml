@@ -12,7 +12,7 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
     </BoxContainer>
     <ScrollContainer VerticalExpand="True" HScrollEnabled="False">
         <BoxContainer Orientation="Vertical" HorizontalExpand="True">
-            <PanelContainer Name="ReputationPanel" Margin="0 8">
+            <PanelContainer Name="ReputationPanel" Visible="False" Margin="0 8">
                 <PanelContainer.PanelOverride>
                     <gfx:StyleBoxFlat BackgroundColor="#071015" BorderColor="#24E0D0" BorderThickness="1" />
                 </PanelContainer.PanelOverride>
@@ -22,6 +22,8 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                     <RichTextLabel Text="{Loc 'nc-fixer-reputation-help'}" />
                 </BoxContainer>
             </PanelContainer>
+            <BoxContainer Name="Directions" Orientation="Vertical" />
+            <Button Name="EntranceButton" Text="{Loc 'nc-fixer-map-entrance'}" Visible="False" />
             <RichTextLabel Name="NoticeLabel" Margin="0 6" />
             <BoxContainer Name="OffersList" Orientation="Vertical" Visible="False" />
             <Button Name="AcceptOfferButton" Text="{Loc 'nc-fixer-accept-offer'}" Visible="False" Disabled="True" />

@@ -34,10 +34,32 @@ namespace Content.IntegrationTests.Tests._NC.LivingCity.Neural;
 [TestOf(typeof(NCHumanVanillaActionAdapterSystem))]
 public sealed class NCHumanPlayerActionSurfaceTest : GameTest
 {
-    private static readonly ProtoId<NCHumanActionPrototype> UnbuckleActionId =
-        new("human-unbuckle-self");
-    private static readonly ProtoId<NCHumanActionPrototype> TreatPersonActionId =
-        new("human-use-held-on-person");
+    private const string UnbuckleActionId = "human-unbuckle-self";
+    private const string TreatPersonActionId = "human-use-held-on-person";
+
+    [TestPrototypes]
+    private static readonly string ActionPrototypes = $"""
+        - type: ncHumanAction
+          id: {UnbuckleActionId}
+          executor: VanillaInteraction
+          operation: UnbuckleSelf
+          targetKind: None
+          completion: WorldStateChanged
+          timeout: 15s
+          requiresPhysicalEntity: true
+          interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
+
+        - type: ncHumanAction
+          id: {TreatPersonActionId}
+          executor: VanillaInteraction
+          operation: UseHeldOnInjuredPerson
+          targetKind: Person
+          completion: WorldStateChanged
+          timeout: 30s
+          requiresPhysicalEntity: true
+          maximumRange: 2
+          interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
+        """;
 
     public override PoolSettings PoolSettings => new()
     {
@@ -69,7 +91,7 @@ public sealed class NCHumanPlayerActionSurfaceTest : GameTest
         await server.WaitRunTicks(60);
         await server.WaitAssertion(() =>
         {
-            var action = prototypes.Index(UnbuckleActionId);
+            var action = prototypes.Index<NCHumanActionPrototype>(UnbuckleActionId);
             var now = new NCActiveWorldTime(100);
             var actorId = NCActorId.New();
             var intention = new NCCognitionIntentionSnapshot(
@@ -166,7 +188,7 @@ public sealed class NCHumanPlayerActionSurfaceTest : GameTest
             beforeRevision = entities.GetComponent<NCMedicalBodyComponent>(patient).MedicalRevision;
             beforeStack = entities.GetComponent<StackComponent>(gauze).Count;
 
-            action = prototypes.Index(TreatPersonActionId);
+            action = prototypes.Index<NCHumanActionPrototype>(TreatPersonActionId);
             intention = new NCCognitionIntentionSnapshot(
                 Guid.NewGuid(),
                 "NCCognitionUseHeldOnPerson",
