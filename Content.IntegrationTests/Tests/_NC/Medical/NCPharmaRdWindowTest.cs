@@ -102,4 +102,26 @@ public sealed class NCPharmaRdWindowTest : GameTest
         Assert.That(ejected, Is.Null);
         window.Close();
     }
+
+    [TestCase(580f, 440f)]
+    [TestCase(900f, 620f)]
+    [TestCase(1400f, 900f)]
+    [RunOnSide(Side.Client)]
+    public void TheConsoleLaysOutAtAnyWindowSizeWithoutThrowing(float width, float height)
+    {
+        var window = new NCPharmaRdWindow();
+        window.UpdateState(State());
+        window.OpenCentered();
+        window.SetSize = new System.Numerics.Vector2(width, height);
+        Assert.DoesNotThrow(() =>
+        {
+            window.Measure(new System.Numerics.Vector2(width, height));
+            window.Arrange(new Robust.Shared.Maths.UIBox2(0, 0, width, height));
+        });
+
+        // The text panel of the tree tab must never be squeezed to a sliver.
+        var materials = window.FindControl<RichTextLabel>("MaterialsLabel");
+        Assert.That(materials.Width, Is.GreaterThanOrEqualTo(150f), "the text panel keeps a readable width");
+        window.Close();
+    }
 }
