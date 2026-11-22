@@ -323,33 +323,43 @@
     sprite: Objects/Specific/Medical/medipen.rsi
   - type: NCPharmaContainer
 
+# A source canister is a jug: the extractor pours the extract into it and the synthesizer draws from it. The prefilled
+# ones are what a supplier sells; the stated grade is only a label, the contents decide purity and contamination.
 - type: entity
-  parent: BaseItem
+  parent: Jug
+  id: NCPharmaSourceCanister
+  name: source canister
+  description: A canister for refined source material. What it holds shows on examination.
+  components:
+  - type: NCPharmaSource
+
+- type: entity
+  parent: NCPharmaSourceCanister
   id: NCPharmaSourceCanisterStreet
   suffix: street grade
   components:
-  - type: Sprite
-    sprite: Objects/Specific/Chemistry/bottle.rsi
-    state: bottle-1
-  - type: Item
-    size: Small
-    sprite: Objects/Specific/Chemistry/bottle.rsi
-  - type: NCPharmaSource
-    units: 30
-    purity: 0.78
-  - type: NCPharmaSourceHidden
-    contaminants: 0.12
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCPharmaSourceNeuro
+        Quantity: 30
+      - ReagentId: NCPharmaImpurity
+        Quantity: 4
+      - ReagentId: NCPharmaSludge
+        Quantity: 5
 
 - type: entity
-  parent: NCPharmaSourceCanisterStreet
+  parent: NCPharmaSourceCanister
   id: NCPharmaSourceCanisterClinical
   suffix: clinical grade
   components:
-  - type: NCPharmaSource
-    units: 20
-    purity: 0.95
-  - type: NCPharmaSourceHidden
-    contaminants: 0.01
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCPharmaSourceNeuro
+        Quantity: 20
+      - ReagentId: NCPharmaImpurity
+        Quantity: 1
 
 - type: entity
   abstract: true

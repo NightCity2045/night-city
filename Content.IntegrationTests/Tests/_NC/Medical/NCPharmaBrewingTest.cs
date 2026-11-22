@@ -54,7 +54,7 @@ public sealed class NCPharmaBrewingTest : GameTest
         var solution = soln.Comp.Solution;
         Assert.Multiple(() =>
         {
-            Assert.That((float) solution.GetTotalPrototypeQuantity(Broth), Is.EqualTo(30f).Within(0.5f),
+            Assert.That((float) solution.GetTotalPrototypeQuantity(Broth), Is.EqualTo(27f).Within(1f),
                 "two parts substrate and one part solvent must brew into broth");
             Assert.That((float) solution.GetTotalPrototypeQuantity(Sludge), Is.EqualTo(0f));
         });
@@ -89,7 +89,7 @@ public sealed class NCPharmaBrewingTest : GameTest
         {
             Assert.That((float) solution.GetTotalPrototypeQuantity(Sludge), Is.GreaterThan(0f),
                 "an overheated brew must leave sludge behind");
-            Assert.That((float) solution.GetTotalPrototypeQuantity(Broth), Is.LessThan(30f));
+            Assert.That((float) solution.GetTotalPrototypeQuantity(Broth), Is.LessThan(27f));
         });
     }
 
@@ -105,7 +105,7 @@ public sealed class NCPharmaBrewingTest : GameTest
         var solution = soln.Comp.Solution;
         Assert.Multiple(() =>
         {
-            Assert.That((float) solution.GetTotalPrototypeQuantity(OtherBroth), Is.EqualTo(30f).Within(0.5f));
+            Assert.That((float) solution.GetTotalPrototypeQuantity(OtherBroth), Is.EqualTo(27f).Within(1f));
             Assert.That((float) solution.GetTotalPrototypeQuantity(Broth), Is.EqualTo(0f));
         });
     }

@@ -427,3 +427,19 @@ ent-NCLabSampleVial = пробирка для образцов
 nc-lab-sample-spoiled = В пробирке больше нет образца: его вылили.
 nc-pharma-purifier-examine = В колонне фильтра осталось проходов: [bold]{$charges}[/bold].
 nc-pharma-filter-examine = Ёмкость фильтра: проходов очистителя — [bold]{$charges}[/bold].
+
+# --- Исходный материал как жидкость ------------------------------------------------------------------------
+reagent-name-nc-pharma-source-neuro = очищенный материал (нейронный)
+reagent-desc-nc-pharma-source-neuro = Очищенный материал (нейронный) для синтеза. Чистый стоит дорого; разбавленный или загрязнённый всё ещё годится, но партия это покажет.
+reagent-name-nc-pharma-source-cardio = очищенный материал (сердечный)
+reagent-desc-nc-pharma-source-cardio = Очищенный материал (сердечный) для синтеза. Чистый стоит дорого; разбавленный или загрязнённый всё ещё годится, но партия это покажет.
+reagent-name-nc-pharma-source-hemato = очищенный материал (кроветворный)
+reagent-desc-nc-pharma-source-hemato = Очищенный материал (кроветворный) для синтеза. Чистый стоит дорого; разбавленный или загрязнённый всё ещё годится, но партия это покажет.
+reagent-name-nc-pharma-source-microbial = очищенный материал (микробный)
+reagent-desc-nc-pharma-source-microbial = Очищенный материал (микробный) для синтеза. Чистый стоит дорого; разбавленный или загрязнённый всё ещё годится, но партия это покажет.
+reagent-name-nc-pharma-source-immune = очищенный материал (иммунный)
+reagent-desc-nc-pharma-source-immune = Очищенный материал (иммунный) для синтеза. Чистый стоит дорого; разбавленный или загрязнённый всё ещё годится, но партия это покажет.
+reagent-name-nc-pharma-impurity = остаток процесса
+reagent-desc-nc-pharma-impurity = Нейтральный остаток варки и экстракции. Только разбавляет то, с чем смешан.
+nc-pharma-source-empty = В канистре нет очищенного исходного материала.
+nc-pharma-source-examine = Очищенный материал: [bold]{$units}[/bold] ед., чистота [bold]{$purity}[/bold].

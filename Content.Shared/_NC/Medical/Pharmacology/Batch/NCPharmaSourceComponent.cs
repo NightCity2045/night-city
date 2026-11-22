@@ -2,28 +2,15 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-using Content.Shared._NC.Medical.Pharmacology.Lab;
 using Robust.Shared.GameStates;
-using Robust.Shared.Prototypes;
 
 namespace Content.Shared._NC.Medical.Pharmacology.Batch;
 
 /// <summary>
-/// Raw material for a synthesis run. It is a finite physical resource with its own quality: a poor supplier
-/// gives a poor batch, and a spent canister is gone.
+/// Marks a canister as source material for a synthesis run. The material itself is the canister's solution: the
+/// reagent of a feedstock is the wanted compound, a neutral impurity dilutes it and sludge contaminates it. Purity,
+/// contamination and quantity are read from that composition, so a canister can be poured, mixed and topped up like
+/// any other container.
 /// </summary>
-[RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
-public sealed partial class NCPharmaSourceComponent : Component
-{
-    /// <summary>Units of material left. One unit makes about one dose at standard yield.</summary>
-    [DataField, AutoNetworkedField]
-    public float Units = 20f;
-
-    /// <summary>Share of the material that is the wanted compound, as the supplier states it.</summary>
-    [DataField, AutoNetworkedField]
-    public float Purity = 0.9f;
-
-    /// <summary>What the material is made of. A compound can only be made from the feedstocks it accepts.</summary>
-    [DataField, AutoNetworkedField]
-    public ProtoId<NCPharmaFeedstockPrototype>? Feedstock;
-}
+[RegisterComponent, NetworkedComponent]
+public sealed partial class NCPharmaSourceComponent : Component;

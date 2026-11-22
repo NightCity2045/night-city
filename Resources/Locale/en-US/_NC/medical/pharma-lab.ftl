@@ -427,3 +427,19 @@ ent-NCLabSampleVial = sample vial
 nc-lab-sample-spoiled = The vial holds no sample any more: it was poured out.
 nc-pharma-purifier-examine = The filter in the column has [bold]{$charges}[/bold] passes left.
 nc-pharma-filter-examine = Filter capacity: [bold]{$charges}[/bold] purifier passes.
+
+# --- Source material as a liquid ---------------------------------------------------------------------------
+reagent-name-nc-pharma-source-neuro = refined neural material
+reagent-desc-nc-pharma-source-neuro = Refined neural material, ready for synthesis. Pure it is expensive; diluted or fouled it still works, but the batch shows it.
+reagent-name-nc-pharma-source-cardio = refined cardiac material
+reagent-desc-nc-pharma-source-cardio = Refined cardiac material, ready for synthesis. Pure it is expensive; diluted or fouled it still works, but the batch shows it.
+reagent-name-nc-pharma-source-hemato = refined blood material
+reagent-desc-nc-pharma-source-hemato = Refined blood material, ready for synthesis. Pure it is expensive; diluted or fouled it still works, but the batch shows it.
+reagent-name-nc-pharma-source-microbial = refined microbial material
+reagent-desc-nc-pharma-source-microbial = Refined microbial material, ready for synthesis. Pure it is expensive; diluted or fouled it still works, but the batch shows it.
+reagent-name-nc-pharma-source-immune = refined immune material
+reagent-desc-nc-pharma-source-immune = Refined immune material, ready for synthesis. Pure it is expensive; diluted or fouled it still works, but the batch shows it.
+reagent-name-nc-pharma-impurity = process residue
+reagent-desc-nc-pharma-impurity = Neutral residue of brewing and extraction. It does nothing but thin out whatever it is mixed into.
+nc-pharma-source-empty = The canister holds no refined source material.
+nc-pharma-source-examine = Refined material: [bold]{$units}[/bold] units, purity [bold]{$purity}[/bold].

@@ -34,6 +34,7 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private ItemSlotsSystem _itemSlots = default!;
     [Dependency] private SharedSolutionContainerSystem _solutions = default!;
+    [Dependency] private NCPharmaSourceSystem _sources = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private UserInterfaceSystem _ui = default!;
     [Dependency] private SmokeSystem _smoke = default!;
@@ -158,7 +159,7 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
         if (source.Units < units)
             return NCPharmaReactorNotice.NotEnoughSource;
         // NC: the compound can only be made from the raw material it accepts.
-        var yield = _batches.ResolveFeedstockYield(formula, source.Feedstock?.Id);
+        var yield = _batches.ResolveFeedstockYield(formula, source.Feedstock);
         if (yield <= 0f)
             return NCPharmaReactorNotice.WrongFeedstock;
 
@@ -166,10 +167,7 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
         if (!_prototypes.TryIndex(reactionId, out var profile))
             return NCPharmaReactorNotice.InvalidRequest;
 
-        source.Units -= units;
-        Dirty(sourceUid, source);
-        if (source.Units <= 0f)
-            QueueDel(sourceUid);
+        _sources.Consume(source, units);
 
         var run = EnsureComp<NCPharmaReactorRunComponent>(reactor);
         run.Formula = formula.ID;
@@ -195,7 +193,7 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
         }
 
         run.SourcePurity = source.Purity;
-        run.SourceContaminants = TryComp<NCPharmaSourceHiddenComponent>(sourceUid, out var hidden) ? hidden.Contaminants : 0f; // NC
+        run.SourceContaminants = source.Contaminants; // NC
         run.Units = units;
         run.FeedstockYield = yield;
         run.Operator = ToPrettyString(user);
@@ -349,19 +347,19 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
     private bool TryGetSource(
         Entity<NCPharmaReactorComponent> reactor,
         out EntityUid sourceUid,
-        out NCPharmaSourceComponent source)
+        out NCPharmaSourceReading source)
     {
         sourceUid = default;
-        source = default!;
+        source = default;
         if (!_itemSlots.TryGetSlot(reactor, reactor.Comp.SourceSlot, out var slot) ||
             slot.Item is not { } item ||
-            !TryComp(item, out NCPharmaSourceComponent? found))
+            !HasComp<NCPharmaSourceComponent>(item) ||
+            !_sources.TryRead(item, out source))
         {
             return false;
         }
 
         sourceUid = item;
-        source = found;
         return true;
     }
 

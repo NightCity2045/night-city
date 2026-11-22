@@ -70,9 +70,7 @@ public sealed class NCPharmaConsumablesTest : GameTest
 
     private EntityUid Canister(MapCoordinates at)
     {
-        var canister = SEntMan.SpawnEntity("NCPharmaSourceCanisterStreet", at);
-        SComp<NCPharmaSourceComponent>(canister).Feedstock = "NCFeedstockNeuro";
-        return canister;
+        return SEntMan.SpawnEntity("NCPharmaSourceCanisterStreet", at);
     }
 
     [Test]

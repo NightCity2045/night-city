@@ -47,6 +47,7 @@ public sealed partial class NCPharmaPurifierSystem : EntitySystem
     [Dependency] private ItemSlotsSystem _slots = default!;
     [Dependency] private SharedPowerReceiverSystem _power = default!;
     [Dependency] private NCPharmaBatchSystem _batches = default!;
+    [Dependency] private NCPharmaSourceSystem _sources = default!;
     [Dependency] private Content.Server._NC.Medical.Pharmacology.Lab.NCBiotechActionSystem _actions = default!;
     [Dependency] private Content.Server._NC.Medical.Pharmacology.Lab.NCPharmaWasteSystem _waste = default!;
 
@@ -139,7 +140,7 @@ public sealed partial class NCPharmaPurifierSystem : EntitySystem
 
         args.Handled = true;
         if (!_power.IsPowered(purifier.Owner) || purifier.Comp.FilterCharges <= 0 ||
-            GetSource(purifier) is not { } item || !TryComp<NCPharmaSourceComponent>(item, out var source) ||
+            GetSource(purifier) is not { } item || !_sources.TryRead(item, out var source) ||
             !_batches.TryGetTuning(out var tuning))
         {
             return;
@@ -151,9 +152,8 @@ public sealed partial class NCPharmaPurifierSystem : EntitySystem
         // The common action-resolution layer decides how well the pass went; a plain pass has quality 1.
         var quality = _actions.Resolve(args.User, "NCBiotechPurify", purifier.Owner).Quality;
         var purity = source.Purity + (gained - source.Purity) * quality;
-        source.Purity = purity;
-        source.Units = units;
-        Dirty(item, source);
+        // NC: the cleaned material goes back into the canister as a composition; contamination stays what it was.
+        _sources.Fill(item, source.Feedstock, units, purity, source.Contaminants);
         _popup.PopupEntity(Loc.GetString("nc-pharma-purifier-done",
             ("purity", purity.ToString("P1")), ("units", units.ToString("0.#"))), purifier, args.User);
     }

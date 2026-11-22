@@ -28,6 +28,7 @@ public sealed partial class NCPharmaSynthesisSystem : EntitySystem
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private ItemSlotsSystem _itemSlots = default!;
     [Dependency] private SharedSolutionContainerSystem _solutions = default!;
+    [Dependency] private NCPharmaSourceSystem _sources = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private UserInterfaceSystem _ui = default!;
     [Dependency] private NCPharmaBatchSystem _batches = default!;
@@ -113,7 +114,7 @@ public sealed partial class NCPharmaSynthesisSystem : EntitySystem
             return NCPharmaStationNotice.NotEnoughSource;
 
         // NC: the compound can only be made from the raw material it accepts; an alternative gives fewer doses.
-        var yield = _batches.ResolveFeedstockYield(formula, source.Feedstock?.Id);
+        var yield = _batches.ResolveFeedstockYield(formula, source.Feedstock);
         if (yield <= 0f)
             return NCPharmaStationNotice.WrongFeedstock;
 
@@ -147,12 +148,10 @@ public sealed partial class NCPharmaSynthesisSystem : EntitySystem
             station.Comp.EquipmentSterility,
             station.Comp.EquipmentMixing,
             station.Comp.CalibrationError,
-            TryComp<NCPharmaSourceHiddenComponent>(sourceUid, out var hidden) ? hidden.Contaminants : 0f); // NC
+            source.Contaminants); // NC
 
-        source.Units -= units;
-        Dirty(sourceUid, source);
-        if (source.Units <= 0f)
-            QueueDel(sourceUid);
+        // NC: the material is liquid in the canister; the run takes its share and leaves the rest as it was.
+        _sources.Consume(source, units);
         if (additiveSolution is { } drawn && requiredReagent is { } used)
             _solutions.RemoveReagent(drawn, used.Id, FixedPoint2.New(requiredAmount));
 
@@ -216,19 +215,19 @@ public sealed partial class NCPharmaSynthesisSystem : EntitySystem
     private bool TryGetSource(
         Entity<NCPharmaSynthesizerComponent> station,
         out EntityUid sourceUid,
-        out NCPharmaSourceComponent source)
+        out NCPharmaSourceReading source)
     {
         sourceUid = default;
-        source = default!;
+        source = default;
         if (!_itemSlots.TryGetSlot(station, station.Comp.SourceSlot, out var slot) ||
             slot.Item is not { } item ||
-            !TryComp(item, out NCPharmaSourceComponent? found))
+            !HasComp<NCPharmaSourceComponent>(item) ||
+            !_sources.TryRead(item, out source))
         {
             return false;
         }
 
         sourceUid = item;
-        source = found;
         return true;
     }
 
@@ -254,7 +253,7 @@ public sealed partial class NCPharmaSynthesisSystem : EntitySystem
                 progress,
                 notice,
                 _batches.BuildFormulaSummaries(true),
-                hasSource ? source.Feedstock?.Id : null,
+                hasSource ? source.Feedstock : null,
                 AdditiveContents(station)));
     }
 }

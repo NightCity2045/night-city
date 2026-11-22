@@ -28,26 +28,34 @@ nc-guide-pharma-overview-kinds = [head=2]Kinds of raw material[/head]
     A formula is made from its main kind at full yield. Many can also be made from another kind, but only a share of the doses comes out; the formula card lists them. The synthesizer refuses a canister that cannot make the formula you picked.
 guide-entry-nc-pharma-overview = Pharmacology: overview
 nc-guide-pharma-brewing-h = [head=1]Brewing raw material[/head]
-nc-guide-pharma-brewing-intro = Raw material does not have to be bought. Players can brew it in an ordinary beaker or the chem master. Raw material comes in [color=#58e6d9]kinds[/color]: neuro-organic, cardio-enzyme, hemo-factor, microbial and immuno-modulator. Every kind has its own substrate, and the solvent is plain [color=#58e6d9]ethanol[/color] from the chemical dispenser. The substrates do nothing inside a body: they only become useful once brewed and extracted.
+nc-guide-pharma-brewing-intro = Raw material is made, not found. Players cook it in ordinary beakers and jugs, in two steps: first the [color=#58e6d9]substrate[/color] is made from ordinary reagents, then the substrate is brewed into a [color=#58e6d9]broth[/color]. Raw material comes in [color=#58e6d9]kinds[/color]: neuro-organic, cardio-enzyme, hemo-factor, microbial and immuno-modulator. Every kind has its own substrate. Substrates do nothing inside a body: they only become useful once brewed and extracted.
 nc-guide-pharma-brewing-recipe = [head=2]Recipes[/head]
-    {""}[color=#58e6d9]Broth[/color]: 2 parts of a [color=#58e6d9]substrate[/color] + 1 part of [color=#58e6d9]ethanol[/color], kept warm between 330 K and 380 K. 3 parts of the broth of the substrate's kind result.
+    {""}[color=#58e6d9]Substrate[/color] (kept warm, 310 K to 340 K, 4 parts result from each recipe):
+    {""}• neuro-organic: 2 protein + 1 lithium + 1 phosphorus;
+    {""}• cardio-enzyme: 2 blood + 1 potassium + 1 sugar;
+    {""}• hemo-factor: 2 blood + 1 iron + 1 protein;
+    {""}• microbial: 2 nutriment + 1 sugar + 1 ammonia;
+    {""}• immuno-modulator: 2 protein + 1 nutriment + 1 sodium.
+    {""}[color=#58e6d9]Broth[/color]: 2 parts of a [color=#58e6d9]substrate[/color] + 1 part of [color=#58e6d9]ethanol[/color], kept warm between 330 K and 380 K. The result is mostly the broth of the substrate's kind, with a little process residue.
     {""}[color=#58e6d9]Brew sludge[/color]: a broth heated above 400 K spoils into sludge. Heat gently and take it off the heat in time.
     A cold mixture does not react at all.
 nc-guide-pharma-brewing-source = [head=2]Where to get the ingredients[/head]
-    Each substrate comes in its own jug of 150 units. Ethanol comes from the chemical dispenser, so a lab always has the solvent but has to find the substrates.
-nc-guide-pharma-brewing-extract = [head=2]From the beaker to a source canister[/head]
-    Put the beaker with the brew into the [color=#58e6d9]extraction station[/color] and start it. The extractor reads the beaker itself:
+    Lithium, phosphorus, potassium, iron, sodium, ammonia, sugar and ethanol come from the chemical dispenser. Protein and nutriment come in jugs of 150 units from the brewing supply crate, and [color=#58e6d9]blood[/color] comes from the blood bank, so the cardio and hemo kinds depend on donors.
+    Ready-made substrate jugs and raw material jugs also exist for those who can buy them: raw material is a jug of broth, diluted and spoiled the way its supplier made it.
+nc-guide-pharma-brewing-extract = [head=2]From the jug to a source canister[/head]
+    Put the jug or beaker with the brew into the [color=#58e6d9]extraction station[/color] and start it. The extractor reads the liquid itself:
     • the [color=#58e6d9]kind[/color] of the extract is the broth there is most of;
-    • the share of that broth in the whole solution is the [color=#58e6d9]purity[/color] (never above 80% for a home brew), so a mixture of kinds or leftover ingredients dilute it;
-    • the share of sludge becomes hidden [color=#58e6d9]contamination[/color] in the extract, on top of a small base amount;
+    • the share of that broth in the whole liquid is the [color=#58e6d9]purity[/color], so a mixture of kinds, leftover ingredients and process residue dilute it, and extraction loses a tenth of it;
+    • the share of sludge becomes hidden [color=#58e6d9]contamination[/color] in the extract;
     • every unit of broth gives about 0.6 units of raw material before extraction losses.
-    The beaker stays in the machine and is emptied. A solution without enough broth is refused.
-    Home brew always yields street-grade source material.
+    The vessel stays in the machine and is emptied. The extract is poured into a new [color=#58e6d9]source canister[/color], a real jug: pour it, split it, top it up. What it holds is what the synthesizer and the reactor read, so a canister that is topped up with another kind or with filler is a worse canister.
+    A liquid without enough broth is refused.
 nc-guide-pharma-brewing-tips = [head=2]Brewing tips[/head]
     • Use exact ratios: leftover ingredients dilute the broth and lower purity.
-    • Do not mix kinds: the lesser broth only dilutes the greater one.
+    • Do not mix kinds: the lesser kind only dilutes the greater one, in a brew and in a canister alike.
     • Do not overheat: sludge goes straight into the contamination of the extract.
     • To raise purity further, pass the canister through the [color=#58e6d9]purifier[/color].
+    • A spent canister is only empty: keep it and fill it again.
     • Never trust your own brew without QC: contamination is hidden from the label.
 guide-entry-nc-pharma-brewing = Brewing raw material
 nc-guide-pharma-stations-h = [head=1]Stations and equipment[/head]
@@ -67,6 +75,7 @@ nc-guide-pharma-stations-all = Every station needs power, takes time, produces w
 nc-guide-pharma-stations-kits = [head=2]Starter kits[/head]
     {""}[color=#58e6d9]Street lab starter crate[/color] — raw material of four kinds, filters, a catalyst vial and a stabilizer vial, waste canisters and vials.
     {""}[color=#58e6d9]Clinical lab starter crate[/color] — corporate raw stock of five kinds with filters, two catalyst and two stabilizer vials, waste canisters and vials.
+    {""}[color=#58e6d9]Brewing supply crate[/color] — protein and nutriment jugs, ethanol and four empty source canisters: what a first substrate brew needs besides dispenser chemistry and blood.
     {""}[color=#58e6d9]Sampling kit[/color] — blood samplers, wound swab kits and empty vials.
     {""}[color=#58e6d9]Blood bank kit[/color] — empty bags for collecting blood from donors.
     {""}[color=#58e6d9]Implant preparation kit[/color] — seed cultures for coating, antibacterial material, tissue interface, neural gel and regenerative matrix.

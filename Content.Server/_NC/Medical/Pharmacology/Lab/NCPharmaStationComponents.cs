@@ -9,37 +9,20 @@ using Robust.Shared.Prototypes;
 
 namespace Content.Server._NC.Medical.Pharmacology.Lab;
 
-/// <summary>Raw material with its own origin and quality. Extraction turns it into usable source material.</summary>
+/// <summary>
+/// Raw material is a jug of liquid: the broth of a feedstock, diluted by impurity and spoiled by sludge. The extractor
+/// reads that composition. This marks where a ready-made jug came from, and an unidentified seized sample.
+/// </summary>
 [RegisterComponent]
 public sealed partial class NCPharmaRawMaterialComponent : Component
 {
-    /// <summary>Units of raw material.</summary>
-    [DataField]
-    public float Units = 30f;
-
-    /// <summary>Share of the extract that is the wanted compound before extraction losses.</summary>
-    [DataField]
-    public float Purity = 0.7f;
-
-    /// <summary>Share of the material that is a toxic contaminant. Hidden from the player.</summary>
-    [DataField]
-    public float Contaminants;
-
     /// <summary>Where it came from, as a localization id shown when examined.</summary>
     [DataField]
     public LocId Origin = "nc-pharma-origin-unknown";
 
-    /// <summary>What the material is. Empty for an unidentified sample: its compound brings its own.</summary>
-    [DataField]
-    public ProtoId<NCPharmaFeedstockPrototype>? Feedstock;
-
-    /// <summary>The source canister the extraction yields.</summary>
-    [DataField]
-    public EntProtoId Output = "NCPharmaSourceCanisterStreet";
-
     /// <summary>
     /// If set, the material holds an unidentified compound drawn from this pool. Extraction isolates it as an
-    /// experimental formula instead of producing generic source material.
+    /// experimental formula instead of producing source material.
     /// </summary>
     [DataField]
     public string? UnknownPool;
@@ -68,10 +51,6 @@ public sealed partial class NCPharmaExtractorComponent : Component
     // ---- brewed raw material ------------------------------------------------------------------------
     // A container whose solution holds the brewed broth is accepted instead of ready-made raw material.
 
-    /// <summary>The by-product of a ruined brew. Its share of the solution becomes hidden contamination.</summary>
-    [DataField]
-    public ProtoId<ReagentPrototype> SludgeReagent = "NCPharmaSludge";
-
     /// <summary>Less brewed broth than this is not worth running the extractor for.</summary>
     [DataField]
     public float MinimumBrew = 5f;
@@ -80,23 +59,12 @@ public sealed partial class NCPharmaExtractorComponent : Component
     [DataField]
     public float UnitsPerReagent = 0.6f;
 
-    /// <summary>Best purity a home brew can reach, however clean the solution is.</summary>
-    [DataField]
-    public float BrewPurityCeiling = 0.8f;
-
-    /// <summary>Contamination of a brew that has no sludge at all.</summary>
-    [DataField]
-    public float BrewBaseContaminants = 0.05f;
-
-    /// <summary>Contamination added per unit share of sludge in the solution.</summary>
-    [DataField]
-    public float SludgeContamination = 0.6f;
-
     [DataField]
     public LocId BrewOrigin = "nc-pharma-origin-brewed";
 
+    /// <summary>The empty canister the extract is poured into.</summary>
     [DataField]
-    public EntProtoId BrewOutput = "NCPharmaSourceCanisterStreet";
+    public EntProtoId BrewOutput = "NCPharmaSourceCanister";
 }
 
 /// <summary>A sterile cabinet or a formulation station: it treats a pack's whole batch.</summary>

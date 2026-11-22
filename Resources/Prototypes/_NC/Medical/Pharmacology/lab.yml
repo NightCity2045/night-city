@@ -478,10 +478,30 @@
   - type: NCPharmaContainer
 
 # --- Raw material, stations and waste ----------------------------------------------------------------------
+# Ready-made raw material is a jug of broth. Each kind is a child of one of these with its own broth in the jug.
 - type: entity
   abstract: true
-  parent: BaseItem
+  parent: Jug
   id: NCPharmaRawBiomass
+  suffix: bioreactor stock
+  components:
+  - type: NCPharmaRawMaterial
+    origin: nc-pharma-origin-bioreactor
+
+- type: entity
+  abstract: true
+  parent: NCPharmaRawBiomass
+  id: NCPharmaRawCorporateStock
+  suffix: corporate stock
+  components:
+  - type: NCPharmaRawMaterial
+    origin: nc-pharma-origin-corporate
+
+# A seized sample is not a liquid: it holds an unidentified compound, and the extractor isolates it.
+- type: entity
+  parent: BaseItem
+  id: NCPharmaRawSeizedSample
+  suffix: seized sample
   components:
   - type: Sprite
     sprite: Objects/Specific/Chemistry/jug.rsi
@@ -490,32 +510,7 @@
     size: Normal
     sprite: Objects/Specific/Chemistry/jug.rsi
   - type: NCPharmaRawMaterial
-    units: 30
-    purity: 0.65
-    origin: nc-pharma-origin-bioreactor
-    contaminants: 0.06
-    output: NCPharmaSourceCanisterStreet
-
-- type: entity
-  abstract: true
-  parent: NCPharmaRawBiomass
-  id: NCPharmaRawCorporateStock
-  components:
-  - type: NCPharmaRawMaterial
-    units: 24
-    purity: 0.9
-    origin: nc-pharma-origin-corporate
-    output: NCPharmaSourceCanisterClinical
-
-- type: entity
-  parent: NCPharmaRawBiomass
-  id: NCPharmaRawSeizedSample
-  components:
-  - type: NCPharmaRawMaterial
-    units: 12
-    purity: 0.7
     origin: nc-pharma-origin-seized
-    contaminants: 0.15
     unknownPool: street
 
 - type: entity
