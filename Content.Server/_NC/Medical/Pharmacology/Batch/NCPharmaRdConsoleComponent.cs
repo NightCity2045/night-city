@@ -14,4 +14,12 @@ public sealed partial class NCPharmaRdConsoleComponent : Component
     /// <summary>Formula whose notebook is shown. It follows the researcher's selection.</summary>
     [ViewVariables]
     public string Selected = string.Empty;
+
+    /// <summary>The slot that holds the beaker with the reagents a new compound is made from.</summary>
+    [DataField]
+    public string ReagentSlot = "reagents";
+
+    /// <summary>Units of each ingredient one invention uses up.</summary>
+    [DataField]
+    public float UnitsPerIngredient = 5f;
 }

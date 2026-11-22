@@ -53,6 +53,9 @@ public static class NCPharmaTextKeys
         NCPharmaRdNotice.Unidentified => "nc-pharma-rd-notice-unidentified",
         NCPharmaRdNotice.NoteSaved => "nc-pharma-rd-notice-note-saved",
         NCPharmaRdNotice.InvalidNote => "nc-pharma-rd-notice-invalid-note",
+        NCPharmaRdNotice.Invented => "nc-pharma-rd-notice-invented",
+        NCPharmaRdNotice.InventionInvalid => "nc-pharma-rd-notice-invention-invalid",
+        NCPharmaRdNotice.NoReagents => "nc-pharma-rd-notice-no-reagents",
         _ => string.Empty,
     };
 

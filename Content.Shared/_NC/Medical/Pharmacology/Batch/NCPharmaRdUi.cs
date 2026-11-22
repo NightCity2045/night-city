@@ -19,7 +19,9 @@ public sealed class NCPharmaRdState(
     NCPharmaJournalSummary[] journal,
     NCPharmaRdNotice notice,
     string[] cores,
-    NCPharmaNodeKnowledge[] knowledge) : BoundUserInterfaceState
+    NCPharmaNodeKnowledge[] knowledge,
+    bool hasBeaker,
+    NCPharmaReagentAmount[] beaker) : BoundUserInterfaceState
 {
     public readonly NCPharmaFormulaSummary[] Formulas = formulas;
     public readonly NCPharmaJournalSummary[] Journal = journal;
@@ -30,6 +32,22 @@ public sealed class NCPharmaRdState(
 
     /// <summary>What the laboratory knows about each node. Anything not listed is unknown.</summary>
     public readonly NCPharmaNodeKnowledge[] Knowledge = knowledge;
+
+    /// <summary>Whether a beaker stands in the console's reagent slot.</summary>
+    public readonly bool HasBeaker = hasBeaker;
+
+    /// <summary>What the beaker holds. Inventing a compound spends ingredients from it.</summary>
+    public readonly NCPharmaReagentAmount[] Beaker = beaker;
+}
+
+/// <summary>
+/// Invents a compound from two or three ingredient reagents in the console's beaker. The server checks that the
+/// beaker holds enough of each, spends it and returns the new compound as an experimental formula.
+/// </summary>
+[Serializable, NetSerializable]
+public sealed class NCPharmaRdInventMessage(string[] ingredients) : BoundUserInterfaceMessage
+{
+    public readonly string[] Ingredients = ingredients;
 }
 
 /// <summary>

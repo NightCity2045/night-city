@@ -110,6 +110,9 @@ public enum NCPharmaRdNotice : byte
     Unidentified,
     NoteSaved,
     InvalidNote,
+    Invented,
+    InventionInvalid,
+    NoReagents,
 }
 
 public enum NCPharmaAuditKind : byte

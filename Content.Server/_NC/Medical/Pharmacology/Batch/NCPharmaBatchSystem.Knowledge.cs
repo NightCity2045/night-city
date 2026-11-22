@@ -160,6 +160,9 @@ public sealed partial class NCPharmaBatchSystem
 
     private bool LoadGenerated(string materialKey, string pool, out ProtoId<NCDrugProfilePrototype> compound)
     {
+        if (pool == InventedPool)
+            return LoadInvented(materialKey, out compound);
+
         compound = NCCompoundGenerator.IdFor(_worldSeed, materialKey);
         if (_prototypes.HasIndex<NCDrugProfilePrototype>(compound))
             return true;
@@ -198,14 +201,33 @@ public sealed partial class NCPharmaBatchSystem
         formula = default!;
         codename = string.Empty;
         var key = MetaData(material).EntityPrototype?.ID ?? string.Empty;
-        if (key.Length == 0 || !TryGetTuning(out var tuning) ||
+        if (key.Length == 0 || !TryGetTuning(out _) ||
             !TryResolveUnknown(pool, key, out var compound) ||
             !_prototypes.TryIndex(compound, out var drug) || drug.Codename == null)
         {
             return false;
         }
 
+        return TryRegisterCompoundFormula(compound, drug, author, "compound isolated from raw material", out formula, out codename);
+    }
+
+    /// <summary>
+    /// Gives the laboratory an experimental formula for a compound it has just isolated or invented, named by its
+    /// codename. Doing it again for the same compound finds the same formula.
+    /// </summary>
+    private bool TryRegisterCompoundFormula(
+        ProtoId<NCDrugProfilePrototype> compound,
+        NCDrugProfilePrototype drug,
+        string author,
+        string journalDetail,
+        out NCPharmaFormulaPrototype formula,
+        out string codename)
+    {
+        formula = default!;
         codename = CodenameOrId(compound);
+        if (!TryGetTuning(out var tuning))
+            return false;
+
         var id = $"NCPharmaFormulaIsolated.{compound.Id}";
         if (_derived.TryGetValue(id, out var existing))
         {
@@ -232,7 +254,7 @@ public sealed partial class NCPharmaBatchSystem
             author,
             null);
         _derived.Add(id, formula);
-        AddJournal(NCPharmaJournalKind.VersionCreated, id, string.Empty, author, "compound isolated from raw material");
+        AddJournal(NCPharmaJournalKind.VersionCreated, id, string.Empty, author, journalDetail);
         return true;
     }
 
@@ -267,11 +289,12 @@ public sealed partial class NCPharmaBatchSystem
                     _worldSeed = seed;
             }
 
-            if (_worldSeed == 0)
-                return;
-
             foreach (var record in records.Where(record => record.Key != SeedKey))
             {
+                // Invented compounds need no seed: their numbers follow from their ingredients alone.
+                if (record.Compound != InventedPool && _worldSeed == 0)
+                    continue;
+
                 if (LoadGenerated(record.Key, record.Compound, out var compound))
                     _unknownAssignments[record.Key] = (compound, record.Compound);
             }

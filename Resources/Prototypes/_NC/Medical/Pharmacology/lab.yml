@@ -836,6 +836,16 @@
   parent: NCLabMachineBase
   id: NCPharmaRdConsole
   components:
+  - type: ContainerContainer
+    containers:
+      reagents: !type:ContainerSlot
+  - type: ItemSlots
+    slots:
+      reagents:
+        name: nc-pharma-rd-reagents-slot
+        whitelist:
+          components:
+          - DrainableSolution
   - type: ActivatableUI
     key: enum.NCPharmaRdUiKey.Key
   - type: ActivatableUIRequiresPower

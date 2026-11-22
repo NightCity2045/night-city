@@ -341,3 +341,10 @@ nc-pharma-rd-forecast-unknown = No forecast: the delivery form or production mod
 nc-pharma-rd-forecast-excluded = The forecast leaves out untested nodes: {$nodes}. The real batch will include them.
 nc-pharma-rd-notice-same-core = The two cores must be different compounds.
 nc-pharma-rd-effect-requires = uses up {$amount} units of {$item} per run
+
+# --- Inventing a compound --------------------------------------------------------------------------------
+nc-lab-codename-invented = NX-{$code}
+nc-pharma-rd-reagents-slot = reagent beaker
+nc-pharma-rd-notice-invented = A new compound is made. It is unidentified: study a batch of it to learn what it does.
+nc-pharma-rd-notice-invention-invalid = These ingredients cannot make a compound. Take two or three that lean towards a drug action.
+nc-pharma-rd-notice-no-reagents = The beaker lacks the ingredients: put a beaker in the console with at least 5 units of every chosen reagent.
