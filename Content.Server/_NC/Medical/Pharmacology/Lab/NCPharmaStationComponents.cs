@@ -147,4 +147,9 @@ public sealed partial class NCPharmaWasteCanisterComponent : Component
 
 /// <summary>An incinerator for waste canisters. It needs power.</summary>
 [RegisterComponent]
-public sealed partial class NCPharmaWasteBinComponent : Component;
+public sealed partial class NCPharmaWasteBinComponent : Component
+{
+    /// <summary>The slot a canister goes into to be burned from the window.</summary>
+    [DataField]
+    public string Slot = "canister";
+}

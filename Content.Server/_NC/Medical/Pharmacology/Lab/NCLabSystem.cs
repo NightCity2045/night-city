@@ -61,8 +61,9 @@ public sealed partial class NCLabSystem : EntitySystem
 
         SubscribeLocalEvent<NCLabSamplerComponent, AfterInteractEvent>(OnSamplerInteract);
         SubscribeLocalEvent<NCLabSamplerComponent, NCLabSampleDoAfterEvent>(OnSampleDone);
-        SubscribeLocalEvent<NCLabAnalyzerComponent, ActivateInWorldEvent>(OnAnalyzerActivate);
+        SubscribeLocalEvent<NCLabAnalyzerComponent, NCLabMachineStartEvent>(OnAnalyzerActivate);
         SubscribeLocalEvent<NCLabAnalyzerComponent, NCLabAnalyzeDoAfterEvent>(OnAnalyzeDone);
+        SubscribeLocalEvent<NCLabAnalyzerComponent, NCLabMachineStatusEvent>(OnAnalyzerStatus);
     }
 
     // ---- sampling -------------------------------------------------------------------------------------
@@ -155,9 +156,9 @@ public sealed partial class NCLabSystem : EntitySystem
 
     // ---- analysis -------------------------------------------------------------------------------------
 
-    private void OnAnalyzerActivate(Entity<NCLabAnalyzerComponent> machine, ref ActivateInWorldEvent args)
+    private void OnAnalyzerActivate(Entity<NCLabAnalyzerComponent> machine, ref NCLabMachineStartEvent args)
     {
-        if (args.Handled || !args.Complex)
+        if (args.Handled)
             return;
 
         args.Handled = true;
@@ -181,6 +182,14 @@ public sealed partial class NCLabSystem : EntitySystem
         };
         if (_doAfter.TryStartDoAfter(doAfter))
             _popup.PopupEntity(Loc.GetString("nc-lab-machine-started"), machine, args.User);
+    }
+
+    private void OnAnalyzerStatus(Entity<NCLabAnalyzerComponent> machine, ref NCLabMachineStatusEvent args)
+    {
+        args.Readouts.Add(new NCLabMachineReadout("nc-lab-machine-ui-method", string.Empty,
+            machine.Comp.Method == NCLabMethod.Metabolic
+                ? "nc-lab-machine-ui-method-metabolic"
+                : "nc-lab-machine-ui-method-culture"));
     }
 
     private EntityUid? GetLoaded(Entity<NCLabAnalyzerComponent> machine)

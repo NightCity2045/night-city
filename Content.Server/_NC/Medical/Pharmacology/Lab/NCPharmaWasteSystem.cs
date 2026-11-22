@@ -4,6 +4,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using Content.Server.Fluids.EntitySystems;
+using Content.Shared._NC.Medical.Pharmacology.Lab;
 using Content.Shared.Chemistry.Components;
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Chemistry.Reagent;
@@ -47,6 +48,8 @@ public sealed partial class NCPharmaWasteSystem : EntitySystem
         base.Initialize();
 
         SubscribeLocalEvent<NCPharmaWasteBinComponent, InteractUsingEvent>(OnBinUsing);
+        SubscribeLocalEvent<NCPharmaWasteBinComponent, NCLabMachineStartEvent>(OnBinStart);
+        SubscribeLocalEvent<NCPharmaWasteBinComponent, NCLabMachineStatusEvent>(OnBinStatus);
     }
 
     /// <summary>True when the machine can take this much more waste. A machine without a waste tank always can.</summary>
@@ -57,6 +60,22 @@ public sealed partial class NCPharmaWasteSystem : EntitySystem
 
         return TryGetCanister(machine, tank, out _, out var contents) &&
                (float) contents.AvailableVolume >= amount * tank.UnitsPerWaste;
+    }
+
+    /// <summary>How full the machine's waste canister is, for its window. False when it has no canister or no tank.</summary>
+    public bool TryGetFill(EntityUid machine, out float used, out float capacity)
+    {
+        used = 0f;
+        capacity = 0f;
+        if (!TryComp<NCPharmaWasteTankComponent>(machine, out var tank) ||
+            !TryGetCanister(machine, tank, out _, out var contents))
+        {
+            return false;
+        }
+
+        used = (float) contents.Volume;
+        capacity = (float) contents.MaxVolume;
+        return true;
     }
 
     public void Add(EntityUid machine, float amount)
@@ -87,29 +106,70 @@ public sealed partial class NCPharmaWasteSystem : EntitySystem
 
     private void OnBinUsing(EntityUid uid, NCPharmaWasteBinComponent bin, InteractUsingEvent args)
     {
-        if (args.Handled || !TryComp<NCPharmaWasteCanisterComponent>(args.Used, out var canister) ||
-            !_solutions.TryGetDrainableSolution(args.Used, out var solution, out var contents))
+        if (args.Handled || !HasComp<NCPharmaWasteCanisterComponent>(args.Used))
+            return;
+
+        args.Handled = true;
+        TryBurn(uid, args.Used, args.User);
+    }
+
+    /// <summary>Starting the incinerator from its window burns the waste in the canister that stands in it.</summary>
+    private void OnBinStart(Entity<NCPharmaWasteBinComponent> bin, ref NCLabMachineStartEvent args)
+    {
+        if (args.Handled)
+            return;
+
+        args.Handled = true;
+        if (!_slots.TryGetSlot(bin, bin.Comp.Slot, out var slot) || slot.Item is not { } canister)
         {
+            _popup.PopupEntity(Loc.GetString("nc-lab-machine-empty"), bin, args.User);
             return;
         }
 
-        args.Handled = true;
+        TryBurn(bin, canister, args.User);
+    }
+
+    private void OnBinStatus(Entity<NCPharmaWasteBinComponent> bin, ref NCLabMachineStatusEvent args)
+    {
+        if (!_slots.TryGetSlot(bin, bin.Comp.Slot, out var slot) || slot.Item is not { } canister ||
+            !TryComp<NCPharmaWasteCanisterComponent>(canister, out var waste) ||
+            !_solutions.TryGetDrainableSolution(canister, out _, out var contents))
+        {
+            args.CanStart = false;
+            return;
+        }
+
+        var held = (float) contents.GetTotalPrototypeQuantity(waste.Reagent);
+        args.Readouts.Add(new NCLabMachineReadout("nc-lab-machine-ui-canister-waste", held.ToString("0.#")));
+        args.CanStart = held > 0f;
+        args.StartKey = "nc-lab-machine-ui-burn";
+    }
+
+    private bool TryBurn(EntityUid uid, EntityUid canisterUid, EntityUid user)
+    {
+        if (!TryComp<NCPharmaWasteCanisterComponent>(canisterUid, out var canister) ||
+            !_solutions.TryGetDrainableSolution(canisterUid, out var solution, out var contents))
+        {
+            return false;
+        }
+
         if (!_power.IsPowered(uid))
         {
-            _popup.PopupEntity(Loc.GetString("nc-lab-machine-unpowered"), uid, args.User);
-            return;
+            _popup.PopupEntity(Loc.GetString("nc-lab-machine-unpowered"), uid, user);
+            return false;
         }
 
         var waste = contents.GetTotalPrototypeQuantity(canister.Reagent);
         if (waste <= FixedPoint2.Zero)
         {
-            _popup.PopupEntity(Loc.GetString("nc-pharma-waste-nothing"), uid, args.User);
-            return;
+            _popup.PopupEntity(Loc.GetString("nc-pharma-waste-nothing"), uid, user);
+            return false;
         }
 
         _solutions.RemoveReagent(solution.Value, canister.Reagent.Id, waste);
         canister.Age = TimeSpan.Zero;
-        _popup.PopupEntity(Loc.GetString("nc-pharma-waste-disposed"), uid, args.User);
+        _popup.PopupEntity(Loc.GetString("nc-pharma-waste-disposed"), uid, user);
+        return true;
     }
 
     public override void Update(float frameTime)

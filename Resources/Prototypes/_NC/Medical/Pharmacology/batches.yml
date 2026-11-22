@@ -368,6 +368,17 @@
   placement:
     mode: SnapgridCenter
   components:
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.PowerDeviceVisuals.Powered:
+        enum.PowerDeviceVisualLayers.Powered:
+          True: { visible: true }
+          False: { visible: false }
+      enum.NCLabMachineVisuals.Working:
+        enum.NCLabMachineVisualLayers.Working:
+          True: { visible: true }
+          False: { visible: false }
   - type: Sprite
     sprite: Structures/Machines/mixer.rsi
     snapCardinals: true
@@ -426,13 +437,6 @@
         whitelist:
           tags:
           - CentrifugeCompatible
-  - type: Appearance
-  - type: GenericVisualizer
-    visuals:
-      enum.PowerDeviceVisuals.Powered:
-        enum.PowerDeviceVisualLayers.Powered:
-          True: { visible: true }
-          False: { visible: false }
   - type: NCPharmaSynthesizer
 
 - type: entity
@@ -440,6 +444,21 @@
   id: NCPharmaSynthesizerStreet
   suffix: street lab
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Pharma/synthesizer_street.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: lit
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
+  - type: Icon
+    sprite: _NC/Structures/Machines/Pharma/synthesizer_street.rsi
+    state: icon
   - type: NCPharmaSynthesizer
     equipmentSterility: 0.7
     equipmentMixing: 0.7
@@ -450,6 +469,21 @@
   id: NCPharmaSynthesizerClinical
   suffix: clinical line
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Pharma/synthesizer_clinical.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: lit
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
+  - type: Icon
+    sprite: _NC/Structures/Machines/Pharma/synthesizer_clinical.rsi
+    state: icon
   - type: NCPharmaSynthesizer
     equipmentSterility: 0.97
     equipmentMixing: 0.96
@@ -462,16 +496,31 @@
     mode: SnapgridCenter
   components:
   - type: Sprite
-    sprite: Structures/Machines/mixer.rsi
+    sprite: _NC/Structures/Machines/Pharma/qc_analyzer.rsi
     snapCardinals: true
     layers:
-    - state: mixer_empty
-    - state: mixer_screens
+    - state: base
+    - state: lit
       shader: unshaded
       map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
   - type: Icon
-    sprite: Structures/Machines/mixer.rsi
-    state: mixer_empty
+    sprite: _NC/Structures/Machines/Pharma/qc_analyzer.rsi
+    state: icon
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.PowerDeviceVisuals.Powered:
+        enum.PowerDeviceVisualLayers.Powered:
+          True: { visible: true }
+          False: { visible: false }
+      enum.NCLabMachineVisuals.Working:
+        enum.NCLabMachineVisualLayers.Working:
+          True: { visible: true }
+          False: { visible: false }
   - type: Fixtures
     fixtures:
       fix1:
@@ -513,13 +562,6 @@
         whitelist:
           components:
           - NCPharmaContainer
-  - type: Appearance
-  - type: GenericVisualizer
-    visuals:
-      enum.PowerDeviceVisuals.Powered:
-        enum.PowerDeviceVisualLayers.Powered:
-          True: { visible: true }
-          False: { visible: false }
   - type: NCPharmaQcAnalyzer
 
 - type: entity
@@ -527,6 +569,21 @@
   id: NCPharmaSynthesizerCorporate
   suffix: corporate lab
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Pharma/synthesizer_corporate.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: lit
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
+  - type: Icon
+    sprite: _NC/Structures/Machines/Pharma/synthesizer_corporate.rsi
+    state: icon
   - type: NCPharmaSynthesizer
     equipmentSterility: 0.995
     equipmentMixing: 0.99
@@ -613,16 +670,31 @@
     mode: SnapgridCenter
   components:
   - type: Sprite
-    sprite: Structures/Machines/mixer.rsi
+    sprite: _NC/Structures/Machines/Pharma/reactor.rsi
     snapCardinals: true
     layers:
-    - state: mixer_empty
-    - state: mixer_screens
+    - state: base
+    - state: lit
       shader: unshaded
       map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
   - type: Icon
-    sprite: Structures/Machines/mixer.rsi
-    state: mixer_empty
+    sprite: _NC/Structures/Machines/Pharma/reactor.rsi
+    state: icon
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.PowerDeviceVisuals.Powered:
+        enum.PowerDeviceVisualLayers.Powered:
+          True: { visible: true }
+          False: { visible: false }
+      enum.NCLabMachineVisuals.Working:
+        enum.NCLabMachineVisualLayers.Working:
+          True: { visible: true }
+          False: { visible: false }
   - type: Fixtures
     fixtures:
       fix1:
@@ -670,13 +742,6 @@
         whitelist:
           tags:
           - CentrifugeCompatible
-  - type: Appearance
-  - type: GenericVisualizer
-    visuals:
-      enum.PowerDeviceVisuals.Powered:
-        enum.PowerDeviceVisualLayers.Powered:
-          True: { visible: true }
-          False: { visible: false }
   - type: NCPharmaReactor
 
 - type: entity
@@ -686,16 +751,31 @@
     mode: SnapgridCenter
   components:
   - type: Sprite
-    sprite: Structures/Machines/mixer.rsi
+    sprite: _NC/Structures/Machines/Pharma/cold_storage.rsi
     snapCardinals: true
     layers:
-    - state: mixer_empty
-    - state: mixer_screens
+    - state: base
+    - state: lit
       shader: unshaded
       map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
   - type: Icon
-    sprite: Structures/Machines/mixer.rsi
-    state: mixer_empty
+    sprite: _NC/Structures/Machines/Pharma/cold_storage.rsi
+    state: icon
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.PowerDeviceVisuals.Powered:
+        enum.PowerDeviceVisualLayers.Powered:
+          True: { visible: true }
+          False: { visible: false }
+      enum.NCLabMachineVisuals.Working:
+        enum.NCLabMachineVisualLayers.Working:
+          True: { visible: true }
+          False: { visible: false }
   - type: Fixtures
     fixtures:
       fix1:
@@ -738,11 +818,4 @@
       enum.StorageUiKey.Key:
         type: StorageBoundUserInterface
   - type: InteractionOutline
-  - type: Appearance
-  - type: GenericVisualizer
-    visuals:
-      enum.PowerDeviceVisuals.Powered:
-        enum.PowerDeviceVisualLayers.Powered:
-          True: { visible: true }
-          False: { visible: false }
   - type: NCPharmaColdStorage

@@ -44,12 +44,15 @@ public sealed partial class NCPharmaStationSystem : EntitySystem
         base.Initialize();
 
         SubscribeLocalEvent<NCPharmaRawMaterialComponent, ExaminedEvent>(OnRawExamined);
-        SubscribeLocalEvent<NCPharmaExtractorComponent, ActivateInWorldEvent>(OnExtractorActivate);
+        SubscribeLocalEvent<NCPharmaExtractorComponent, NCLabMachineStartEvent>(OnExtractorActivate);
         SubscribeLocalEvent<NCPharmaExtractorComponent, NCPharmaExtractDoAfterEvent>(OnExtractDone);
-        SubscribeLocalEvent<NCPharmaTreatmentStationComponent, ActivateInWorldEvent>(OnTreatActivate);
+        SubscribeLocalEvent<NCPharmaTreatmentStationComponent, NCLabMachineStartEvent>(OnTreatActivate);
         SubscribeLocalEvent<NCPharmaTreatmentStationComponent, NCPharmaTreatDoAfterEvent>(OnTreatDone);
-        SubscribeLocalEvent<NCPharmaFillingStationComponent, ActivateInWorldEvent>(OnFillActivate);
+        SubscribeLocalEvent<NCPharmaFillingStationComponent, NCLabMachineStartEvent>(OnFillActivate);
         SubscribeLocalEvent<NCPharmaFillingStationComponent, NCPharmaFillDoAfterEvent>(OnFillDone);
+        SubscribeLocalEvent<NCPharmaTreatmentStationComponent, NCLabMachineStatusEvent>(OnTreatStatus);
+        SubscribeLocalEvent<NCPharmaFillingStationComponent, NCLabMachineStatusEvent>(OnFillStatus);
+        SubscribeLocalEvent<NCPharmaExtractorComponent, NCLabMachineStatusEvent>(OnExtractStatus);
     }
 
     private void OnRawExamined(Entity<NCPharmaRawMaterialComponent> raw, ref ExaminedEvent args)
@@ -102,9 +105,9 @@ public sealed partial class NCPharmaStationSystem : EntitySystem
 
     // ---- extraction -----------------------------------------------------------------------------------
 
-    private void OnExtractorActivate(Entity<NCPharmaExtractorComponent> machine, ref ActivateInWorldEvent args)
+    private void OnExtractorActivate(Entity<NCPharmaExtractorComponent> machine, ref NCLabMachineStartEvent args)
     {
-        if (args.Handled || !args.Complex)
+        if (args.Handled)
             return;
 
         args.Handled = true;
@@ -207,11 +210,30 @@ public sealed partial class NCPharmaStationSystem : EntitySystem
         return true;
     }
 
+    private void OnTreatStatus(Entity<NCPharmaTreatmentStationComponent> machine, ref NCLabMachineStatusEvent args)
+    {
+        args.Readouts.Add(new NCLabMachineReadout("nc-lab-machine-ui-treatment", string.Empty,
+            machine.Comp.Treatment == NCPharmaTreatment.Sterilize
+                ? "nc-lab-machine-ui-treatment-sterilize"
+                : "nc-lab-machine-ui-treatment-formulate"));
+    }
+
+    private void OnFillStatus(Entity<NCPharmaFillingStationComponent> machine, ref NCLabMachineStatusEvent args)
+    {
+        args.Readouts.Add(new NCLabMachineReadout("nc-lab-machine-ui-doses", machine.Comp.DosesPerPack.ToString()));
+    }
+
+    private void OnExtractStatus(Entity<NCPharmaExtractorComponent> machine, ref NCLabMachineStatusEvent args)
+    {
+        args.Readouts.Add(new NCLabMachineReadout("nc-lab-machine-ui-efficiency",
+            (machine.Comp.Efficiency * 100f).ToString("0") + "%"));
+    }
+
     // ---- sterile cabinet / formulation station ---------------------------------------------------------
 
-    private void OnTreatActivate(Entity<NCPharmaTreatmentStationComponent> machine, ref ActivateInWorldEvent args)
+    private void OnTreatActivate(Entity<NCPharmaTreatmentStationComponent> machine, ref NCLabMachineStartEvent args)
     {
-        if (args.Handled || !args.Complex)
+        if (args.Handled)
             return;
 
         args.Handled = true;
@@ -248,9 +270,9 @@ public sealed partial class NCPharmaStationSystem : EntitySystem
 
     // ---- filling station -------------------------------------------------------------------------------
 
-    private void OnFillActivate(Entity<NCPharmaFillingStationComponent> machine, ref ActivateInWorldEvent args)
+    private void OnFillActivate(Entity<NCPharmaFillingStationComponent> machine, ref NCLabMachineStartEvent args)
     {
-        if (args.Handled || !args.Complex)
+        if (args.Handled)
             return;
 
         args.Handled = true;

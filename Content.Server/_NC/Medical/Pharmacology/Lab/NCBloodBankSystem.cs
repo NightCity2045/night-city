@@ -61,7 +61,7 @@ public sealed partial class NCBloodBankSystem : EntitySystem
 
         SubscribeLocalEvent<NCBloodBagComponent, AfterInteractEvent>(OnAfterInteract);
         SubscribeLocalEvent<NCBloodBagComponent, NCBloodDrawDoAfterEvent>(OnDrawDone);
-        SubscribeLocalEvent<NCBloodCentrifugeComponent, ActivateInWorldEvent>(OnCentrifugeActivate);
+        SubscribeLocalEvent<NCBloodCentrifugeComponent, NCLabMachineStartEvent>(OnCentrifugeActivate);
         SubscribeLocalEvent<NCBloodCentrifugeComponent, NCBloodCentrifugeDoAfterEvent>(OnCentrifugeDone);
     }
 
@@ -119,9 +119,9 @@ public sealed partial class NCBloodBankSystem : EntitySystem
             : null;
     }
 
-    private void OnCentrifugeActivate(Entity<NCBloodCentrifugeComponent> centrifuge, ref ActivateInWorldEvent args)
+    private void OnCentrifugeActivate(Entity<NCBloodCentrifugeComponent> centrifuge, ref NCLabMachineStartEvent args)
     {
-        if (args.Handled || !args.Complex)
+        if (args.Handled)
             return;
 
         args.Handled = true;

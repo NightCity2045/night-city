@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using Content.Server._NC.Medical.Pharmacology.Lab;
 using Content.Shared._NC.Medical.Pharmacology.Batch;
 using Content.Shared._NC.Medical.Pharmacology.Lab;
 using Content.Shared.Containers.ItemSlots;
@@ -57,11 +58,19 @@ public sealed partial class NCPharmaPurifierSystem : EntitySystem
     {
         base.Initialize();
 
-        SubscribeLocalEvent<NCPharmaPurifierComponent, ActivateInWorldEvent>(OnActivate);
+        SubscribeLocalEvent<NCPharmaPurifierComponent, NCLabMachineStartEvent>(OnActivate);
         SubscribeLocalEvent<NCPharmaPurifierComponent, InteractUsingEvent>(OnInteractUsing);
         SubscribeLocalEvent<NCPharmaPurifierComponent, NCPharmaPurifyDoAfterEvent>(OnDone);
         SubscribeLocalEvent<NCPharmaPurifierComponent, ExaminedEvent>(OnPurifierExamined);
+        SubscribeLocalEvent<NCPharmaPurifierComponent, NCLabMachineStatusEvent>(OnPurifierStatus);
         SubscribeLocalEvent<NCPharmaFilterCartridgeComponent, ExaminedEvent>(OnCartridgeExamined);
+    }
+
+    private void OnPurifierStatus(Entity<NCPharmaPurifierComponent> purifier, ref NCLabMachineStatusEvent args)
+    {
+        args.Readouts.Add(new NCLabMachineReadout("nc-lab-machine-ui-filter", purifier.Comp.FilterCharges.ToString()));
+        if (purifier.Comp.FilterCharges <= 0)
+            args.CanStart = false;
     }
 
     private void OnPurifierExamined(Entity<NCPharmaPurifierComponent> purifier, ref ExaminedEvent args)
@@ -85,9 +94,9 @@ public sealed partial class NCPharmaPurifierSystem : EntitySystem
         _popup.PopupEntity(Loc.GetString("nc-pharma-purifier-refilled"), purifier, args.User);
     }
 
-    private void OnActivate(Entity<NCPharmaPurifierComponent> purifier, ref ActivateInWorldEvent args)
+    private void OnActivate(Entity<NCPharmaPurifierComponent> purifier, ref NCLabMachineStartEvent args)
     {
-        if (args.Handled || !args.Complex)
+        if (args.Handled)
             return;
 
         args.Handled = true;

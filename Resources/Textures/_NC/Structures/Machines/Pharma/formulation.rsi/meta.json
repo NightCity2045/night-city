@@ -1,0 +1,31 @@
+{
+    "version": 1,
+    "license": "CC0-1.0",
+    "copyright": "Original procedural pixel art created for Night City 2045.",
+    "size": {
+        "x": 32,
+        "y": 32
+    },
+    "states": [
+        {
+            "name": "base"
+        },
+        {
+            "name": "lit"
+        },
+        {
+            "name": "icon"
+        },
+        {
+            "name": "work",
+            "delays": [
+                [
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2
+                ]
+            ]
+        }
+    ]
+}

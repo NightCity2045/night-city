@@ -7,12 +7,12 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                       x:Class="Content.Client._NC.Medical.Pharmacology.NCPharmaRdWindow"
                       Title="{Loc 'nc-pharma-rd-title'}"
-                      SetSize="1000 680" MinSize="720 520">
+                      SetSize="900 620" MinSize="520 420">
     <BoxContainer Orientation="Vertical" Margin="8" SeparationOverride="6">
         <TabContainer Name="Tabs" VerticalExpand="True">
             <!-- The formula tree -->
             <BoxContainer Name="TreeTab" Orientation="Horizontal" SeparationOverride="10">
-                <BoxContainer Orientation="Vertical" HorizontalExpand="True" SeparationOverride="4">
+                <BoxContainer Orientation="Vertical" HorizontalExpand="True" SizeFlagsStretchRatio="3" SeparationOverride="4">
                     <Button Name="NewButton" Text="{Loc 'nc-pharma-rd-new'}" HorizontalAlignment="Left" />
                     <RichTextLabel Name="TreeHint" />
                     <PanelContainer VerticalExpand="True" HorizontalExpand="True">
@@ -20,7 +20,7 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                     </PanelContainer>
                 </BoxContainer>
                 <PanelContainer StyleClasses="LowDivider" />
-                <BoxContainer Orientation="Vertical" MinWidth="290" MaxWidth="290" SeparationOverride="4">
+                <BoxContainer Orientation="Vertical" HorizontalExpand="True" SizeFlagsStretchRatio="2" SeparationOverride="4">
                     <ScrollContainer VerticalExpand="True" HScrollEnabled="False">
                         <BoxContainer Orientation="Vertical" HorizontalExpand="True" SeparationOverride="4">
                             <Label Text="{Loc 'nc-pharma-rd-composition'}" StyleClasses="LabelHeading" />
@@ -44,7 +44,7 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
             </BoxContainer>
             <!-- Inventing a compound -->
             <BoxContainer Name="InventTab" Orientation="Horizontal" SeparationOverride="10">
-                <BoxContainer Orientation="Vertical" MinWidth="360" MaxWidth="360" SeparationOverride="4">
+                <BoxContainer Orientation="Vertical" HorizontalExpand="True" SizeFlagsStretchRatio="3" SeparationOverride="4">
                     <Label Text="{Loc 'nc-pharma-rd-ingredients'}" StyleClasses="LabelHeading" />
                     <RichTextLabel Name="IngredientHint" />
                     <ScrollContainer VerticalExpand="True" HScrollEnabled="False">
@@ -52,7 +52,7 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                     </ScrollContainer>
                 </BoxContainer>
                 <PanelContainer StyleClasses="LowDivider" />
-                <BoxContainer Orientation="Vertical" HorizontalExpand="True" SeparationOverride="6">
+                <BoxContainer Orientation="Vertical" HorizontalExpand="True" SizeFlagsStretchRatio="2" SeparationOverride="6">
                     <Label Text="{Loc 'nc-pharma-rd-beaker'}" StyleClasses="LabelHeading" />
                     <RichTextLabel Name="BeakerLabel" />
                     <Label Text="{Loc 'nc-pharma-rd-expected'}" StyleClasses="LabelHeading" />
@@ -62,13 +62,13 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
             </BoxContainer>
             <!-- Lines of formulas -->
             <BoxContainer Name="LinesTab" Orientation="Horizontal" SeparationOverride="10">
-                <BoxContainer Orientation="Vertical" MinWidth="240" MaxWidth="240" SeparationOverride="4">
+                <BoxContainer Orientation="Vertical" HorizontalExpand="True" SizeFlagsStretchRatio="2" SeparationOverride="4">
                     <Label Text="{Loc 'nc-pharma-rd-formulas'}" StyleClasses="LabelHeading" />
                     <RichTextLabel Text="{Loc 'nc-pharma-rd-lines-hint'}" />
                     <ItemList Name="FormulaList" VerticalExpand="True" />
                 </BoxContainer>
                 <PanelContainer StyleClasses="LowDivider" />
-                <BoxContainer Orientation="Vertical" HorizontalExpand="True" SeparationOverride="6">
+                <BoxContainer Orientation="Vertical" HorizontalExpand="True" SizeFlagsStretchRatio="3" SeparationOverride="6">
                     <Label Text="{Loc 'nc-pharma-rd-selected'}" StyleClasses="LabelHeading" />
                     <RichTextLabel Name="SelectedCard" />
                     <BoxContainer Orientation="Horizontal" SeparationOverride="6">

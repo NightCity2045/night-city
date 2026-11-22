@@ -228,7 +228,9 @@ public sealed partial class NCPharmaRdWindow : FancyWindow
         switch (node)
         {
             case var core when core.StartsWith("core:", StringComparison.Ordinal):
-                ToggleCore(core[5..]);
+                // A core the chip has not studied cannot be taken; pressing it explains how to study it.
+                if (_availableCores.Contains(core[5..]))
+                    ToggleCore(core[5..]);
                 break;
             case var form when form.StartsWith("form:", StringComparison.Ordinal):
                 _chosenForm = form[5..];
@@ -610,6 +612,13 @@ public sealed partial class NCPharmaRdWindow : FancyWindow
 
     private string NodeText(string node)
     {
+        if (node.StartsWith("core:", StringComparison.Ordinal) && !_availableCores.Contains(node[5..]))
+        {
+            var known = _formulas.FirstOrDefault(formula => formula.Compound == node[5..] || formula.SecondCompound == node[5..]);
+            return Loc.GetString("nc-pharma-rd-core-locked",
+                ("formula", known.Id == null ? CoreName(node[5..]) : FormulaName(known)));
+        }
+
         var state = StateOf(node);
         var title = node switch
         {
