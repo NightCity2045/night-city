@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+#nullable enable annotations
 using System.Collections.Generic;
 using Content.Shared._NC.Medical.Pharmacology.Lab;
 using NUnit.Framework;
@@ -25,7 +26,7 @@ public sealed class NCPharmaInventionTests
         Assert.That(NCPharmaInvention.TryCombine([PainB, PainA], out var second), Is.True);
         Assert.That(second, Is.EqualTo(first));
         Assert.That(NCPharmaInvention.KeyOf(["B", "A"]), Is.EqualTo(NCPharmaInvention.KeyOf(["A", "B"])));
-        Assert.That(NCPharmaInvention.IdFor("A+B"), Is.EqualTo(NCPharmaInvention.IdFor("A+B")));
+        Assert.That(NCPharmaInvention.IdFor(NCPharmaInvention.KeyOf(["B", "A"])), Is.EqualTo(NCPharmaInvention.IdFor("A+B")));
         Assert.That(NCPharmaInvention.IdFor("A+B"), Is.Not.EqualTo(NCPharmaInvention.IdFor("A+C")));
     }
 

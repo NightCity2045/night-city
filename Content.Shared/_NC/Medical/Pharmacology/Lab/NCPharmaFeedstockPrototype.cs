@@ -37,6 +37,10 @@ public sealed partial class NCPharmaFeedstockPrototype : IPrototype
     /// </summary>
     [DataField(required: true)]
     public ProtoId<ReagentPrototype> Source { get; private set; }
+
+    /// <summary>The reagent that is brewed into the broth. The console shows how to make it.</summary>
+    [DataField(required: true)]
+    public ProtoId<ReagentPrototype> Substrate { get; private set; }
 }
 
 /// <summary>One feedstock a formula can be made from and what share of the doses it gives.</summary>

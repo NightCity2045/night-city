@@ -21,6 +21,7 @@ public sealed partial class NCPharmaRdBoundUserInterface(EntityUid owner, Enum k
             SendMessage(new NCPharmaRdComposeMessage(parent, firstCore, secondCore, form, concentration, modifiers, profile));
         _window.ApproveRequested += formula => SendMessage(new NCPharmaRdApproveMessage(formula));
         _window.NoteRequested += (formula, text) => SendMessage(new NCPharmaRdNoteMessage(formula, text));
+        _window.InventRequested += ingredients => SendMessage(new NCPharmaRdInventMessage(ingredients));
     }
 
     protected override void UpdateState(BoundUserInterfaceState state)

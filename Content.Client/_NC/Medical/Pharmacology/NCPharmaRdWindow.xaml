@@ -3,38 +3,91 @@ SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md. -->
 <controls:FancyWindow xmlns="https://spacestation14.io"
                       xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+                      xmlns:rd="clr-namespace:Content.Client._NC.Medical.Pharmacology"
                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                       x:Class="Content.Client._NC.Medical.Pharmacology.NCPharmaRdWindow"
                       Title="{Loc 'nc-pharma-rd-title'}"
-                      SetSize="1280 780" MinSize="1020 620">
-    <BoxContainer Orientation="Horizontal" Margin="10" SeparationOverride="10">
-        <BoxContainer Orientation="Vertical" MinWidth="230" MaxWidth="230" SeparationOverride="6">
-            <Label Text="{Loc 'nc-pharma-rd-formulas'}" StyleClasses="LabelHeading" />
-            <ItemList Name="FormulaList" VerticalExpand="True" />
-        </BoxContainer>
-        <PanelContainer StyleClasses="LowDivider" />
-        <BoxContainer Orientation="Vertical" HorizontalExpand="True" SeparationOverride="6">
-            <Label Text="{Loc 'nc-pharma-rd-selected'}" StyleClasses="LabelHeading" />
-            <RichTextLabel Name="SelectedCard" />
-            <PanelContainer StyleClasses="LowDivider" />
-            <Label Text="{Loc 'nc-pharma-rd-tree'}" StyleClasses="LabelHeading" />
-            <BoxContainer Name="TreeColumns" Orientation="Horizontal" SeparationOverride="6"
-                          VerticalExpand="True" MinHeight="250" />
-            <RichTextLabel Name="NodeInfo" />
-            <RichTextLabel Name="ForecastLabel" />
-            <BoxContainer Orientation="Horizontal" SeparationOverride="6">
-                <Button Name="CreateButton" Text="{Loc 'nc-pharma-rd-create'}" HorizontalExpand="True" />
-                <Button Name="ApproveButton" Text="{Loc 'nc-pharma-rd-approve'}" HorizontalExpand="True" />
+                      SetSize="1320 800" MinSize="1100 680">
+    <BoxContainer Orientation="Vertical" Margin="8" SeparationOverride="6">
+        <TabContainer Name="Tabs" VerticalExpand="True">
+            <!-- The formula tree -->
+            <BoxContainer Name="TreeTab" Orientation="Horizontal" SeparationOverride="10">
+                <BoxContainer Orientation="Vertical" HorizontalExpand="True" SeparationOverride="4">
+                    <BoxContainer Orientation="Horizontal" SeparationOverride="8">
+                        <Button Name="NewButton" Text="{Loc 'nc-pharma-rd-new'}" />
+                        <RichTextLabel Name="TreeHint" HorizontalExpand="True" />
+                    </BoxContainer>
+                    <PanelContainer VerticalExpand="True" HorizontalExpand="True">
+                        <rd:NCPharmaTreeCanvas Name="Canvas" />
+                    </PanelContainer>
+                </BoxContainer>
+                <PanelContainer StyleClasses="LowDivider" />
+                <BoxContainer Orientation="Vertical" MinWidth="350" MaxWidth="350" SeparationOverride="4">
+                    <Label Text="{Loc 'nc-pharma-rd-composition'}" StyleClasses="LabelHeading" />
+                    <RichTextLabel Name="CompositionLabel" />
+                    <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                        <Label Text="{Loc 'nc-pharma-rd-concentration'}" />
+                        <Button Name="ConcentrationDown" Text="−" MinWidth="34" />
+                        <Label Name="ConcentrationValue" MinWidth="60" Align="Center" />
+                        <Button Name="ConcentrationUp" Text="+" MinWidth="34" />
+                    </BoxContainer>
+                    <PanelContainer StyleClasses="LowDivider" />
+                    <Label Text="{Loc 'nc-pharma-rd-node'}" StyleClasses="LabelHeading" />
+                    <ScrollContainer MinHeight="110" MaxHeight="170" HScrollEnabled="False">
+                        <RichTextLabel Name="NodeInfo" />
+                    </ScrollContainer>
+                    <Label Text="{Loc 'nc-pharma-rd-materials'}" StyleClasses="LabelHeading" />
+                    <ScrollContainer VerticalExpand="True" HScrollEnabled="False">
+                        <RichTextLabel Name="MaterialsLabel" />
+                    </ScrollContainer>
+                    <RichTextLabel Name="ForecastLabel" />
+                    <Button Name="CreateButton" Text="{Loc 'nc-pharma-rd-create'}" />
+                </BoxContainer>
             </BoxContainer>
-            <Label Name="NoticeLabel" FontColorOverride="#FFC95C" />
-            <BoxContainer Orientation="Horizontal" SeparationOverride="6">
-                <LineEdit Name="NoteEdit" HorizontalExpand="True" PlaceHolder="{Loc 'nc-pharma-rd-note-placeholder'}" />
-                <Button Name="NoteButton" Text="{Loc 'nc-pharma-rd-note-save'}" />
+            <!-- Inventing a compound -->
+            <BoxContainer Name="InventTab" Orientation="Horizontal" SeparationOverride="10">
+                <BoxContainer Orientation="Vertical" MinWidth="470" MaxWidth="470" SeparationOverride="4">
+                    <Label Text="{Loc 'nc-pharma-rd-ingredients'}" StyleClasses="LabelHeading" />
+                    <RichTextLabel Name="IngredientHint" />
+                    <ScrollContainer VerticalExpand="True" HScrollEnabled="False">
+                        <BoxContainer Name="IngredientList" Orientation="Vertical" SeparationOverride="3" />
+                    </ScrollContainer>
+                </BoxContainer>
+                <PanelContainer StyleClasses="LowDivider" />
+                <BoxContainer Orientation="Vertical" HorizontalExpand="True" SeparationOverride="6">
+                    <Label Text="{Loc 'nc-pharma-rd-beaker'}" StyleClasses="LabelHeading" />
+                    <RichTextLabel Name="BeakerLabel" />
+                    <Label Text="{Loc 'nc-pharma-rd-expected'}" StyleClasses="LabelHeading" />
+                    <RichTextLabel Name="InventionPreview" VerticalExpand="True" />
+                    <Button Name="InventButton" Text="{Loc 'nc-pharma-rd-invent'}" />
+                </BoxContainer>
             </BoxContainer>
-            <Label Text="{Loc 'nc-pharma-rd-journal'}" StyleClasses="LabelHeading" />
-            <ScrollContainer MinHeight="90" MaxHeight="130" HScrollEnabled="False">
-                <RichTextLabel Name="JournalLabel" />
-            </ScrollContainer>
-        </BoxContainer>
+            <!-- Lines of formulas -->
+            <BoxContainer Name="LinesTab" Orientation="Horizontal" SeparationOverride="10">
+                <BoxContainer Orientation="Vertical" MinWidth="300" MaxWidth="300" SeparationOverride="4">
+                    <Label Text="{Loc 'nc-pharma-rd-formulas'}" StyleClasses="LabelHeading" />
+                    <RichTextLabel Text="{Loc 'nc-pharma-rd-lines-hint'}" />
+                    <ItemList Name="FormulaList" VerticalExpand="True" />
+                </BoxContainer>
+                <PanelContainer StyleClasses="LowDivider" />
+                <BoxContainer Orientation="Vertical" HorizontalExpand="True" SeparationOverride="6">
+                    <Label Text="{Loc 'nc-pharma-rd-selected'}" StyleClasses="LabelHeading" />
+                    <RichTextLabel Name="SelectedCard" />
+                    <BoxContainer Orientation="Horizontal" SeparationOverride="6">
+                        <Button Name="ContinueButton" Text="{Loc 'nc-pharma-rd-continue'}" HorizontalExpand="True" />
+                        <Button Name="ApproveButton" Text="{Loc 'nc-pharma-rd-approve'}" HorizontalExpand="True" />
+                    </BoxContainer>
+                    <BoxContainer Orientation="Horizontal" SeparationOverride="6">
+                        <LineEdit Name="NoteEdit" HorizontalExpand="True" PlaceHolder="{Loc 'nc-pharma-rd-note-placeholder'}" />
+                        <Button Name="NoteButton" Text="{Loc 'nc-pharma-rd-note-save'}" />
+                    </BoxContainer>
+                    <Label Text="{Loc 'nc-pharma-rd-journal'}" StyleClasses="LabelHeading" />
+                    <ScrollContainer VerticalExpand="True" HScrollEnabled="False">
+                        <RichTextLabel Name="JournalLabel" />
+                    </ScrollContainer>
+                </BoxContainer>
+            </BoxContainer>
+        </TabContainer>
+        <Label Name="NoticeLabel" FontColorOverride="#FFC95C" />
     </BoxContainer>
 </controls:FancyWindow>

@@ -240,16 +240,18 @@ nc-guide-pharma-walkthrough-steps = 1. [color=#58e6d9]Get raw material[/color] o
     Doing it by hand, a standard batch takes about ten minutes. Your own formula is built in the research console (see Building a formula) and is never faster than its tests.
 guide-entry-nc-pharma-walkthrough = Your first drug, step by step
 nc-guide-pharma-build-h = [head=1]Building a formula[/head]
-nc-guide-pharma-build-tree = [head=2]The tree[/head]
-    The research console builds a formula on a tree of five branches. Pick nodes with the buttons:
+nc-guide-pharma-build-tree = [head=2]The map[/head]
+    The research console shows the formula as a [color=#58e6d9]map[/color]: a hub in the middle and five branches around it. Click the round nodes to take them into the formula; click again to drop one. Drag the map to move it, use the wheel to zoom. A question mark on a node means nobody has tested it. Nothing is built for you: start from the empty hub, or continue an existing line from the Lines tab.
     • [color=#58e6d9]Core[/color] — the compound, one or two.
     • [color=#58e6d9]Delivery[/color] — the delivery form, one.
     • [color=#58e6d9]Kinetics[/color] — the concentration, and modifiers for peak, speed and duration.
     • [color=#58e6d9]Safety[/color] — modifiers that make the drug gentler.
     • [color=#58e6d9]Production[/color] — the production mode, and modifiers for stability, purity and masking.
-    At most two modifiers in all. Nothing limits how much you change at once, but changing one thing at a time is the only way to tell what did what.
-nc-guide-pharma-build-cores = [head=2]One core or two[/head]
-    A core is a compound the laboratory already knows: those of its formulas, once identified. With two cores each is delivered at 60% of the concentration, the pair is 25% more toxic than a single one, and the raw material must suit both; the yield is the worse of the two. Two cores are a choice with a price, not an upgrade.
+    The side panel lists what is chosen and what is still missing, what the pointed node does, and the [color=#58e6d9]materials[/color] of the chosen core: its raw material kind, the recipe of the substrate and the broth. At most two modifiers in all. Changing one thing at a time is the only way to tell what did what.
+nc-guide-pharma-build-cores = [head=2]One core or two, and new compounds[/head]
+    A core is a compound the laboratory has identified. With two cores each is delivered at 60% of the concentration, the pair is 25% more toxic than a single one, and the raw material must suit both; the yield is the worse of the two. Two cores are a choice with a price, not an upgrade.
+    New compounds are [color=#58e6d9]invented[/color] on the second tab of the console. Put a beaker with reagents into the console, take two or three [color=#58e6d9]ingredients[/color] and make the compound: 5 units of each are used up. What an ingredient leans towards (pain relief, sedation, stimulation, fighting bacteria, immune suppression, clearing toxins), how strong it is and how harmful, you read by pointing at it. The result follows from the ingredients alone: ingredients that pull the same way make a stronger compound that needs less of it; ones that pull apart, or are harmful, narrow the safe window; charcoal leans towards nothing and takes harm away. The same ingredients always make the same compound, so a good recipe can be written down and repeated.
+    An invented compound appears on the map locked and unidentified. Make a batch of it, test it and study it: only then can it be a core of your own formulas.
 nc-guide-pharma-build-names = [head=2]Names and versions[/head]
     You do not name a drug. A formula built on the same cores as the one you selected is its [color=#58e6d9]next version[/color]. Any other combination starts a new [color=#58e6d9]line[/color], named after its first core, with the second core added after a plus. A laboratory can develop 30 lines; versions inside a line are not counted.
 nc-guide-pharma-build-knowledge = [head=2]What the laboratory knows[/head]

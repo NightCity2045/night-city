@@ -12,6 +12,7 @@
   description: nc-pharma-feedstock-neuro-desc
   broth: NCPharmaBrothNeuro
   source: NCPharmaSourceNeuro
+  substrate: NCPharmaSubstrateNeuro
 
 - type: ncPharmaFeedstock
   id: NCFeedstockCardio
@@ -19,6 +20,7 @@
   description: nc-pharma-feedstock-cardio-desc
   broth: NCPharmaBrothCardio
   source: NCPharmaSourceCardio
+  substrate: NCPharmaSubstrateCardio
 
 - type: ncPharmaFeedstock
   id: NCFeedstockHemato
@@ -26,6 +28,7 @@
   description: nc-pharma-feedstock-hemato-desc
   broth: NCPharmaBrothHemato
   source: NCPharmaSourceHemato
+  substrate: NCPharmaSubstrateHemato
 
 - type: ncPharmaFeedstock
   id: NCFeedstockMicrobial
@@ -33,6 +36,7 @@
   description: nc-pharma-feedstock-microbial-desc
   broth: NCPharmaBrothMicrobial
   source: NCPharmaSourceMicrobial
+  substrate: NCPharmaSubstrateMicrobial
 
 - type: ncPharmaFeedstock
   id: NCFeedstockImmune
@@ -40,6 +44,7 @@
   description: nc-pharma-feedstock-immune-desc
   broth: NCPharmaBrothImmune
   source: NCPharmaSourceImmune
+  substrate: NCPharmaSubstrateImmune
 
 # --- Reagents players brew from ---------------------------------------------------------------------------------
 - type: reagent
