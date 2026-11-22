@@ -9,39 +9,41 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
     x:Class="Content.Client._NC.Meta.UI.NCMetaWorkspaceWindow"
     Title="{Loc 'nc-meta-workspace-title'}" MinWidth="820" MinHeight="600" SetWidth="1080" SetHeight="740">
     <BoxContainer Orientation="Vertical" Margin="8" SeparationOverride="6">
-        <metaUi:NCMetaToolbarScrollContainer Name="ProjectToolbar" VScrollEnabled="False" HorizontalExpand="True">
-        <BoxContainer Orientation="Horizontal" SeparationOverride="4">
-            <OptionButton Name="Projects" MinWidth="160" />
-            <LineEdit Name="ProjectName" PlaceHolder="{Loc 'nc-meta-project-name'}" HorizontalExpand="True" />
-            <Button Name="NewProject" Text="{Loc 'nc-meta-new-project'}" />
-            <Button Name="RenameProject" Text="{Loc 'nc-meta-rename'}" />
-            <Button Name="DeleteProject" Text="{Loc 'nc-meta-delete-project'}" />
-            <Button Name="Refresh" Text="{Loc 'nc-meta-refresh'}" />
-        </BoxContainer>
-        </metaUi:NCMetaToolbarScrollContainer>
         <metaUi:NCMetaToolbarScrollContainer VScrollEnabled="False" HorizontalExpand="True">
         <BoxContainer Orientation="Horizontal" SeparationOverride="4">
             <Button Name="Save" Text="{Loc 'nc-meta-save'}" />
             <Button Name="Build" Text="{Loc 'nc-meta-build'}" />
             <Button Name="Tests" Text="{Loc 'nc-meta-test'}" />
+            <Button Name="PreviewOpen" Text="{Loc 'nc-meta-preview'}" />
             <OptionButton Name="Devices" MinWidth="160" HorizontalExpand="True" />
             <Button Name="Install" Text="{Loc 'nc-meta-install'}" />
             <Button Name="Start" Text="{Loc 'nc-meta-start'}" />
             <Button Name="Stop" Text="{Loc 'nc-meta-stop'}" />
-            <Button Name="Rollback" Text="{Loc 'nc-meta-rollback'}" />
+            <Button Name="MoreToggle" Text="{Loc 'nc-meta-more-toggle'}" ToggleMode="True" />
         </BoxContainer>
         </metaUi:NCMetaToolbarScrollContainer>
-        <metaUi:NCMetaToolbarScrollContainer VScrollEnabled="False" HorizontalExpand="True">
-        <BoxContainer Orientation="Horizontal" SeparationOverride="4">
-            <OptionButton Name="Installations" MinWidth="180" HorizontalExpand="True" />
-            <Button Name="ExportMedia" Text="{Loc 'nc-meta-export-media'}" />
-            <Button Name="ImportMedia" Text="{Loc 'nc-meta-import-media'}" />
-            <OptionButton Name="ApplicationViews" MinWidth="100" />
-            <Button Name="OpenApplication" Text="{Loc 'nc-meta-open-application'}" />
+        <BoxContainer Name="MoreRows" Orientation="Vertical" SeparationOverride="4" Visible="False">
+            <metaUi:NCMetaToolbarScrollContainer Name="ProjectToolbar" VScrollEnabled="False" HorizontalExpand="True">
+            <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                <OptionButton Name="Projects" MinWidth="160" />
+                <LineEdit Name="ProjectName" PlaceHolder="{Loc 'nc-meta-project-name'}" HorizontalExpand="True" />
+                <Button Name="NewProject" Text="{Loc 'nc-meta-new-project'}" />
+                <Button Name="RenameProject" Text="{Loc 'nc-meta-rename'}" />
+                <Button Name="DeleteProject" Text="{Loc 'nc-meta-delete-project'}" />
+                <Button Name="Refresh" Text="{Loc 'nc-meta-refresh'}" />
+            </BoxContainer>
+            </metaUi:NCMetaToolbarScrollContainer>
+            <metaUi:NCMetaToolbarScrollContainer VScrollEnabled="False" HorizontalExpand="True">
+            <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                <OptionButton Name="Installations" MinWidth="180" HorizontalExpand="True" />
+                <Button Name="Rollback" Text="{Loc 'nc-meta-rollback'}" />
+                <Button Name="ExportMedia" Text="{Loc 'nc-meta-export-media'}" />
+                <Button Name="ImportMedia" Text="{Loc 'nc-meta-import-media'}" />
+                <OptionButton Name="ApplicationViews" MinWidth="100" />
+                <Button Name="OpenApplication" Text="{Loc 'nc-meta-open-application'}" />
+            </BoxContainer>
+            </metaUi:NCMetaToolbarScrollContainer>
         </BoxContainer>
-        </metaUi:NCMetaToolbarScrollContainer>
-        <Label Name="ReleaseInfo" ClipText="True" />
-        <Label Name="Status" ClipText="True" />
         <metaUi:NCMetaToolbarScrollContainer Name="NativeToolsMenu" VScrollEnabled="False" Visible="False">
             <BoxContainer Orientation="Horizontal" SeparationOverride="4">
                 <Button Name="ToolsInstaller" Text="{Loc 'nc-meta-tools-installer'}" />
@@ -62,27 +64,33 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
         <BoxContainer Name="EditorTab" Orientation="Horizontal" VerticalExpand="True" SeparationOverride="6">
             <BoxContainer Orientation="Vertical" SetWidth="190" SeparationOverride="4">
                 <Label Text="{Loc 'nc-meta-project-files'}" />
-                <OptionButton Name="Templates" MinWidth="120" />
-                <Button Name="ImportTemplate" Text="{Loc 'nc-meta-import-template'}" />
                 <ItemList Name="Files" VerticalExpand="True" />
-                <LineEdit Name="FilePath" PlaceHolder="{Loc 'nc-meta-file-path'}" />
-                <BoxContainer Orientation="Horizontal">
-                    <Button Name="NewFile" Text="{Loc 'nc-meta-new-file'}" />
-                    <Button Name="RenameFile" Text="{Loc 'nc-meta-rename'}" />
-                </BoxContainer>
-                <Button Name="DeleteFile" Text="{Loc 'nc-meta-delete-file'}" />
                 <Label Name="FileInfo" ClipText="True" />
+                <Button Name="FileToolsToggle" Text="{Loc 'nc-meta-file-tools-toggle'}" ToggleMode="True" />
+                <BoxContainer Name="FileTools" Orientation="Vertical" SeparationOverride="4" Visible="False">
+                    <OptionButton Name="Templates" MinWidth="120" />
+                    <Button Name="ImportTemplate" Text="{Loc 'nc-meta-import-template'}" />
+                    <LineEdit Name="FilePath" PlaceHolder="{Loc 'nc-meta-file-path'}" />
+                    <BoxContainer Orientation="Horizontal">
+                        <Button Name="NewFile" Text="{Loc 'nc-meta-new-file'}" />
+                        <Button Name="RenameFile" Text="{Loc 'nc-meta-rename'}" />
+                    </BoxContainer>
+                    <Button Name="DeleteFile" Text="{Loc 'nc-meta-delete-file'}" />
+                </BoxContainer>
             </BoxContainer>
             <BoxContainer Orientation="Vertical" HorizontalExpand="True" SeparationOverride="4">
-                <metaUi:NCMetaToolbarScrollContainer VScrollEnabled="False"><BoxContainer Name="FileTabs" Orientation="Horizontal" /></metaUi:NCMetaToolbarScrollContainer>
-                <metaUi:NCMetaToolbarScrollContainer VScrollEnabled="False">
+                <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                    <metaUi:NCMetaToolbarScrollContainer VScrollEnabled="False" HorizontalExpand="True"><BoxContainer Name="FileTabs" Orientation="Horizontal" /></metaUi:NCMetaToolbarScrollContainer>
+                    <Button Name="Undo" Text="{Loc 'nc-meta-undo'}" />
+                    <Button Name="Redo" Text="{Loc 'nc-meta-redo'}" />
+                    <Button Name="SearchToggle" Text="{Loc 'nc-meta-search-toggle'}" ToggleMode="True" />
+                </BoxContainer>
+                <metaUi:NCMetaToolbarScrollContainer Name="SearchRow" VScrollEnabled="False" Visible="False">
                 <BoxContainer Orientation="Horizontal">
                     <LineEdit Name="Search" PlaceHolder="{Loc 'nc-meta-search'}" HorizontalExpand="True" />
                     <Button Name="Find" Text="{Loc 'nc-meta-find'}" />
                     <LineEdit Name="Replacement" PlaceHolder="{Loc 'nc-meta-replace'}" HorizontalExpand="True" />
                     <Button Name="Replace" Text="{Loc 'nc-meta-replace-all'}" />
-                    <Button Name="Undo" Text="{Loc 'nc-meta-undo'}" />
-                    <Button Name="Redo" Text="{Loc 'nc-meta-redo'}" />
                 </BoxContainer>
                 </metaUi:NCMetaToolbarScrollContainer>
                 <editor:NCMetaCodeEditor Name="Editor" />
@@ -110,16 +118,20 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                             <Button Name="Evaluate" Text="{Loc 'nc-meta-debug-evaluate'}" />
                         </BoxContainer>
                     </BoxContainer>
-                    <BoxContainer Orientation="Vertical">
-                        <Label Text="{Loc 'nc-meta-preview-description'}" />
-                        <BoxContainer Orientation="Horizontal">
-                            <LineEdit Name="MockState" Text="{}" HorizontalExpand="True" />
-                            <Button Name="Preview" Text="{Loc 'nc-meta-preview'}" />
-                            <OptionButton Name="PreviewSize" />
+                    <BoxContainer Name="PreviewTab" Orientation="Vertical" SeparationOverride="4">
+                        <Label Text="{Loc 'nc-meta-preview-in-window'}" />
+                        <Button Name="PreviewWindowButton" Text="{Loc 'nc-meta-preview-open-window'}" />
+                        <BoxContainer Name="PreviewPanel" Orientation="Vertical" VerticalExpand="True" HorizontalExpand="True">
+                            <Label Text="{Loc 'nc-meta-preview-description'}" />
+                            <BoxContainer Orientation="Horizontal">
+                                <LineEdit Name="MockState" Text="{}" HorizontalExpand="True" />
+                                <Button Name="Preview" Text="{Loc 'nc-meta-preview'}" />
+                                <OptionButton Name="PreviewSize" />
+                            </BoxContainer>
+                            <ScrollContainer VerticalExpand="True"><BoxContainer Name="PreviewHost" Orientation="Vertical" /></ScrollContainer>
+                            <Label Name="PreviewCosts" ClipText="True" />
+                            <Label Name="PreviewAction" ClipText="True" />
                         </BoxContainer>
-                        <ScrollContainer VerticalExpand="True"><BoxContainer Name="PreviewHost" Orientation="Vertical" /></ScrollContainer>
-                        <Label Name="PreviewCosts" ClipText="True" />
-                        <Label Name="PreviewAction" ClipText="True" />
                     </BoxContainer>
                     <BoxContainer Orientation="Vertical">
                         <BoxContainer Orientation="Horizontal">
@@ -405,5 +417,7 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
             </BoxContainer>
         </ScrollContainer>
         </TabContainer>
+        <Label Name="Status" ClipText="True" />
+        <Label Name="ReleaseInfo" ClipText="True" />
     </BoxContainer>
 </controls:FancyWindow>

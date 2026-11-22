@@ -66,6 +66,7 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
         InitializeServiceGrants();
         InitializeDevelopment();
         InitializeNativeTools();
+        InitializeLayout();
         for (var tab = 0; tab < Output.ChildCount; tab++) OutputSelector.AddItem(Output.GetActualTabTitle(tab), tab);
         OutputSelector.SelectId(0);
         OutputSelector.OnItemSelected += args => { if (args.Id >= 0 && args.Id < Output.ChildCount) Output.CurrentTab = args.Id; };
@@ -825,6 +826,7 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
             InvalidateFirmware();
             _firmwareLinkDevices.Clear();
             InvalidateServiceGrants();
+            DisposePreviewWindow();
             _developmentDialog?.Dispose(); _developmentDialog = null; _developmentView = null;
             _developmentFixtureBytes = null; _developmentContacts.Clear(); _developmentFixtures.Clear();
             Requested = null;
@@ -834,6 +836,7 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
 
     public override void Close()
     {
+        ClosePreviewWindow();
         NCMetaUiLifecycle.BeforeRemove(this);
         base.Close();
     }
