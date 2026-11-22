@@ -404,6 +404,7 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
             <BoxContainer Orientation="Vertical" HorizontalExpand="True" SeparationOverride="6">
                 <RichTextLabel Text="{Loc 'nc-meta-tools-description'}" />
                 <RichTextLabel Name="ToolsHelp" />
+                <controls:ConfirmButton Name="ToolsMaintenance" Visible="False" />
                 <BoxContainer Name="ToolsStockPanel" Orientation="Vertical" SeparationOverride="4">
                     <OptionButton Name="ToolsStock" />
                     <Button Name="ToolsPrepare" Text="{Loc 'nc-meta-tools-prepare-stock'}" />

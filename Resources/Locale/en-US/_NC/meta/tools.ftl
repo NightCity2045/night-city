@@ -32,3 +32,6 @@ nc-meta-tools-health-maintenance = Maintenance
 nc-meta-tools-health-unknown = Health unavailable
 nc-meta-tools-prepare-stock = Prepare selected application
 nc-meta-tools-binding-consent = I approve the displayed connections and permissions for this installation.
+nc-meta-panel-open = META service panel
+nc-meta-tools-maintenance-confirm = Stops every installed program. Press again to confirm.
+nc-meta-tools-maintenance-leave-confirm = Reboots the host. Press again to confirm.

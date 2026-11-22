@@ -247,6 +247,9 @@ public sealed partial class NCMetaWorkspaceSystem : EntitySystem
                 case NCMetaWorkspaceOperation.OpenNativeTools:
                     await OnMainAsync(() => { SelectNativeTools(context, request); return true; });
                     break;
+                case NCMetaWorkspaceOperation.SetMaintenance:
+                    await OnMainAsync(() => { SetMaintenanceFromPanel(context, request); return true; });
+                    break;
                 case NCMetaWorkspaceOperation.PrepareStockApplication:
                     if (await PrepareStockApplicationAsync(context, device, request, state) is { } stockProject)
                     {

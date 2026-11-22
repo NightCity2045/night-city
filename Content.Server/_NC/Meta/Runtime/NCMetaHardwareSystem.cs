@@ -121,9 +121,8 @@ public sealed partial class NCMetaHardwareSystem : EntitySystem
     {
         if (!args.CanAccess || !args.CanInteract || !_devices.CanManage(ent.Owner, args.User)) return;
         var user = args.User;
+        // Entering and leaving maintenance live in the service panel's hardware view, not in this menu.
         var maintenance = ent.Comp.Maintenance;
-        args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString(maintenance ? "nc-meta-hardware-maintenance-leave" : "nc-meta-hardware-maintenance-enter"),
-            Act = () => TrySetMaintenance(ent.Owner, user, !maintenance) });
         if (maintenance && ent.Comp.FirmwareFault)
             args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString("nc-meta-hardware-clear-firmware-fault"),
                 Act = () => TryClearFirmwareFault(ent.Owner, user) });

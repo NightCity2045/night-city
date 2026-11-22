@@ -37,6 +37,8 @@
   - type: NCMetaHost
     profile: NCMetaServer
     allowClaim: true
+  - type: NCMetaTerminal
+    allowEditor: false
   - type: NCMetaStorage
     capacityBytes: 268435456
   - type: NCMetaPort

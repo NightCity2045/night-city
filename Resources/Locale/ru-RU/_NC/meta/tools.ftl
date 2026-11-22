@@ -32,3 +32,6 @@ nc-meta-tools-health-maintenance = Обслуживание
 nc-meta-tools-health-unknown = Состояние недоступно
 nc-meta-tools-prepare-stock = Подготовить выбранное приложение
 nc-meta-tools-binding-consent = Я разрешаю показанные подключения и права для этой установки.
+nc-meta-panel-open = Панель META
+nc-meta-tools-maintenance-confirm = Остановит все установленные программы. Нажмите ещё раз для подтверждения.
+nc-meta-tools-maintenance-leave-confirm = Перезагрузит хост. Нажмите ещё раз для подтверждения.

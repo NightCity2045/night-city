@@ -23,15 +23,17 @@ public sealed partial class NCMetaWorkspaceSystem
     {
         if (!args.CanAccess || !args.CanInteract || !_devices.CanManage(ent.Owner, args.User)) return;
         var actor = args.User;
-        args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString("nc-meta-domain-workspace"),
-            Act = () => TryOpenDevelopmentWorkspace(ent.Owner, actor) });
-        foreach (var tool in NativeToolViews)
-        {
-            var view = tool;
-            args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString("nc-meta-tools-" + view),
-                Act = () => TryOpenNativeTools(ent.Owner, actor, view) });
-        }
+        // One service panel switches between installer, recovery, hardware monitor and diagnostics itself.
+        args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString("nc-meta-panel-open"),
+            Act = () => TryOpenNativeTools(ent.Owner, actor, NativeToolViews[0]) });
+        if (ent.Comp.AllowEditor)
+            args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString("nc-meta-domain-workspace"),
+                Act = () => TryOpenDevelopmentWorkspace(ent.Owner, actor) });
     }
+
+    /// <summary>Whether the device offers the source editor; servers only offer the service panel.</summary>
+    public bool CanOpenDevelopmentWorkspace(EntityUid terminal) =>
+        TryComp<NCMetaTerminalComponent>(terminal, out var component) && component.AllowEditor;
 
     /// <summary>Opens existing native service operations without opening the source editor.</summary>
     public bool TryOpenNativeTools(EntityUid terminal, EntityUid user, string view)
@@ -51,11 +53,19 @@ public sealed partial class NCMetaWorkspaceSystem
 
     public bool TryOpenDevelopmentWorkspace(EntityUid terminal, EntityUid user)
     {
-        if (!_devices.CanManage(terminal, user) || !HasComp<NCMetaTerminalComponent>(terminal)) return false;
+        if (!_devices.CanManage(terminal, user) || !CanOpenDevelopmentWorkspace(terminal)) return false;
         _nativeTools.Remove((terminal, user));
         if (!_ui.TryOpenUi(terminal, NCMetaUiKey.Workspace, user)) return false;
         _ = BeginAuthorizedAsync(terminal, user, new(NCMetaWorkspaceOperation.Open, Guid.NewGuid()));
         return true;
+    }
+
+    /// <summary>Maintenance moved from the right-click menu into the hardware view; Source is "enter" or "leave".</summary>
+    private void SetMaintenanceFromPanel(Context context, NCMetaWorkspaceRequestMessage request)
+    {
+        if (!_devices.TryResolve(request.DeviceId, out var target) || request.Source is not ("enter" or "leave") ||
+            !_runtime.CanReach(context.Terminal, target.Entity)) return;
+        _hardware.TrySetMaintenance(target.Entity, context.User, request.Source == "enter");
     }
 
     private void OnNativeToolsShutdown(Entity<NCMetaTerminalComponent> ent, ref ComponentShutdown args)
@@ -65,7 +75,11 @@ public sealed partial class NCMetaWorkspaceSystem
 
     private void SelectNativeTools(Context context, NCMetaWorkspaceRequestMessage request)
     {
-        if (request.Source == "editor") { _nativeTools.Remove((context.Terminal, context.User)); return; }
+        if (request.Source == "editor")
+        {
+            if (CanOpenDevelopmentWorkspace(context.Terminal)) _nativeTools.Remove((context.Terminal, context.User));
+            return;
+        }
         if (NativeToolViews.Contains(request.Source, StringComparer.Ordinal) &&
             (_nativeTools.Count < 128 || _nativeTools.ContainsKey((context.Terminal, context.User))))
             _nativeTools[(context.Terminal, context.User)] = request.Source;
@@ -94,7 +108,12 @@ public sealed partial class NCMetaWorkspaceSystem
 
     private void PopulateNativeTools(Context context, NCMetaWorkspaceState state)
     {
-        if (!_nativeTools.TryGetValue((context.Terminal, context.User), out var view)) return;
+        if (!_nativeTools.TryGetValue((context.Terminal, context.User), out var view))
+        {
+            // A device without the editor always opens the service panel, however its window was opened.
+            if (CanOpenDevelopmentWorkspace(context.Terminal)) return;
+            view = NativeToolViews[0];
+        }
         var hardware = new List<NCMetaHardwareSummary>();
         foreach (var entry in _devices.GetOwned(context.Owner).Take(128))
         {

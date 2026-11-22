@@ -21,6 +21,8 @@ public sealed partial class NCMetaHostComponent : Component
 public sealed partial class NCMetaTerminalComponent : Component
 {
     [DataField] public bool AllowCompilation = true;
+    /// <summary>The source editor. A device without it (a server) still offers the native service panel.</summary>
+    [DataField] public bool AllowEditor = true;
     [DataField] public float InteractionRange = 2;
 }
 

@@ -24,6 +24,12 @@ public sealed partial class NCMetaWorkspaceWindow
         ToolsRecovery.OnPressed += _ => Request(NCMetaWorkspaceOperation.OpenNativeTools, "recovery");
         ToolsHardware.OnPressed += _ => Request(NCMetaWorkspaceOperation.OpenNativeTools, "hardware");
         ToolsDiagnostics.OnPressed += _ => Request(NCMetaWorkspaceOperation.OpenNativeTools, "diagnostics");
+        ToolsMaintenance.OnPressed += _ =>
+        {
+            if (ToolsMaintenance.Disabled) return;
+            var host = _state.NativeTools?.Hardware.FirstOrDefault(row => row.DeviceId == _selectedDeviceId);
+            if (host != null) Request(NCMetaWorkspaceOperation.SetMaintenance, host.Maintenance ? "leave" : "enter");
+        };
         ToolsMarket.OnPressed += _ => MainContentTabs.CurrentTab = 1;
         ToolsPermissions.OnPressed += _ => MainContentTabs.CurrentTab = 2;
         ToolsStock.OnItemSelected += args => ToolsStock.SelectId(args.Id);
@@ -97,6 +103,13 @@ public sealed partial class NCMetaWorkspaceWindow
             tools.View == "diagnostics" ? "nc-meta-tools-diagnostics-help" : "nc-meta-tools-description"));
         ToolsStockPanel.Visible = tools.View == "installer";
         ToolsMeasurements.Visible = tools.View is "hardware" or "diagnostics";
+        var maintenanceHost = tools.Hardware.FirstOrDefault(row => row.DeviceId == _selectedDeviceId);
+        ToolsMaintenance.Visible = tools.View == "hardware" && maintenanceHost != null;
+        if (maintenanceHost != null)
+        {
+            ToolsMaintenance.Text = Loc.GetString(maintenanceHost.Maintenance ? "nc-meta-hardware-maintenance-leave" : "nc-meta-hardware-maintenance-enter");
+            ToolsMaintenance.ConfirmationText = Loc.GetString(maintenanceHost.Maintenance ? "nc-meta-tools-maintenance-leave-confirm" : "nc-meta-tools-maintenance-confirm");
+        }
         ToolsLogs.Visible = tools.View is "diagnostics" or "recovery";
         if (_toolsRelease != _state.ActiveReleaseId || _toolsDevice != _selectedDeviceId)
         {
