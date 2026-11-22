@@ -28,6 +28,7 @@
     id: NCPDCommanderPDA
     belt: ClothingBeltSecurity
     armor: ClothingOuterArmorBulletproof
+    neck: NCPDWarrantCard
   storage:
     back:
     - WantedListCartridge
@@ -46,20 +47,13 @@
   jobName: job-name-ncpd-commander
 
 - type: entity
-  parent: IDCardStandard
-  id: NCPDCommanderIDCard
-  name: NCPD precinct commander ID
+  parent: NCIDCardStandard
+  id: NCPDCommanderAccesCard
+  name: NCPD precinct commander acces card
   components:
   - type: Sprite
     layers:
-    - state: default
-    - state: stripe_top
-      color: "#4777C8"
-    - state: stripe_bottom
-      color: "#2F5C9E"
-    - sprite: _NC/Interface/Misc/job_icons.rsi
-      offset: -0.09375, 0.0625
-      state: ncpd_policer_commander
+    - state: ncpd
   - type: PresetIdCard
     job: NCPDCommander
 
@@ -67,10 +61,10 @@
   parent: BaseSecurityPDA
   id: NCPDCommanderPDA
   name: NCPD precinct commander PDA
-  description: A rugged department terminal tied to its owner's persistent position.
+  description: Has seen more precincts than it has buttons.
   components:
   - type: Pda
-    id: NCPDCommanderIDCard
+    id: NCPDCommanderAccesCard
   - type: Appearance
     appearanceDataInit:
       enum.PdaVisuals.PdaType:

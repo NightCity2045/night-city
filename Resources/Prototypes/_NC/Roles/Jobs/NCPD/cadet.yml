@@ -26,6 +26,7 @@
     belt: ClothingBeltSecurity
     armor: ClothingOuterArmorBasicSlim
     pocket2: BookSecurity
+    neck: NCPDBadgeSilver
   storage:
     back:
     - WantedListCartridge
@@ -42,20 +43,13 @@
   jobName: job-name-ncpd-cadet
 
 - type: entity
-  parent: IDCardStandard
-  id: NCPDCadetIDCard
-  name: NCPD cadet ID
+  parent: NCIDCardStandard
+  id: NCPDCadetAccesCard
+  name: NCPD cadet acces card
   components:
   - type: Sprite
     layers:
-    - state: default
-    - state: stripe_top
-      color: "#4777C8"
-    - state: stripe_bottom
-      color: "#2F5C9E"
-    - sprite: _NC/Interface/Misc/job_icons.rsi
-      offset: -0.09375, 0.0625
-      state: ncpd_policer
+    - state: ncpd
   - type: PresetIdCard
     job: NCPDCadet
 
@@ -66,7 +60,7 @@
   description: A rugged department terminal tied to its owner's persistent position.
   components:
   - type: Pda
-    id: NCPDCadetIDCard
+    id: NCPDCadetAccesCard
   - type: Appearance
     appearanceDataInit:
       enum.PdaVisuals.PdaType:
@@ -74,5 +68,6 @@
         pda-security
   - type: PdaBorderColor
     borderColor: "#4777C8"
+    accentVColor: "#2F5C9E"
   - type: Icon
     state: pda-security

@@ -67,6 +67,25 @@ job-description-biotechnica-netrunner = Ведёт корпоративные с
 job-name-biotechnica-paramedic = Парамедик Biotechnica
 job-description-biotechnica-paramedic = Оказывает полевую помощь корпоративным группам.
 
+job-name-militech-chief = Директор Militech
+job-description-militech-chief = Руководит операциями Militech в Найт-Сити.
+job-name-militech-operative-lead = Руководитель оперативников Militech
+job-description-militech-operative-lead = Командует полевыми группами Militech.
+job-name-militech-operative = Оперативник Militech
+job-description-militech-operative = Выполняет вооружённые корпоративные операции.
+job-name-militech-rigger = Риггер Militech
+job-description-militech-rigger = Обслуживает дронов, транспорт и полевые системы.
+job-name-militech-netrunner = Нетраннер Militech
+job-description-militech-netrunner = Ведёт военные сетевые операции.
+job-name-militech-security-specialist = Специалист по безопасности Militech
+job-description-militech-security-specialist = Защищает корпоративный персонал и имущество.
+job-name-militech-combat-medic = Боевой медик Militech
+job-description-militech-combat-medic = Оказывает медицинскую помощь под огнём.
+job-name-militech-tech = Техник Militech
+job-description-militech-tech = Обслуживает военную технику и оборудование.
+job-name-militech-quartermaster = Квартирмейстер Militech
+job-description-militech-quartermaster = Распоряжается дефицитными корпоративными запасами.
+
 job-name-zhirafa-janitor = Работник санитарной службы Zhirafa
 job-description-zhirafa-janitor = Обслуживает улицы и городские пространства.
 job-name-zhirafa-engineer = Инженер Zhirafa

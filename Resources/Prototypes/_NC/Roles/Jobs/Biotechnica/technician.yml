@@ -12,7 +12,7 @@
   salary: 200
   setPreference: false
   startingGear: BiotechnicaTechGear
-  icon: JobIconStationEngineer
+  icon: JobIconBiotechnicaTech
   accessGroups: [ BiotechBasic ]
   access: [ Biotech_Tech ]
 
@@ -25,9 +25,36 @@
     head: ClothingHeadHatBiotechCap
     eyes: ClothingEyesGogglesBiotechnicaTech
     gloves: ClothingHandsGlovesBiotechnica
-    id: EngineerPDA
+    id: BiotechnicaTechPDA
     belt: ClothingBeltUtilityEngineering
   storage:
     back:
     - LogProbeCartridge
     - AstroNavCartridge
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconBiotechnicaTech
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: biotech_engineer
+  jobName: job-name-biotechnica-tech
+
+- type: entity
+  parent: BasePDA
+  id: BiotechnicaTechPDA
+  name: Biotechnica technician PDA
+  description: Half the buttons are labeled in marker.
+  components:
+  - type: Pda
+    id: BiotechnicaTechIDCard
+  - type: Appearance
+    appearanceDataInit:
+      enum.PdaVisuals.PdaType:
+        !type:String
+        pda-engineer
+  - type: PdaBorderColor
+    borderColor: "#949137"
+    accentVColor: "#A32D26"
+  - type: Icon
+    state: pda-engineer

@@ -12,7 +12,7 @@
   salary: 150
   setPreference: false
   startingGear: BiotechnicaBotanistGear
-  icon: JobIconBotanist
+  icon: JobIconBiotechnicaBotanist
   accessGroups: [ BiotechBasic ]
   access: [ Biotech_Botany ]
 
@@ -26,7 +26,7 @@
     eyes: ClothingEyesGogglesBiotechnicaBotany
     mask: ClothingMaskBiotechnicaBotany
     gloves: ClothingHandsGlovesBiotechnica
-    id: BotanistPDA
+    id: BiotechnicaBotanistPDA
     belt: ClothingBeltBiotechnicaBotany
     outerClothing: ClothingOuterApronBiotechnicaBotany
   storage:
@@ -35,3 +35,30 @@
     - HydroponicsToolSpade
     - HydroponicsToolClippers
     - ChemistryBottleRobustHarvest
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconBiotechnicaBotanist
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: biotech_agrariy
+  jobName: job-name-biotechnica-botanist
+
+- type: entity
+  parent: BasePDA
+  id: BiotechnicaBotanistPDA
+  name: botanist PDA
+  description: Has an earthy scent.
+  components:
+  - type: Pda
+    id: BiotechnicaBotanistIDCard
+  - type: Appearance
+    appearanceDataInit:
+      enum.PdaVisuals.PdaType:
+        !type:String
+        pda-hydro
+  - type: PdaBorderColor
+    borderColor: "#44843c"
+    accentVColor: "#00cc35"
+  - type: Icon
+    state: pda-hydro

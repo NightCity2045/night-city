@@ -12,7 +12,7 @@
   salary: 400
   setPreference: false
   startingGear: MilitechOperativeLeadGear
-  icon: JobIconWarden
+  icon: JobIconMilitechOperativeLead
   accessGroups: [ MilitechBasic ]
   access: [ Militech_Command, Militech_Operative, Militech_Armory ]
 
@@ -25,7 +25,7 @@
     head: ClothingHeadHatMilitechCap
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesCombat
-    id: WardenPDA
+    id: MilitechOperativeLeadPDA
     belt: ClothingBeltSecurity
     armor: ClothingOuterArmorMilitechBulletproof
   storage:
@@ -34,3 +34,30 @@
     - Handcuffs
     - HoloprojectorSecurity
     - RadioHandheldSecurity
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconMilitechOperativeLead
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: militech_operative_lead
+  jobName: job-name-militech-operative-lead
+
+- type: entity
+  parent: BaseSecurityPDA
+  id: MilitechOperativeLeadPDA
+  name: Militech operations lead PDA
+  description: Rugged and well-worn.
+  components:
+  - type: Pda
+    id: MilitechOperativeLeadIDCard
+  - type: Appearance
+    appearanceDataInit:
+      enum.PdaVisuals.PdaType:
+        !type:String
+        pda-security
+  - type: PdaBorderColor
+    borderColor: "#949137"
+    accentVColor: "#A32D26"
+  - type: Icon
+    state: pda-security

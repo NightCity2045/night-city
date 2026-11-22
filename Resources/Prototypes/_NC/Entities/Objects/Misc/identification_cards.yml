@@ -1,0 +1,346 @@
+﻿- type: entity
+  parent: IDCardStandard
+  id: NCIDCardStandard
+  name: Base card ID card
+  abstract: true
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Misc/id_cards.rsi
+    scale: 0.8,0.8
+
+
+
+
+# Civil
+- type: entity
+  parent: NCIDCardStandard
+  id: CivilIDCard
+  name: civil ID card
+  components:
+  - type: Sprite
+    layers:
+    - state: civil
+  - type: PresetIdCard
+    job: Passenger
+  - type: Item
+    heldPrefix: civil
+
+
+# Biotechnica
+- type: entity
+  parent: NCIDCardStandard
+  id: BiotechnicaIDCard
+  name: biotechnica ID card
+  abstract: true
+  components:
+  - type: Sprite
+    layers:
+    - state: biotechnica
+  - type: Item
+    heldPrefix: biotechnica
+
+- type: entity
+  parent: BiotechnicaIDCard
+  id: BiotechnicaBotanistIDCard
+  name: Biotechnica botanist ID card
+  components:
+  - type: PresetIdCard
+    job: BiotechnicaBotanist
+
+- type: entity
+  parent: BiotechnicaIDCard
+  id: BiotechnicaChiefIDCard
+  name: Biotechnica chief ID card
+  components:
+  - type: Sprite
+    layers:
+    - state: head-biotechnica
+  - type: PresetIdCard
+    job: BiotechnicaChief
+
+- type: entity
+  parent: BiotechnicaIDCard
+  id: BiotechnicaMedTechIDCard
+  name: Biotechnica med tech ID card
+  components:
+  - type: PresetIdCard
+    job: BiotechnicaMedTech
+
+- type: entity
+  parent: BiotechnicaIDCard
+  id: BiotechnicaNetrunnerIDCard
+  name: Biotechnica netrunner ID card
+  components:
+  - type: PresetIdCard
+    job: BiotechnicaNetrunner
+
+- type: entity
+  parent: BiotechnicaIDCard
+  id: BiotechnicaOperativeIDCard
+  name: Biotechnica operative ID card
+  components:
+  - type: PresetIdCard
+    job: BiotechnicaOperative
+
+- type: entity
+  parent: BiotechnicaIDCard
+  id: BiotechnicaOperativeLeadIDCard
+  name: Biotechnica operative lead ID card
+  components:
+  - type: PresetIdCard
+    job: BiotechnicaOperativeLead
+
+- type: entity
+  parent: BiotechnicaIDCard
+  id: BiotechnicaParamedicIDCard
+  name: Biotechnica paramedic ID card
+  components:
+  - type: PresetIdCard
+    job: BiotechnicaParamedic
+
+- type: entity
+  parent: BiotechnicaIDCard
+  id: BiotechnicaRiggerIDCard
+  name: Biotechnica rigger ID card
+  components:
+  - type: PresetIdCard
+    job: BiotechnicaRigger
+
+- type: entity
+  parent: BiotechnicaIDCard
+  id: BiotechnicaTechIDCard
+  name: Biotechnica tech ID card
+  components:
+  - type: PresetIdCard
+    job: BiotechnicaTech
+
+
+
+
+
+# Militech
+- type: entity
+  parent: NCIDCardStandard
+  id: MilitechIDCard
+  name: Militech ID card
+  abstract: true
+  components:
+  - type: Sprite
+    layers:
+    - state: militech
+  - type: Item
+    heldPrefix: militech
+
+- type: entity
+  parent: MilitechIDCard
+  id: MilitechChiefIDCard
+  name: Militech chief ID card
+  components:
+  - type: Sprite
+    layers:
+    - state: head-militech
+  - type: PresetIdCard
+    job: MilitechChief
+
+- type: entity
+  parent: MilitechIDCard
+  id: MilitechCombatMedicIDCard
+  name: Militech combat medic ID card
+  components:
+  - type: PresetIdCard
+    job: MilitechCombatMedic
+
+- type: entity
+  parent: MilitechIDCard
+  id: MilitechNetrunnerIDCard
+  name: Militech netrunner ID card
+  components:
+  - type: PresetIdCard
+    job: MilitechNetrunner
+
+- type: entity
+  parent: MilitechIDCard
+  id: MilitechOperativeIDCard
+  name: Militech operative ID card
+  components:
+  - type: PresetIdCard
+    job: MilitechOperative
+
+- type: entity
+  parent: MilitechIDCard
+  id: MilitechOperativeLeadIDCard
+  name: Militech operative lead ID card
+  components:
+  - type: PresetIdCard
+    job: MilitechOperativeLead
+
+- type: entity
+  parent: MilitechIDCard
+  id: MilitechQuartermasterIDCard
+  name: Militech quartermaster ID card
+  components:
+  - type: PresetIdCard
+    job: MilitechQuartermaster
+
+- type: entity
+  parent: MilitechIDCard
+  id: MilitechRiggerIDCard
+  name: Militech rigger ID card
+  components:
+  - type: PresetIdCard
+    job: MilitechRigger
+
+- type: entity
+  parent: MilitechIDCard
+  id: MilitechSecuritySpecialistIDCard
+  name: Militech security specialist ID card
+  components:
+  - type: PresetIdCard
+    job: MilitechSecuritySpecialist
+
+- type: entity
+  parent: MilitechIDCard
+  id: MilitechTechIDCard
+  name: Militech tech ID card
+  components:
+  - type: PresetIdCard
+    job: MilitechTech
+
+
+
+# NCPD
+# High rank (Lieutenant, Commander, Chief)
+- type: entity
+  parent: ClothingNeckBase
+  id: NCPDWarrantCard
+  name: NCPD warrant card
+  description: A senior NCPD warrant card. It proves your authority to command. Not an access card.
+  components:
+  - type: Sprite
+    scale: 0.6,0.6
+    sprite: _NC/Objects/Misc/ncpd_warrant_card.rsi
+  - type: Clothing
+    sprite: _NC/Objects/Misc/ncpd_warrant_card.rsi
+  - type: Item
+    size: Small
+    storedRotation: -90
+  - type: Tag
+    tags:
+    - WhitelistChameleon
+
+# Middle rank (Sergeant, Inspector)
+- type: entity
+  parent: NCPDWarrantCard
+  id: NCPDBadgeSilverGold
+  name: NCPD silver badge with gold trim
+  description: A silver NCPD badge with gold lettering. A clear sign you've survived long enough to earn a desk.
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Misc/ncpd_badge_silver_gold.rsi
+  - type: Clothing
+    sprite: _NC/Objects/Misc/ncpd_badge_silver_gold.rsi
+
+# Low rank (Cadet, Officer)
+- type: entity
+  parent: NCPDWarrantCard
+  id: NCPDBadgeSilver
+  name: NCPD silver badge
+  description: A standard silver NCPD badge. Polished to a shine, but still smells like cheap precinct coffee.
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Misc/ncpd_badge_silver.rsi
+  - type: Clothing
+    sprite: _NC/Objects/Misc/ncpd_badge_silver.rsi
+
+
+
+
+# Trauma Team
+- type: entity
+  parent: NCIDCardStandard
+  id: TraumaTeamIDCard
+  name: trauma team ID card
+  abstract: true
+  components:
+  - type: Sprite
+    layers:
+    - state: trauma-team
+  - type: Item
+    heldPrefix: trauma-team
+
+- type: entity
+  parent: TraumaTeamIDCard
+  id: TraumaTeamChiefIDCard
+  name: trauma team Chief ID card
+  components:
+  - type: Sprite
+    layers:
+    - state: head-trauma
+  #- type: PresetIdCard
+  #  job: TraumaTeamChief
+
+- type: entity
+  parent: TraumaTeamIDCard
+  id: TraumaTeamOperativeIDCard
+  name: trauma team operative ID card
+  components:
+  - type: Sprite
+    layers:
+    - state: trauma-team
+    - sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+      offset: -0.28, 0.062
+      scale: 1.251,1.251
+      state: trauma
+  - type: PresetIdCard
+    job: TraumaTeamOperative
+
+- type: entity
+  parent: TraumaTeamOperativeIDCard
+  id: TraumaTeamParamedicIDCard
+  name: trauma team paramedic ID card
+  components:
+  - type: Sprite
+    layers:
+    - state: trauma-team
+    - sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+      offset: -0.28, 0.062
+      scale: 1.251,1.251
+      state: trauma-paramed
+  - type: PresetIdCard
+    job: TraumaTeamParamedic
+
+
+
+
+
+# Zhirafa
+- type: entity
+  parent: NCIDCardStandard
+  id: ZhirafaIDCard
+  name: zhirafa ID card
+  abstract: true
+  components:
+  - type: Sprite
+    layers:
+    - state: zhirafa
+  - type: Item
+    heldPrefix: zhirafa
+
+- type: entity
+  parent: ZhirafaIDCard
+  id: ZhirafaJanitorIDCard
+  name: zhirafa janitor ID card
+  components:
+  - type: PresetIdCard
+    job: ZhirafaJanitor
+
+- type: entity
+  parent: ZhirafaIDCard
+  id: ZhirafaChiefIDCard
+  name: zhirafa chief ID card
+  components:
+  - type: Sprite
+    layers:
+    - state: head-zhirafa
+  #- type: PresetIdCard
+  #  job: ZhirafaChief

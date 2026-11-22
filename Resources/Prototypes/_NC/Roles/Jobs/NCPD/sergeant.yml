@@ -27,6 +27,7 @@
     id: NCPDSergeantPDA
     belt: ClothingBeltSecurity
     armor: ClothingOuterArmorBulletproof
+    neck: NCPDBadgeSilverGold
   storage:
     back:
     - WantedListCartridge
@@ -45,20 +46,13 @@
   jobName: job-name-ncpd-sergeant
 
 - type: entity
-  parent: IDCardStandard
-  id: NCPDSergeantIDCard
-  name: NCPD sergeant ID
+  parent: NCIDCardStandard
+  id: NCPDSergeantAccesCard
+  name: NCPD sergeant acces card
   components:
   - type: Sprite
     layers:
-    - state: default
-    - state: stripe_top
-      color: "#4777C8"
-    - state: stripe_bottom
-      color: "#2F5C9E"
-    - sprite: _NC/Interface/Misc/job_icons.rsi
-      offset: -0.09375, 0.0625
-      state: ncpd_policer_serg
+    - state: ncpd
   - type: PresetIdCard
     job: NCPDSergeant
 
@@ -66,10 +60,10 @@
   parent: BaseSecurityPDA
   id: NCPDSergeantPDA
   name: NCPD sergeant PDA
-  description: A rugged department terminal tied to its owner's persistent position.
+  description: The screen has survived more than most rookies.
   components:
   - type: Pda
-    id: NCPDSergeantIDCard
+    id: NCPDSergeantAccesCard
   - type: Appearance
     appearanceDataInit:
       enum.PdaVisuals.PdaType:

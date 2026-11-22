@@ -12,7 +12,7 @@
   salary: 450
   setPreference: false
   startingGear: MilitechNetrunnerGear
-  icon: JobIconScientist
+  icon: JobIconMilitechNetrunner
   accessGroups: [ MilitechBasic ]
   access: [ Militech_Tech ]
 
@@ -24,8 +24,35 @@
     shoes: ClothingShoesColorBlack
     head: ClothingHeadHatMilitechCap
     eyes: ClothingEyesGlasses
-    id: SciencePDA
+    id: MilitechNetrunnerPDA
   storage:
     back:
     - NetProbeCartridge
     - LogProbeCartridge
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconMilitechNetrunner
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: militech_other
+  jobName: job-name-militech-netrunner
+
+- type: entity
+  parent: BaseSecurityPDA
+  id: MilitechNetrunnerPDA
+  name: Militech netrunner PDA
+  description: Warm to the touch. Probably fine.
+  components:
+  - type: Pda
+    id: MilitechNetrunnerIDCard
+  - type: Appearance
+    appearanceDataInit:
+      enum.PdaVisuals.PdaType:
+        !type:String
+        pda-security
+  - type: PdaBorderColor
+    borderColor: "#949137"
+    accentVColor: "#A32D26"
+  - type: Icon
+    state: pda-security

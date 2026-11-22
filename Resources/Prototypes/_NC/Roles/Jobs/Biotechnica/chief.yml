@@ -13,7 +13,7 @@
   ncNpcAllowed: false
   setPreference: false
   startingGear: BiotechnicaChiefGear
-  icon: JobIconResearchDirector
+  icon: JobIconBiotechnicaChief
   accessGroups: [ BiotechBasic ]
   access: [ Biotech_Director, Biotech_HeadOfDepartment, Biotech_Botany, Biotech_MedTech, Biotech_Tech, Biotech_Operative ]
 
@@ -26,6 +26,34 @@
     head: ClothingHeadHatBiotechCap
     eyes: ClothingEyesGlasses
     gloves: ClothingHandsGlovesBiotechnica
-    id: RnDPDA
+    id: BiotechnicaChiefPDA
     armor: ClothingOuterArmorBiotechBulletproof
     outerClothing: ClothingOuterCoatBiotechnicaMedtechAdvanced
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconBiotechnicaChief
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: biotech_chief
+  jobName: job-name-biotechnica-chief
+
+- type: entity
+  parent: BasePDA
+  id: BiotechnicaChiefPDA
+  name: research director PDA
+  description: It appears surprisingly ordinary.
+  components:
+  - type: Pda
+    id: BiotechnicaChiefIDCard
+  - type: Appearance
+    appearanceDataInit:
+      enum.PdaVisuals.PdaType:
+        !type:String
+        pda-rd
+  - type: PdaBorderColor
+    borderColor: "#d7d7d0"
+    accentHColor: "#447987"
+    accentVColor: "#8900c9"
+  - type: Icon
+    state: pda-rd

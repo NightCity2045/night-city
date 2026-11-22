@@ -12,7 +12,7 @@
   salary: 250
   setPreference: false
   startingGear: MilitechCombatMedicGear
-  icon: JobIconParamedic
+  icon: JobIconMilitechCombatMedic
   accessGroups: [ MilitechBasic ]
   access: [ Militech_Operative, Militech_Medical ]
 
@@ -25,9 +25,36 @@
     eyes: ClothingEyesHudMedical
     mask: ClothingMaskSterile
     gloves: ClothingHandsGlovesNitrile
-    id: ParamedicPDA
+    id: MilitechCombatMedicPDA
     belt: ClothingBeltMedicalFilled
     armor: ClothingOuterArmorMilitechBulletproof
   storage:
     back:
     - MedTekCartridge
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconMilitechCombatMedic
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: militech_medic
+  jobName: job-name-militech-combat-medic
+
+- type: entity
+  parent: BaseSecurityPDA
+  id: MilitechCombatMedicPDA
+  name: Militech combat medic PDA
+  description: Rugged and well-worn.
+  components:
+  - type: Pda
+    id: MilitechCombatMedicIDCard
+  - type: Appearance
+    appearanceDataInit:
+      enum.PdaVisuals.PdaType:
+        !type:String
+        pda-medical
+  - type: PdaBorderColor
+    borderColor: "#949137"
+    accentVColor: "#A32D26"
+  - type: Icon
+    state: pda-medical

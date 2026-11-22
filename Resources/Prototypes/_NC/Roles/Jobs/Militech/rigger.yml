@@ -12,7 +12,7 @@
   salary: 350
   setPreference: false
   startingGear: MilitechRiggerGear
-  icon: JobIconStationEngineer
+  icon: JobIconMilitechRigger
   accessGroups: [ MilitechBasic ]
   access: [ Militech_Tech ]
 
@@ -25,9 +25,36 @@
     head: ClothingHeadHatMilitechCap
     eyes: ClothingEyesGlassesMeson
     gloves: ClothingHandsGlovesColorYellow
-    id: EngineerPDA
+    id: MilitechRiggerPDA
     belt: ClothingBeltUtilityFilled
   storage:
     back:
     - LogProbeCartridge
     - AstroNavCartridge
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconMilitechRigger
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: militech_other
+  jobName: job-name-militech-rigger
+
+- type: entity
+  parent: BasePDA
+  id: MilitechRiggerPDA
+  name: Militech rigger PDA
+  description: Smells like coolant and questionable repairs.
+  components:
+  - type: Pda
+    id: MilitechRiggerIDCard
+  - type: Appearance
+    appearanceDataInit:
+      enum.PdaVisuals.PdaType:
+        !type:String
+        pda-engineer
+  - type: PdaBorderColor
+    borderColor: "#949137"
+    accentVColor: "#A32D26"
+  - type: Icon
+    state: pda-engineer

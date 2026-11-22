@@ -12,7 +12,7 @@
   salary: 350
   setPreference: false
   startingGear: MilitechSecuritySpecialistGear
-  icon: JobIconSecurityOfficer
+  icon: JobIconMilitechSecuritySpecialist
   accessGroups: [ MilitechBasic ]
   access: [ Militech_Operative, Militech_Armory ]
 
@@ -25,7 +25,7 @@
     head: ClothingHeadHatMilitechCap
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesCombat
-    id: SecurityPDA
+    id: MilitechSecuritySpecialistPDA
     belt: ClothingBeltSecurity
     armor: ClothingOuterArmorMilitechBulletproof
   storage:
@@ -34,3 +34,30 @@
     - Handcuffs
     - HoloprojectorSecurity
     - RadioHandheldSecurity
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconMilitechSecuritySpecialist
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: militech_security
+  jobName: job-name-militech-security-specialist
+
+- type: entity
+  parent: BaseSecurityPDA
+  id: MilitechSecuritySpecialistPDA
+  name: Militech security specialist PDA
+  description: Rugged and well-worn.
+  components:
+  - type: Pda
+    id: MilitechSecuritySpecialistIDCard
+  - type: Appearance
+    appearanceDataInit:
+      enum.PdaVisuals.PdaType:
+        !type:String
+        pda-security
+  - type: PdaBorderColor
+    borderColor: "#949137"
+    accentVColor: "#A32D26"
+  - type: Icon
+    state: pda-security

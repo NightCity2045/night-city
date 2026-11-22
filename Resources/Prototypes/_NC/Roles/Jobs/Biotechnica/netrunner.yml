@@ -12,7 +12,7 @@
   salary: 400
   setPreference: false
   startingGear: BiotechnicaNetrunnerGear
-  icon: JobIconScientist
+  icon: JobIconBiotechnicaNetrunner
   accessGroups: [ BiotechBasic ]
   access: [ Biotech_Tech ]
 
@@ -24,9 +24,36 @@
     shoes: ClothingShoesColorBlack
     head: ClothingHeadHatBiotechCap
     eyes: ClothingEyesGlasses
-    id: SciencePDA
+    id: BiotechnicaNetrunnerPDA
     outerClothing: ClothingOuterCoatBiotechnicaMedtechRadiation
   storage:
     back:
     - NetProbeCartridge
     - LogProbeCartridge
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconBiotechnicaNetrunner
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: biotech_netrunner
+  jobName: job-name-biotechnica-netrunner
+
+- type: entity
+  parent: BaseSecurityPDA
+  id: BiotechnicaNetrunnerPDA
+  name: Biotechnica netrunner PDA
+  description: Warm to the touch. Probably fine.
+  components:
+  - type: Pda
+    id: BiotechnicaNetrunnerIDCard
+  - type: Appearance
+    appearanceDataInit:
+      enum.PdaVisuals.PdaType:
+        !type:String
+        pda-security
+  - type: PdaBorderColor
+    borderColor: "#949137"
+    accentVColor: "#A32D26"
+  - type: Icon
+    state: pda-security

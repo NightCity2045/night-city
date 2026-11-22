@@ -24,7 +24,7 @@
     shoes: ClothingShoesBootsJack
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesCombat
-    id: SecurityPDA
+    id: TraumaTeamOperativePDA
     belt: ClothingBeltSecurity
     outerClothing: ClothingOuterHardsuitTraumaArmored
   storage:
@@ -35,3 +35,22 @@
     - Handcuffs
     - HoloprojectorSecurity
     - RadioHandheldSecurity
+
+- type: entity
+  parent: BaseSecurityPDA
+  id: TraumaTeamOperativePDA
+  name: Trauma Team operative PDA
+  description: A rugged department terminal tied to its owner's persistent position. The screen is cracked exactly where a patient once grabbed it.
+  components:
+  - type: Pda
+    id: TraumaTeamOperativeIDCard
+  - type: Appearance
+    appearanceDataInit:
+      enum.PdaVisuals.PdaType:
+        !type:String
+        pda-warden
+  - type: PdaBorderColor
+    borderColor: "#4777C8"
+    accentVColor: "#2F5C9E"
+  - type: Icon
+    state: pda-warden

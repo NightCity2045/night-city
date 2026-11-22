@@ -21,3 +21,9 @@ lobby-trauma-team-artist = Hua Ma
 
 lobby-militech-title = Militech
 lobby-militech-artist = неизвестный
+
+lobby-cyberpsychosis-title = Киберпсихоз
+lobby-cyberpsychosis-artist = _m1nxx_
+
+lobby-AVIDA-title = АВИДА!
+lobby-AVIDA-artist = _m1nxx_

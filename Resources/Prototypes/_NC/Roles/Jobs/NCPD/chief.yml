@@ -30,6 +30,7 @@
     belt: ClothingBeltSecurity
     armor: ClothingOuterArmorBulletproof
     outerClothing: ClothingOuterCoatHoSTrench
+    neck: NCPDWarrantCard
   storage:
     back:
     - WantedListCartridge
@@ -48,20 +49,13 @@
   jobName: job-name-ncpd-chief
 
 - type: entity
-  parent: IDCardStandard
-  id: NCPDChiefIDCard
-  name: NCPD chief ID
+  parent: NCIDCardStandard
+  id: NCPDChiefAccesCard
+  name: NCPD chief acces card
   components:
   - type: Sprite
     layers:
-    - state: gold
-    - state: stripe_top
-      color: "#4777C8"
-    - state: stripe_bottom
-      color: "#2F5C9E"
-    - sprite: _NC/Interface/Misc/job_icons.rsi
-      offset: -0.09375, 0.0625
-      state: ncpd_Nachalnik
+    - state: ncpd
   - type: PresetIdCard
     job: NCPDChief
 
@@ -69,10 +63,10 @@
   parent: BaseSecurityPDA
   id: NCPDChiefPDA
   name: NCPD chief PDA
-  description: A rugged department terminal tied to its owner's persistent position.
+  description: Carries more authority than its cracked screen suggests.
   components:
   - type: Pda
-    id: NCPDChiefIDCard
+    id: NCPDChiefAccesCard
   - type: Appearance
     appearanceDataInit:
       enum.PdaVisuals.PdaType:

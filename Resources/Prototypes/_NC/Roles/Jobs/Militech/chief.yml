@@ -13,7 +13,7 @@
   ncNpcAllowed: false
   setPreference: false
   startingGear: MilitechChiefGear
-  icon: JobIconHeadOfSecurity
+  icon: JobIconMilitechChief
   accessGroups: [ MilitechBasic ]
   access: [ Militech_Command, Militech_Operative, Militech_Armory, Militech_Tech, Militech_Medical ]
 
@@ -26,7 +26,7 @@
     head: ClothingHeadHatMilitechCap
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesCombat
-    id: HoSPDA
+    id: MilitechChiefPDA
     belt: ClothingBeltSecurity
     armor: ClothingOuterArmorMilitechBulletproof
     outerClothing: ClothingOuterCoatHoSTrench
@@ -36,3 +36,30 @@
     - Handcuffs
     - HoloprojectorSecurity
     - RadioHandheldSecurity
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconMilitechChief
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: militech_chief
+  jobName: job-name-militech-chief
+
+- type: entity
+  parent: BaseSecurityPDA
+  id: MilitechChiefPDA
+  name: Militech director PDA
+  description: Carries more authority than its cracked screen suggests.
+  components:
+  - type: Pda
+    id: MilitechChiefIDCard
+  - type: Appearance
+    appearanceDataInit:
+      enum.PdaVisuals.PdaType:
+        !type:String
+        pda-hos
+  - type: PdaBorderColor
+    borderColor: "#949137"
+    accentVColor: "#A32D26"
+  - type: Icon
+    state: pda-hos

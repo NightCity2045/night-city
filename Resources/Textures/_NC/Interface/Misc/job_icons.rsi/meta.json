@@ -15,25 +15,25 @@
             "name": "biotech_agrariy"
         },
         {
-            "name": "biotech_medick"
+            "name": "biotech_operative"
         },
         {
-            "name": "biotech_medteh"
+            "name": "biotech_medtech"
         },
         {
-            "name": "biotech_netruner"
+            "name": "biotech_netrunner"
         },
         {
-            "name": "biotech_oficer"
+            "name": "biotech_operative_lead"
         },
         {
-            "name": "biotech_rukuvoditel"
+            "name": "biotech_chief"
         },
         {
-            "name": "biotech_teh"
+            "name": "biotech_engineer"
         },
         {
-            "name": "biotech_zaparamedick"
+            "name": "biotech_paramedic"
         },
         {
             "name": "civ_citizen"
@@ -106,6 +106,33 @@
         },
         {
             "name": "traumator"
+        },
+        {
+            "name": "militech"
+        },
+        {
+            "name": "militech_chief"
+        },
+        {
+            "name": "militech_engineer"
+        },
+        {
+            "name": "militech_medic"
+        },
+        {
+            "name": "militech_operative_lead"
+        },
+        {
+            "name": "militech_other"
+        },
+        {
+            "name": "militech_qm"
+        },
+        {
+            "name": "militech_security"
+        },
+        {
+            "name": "Janitor"
         }
     ]
 }

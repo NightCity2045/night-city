@@ -45,3 +45,15 @@
   background: /Textures/_NC/LobbyScreens/militech.webp
   title: lobby-militech-title
   artist: lobby-militech-artist
+
+- type: lobbyBackground
+  id: NCCyberpsychosis
+  background: /Textures/_NC/LobbyScreens/cyberpsychosis.webp
+  title: lobby-cyberpsychosis-title
+  artist: lobby-cyberpsychosis-artist
+
+- type: lobbyBackground
+  id: NCABIDA
+  background: /Textures/_NC/LobbyScreens/AVIDA.webp
+  title: lobby-AVIDA-title
+  artist: lobby-AVIDA-artist

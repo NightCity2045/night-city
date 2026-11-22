@@ -12,7 +12,7 @@
   salary: 200
   setPreference: false
   startingGear: BiotechnicaMedTechGear
-  icon: JobIconMedicalDoctor
+  icon: JobIconBiotechnicaMedTech
   accessGroups: [ BiotechBasic ]
   access: [ Biotech_MedTech ]
 
@@ -26,9 +26,36 @@
     eyes: ClothingEyesHudMedical
     mask: ClothingMaskBiotechnicaMedtech
     gloves: ClothingHandsGlovesBiotechnica
-    id: MedicalPDA
+    id: BiotechnicaMedTechPDA
     belt: ClothingBeltMedicalFilled
     outerClothing: ClothingOuterCoatBiotechnicaMedtech
   storage:
     back:
     - MedTekCartridge
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconBiotechnicaMedTech
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: biotech_medtech
+  jobName: job-name-biotechnica-med-tech
+
+- type: entity
+  parent: BasePDA
+  id: BiotechnicaMedTechPDA
+  name: science PDA
+  description: Smells faintly of disinfectant and bad ideas.
+  components:
+  - type: Pda
+    id: BiotechnicaMedTechIDCard
+  - type: Appearance
+    appearanceDataInit:
+      enum.PdaVisuals.PdaType:
+        !type:String
+        pda-science
+  - type: PdaBorderColor
+    borderColor: "#d7d7d0"
+    accentVColor: "#8900c9"
+  - type: Icon
+    state: pda-science

@@ -12,7 +12,7 @@
   salary: 250
   setPreference: false
   startingGear: BiotechnicaOperativeGear
-  icon: JobIconSecurityOfficer
+  icon: JobIconBiotechnicaOperative
   accessGroups: [ BiotechBasic ]
   access: [ Biotech_Operative ]
 
@@ -25,7 +25,7 @@
     head: ClothingHeadHatBiotechCap
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesBiotechnica
-    id: SecurityPDA
+    id: BiotechnicaOperativePDA
     belt: ClothingBeltSecurity
     armor: ClothingOuterArmorBiotechBulletproof
   storage:
@@ -33,3 +33,30 @@
     - Handcuffs
     - HoloprojectorSecurity
     - RadioHandheldSecurity
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconBiotechnicaOperative
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: biotech_operative
+  jobName: job-name-biotechnica-operative
+
+- type: entity
+  parent: BaseSecurityPDA
+  id: BiotechnicaOperativePDA
+  name: security PDA
+  description: Scuffed, dented, and still logged in.
+  components:
+  - type: Pda
+    id: BiotechnicaOperativeIDCard
+  - type: Appearance
+    appearanceDataInit:
+      enum.PdaVisuals.PdaType:
+        !type:String
+        pda-security
+  - type: PdaBorderColor
+    borderColor: "#949137"
+    accentVColor: "#A32D26"
+  - type: Icon
+    state: pda-security

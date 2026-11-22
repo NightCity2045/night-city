@@ -120,6 +120,7 @@
   ncSelectable: true
   ncEntryJob: MilitechOperative
   ncPersonnelManagers: [ MilitechChief, MilitechOperativeLead ]
+  ncIcon: NCDepartmentIconMilitech
   ncPositionLimits:
     MilitechChief: 1
     MilitechOperativeLead: 4
@@ -192,3 +193,10 @@
   icon:
     sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
     state: biotech
+
+- type: jobIcon
+  parent: JobIcon
+  id: NCDepartmentIconMilitech
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: militech

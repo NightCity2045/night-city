@@ -28,6 +28,7 @@
     id: NCPDInspectorPDA
     belt: ClothingBeltSecurity
     armor: ClothingOuterVestDetective
+    neck: NCPDBadgeSilverGold
   storage:
     back:
     - ForensicPad
@@ -49,20 +50,13 @@
   jobName: job-name-ncpd-inspector
 
 - type: entity
-  parent: IDCardStandard
-  id: NCPDInspectorIDCard
-  name: NCPD inspector ID
+  parent: NCIDCardStandard
+  id: NCPDInspectorAccesCard
+  name: NCPD inspector acces card
   components:
   - type: Sprite
     layers:
-    - state: default
-    - state: stripe_top
-      color: "#4777C8"
-    - state: stripe_bottom
-      color: "#2F5C9E"
-    - sprite: _NC/Interface/Misc/job_icons.rsi
-      offset: -0.09375, 0.0625
-      state: ncpd_inspector
+    - state: ncpd
   - type: PresetIdCard
     job: NCPDInspector
 
@@ -70,10 +64,10 @@
   parent: BaseSecurityPDA
   id: NCPDInspectorPDA
   name: NCPD inspector PDA
-  description: A rugged department terminal tied to its owner's persistent position.
+  description: Full of case notes and half-finished thoughts.
   components:
   - type: Pda
-    id: NCPDInspectorIDCard
+    id: NCPDInspectorAccesCard
   - type: Appearance
     appearanceDataInit:
       enum.PdaVisuals.PdaType:

@@ -26,7 +26,7 @@
     eyes: ClothingEyesHudMedical
     mask: ClothingMaskSterile
     gloves: ClothingHandsGlovesLatex
-    id: ParamedicPDA
+    id: TraumaTeamParamedicPDA
     belt: ClothingBeltMedicalFilled
     outerClothing: ClothingOuterHardsuitTraumaMed
   storage:
@@ -34,3 +34,22 @@
     - MedTekCartridge
     - NCTraumaResponseCartridge
     - NCTraumaTrackingImplanter
+
+- type: entity
+  parent: BaseMedicalPDA
+  id: TraumaTeamParamedicPDA
+  name: Trauma Team paramedic PDA
+  description: Shiny and sterile. Mostly. Someone wiped the blood off in a hurry.
+  components:
+  - type: Pda
+    id: TraumaTeamParamedicIDCard
+  - type: Appearance
+    appearanceDataInit:
+      enum.PdaVisuals.PdaType:
+        !type:String
+        pda-paramedic
+  - type: PdaBorderColor
+    borderColor: "#d7d7d0"
+    accentVColor: "#2a4b5b"
+  - type: Icon
+    state: pda-paramedic

@@ -12,7 +12,7 @@
   salary: 300
   setPreference: false
   startingGear: BiotechnicaRiggerGear
-  icon: JobIconStationEngineer
+  icon: JobIconBiotechnicaRigger
   accessGroups: [ BiotechBasic ]
   access: [ Biotech_Tech ]
 
@@ -25,9 +25,36 @@
     head: ClothingHeadEnvirohelmBiotechnica
     eyes: ClothingEyesGogglesBiotechnicaTech
     gloves: ClothingHandsGlovesBiotechnica
-    id: EngineerPDA
+    id: BiotechnicaRiggerPDA
     belt: ClothingBeltUtilityFilled
   storage:
     back:
     - LogProbeCartridge
     - AstroNavCartridge
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconBiotechnicaRigger
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: biotech
+  jobName: job-name-biotechnica-rigger
+
+- type: entity
+  parent: BasePDA
+  id: BiotechnicaRiggerPDA
+  name: Biotechnica rigger PDA
+  description: Smells like coolant and questionable repairs.
+  components:
+  - type: Pda
+    id: BiotechnicaRiggerIDCard
+  - type: Appearance
+    appearanceDataInit:
+      enum.PdaVisuals.PdaType:
+        !type:String
+        pda-engineer
+  - type: PdaBorderColor
+    borderColor: "#949137"
+    accentVColor: "#A32D26"
+  - type: Icon
+    state: pda-engineer

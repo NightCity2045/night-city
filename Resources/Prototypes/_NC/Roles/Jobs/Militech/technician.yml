@@ -31,3 +31,30 @@
     back:
     - LogProbeCartridge
     - AstroNavCartridge
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconMilitechTech
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: militech_engineer
+  jobName: job-name-militech-tech
+
+- type: entity
+  parent: BasePDA
+  id: MilitechTechPDA
+  name: Militech technician PDA
+  description: Rugged and well-worn.
+  components:
+  - type: Pda
+    id: MilitechTechIDCard
+  - type: Appearance
+    appearanceDataInit:
+      enum.PdaVisuals.PdaType:
+        !type:String
+        pda-engineer
+  - type: PdaBorderColor
+    borderColor: "#949137"
+    accentVColor: "#A32D26"
+  - type: Icon
+    state: pda-engineer

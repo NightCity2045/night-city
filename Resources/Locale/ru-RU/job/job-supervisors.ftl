@@ -13,3 +13,5 @@ job-supervisors-security = офицерам, смотрителю, и главе
 job-supervisors-science = ученые, старший научный сотрудник и научный руководитель
 job-supervisors-hire = своим нанимателям
 job-supervisors-everyone = вообще всем
+job-supervisors-yourself = самому себе
+job-supervisors-nobody = никому

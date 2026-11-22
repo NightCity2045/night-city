@@ -3,7 +3,7 @@
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 - type: entity
-  parent: [ ClothingUniformBase, ClothingUniformFoldableBase ]
+  parent: ClothingUniformBase
   id: ClothingUniformArmoredBusinessSuit
   name: armored business suit
   description: A stylish executive business suit lined with discreet high-weave armor.
@@ -16,7 +16,7 @@
     profile: NCArmorLightArmorjack
 
 - type: entity
-  parent: [ ClothingUniformBase, ClothingUniformFoldableBase ]
+  parent: ClothingUniformBase
   id: ClothingUniformBiotech
   name: BioTechnica jumpsuit
   description: A comfortable utility jumpsuit bearing the BioTechnica corporate insignia.
@@ -27,7 +27,7 @@
     sprite: _NC/Clothing/Uniforms/Jumpsuits/biotech_jumpsuit.rsi
 
 - type: entity
-  parent: [ ClothingUniformBase, ClothingUniformFoldableBase ]
+  parent: ClothingUniformBase
   id: ClothingUniformMilitech
   name: Militech jumpsuit
   description: A tactical utility jumpsuit worn by Militech military contractors and staff.

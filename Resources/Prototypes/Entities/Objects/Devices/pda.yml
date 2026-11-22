@@ -190,10 +190,10 @@
   parent: BasePDA
   id: PassengerPDA
   name: passenger PDA
-  description: Why isn't it gray?
+  description: Isn't gray.
   components:
   - type: Pda
-    id: PassengerIDCard
+    id: CivilIDCard # NC edit
   - type: PdaBorderColor
     borderColor: "#717059"
 

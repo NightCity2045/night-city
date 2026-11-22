@@ -12,7 +12,7 @@
   salary: 150
   setPreference: false
   startingGear: BiotechnicaParamedicGear
-  icon: JobIconParamedic
+  icon: JobIconBiotechnicaParamedic
   accessGroups: [ BiotechBasic ]
   access: [ Biotech_MedTech, Biotech_Operative ]
 
@@ -26,10 +26,37 @@
     eyes: ClothingEyesHudMedical
     mask: ClothingMaskBiotechnicaMedtech
     gloves: ClothingHandsGlovesBiotechnica
-    id: ParamedicPDA
+    id: BiotechnicaParamedicPDA
     belt: ClothingBeltMedicalFilled
     armor: ClothingOuterArmorBiotechBulletproof
     outerClothing: ClothingOuterCoatBiotechnicaMedtechAdvanced
   storage:
     back:
     - MedTekCartridge
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconBiotechnicaParamedic
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: biotech_paramedic
+  jobName: job-name-biotechnica-paramedic
+
+- type: entity
+  parent: BaseMedicalPDA
+  id: BiotechnicaParamedicPDA
+  name: paramedic PDA
+  description: Someone already wiped the blood off. Mostly.
+  components:
+  - type: Pda
+    id: BiotechnicaParamedicIDCard
+  - type: Appearance
+    appearanceDataInit:
+      enum.PdaVisuals.PdaType:
+        !type:String
+        pda-paramedic
+  - type: PdaBorderColor
+    borderColor: "#d7d7d0"
+    accentVColor: "#2a4b5b"
+  - type: Icon
+    state: pda-paramedic

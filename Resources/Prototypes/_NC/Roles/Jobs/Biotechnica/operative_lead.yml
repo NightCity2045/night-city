@@ -12,7 +12,7 @@
   salary: 350
   setPreference: false
   startingGear: BiotechnicaOperativeLeadGear
-  icon: JobIconSecurityOfficer
+  icon: JobIconBiotechnicaOperativeLead
   accessGroups: [ BiotechBasic ]
   access: [ Biotech_HeadOfDepartment, Biotech_Operative ]
 
@@ -25,7 +25,7 @@
     head: ClothingHeadHatBiotechCap
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesBiotechnica
-    id: WardenPDA
+    id: BiotechnicaOperativeLeadPDA
     belt: ClothingBeltSecurity
     armor: ClothingOuterArmorBiotechBulletproof
   storage:
@@ -34,3 +34,30 @@
     - Handcuffs
     - HoloprojectorSecurity
     - RadioHandheldSecurity
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconBiotechnicaOperativeLead
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: biotech_operative_lead
+  jobName: job-name-biotechnica-operative-lead
+
+- type: entity
+  parent: BaseSecurityPDA
+  id: BiotechnicaOperativeLeadPDA
+  name: security PDA
+  description: Carries more authority than its cracked screen suggests.
+  components:
+  - type: Pda
+    id: BiotechnicaOperativeLeadIDCard
+  - type: Appearance
+    appearanceDataInit:
+      enum.PdaVisuals.PdaType:
+        !type:String
+        pda-security
+  - type: PdaBorderColor
+    borderColor: "#949137"
+    accentVColor: "#A32D26"
+  - type: Icon
+    state: pda-security

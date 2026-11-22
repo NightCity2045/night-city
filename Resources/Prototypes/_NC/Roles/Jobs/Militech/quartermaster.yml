@@ -12,7 +12,7 @@
   salary: 300
   setPreference: false
   startingGear: MilitechQuartermasterGear
-  icon: JobIconQuarterMaster
+  icon: JobIconMilitechQuartermaster
   accessGroups: [ MilitechBasic ]
   access: [ Militech_Armory ]
 
@@ -23,7 +23,34 @@
     back: ClothingBackpackCargo
     shoes: ClothingShoesBootsWork
     head: ClothingHeadHatMilitechCap
-    id: QuartermasterPDA
+    id: MilitechQuartermasterPDA
     belt: BoxFolderClipboardThreePapers
     pocket1: AppraisalTool
     outerClothing: ClothingOuterWinterQM
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconMilitechQuartermaster
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: militech_qm
+  jobName: job-name-militech-quartermaster
+
+- type: entity
+  parent: BaseSecurityPDA
+  id: MilitechQuartermasterPDA
+  name: Militech quartermaster PDA
+  description: Rugged and well-worn.
+  components:
+  - type: Pda
+    id: MilitechQuartermasterIDCard
+  - type: Appearance
+    appearanceDataInit:
+      enum.PdaVisuals.PdaType:
+        !type:String
+        pda-cargo
+  - type: PdaBorderColor
+    borderColor: "#949137"
+    accentVColor: "#A32D26"
+  - type: Icon
+    state: pda-cargo

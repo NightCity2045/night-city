@@ -12,7 +12,7 @@
   salary: 80
   setPreference: false
   startingGear: ZhirafaJanitorGear
-  icon: JobIconJanitor
+  icon: JobIconZhirafaJanitor
   accessGroups: [ ZhirafaBasic ]
 
 - type: startingGear
@@ -21,9 +21,35 @@
     jumpsuit: ClothingUniformJumpsuitJanitor
     back: ClothingBackpack
     shoes: ClothingShoesGaloshes
-    id: JanitorPDA
+    id: ZhirafaJanitorPDA
     belt: ClothingBeltJanitorFilled
     outerClothing: ClothingOuterWinterJani
   # NC: A physical worker must carry the same real tool a player uses. The professional adapter never invents one.
   inhand:
   - MopItem
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconZhirafaJanitor
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: zhirafa
+  jobName: job-name-zhirafa-janitor
+
+- type: entity
+  parent: BasePDA
+  id: ZhirafaJanitorPDA
+  name: Zhirafa janitor PDA
+  description: Smells like bleach. The corporate kind, mostly.
+  components:
+  - type: Pda
+    id: ZhirafaJanitorIDCard
+  - type: Appearance
+    appearanceDataInit:
+      enum.PdaVisuals.PdaType:
+        !type:String
+        pda-janitor
+  - type: PdaBorderColor
+    borderColor: "#5D2D56"
+  - type: Icon
+    state: pda-janitor

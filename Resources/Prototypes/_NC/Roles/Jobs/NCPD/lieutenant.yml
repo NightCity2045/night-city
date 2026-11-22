@@ -27,6 +27,7 @@
     id: NCPDLieutenantPDA
     belt: ClothingBeltSecurity
     armor: ClothingOuterArmorBulletproof
+    neck: NCPDWarrantCard
   storage:
     back:
     - WantedListCartridge
@@ -45,20 +46,13 @@
   jobName: job-name-ncpd-lieutenant
 
 - type: entity
-  parent: IDCardStandard
-  id: NCPDLieutenantIDCard
-  name: NCPD lieutenant ID
+  parent: NCIDCardStandard
+  id: NCPDLieutenantAccesCard
+  name: NCPD lieutenant acces card
   components:
   - type: Sprite
     layers:
-    - state: default
-    - state: stripe_top
-      color: "#4777C8"
-    - state: stripe_bottom
-      color: "#2F5C9E"
-    - sprite: _NC/Interface/Misc/job_icons.rsi
-      offset: -0.09375, 0.0625
-      state: ncpd_Letenant
+    - state: ncpd
   - type: PresetIdCard
     job: NCPDLieutenant
 
@@ -66,10 +60,10 @@
   parent: BaseSecurityPDA
   id: NCPDLieutenantPDA
   name: NCPD lieutenant PDA
-  description: A rugged department terminal tied to its owner's persistent position.
+  description: Scuffed from years of paperwork and riots.
   components:
   - type: Pda
-    id: NCPDLieutenantIDCard
+    id: NCPDLieutenantAccesCard
   - type: Appearance
     appearanceDataInit:
       enum.PdaVisuals.PdaType:
