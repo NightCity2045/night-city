@@ -1,0 +1,14 @@
+<Document>
+<NCGuideLocalizedText Key="nc-guide-pharma-build-h"/>
+<NCGuideLocalizedText Key="nc-guide-pharma-build-tree"/>
+<NCGuideLocalizedText Key="nc-guide-pharma-build-cores"/>
+<NCGuideLocalizedText Key="nc-guide-pharma-build-names"/>
+<NCGuideLocalizedText Key="nc-guide-pharma-build-knowledge"/>
+<NCGuideLocalizedText Key="nc-guide-pharma-build-approve"/>
+<Box>
+<GuideEntityEmbed Entity="NCPharmaRdConsole"/>
+<GuideEntityEmbed Entity="NCPharmaQcAnalyzer"/>
+<GuideEntityEmbed Entity="NCPharmaCatalystVial"/>
+<GuideEntityEmbed Entity="NCPharmaStabilizerVial"/>
+</Box>
+</Document>

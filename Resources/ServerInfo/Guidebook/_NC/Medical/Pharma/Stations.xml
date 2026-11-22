@@ -1,6 +1,7 @@
 <Document>
 <NCGuideLocalizedText Key="nc-guide-pharma-stations-h"/>
 <NCGuideLocalizedText Key="nc-guide-pharma-stations-all"/>
+<NCGuideLocalizedText Key="nc-guide-pharma-stations-consumables"/>
 <NCGuideLocalizedText Key="nc-guide-pharma-stations-kits"/>
 <Box>
 <GuideEntityEmbed Entity="NCPharmaExtractor"/>
