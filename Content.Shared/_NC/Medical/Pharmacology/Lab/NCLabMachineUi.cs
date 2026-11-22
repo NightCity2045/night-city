@@ -69,3 +69,17 @@ public sealed class NCLabMachineEjectMessage(string slot) : BoundUserInterfaceMe
 {
     public readonly string Slot = slot;
 }
+
+/// <summary>What a laboratory machine shows from outside: whether it is working.</summary>
+[Serializable, NetSerializable]
+public enum NCLabMachineVisuals : byte
+{
+    Working,
+}
+
+/// <summary>The sprite layer that shows the machine at work.</summary>
+[Serializable, NetSerializable]
+public enum NCLabMachineVisualLayers : byte
+{
+    Working,
+}

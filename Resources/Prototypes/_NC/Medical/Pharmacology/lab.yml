@@ -225,6 +225,17 @@
   placement:
     mode: SnapgridCenter
   components:
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.PowerDeviceVisuals.Powered:
+        enum.PowerDeviceVisualLayers.Powered:
+          True: { visible: true }
+          False: { visible: false }
+      enum.NCLabMachineVisuals.Working:
+        enum.NCLabMachineVisualLayers.Working:
+          True: { visible: true }
+          False: { visible: false }
   - type: Sprite
     sprite: Structures/Machines/mixer.rsi
     snapCardinals: true
@@ -261,18 +272,26 @@
   - type: ApcPowerReceiver
     powerLoad: 200
   - type: InteractionOutline
-  - type: Appearance
-  - type: GenericVisualizer
-    visuals:
-      enum.PowerDeviceVisuals.Powered:
-        enum.PowerDeviceVisualLayers.Powered:
-          True: { visible: true }
-          False: { visible: false }
 
 - type: entity
   parent: NCLabMachineWithUi
   id: NCLabCultureStation
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Pharma/culture_station.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: lit
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
+  - type: Icon
+    sprite: _NC/Structures/Machines/Pharma/culture_station.rsi
+    state: icon
   - type: ContainerContainer
     containers:
       sample: !type:ContainerSlot
@@ -291,6 +310,21 @@
   parent: NCLabMachineWithUi
   id: NCLabMetabolicAnalyzer
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Pharma/metabolic_analyzer.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: lit
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
+  - type: Icon
+    sprite: _NC/Structures/Machines/Pharma/metabolic_analyzer.rsi
+    state: icon
   - type: ContainerContainer
     containers:
       sample: !type:ContainerSlot
@@ -309,6 +343,21 @@
   parent: NCLabMachineWithUi
   id: NCLabTissueIncubator
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Pharma/tissue_incubator.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: lit
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
+  - type: Icon
+    sprite: _NC/Structures/Machines/Pharma/tissue_incubator.rsi
+    state: icon
   - type: ContainerContainer
     containers:
       seed: !type:ContainerSlot
@@ -373,6 +422,21 @@
   parent: NCLabMachineWithUi
   id: NCPharmaPurifier
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Pharma/purifier.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: lit
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
+  - type: Icon
+    sprite: _NC/Structures/Machines/Pharma/purifier.rsi
+    state: icon
   - type: ContainerContainer
     containers:
       waste: !type:ContainerSlot
@@ -529,6 +593,21 @@
   parent: NCLabMachineWithUi
   id: NCPharmaExtractor
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Pharma/extractor.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: lit
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
+  - type: Icon
+    sprite: _NC/Structures/Machines/Pharma/extractor.rsi
+    state: icon
   - type: ContainerContainer
     containers:
       waste: !type:ContainerSlot
@@ -552,6 +631,21 @@
   parent: NCLabMachineWithUi
   id: NCPharmaSterileCabinet
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Pharma/sterile_cabinet.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: lit
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
+  - type: Icon
+    sprite: _NC/Structures/Machines/Pharma/sterile_cabinet.rsi
+    state: icon
   - type: ContainerContainer
     containers:
       waste: !type:ContainerSlot
@@ -575,6 +669,21 @@
   parent: NCLabMachineWithUi
   id: NCPharmaFormulationStation
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Pharma/formulation.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: lit
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
+  - type: Icon
+    sprite: _NC/Structures/Machines/Pharma/formulation.rsi
+    state: icon
   - type: ContainerContainer
     containers:
       waste: !type:ContainerSlot
@@ -600,6 +709,21 @@
   parent: NCLabMachineWithUi
   id: NCPharmaFillingStation
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Pharma/filling.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: lit
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
+  - type: Icon
+    sprite: _NC/Structures/Machines/Pharma/filling.rsi
+    state: icon
   - type: ContainerContainer
     containers:
       waste: !type:ContainerSlot
@@ -622,6 +746,21 @@
   parent: NCLabMachineWithUi
   id: NCPharmaWasteBin
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Pharma/waste_bin.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: lit
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
+  - type: Icon
+    sprite: _NC/Structures/Machines/Pharma/waste_bin.rsi
+    state: icon
   - type: ContainerContainer
     containers:
       canister: !type:ContainerSlot
@@ -639,6 +778,21 @@
   parent: NCLabMachineBase
   id: NCLabVivarium
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Pharma/vivarium.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: lit
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
+  - type: Icon
+    sprite: _NC/Structures/Machines/Pharma/vivarium.rsi
+    state: icon
   - type: NCVivarium
 
 # --- Synthetic blood and blood components -----------------------------------------------------------------
@@ -717,6 +871,21 @@
   parent: NCLabMachineWithUi
   id: NCBloodCentrifuge
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Pharma/blood_centrifuge.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: lit
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
+  - type: Icon
+    sprite: _NC/Structures/Machines/Pharma/blood_centrifuge.rsi
+    state: icon
   - type: ContainerContainer
     containers:
       bag: !type:ContainerSlot
@@ -880,6 +1049,21 @@
   parent: NCLabMachineBase
   id: NCPharmaRdConsole
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Pharma/rd_console.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: lit
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
+  - type: Icon
+    sprite: _NC/Structures/Machines/Pharma/rd_console.rsi
+    state: icon
   - type: ContainerContainer
     containers:
       reagents: !type:ContainerSlot

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using Content.Server._NC.Medical.Pharmacology.Batch;
 using Content.Shared._NC.Medical.Pharmacology.Lab;
 using Content.Shared.Containers.ItemSlots;
 using Content.Shared.DoAfter;
@@ -65,6 +66,7 @@ public sealed partial class NCLabMachineUiSystem : EntitySystem
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private NCPharmaWasteSystem _waste = default!;
     [Dependency] private IGameTiming _timing = default!;
+    [Dependency] private SharedAppearanceSystem _appearance = default!;
 
     private TimeSpan _nextRefresh;
 
@@ -182,7 +184,34 @@ public sealed partial class NCLabMachineUiSystem : EntitySystem
         {
             if (_ui.IsUiOpen(uid, NCLabMachineUiKey.Key))
                 UpdateUi((uid, comp));
+            else
+                SetWorking(uid, IsWorking((uid, comp)));
         }
+
+        // The synthesizers and the thermoreactor run on their own run components.
+        var synthesizers = EntityQueryEnumerator<NCPharmaSynthesizerComponent>();
+        while (synthesizers.MoveNext(out var uid, out _))
+            SetWorking(uid, HasComp<NCPharmaSynthesisRunComponent>(uid));
+        var reactors = EntityQueryEnumerator<NCPharmaReactorComponent>();
+        while (reactors.MoveNext(out var uid, out _))
+            SetWorking(uid, HasComp<NCPharmaReactorRunComponent>(uid));
+    }
+
+    private bool IsWorking(Entity<NCLabMachineUiComponent> machine)
+    {
+        if (!_power.IsPowered(machine.Owner))
+            return false;
+
+        var status = new NCLabMachineStatusEvent();
+        RaiseLocalEvent(machine, ref status);
+        return status.Phase is { } own
+            ? own == NCLabMachinePhase.Working
+            : FindRun(machine, out _, out _);
+    }
+
+    private void SetWorking(EntityUid uid, bool working)
+    {
+        _appearance.SetData(uid, NCLabMachineVisuals.Working, working);
     }
 
     private void UpdateUi(Entity<NCLabMachineUiComponent> machine)
@@ -228,6 +257,7 @@ public sealed partial class NCLabMachineUiSystem : EntitySystem
         }
 
         var powered = _power.IsPowered(machine.Owner);
+        SetWorking(machine.Owner, powered && phase == NCLabMachinePhase.Working);
         _ui.SetUiState(
             machine.Owner,
             NCLabMachineUiKey.Key,
