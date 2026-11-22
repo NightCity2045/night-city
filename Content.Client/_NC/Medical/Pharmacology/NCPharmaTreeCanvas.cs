@@ -327,7 +327,7 @@ public sealed partial class NCPharmaTreeCanvas : Control
             return;
 
         var hit = Pick(args.RelativePixelPosition);
-        if (hit != null && !hit.Locked)
+        if (hit != null)
         {
             NodePressed?.Invoke(hit.Id);
         }

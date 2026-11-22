@@ -104,4 +104,22 @@ public sealed class NCPharmaResearchChipTest : GameTest
         Assert.That(researched, Does.Contain(NCPharmaNodeIds.Form(Autoinjector)));
         Assert.That(Compose(researched), Is.True);
     }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void QualityControlOfARealBatchTeachesTheBlankChipItsFormula()
+    {
+        var (console, _, _) = Setup();
+        Assert.That(_console.TryGetChip(console, out var chip), Is.True);
+        Assert.That(chip.Comp.Researched, Is.Empty);
+
+        Assert.That(_batches.TryCreateBatch(
+            "NCPharmaFormulaTraumaAnalgesic", null, new NCPharmaProductionInputs(10f, 0.9f, 0.9f, 0.9f, 0f),
+            "Tester", "Test", out var batch), Is.True);
+        Assert.That(_batches.TryPerformQc(batch!.BatchId, "Tester", NCPharmaQcTests.All, out _), Is.True);
+
+        Assert.That(chip.Comp.Researched, Does.Contain(NCPharmaNodeIds.Core(Analgesic)), "the core is now studied");
+        Assert.That(chip.Comp.Researched, Does.Contain(NCPharmaNodeIds.Form(Autoinjector)), "and so is its delivery form");
+        Assert.That(Compose(chip.Comp.Researched), Is.True, "so a formula can be built on it");
+    }
 }
