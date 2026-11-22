@@ -158,7 +158,8 @@ public sealed partial class NCPharmaBatchSystem
             return false;
         }
 
-        RecordAnalysis(formula.Compound, NCAnalysisTier.InVivo);
+        foreach (var core in Cores(formula))
+            RecordAnalysis(core, NCAnalysisTier.InVivo);
         AddAudit(batch, tuning, NCPharmaAuditKind.Administered, actor,
             $"observed study subject={subject} outcome={result.Outcome} peak={result.Peak:F2}");
 

@@ -5,6 +5,7 @@
 using System.Linq;
 using Content.Shared._NC.Medical.Pharmacology.Batch;
 using Content.Shared.Chemistry.Components;
+using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Containers.ItemSlots;
 using Content.Shared.FixedPoint;
 using Content.Shared.Popups;
@@ -32,6 +33,8 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private ItemSlotsSystem _itemSlots = default!;
+    [Dependency] private SharedSolutionContainerSystem _solutions = default!;
+    [Dependency] private NCPharmaSourceSystem _sources = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private UserInterfaceSystem _ui = default!;
     [Dependency] private SmokeSystem _smoke = default!;
@@ -155,15 +158,16 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
             return NCPharmaReactorNotice.UnitsLimit;
         if (source.Units < units)
             return NCPharmaReactorNotice.NotEnoughSource;
+        // NC: the compound can only be made from the raw material it accepts.
+        var yield = _batches.ResolveFeedstockYield(formula, source.Feedstock);
+        if (yield <= 0f)
+            return NCPharmaReactorNotice.WrongFeedstock;
 
         var reactionId = formula.Reaction ?? tuning.DefaultReaction;
         if (!_prototypes.TryIndex(reactionId, out var profile))
             return NCPharmaReactorNotice.InvalidRequest;
 
-        source.Units -= units;
-        Dirty(sourceUid, source);
-        if (source.Units <= 0f)
-            QueueDel(sourceUid);
+        _sources.Consume(source, units);
 
         var run = EnsureComp<NCPharmaReactorRunComponent>(reactor);
         run.Formula = formula.ID;
@@ -171,10 +175,27 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
         run.State = NCReactorMath.Start(profile);
         run.Controls = default;
         run.Ventilation = false;
-        run.CatalystLeft = tuning.CatalystCharges;
+        // NC: the catalyst is a reagent in a real vial in the catalyst slot. The run draws its charges out of the vial
+        // and the vial stays, to be refilled or emptied like any other; with no catalyst in it there is nothing to add.
+        run.CatalystLeft = 0;
+        if (_itemSlots.TryGetSlot(reactor, reactor.Comp.CatalystSlot, out var catalystSlot) &&
+            catalystSlot.Item is { } vial &&
+            _solutions.TryGetDrainableSolution(vial, out var vialSolution, out var contents))
+        {
+            var available = (float) contents.GetTotalPrototypeQuantity(reactor.Comp.CatalystReagent);
+            var charges = Math.Min((int) MathF.Floor(available / reactor.Comp.UnitsPerCharge), tuning.CatalystCharges);
+            if (charges > 0)
+            {
+                _solutions.RemoveReagent(
+                    vialSolution.Value, reactor.Comp.CatalystReagent.Id, FixedPoint2.New(charges * reactor.Comp.UnitsPerCharge));
+                run.CatalystLeft = charges;
+            }
+        }
+
         run.SourcePurity = source.Purity;
-        run.SourceContaminants = TryComp<NCPharmaSourceHiddenComponent>(sourceUid, out var hidden) ? hidden.Contaminants : 0f; // NC
+        run.SourceContaminants = source.Contaminants; // NC
         run.Units = units;
+        run.FeedstockYield = yield;
         run.Operator = ToPrettyString(user);
         run.NextStep = _timing.CurTime + Step;
         run.Warned = false;
@@ -281,7 +302,7 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
     {
         var formula = run.Formula;
         var outcome = NCReactorMath.Evaluate(run.State);
-        var units = (int) MathF.Floor(run.Units * outcome.YieldFactor);
+        var units = (int) MathF.Floor(run.Units * run.FeedstockYield * outcome.YieldFactor);
         var sourcePurity = run.SourcePurity;
         var sourceContaminants = run.SourceContaminants;
         var producer = run.Operator;
@@ -326,19 +347,19 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
     private bool TryGetSource(
         Entity<NCPharmaReactorComponent> reactor,
         out EntityUid sourceUid,
-        out NCPharmaSourceComponent source)
+        out NCPharmaSourceReading source)
     {
         sourceUid = default;
-        source = default!;
+        source = default;
         if (!_itemSlots.TryGetSlot(reactor, reactor.Comp.SourceSlot, out var slot) ||
             slot.Item is not { } item ||
-            !TryComp(item, out NCPharmaSourceComponent? found))
+            !HasComp<NCPharmaSourceComponent>(item) ||
+            !_sources.TryRead(item, out source))
         {
             return false;
         }
 
         sourceUid = item;
-        source = found;
         return true;
     }
 

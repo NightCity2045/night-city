@@ -256,14 +256,17 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
             EffectiveConcentration = effect.EffectiveConcentration * massScale * (1f - localFraction) * delivered,
             ToxinBurden = effect.ToxinBurden * massScale * delivered,
         };
-        if (localConcentration > 0f)
-            ApplyLocalTissue(patient, formula.Compound, localConcentration, tuning);
-        _depot.TryDeposit(
-            patient,
-            formula.Compound,
-            effect.EffectiveConcentration,
-            NCPharmaBatchMath.ResolveAbsorption(form, ResolveModifiers(formula)),
-            NCPharmaBatchMath.ResolveClearanceFactor(ResolveModifiers(formula)));
+        // NC: with two cores each gets its share of the dose; the pair's extra toxicity is already in the batch.
+        var coreShare = formula.SecondCompound != null ? NCPharmaBatchMath.SecondCoreShare : 1f;
+        var absorption = NCPharmaBatchMath.ResolveAbsorption(form, ResolveModifiers(formula));
+        var clearance = NCPharmaBatchMath.ResolveClearanceFactor(ResolveModifiers(formula));
+        foreach (var core in Cores(formula))
+        {
+            if (localConcentration > 0f)
+                ApplyLocalTissue(patient, core, localConcentration * coreShare, tuning);
+            _depot.TryDeposit(patient, core, effect.EffectiveConcentration * coreShare, absorption, clearance);
+        }
+
         if (form.TransfusionVolume > 0f)
             InfuseVolume(patient, form.TransfusionVolume * delivered); // NC: synthetic blood also restores volume
         if (effect.ToxinBurden > 0f)
@@ -338,7 +341,10 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
         RecordQcAnalysis(batchId, report); // NC
         // Quality control is a chemical analysis: it tells the laboratory what the compound is.
         if (TryGetFormula(batch.Formula, out var analysedFormula))
-            RecordAnalysis(analysedFormula.Compound, Content.Shared._NC.Medical.Pharmacology.Lab.NCAnalysisTier.Chemical);
+            foreach (var core in Cores(analysedFormula))
+                RecordAnalysis(core, Content.Shared._NC.Medical.Pharmacology.Lab.NCAnalysisTier.Chemical);
+        if (TryGetFormula(batch.Formula, out var studied))
+            RaiseResearch(FormulaNodes(studied)); // NC
         if (TryGetFormula(batch.Formula, out var qcFormula) && IsTracked(qcFormula))
             AddJournal(NCPharmaJournalKind.QcPerformed, batch.Formula, batch.BatchCode, actor,
                 $"tests {report.Performed}, failed {report.Failed}, now {batch.QcState}");

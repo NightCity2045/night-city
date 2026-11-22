@@ -1,0 +1,115 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Reagents a laboratory can invent a compound from. Two or three go into the beaker of the research console.
+# What they lean towards, how strongly and how harmful they are decides the compound; the same ingredients always
+# make the same compound. Charcoal leans towards nothing and takes harm away.
+
+- type: ncPharmaIngredient
+  id: NCIngredientInaprovaline
+  reagent: Inaprovaline
+  category: Analgesic
+  potency: 0.6
+  toxicity: 0.2
+
+- type: ncPharmaIngredient
+  id: NCIngredientBicaridine
+  reagent: Bicaridine
+  category: Analgesic
+  potency: 0.5
+  toxicity: 0.1
+
+- type: ncPharmaIngredient
+  id: NCIngredientDylovene
+  reagent: Dylovene
+  category: Antitoxin
+  potency: 0.7
+  toxicity: 0.1
+
+- type: ncPharmaIngredient
+  id: NCIngredientTricordrazine
+  reagent: Tricordrazine
+  category: Antitoxin
+  potency: 0.5
+  toxicity: 0.15
+
+- type: ncPharmaIngredient
+  id: NCIngredientEphedrine
+  reagent: Ephedrine
+  category: Stimulant
+  potency: 0.7
+  toxicity: 0.3
+  side: cardiac
+
+- type: ncPharmaIngredient
+  id: NCIngredientEpinephrine
+  reagent: Epinephrine
+  category: Stimulant
+  potency: 0.6
+  toxicity: 0.25
+  side: rhythm
+
+- type: ncPharmaIngredient
+  id: NCIngredientSynaptizine
+  reagent: Synaptizine
+  category: Stimulant
+  potency: 0.7
+  toxicity: 0.4
+  side: respiratory
+
+- type: ncPharmaIngredient
+  id: NCIngredientCognizine
+  reagent: Cognizine
+  category: Stimulant
+  potency: 0.5
+  toxicity: 0.3
+
+- type: ncPharmaIngredient
+  id: NCIngredientNicotine
+  reagent: Nicotine
+  category: Stimulant
+  potency: 0.4
+  toxicity: 0.5
+  dependence: NCDependenceSocial
+
+- type: ncPharmaIngredient
+  id: NCIngredientDiphenhydramine
+  reagent: Diphenhydramine
+  category: Sedative
+  potency: 0.5
+  toxicity: 0.15
+
+- type: ncPharmaIngredient
+  id: NCIngredientHaloperidol
+  reagent: Haloperidol
+  category: Sedative
+  potency: 0.8
+  toxicity: 0.4
+  side: motor
+
+- type: ncPharmaIngredient
+  id: NCIngredientLithium
+  reagent: Lithium
+  category: Sedative
+  potency: 0.4
+  toxicity: 0.3
+
+- type: ncPharmaIngredient
+  id: NCIngredientAmbuzol
+  reagent: Ambuzol
+  category: Antibiotic
+  potency: 0.8
+  toxicity: 0.25
+
+- type: ncPharmaIngredient
+  id: NCIngredientHyronalin
+  reagent: Hyronalin
+  category: Immunosuppressant
+  potency: 0.6
+  toxicity: 0.35
+
+- type: ncPharmaIngredient
+  id: NCIngredientCharcoal
+  reagent: Charcoal
+  toxicity: -0.3

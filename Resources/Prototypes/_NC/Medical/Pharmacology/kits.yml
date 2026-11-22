@@ -12,16 +12,19 @@
     containers:
       entity_storage: !type:AllSelector
         children:
-        - id: NCPharmaSourceCanisterStreet
-          amount: 2
-        - id: NCPharmaRawBiomass
-          amount: 2
+        - id: NCPharmaRawBiomassNeuro
+        - id: NCPharmaRawBiomassCardio
+        - id: NCPharmaRawBiomassHemato
+        - id: NCPharmaRawBiomassMicrobial
         - id: NCPharmaFilterCartridge
           amount: 2
+        - id: NCPharmaCatalystVial
+        - id: NCPharmaStabilizerVial
         - id: NCPharmaWasteCanister
           amount: 4
         - id: NCLabSampleVial
           amount: 4
+        - id: NCPharmaResearchChip
 
 - type: entity
   parent: CrateMedical
@@ -31,16 +34,22 @@
     containers:
       entity_storage: !type:AllSelector
         children:
-        - id: NCPharmaSourceCanisterClinical
-          amount: 2
-        - id: NCPharmaRawCorporateStock
-          amount: 2
+        - id: NCPharmaRawCorporateNeuro
+        - id: NCPharmaRawCorporateCardio
+        - id: NCPharmaRawCorporateHemato
+        - id: NCPharmaRawCorporateMicrobial
+        - id: NCPharmaRawCorporateImmune
         - id: NCPharmaFilterCartridge
+          amount: 2
+        - id: NCPharmaCatalystVial
+          amount: 2
+        - id: NCPharmaStabilizerVial
           amount: 2
         - id: NCPharmaWasteCanister
           amount: 4
         - id: NCLabSampleVial
           amount: 4
+        - id: NCPharmaResearchChipStock
 
 - type: entity
   parent: BoxCardboard
@@ -92,3 +101,17 @@
         children:
         - id: NCPharmaRawSeizedSample
           amount: 2
+
+- type: entity
+  parent: CrateMedical
+  id: NCPharmaKitBrewing
+  components:
+  - type: EntityTableContainerFill
+    containers:
+      entity_storage: !type:AllSelector
+        children:
+        - id: NCPharmaProteinJug
+        - id: NCPharmaNutrientJug
+        - id: JugEthanol
+        - id: NCPharmaSourceCanister
+          amount: 4

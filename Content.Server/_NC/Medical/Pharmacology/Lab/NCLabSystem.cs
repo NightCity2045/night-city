@@ -11,6 +11,8 @@ using Content.Shared._NC.Medical.Pharmacology.Batch;
 using Content.Shared._NC.Medical.Pharmacology.Lab;
 using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Wounds;
+using Content.Shared.Chemistry.EntitySystems;
+using Content.Shared.Chemistry.Reagent;
 using Content.Shared.Containers.ItemSlots;
 using Content.Shared.DoAfter;
 using Content.Shared.Hands.EntitySystems;
@@ -43,6 +45,15 @@ public sealed partial class NCLabSystem : EntitySystem
     [Dependency] private NCPharmacologySystem _pharmacology = default!;
     [Dependency] private NCPharmaBatchSystem _batches = default!;
     [Dependency] private NCBiotechActionSystem _actions = default!;
+    [Dependency] private SharedSolutionContainerSystem _solutions = default!;
+
+    /// <summary>Units of sample fluid a sample puts into its vial.</summary>
+    private static readonly ProtoId<ReagentPrototype> SampleFluidReagent = "NCLabSampleFluid";
+
+    private const float SampleFluidUnits = 5f;
+
+    /// <summary>Least sample fluid a vial must still hold for a laboratory to read it.</summary>
+    private const float SampleFluidMinimum = 1f;
 
     public override void Initialize()
     {
@@ -50,8 +61,9 @@ public sealed partial class NCLabSystem : EntitySystem
 
         SubscribeLocalEvent<NCLabSamplerComponent, AfterInteractEvent>(OnSamplerInteract);
         SubscribeLocalEvent<NCLabSamplerComponent, NCLabSampleDoAfterEvent>(OnSampleDone);
-        SubscribeLocalEvent<NCLabAnalyzerComponent, ActivateInWorldEvent>(OnAnalyzerActivate);
+        SubscribeLocalEvent<NCLabAnalyzerComponent, NCLabMachineStartEvent>(OnAnalyzerActivate);
         SubscribeLocalEvent<NCLabAnalyzerComponent, NCLabAnalyzeDoAfterEvent>(OnAnalyzeDone);
+        SubscribeLocalEvent<NCLabAnalyzerComponent, NCLabMachineStatusEvent>(OnAnalyzerStatus);
     }
 
     // ---- sampling -------------------------------------------------------------------------------------
@@ -100,6 +112,9 @@ public sealed partial class NCLabSystem : EntitySystem
         sample.Kind = sampler.Comp.Kind;
         sample.Source = Name(patient);
         Dirty(vial, sample);
+        // The sample is a real fluid in a real vial: pour it out and it is gone.
+        if (_solutions.TryGetDrainableSolution(vial, out var fluid, out _))
+            _solutions.TryAddReagent(fluid.Value, SampleFluidReagent, SampleFluidUnits);
         var data = EnsureComp<NCLabSampleDataComponent>(vial);
         Capture(patient, data);
         // A clumsy draw spoils part of the sample: it reads weaker than the patient really is.
@@ -109,6 +124,13 @@ public sealed partial class NCLabSystem : EntitySystem
         data.WoundInfection *= quality;
         _hands.TryPickupAnyHand(args.User, vial);
         _popup.PopupEntity(Loc.GetString("nc-lab-sample-taken"), patient, args.User);
+    }
+
+    /// <summary>A sample is only worth reading while its vial still holds the sample fluid.</summary>
+    public bool HasSampleFluid(EntityUid vial)
+    {
+        return _solutions.TryGetDrainableSolution(vial, out _, out var contents) &&
+               (float) contents.GetTotalPrototypeQuantity(SampleFluidReagent) >= SampleFluidMinimum;
     }
 
     private void Capture(EntityUid patient, NCLabSampleDataComponent data)
@@ -134,9 +156,9 @@ public sealed partial class NCLabSystem : EntitySystem
 
     // ---- analysis -------------------------------------------------------------------------------------
 
-    private void OnAnalyzerActivate(Entity<NCLabAnalyzerComponent> machine, ref ActivateInWorldEvent args)
+    private void OnAnalyzerActivate(Entity<NCLabAnalyzerComponent> machine, ref NCLabMachineStartEvent args)
     {
-        if (args.Handled || !args.Complex)
+        if (args.Handled)
             return;
 
         args.Handled = true;
@@ -162,6 +184,14 @@ public sealed partial class NCLabSystem : EntitySystem
             _popup.PopupEntity(Loc.GetString("nc-lab-machine-started"), machine, args.User);
     }
 
+    private void OnAnalyzerStatus(Entity<NCLabAnalyzerComponent> machine, ref NCLabMachineStatusEvent args)
+    {
+        args.Readouts.Add(new NCLabMachineReadout("nc-lab-machine-ui-method", string.Empty,
+            machine.Comp.Method == NCLabMethod.Metabolic
+                ? "nc-lab-machine-ui-method-metabolic"
+                : "nc-lab-machine-ui-method-culture"));
+    }
+
     private EntityUid? GetLoaded(Entity<NCLabAnalyzerComponent> machine)
     {
         return _slots.TryGetSlot(machine.Owner, machine.Comp.Slot, out var slot) ? slot.Item : null;
@@ -178,6 +208,12 @@ public sealed partial class NCLabSystem : EntitySystem
 
         var report = new StringBuilder();
         string title;
+        if (HasComp<NCLabSampleComponent>(loaded) && !HasSampleFluid(loaded))
+        {
+            _popup.PopupEntity(Loc.GetString("nc-lab-sample-spoiled"), machine, args.User);
+            return;
+        }
+
         if (TryComp<NCLabSampleComponent>(loaded, out var sample) &&
             TryComp<NCLabSampleDataComponent>(loaded, out var data))
         {

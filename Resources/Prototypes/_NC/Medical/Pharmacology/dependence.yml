@@ -85,6 +85,9 @@
 - type: ncDrugProfile
   id: NCDrugMaintenanceAnalgesic
   category: Analgesic
+  feedstock: NCFeedstockNeuro
+  alternateFeedstocks:
+    NCFeedstockImmune: 0.5
   maximumConcentration: 30
   removalConcentration: 0.05
   minimumEffectiveConcentration: 1
@@ -104,6 +107,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaMaintenanceAnalgesic
   name: nc-pharma-formula-maintenance-analgesic
+  description: nc-pharma-formula-maintenance-analgesic-desc
   version: 1
   compound: NCDrugMaintenanceAnalgesic
   deliveryForm: NCPharmaDeliveryOral
@@ -168,6 +172,7 @@
 - type: ncDrugProfile
   id: NCDrugEuphoric
   category: Recreational
+  feedstock: NCFeedstockNeuro
   dependence: NCDependenceEuphoric
   interactionsCharted: false
   maximumConcentration: 25
@@ -198,6 +203,7 @@
 - type: ncDrugProfile
   id: NCDrugSocial
   category: Recreational
+  feedstock: NCFeedstockNeuro
   dependence: NCDependenceSocial
   interactionsCharted: false
   maximumConcentration: 25
@@ -224,6 +230,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaEuphoric
   name: nc-pharma-formula-euphoric
+  description: nc-pharma-formula-euphoric-desc
   version: 1
   compound: NCDrugEuphoric
   deliveryForm: NCPharmaDeliveryAutoinjector
@@ -236,6 +243,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaSocial
   name: nc-pharma-formula-social
+  description: nc-pharma-formula-social-desc
   version: 1
   compound: NCDrugSocial
   deliveryForm: NCPharmaDeliveryOral

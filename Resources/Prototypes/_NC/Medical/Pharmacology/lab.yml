@@ -33,6 +33,9 @@
 - type: ncDrugProfile
   id: NCDrugGramPositiveAntibiotic
   category: Antibiotic
+  feedstock: NCFeedstockMicrobial
+  alternateFeedstocks:
+    NCFeedstockImmune: 0.5
   maximumConcentration: 30
   removalConcentration: 0.05
   minimumEffectiveConcentration: 1
@@ -48,6 +51,9 @@
 - type: ncDrugProfile
   id: NCDrugGramNegativeAntibiotic
   category: Antibiotic
+  feedstock: NCFeedstockMicrobial
+  alternateFeedstocks:
+    NCFeedstockImmune: 0.5
   maximumConcentration: 30
   removalConcentration: 0.05
   minimumEffectiveConcentration: 1
@@ -63,6 +69,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaGramPositiveAntibiotic
   name: nc-pharma-formula-gram-positive-antibiotic
+  description: nc-pharma-formula-gram-positive-antibiotic-desc
   version: 1
   compound: NCDrugGramPositiveAntibiotic
   deliveryForm: NCPharmaDeliveryInfusion
@@ -75,6 +82,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaGramNegativeAntibiotic
   name: nc-pharma-formula-gram-negative-antibiotic
+  description: nc-pharma-formula-gram-negative-antibiotic-desc
   version: 1
   compound: NCDrugGramNegativeAntibiotic
   deliveryForm: NCPharmaDeliveryInfusion
@@ -102,6 +110,7 @@
 - type: ncDrugProfile
   id: NCDrugX17
   category: Stimulant
+  feedstock: NCFeedstockNeuro
   codename: nc-lab-codename-x17
   dependence: NCDependenceX17
   interactionsCharted: false
@@ -126,6 +135,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaX17
   name: nc-pharma-formula-x17
+  description: nc-pharma-formula-x17-desc
   version: 1
   compound: NCDrugX17
   deliveryForm: NCPharmaDeliveryAutoinjector
@@ -137,15 +147,9 @@
 
 # --- Samples, collection and the machines that read them -------------------------------------------------
 - type: entity
-  parent: BaseItem
+  parent: ChemistryEmptyVial
   id: NCLabSampleVial
   components:
-  - type: Sprite
-    sprite: Objects/Specific/Chemistry/vial.rsi
-    state: vial
-  - type: Item
-    size: Tiny
-    sprite: Objects/Specific/Chemistry/vial.rsi
   - type: NCLabSample
 
 - type: entity
@@ -221,6 +225,17 @@
   placement:
     mode: SnapgridCenter
   components:
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.PowerDeviceVisuals.Powered:
+        enum.PowerDeviceVisualLayers.Powered:
+          True: { visible: true }
+          False: { visible: false }
+      enum.NCLabMachineVisuals.Working:
+        enum.NCLabMachineVisualLayers.Working:
+          True: { visible: true }
+          False: { visible: false }
   - type: Sprite
     sprite: Structures/Machines/mixer.rsi
     snapCardinals: true
@@ -257,18 +272,26 @@
   - type: ApcPowerReceiver
     powerLoad: 200
   - type: InteractionOutline
-  - type: Appearance
-  - type: GenericVisualizer
-    visuals:
-      enum.PowerDeviceVisuals.Powered:
-        enum.PowerDeviceVisualLayers.Powered:
-          True: { visible: true }
-          False: { visible: false }
 
 - type: entity
-  parent: NCLabMachineBase
+  parent: NCLabMachineWithUi
   id: NCLabCultureStation
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Pharma/culture_station.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: lit
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
+  - type: Icon
+    sprite: _NC/Structures/Machines/Pharma/culture_station.rsi
+    state: icon
   - type: ContainerContainer
     containers:
       sample: !type:ContainerSlot
@@ -284,9 +307,24 @@
     method: Culture
 
 - type: entity
-  parent: NCLabMachineBase
+  parent: NCLabMachineWithUi
   id: NCLabMetabolicAnalyzer
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Pharma/metabolic_analyzer.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: lit
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
+  - type: Icon
+    sprite: _NC/Structures/Machines/Pharma/metabolic_analyzer.rsi
+    state: icon
   - type: ContainerContainer
     containers:
       sample: !type:ContainerSlot
@@ -302,9 +340,24 @@
 
 # --- Tissue ----------------------------------------------------------------------------------------------
 - type: entity
-  parent: NCLabMachineBase
+  parent: NCLabMachineWithUi
   id: NCLabTissueIncubator
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Pharma/tissue_incubator.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: lit
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
+  - type: Icon
+    sprite: _NC/Structures/Machines/Pharma/tissue_incubator.rsi
+    state: icon
   - type: ContainerContainer
     containers:
       seed: !type:ContainerSlot
@@ -366,14 +419,35 @@
 
 # --- Purification of raw material ------------------------------------------------------------------------
 - type: entity
-  parent: NCLabMachineBase
+  parent: NCLabMachineWithUi
   id: NCPharmaPurifier
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Pharma/purifier.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: lit
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
+  - type: Icon
+    sprite: _NC/Structures/Machines/Pharma/purifier.rsi
+    state: icon
   - type: ContainerContainer
     containers:
+      waste: !type:ContainerSlot
       source: !type:ContainerSlot
   - type: ItemSlots
     slots:
+      waste:
+        name: nc-pharma-waste-slot
+        whitelist:
+          tags:
+          - NCPharmaWasteCanister
       source:
         name: nc-pharma-purifier-slot
         whitelist:
@@ -467,10 +541,43 @@
     sprite: Objects/Specific/Chemistry/dropper.rsi
   - type: NCPharmaContainer
 
+# --- A machine that is operated through a window ----------------------------------------------------------
+- type: entity
+  abstract: true
+  parent: NCLabMachineBase
+  id: NCLabMachineWithUi
+  components:
+  - type: UserInterface
+    interfaces:
+      enum.NCLabMachineUiKey.Key:
+        type: NCLabMachineBoundUserInterface
+  - type: NCLabMachineUi
+
 # --- Raw material, stations and waste ----------------------------------------------------------------------
+# Ready-made raw material is a jug of broth. Each kind is a child of one of these with its own broth in the jug.
+- type: entity
+  abstract: true
+  parent: Jug
+  id: NCPharmaRawBiomass
+  suffix: bioreactor stock
+  components:
+  - type: NCPharmaRawMaterial
+    origin: nc-pharma-origin-bioreactor
+
+- type: entity
+  abstract: true
+  parent: NCPharmaRawBiomass
+  id: NCPharmaRawCorporateStock
+  suffix: corporate stock
+  components:
+  - type: NCPharmaRawMaterial
+    origin: nc-pharma-origin-corporate
+
+# A seized sample is not a liquid: it holds an unidentified compound, and the extractor isolates it.
 - type: entity
   parent: BaseItem
-  id: NCPharmaRawBiomass
+  id: NCPharmaRawSeizedSample
+  suffix: seized sample
   components:
   - type: Sprite
     sprite: Objects/Specific/Chemistry/jug.rsi
@@ -479,42 +586,39 @@
     size: Normal
     sprite: Objects/Specific/Chemistry/jug.rsi
   - type: NCPharmaRawMaterial
-    units: 30
-    purity: 0.65
-    origin: nc-pharma-origin-bioreactor
-    contaminants: 0.06
-    output: NCPharmaSourceCanisterStreet
-
-- type: entity
-  parent: NCPharmaRawBiomass
-  id: NCPharmaRawCorporateStock
-  components:
-  - type: NCPharmaRawMaterial
-    units: 24
-    purity: 0.9
-    origin: nc-pharma-origin-corporate
-    output: NCPharmaSourceCanisterClinical
-
-- type: entity
-  parent: NCPharmaRawBiomass
-  id: NCPharmaRawSeizedSample
-  components:
-  - type: NCPharmaRawMaterial
-    units: 12
-    purity: 0.7
     origin: nc-pharma-origin-seized
-    contaminants: 0.15
     unknownPool: street
 
 - type: entity
-  parent: NCLabMachineBase
+  parent: NCLabMachineWithUi
   id: NCPharmaExtractor
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Pharma/extractor.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: lit
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
+  - type: Icon
+    sprite: _NC/Structures/Machines/Pharma/extractor.rsi
+    state: icon
   - type: ContainerContainer
     containers:
+      waste: !type:ContainerSlot
       material: !type:ContainerSlot
   - type: ItemSlots
     slots:
+      waste:
+        name: nc-pharma-waste-slot
+        whitelist:
+          tags:
+          - NCPharmaWasteCanister
       material:
         name: nc-pharma-material-slot
         whitelist:
@@ -524,14 +628,35 @@
   - type: NCPharmaWasteTank
   - type: NCPharmaExtractor
 - type: entity
-  parent: NCLabMachineBase
+  parent: NCLabMachineWithUi
   id: NCPharmaSterileCabinet
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Pharma/sterile_cabinet.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: lit
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
+  - type: Icon
+    sprite: _NC/Structures/Machines/Pharma/sterile_cabinet.rsi
+    state: icon
   - type: ContainerContainer
     containers:
+      waste: !type:ContainerSlot
       pack: !type:ContainerSlot
   - type: ItemSlots
     slots:
+      waste:
+        name: nc-pharma-waste-slot
+        whitelist:
+          tags:
+          - NCPharmaWasteCanister
       pack:
         name: nc-pharma-pack-slot
         whitelist:
@@ -541,14 +666,35 @@
   - type: NCPharmaTreatmentStation
     treatment: Sterilize
 - type: entity
-  parent: NCLabMachineBase
+  parent: NCLabMachineWithUi
   id: NCPharmaFormulationStation
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Pharma/formulation.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: lit
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
+  - type: Icon
+    sprite: _NC/Structures/Machines/Pharma/formulation.rsi
+    state: icon
   - type: ContainerContainer
     containers:
+      waste: !type:ContainerSlot
       pack: !type:ContainerSlot
   - type: ItemSlots
     slots:
+      waste:
+        name: nc-pharma-waste-slot
+        whitelist:
+          tags:
+          - NCPharmaWasteCanister
       pack:
         name: nc-pharma-pack-slot
         whitelist:
@@ -560,14 +706,35 @@
     gapClosed: 0.65
     stabilityCost: 0.02
 - type: entity
-  parent: NCLabMachineBase
+  parent: NCLabMachineWithUi
   id: NCPharmaFillingStation
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Pharma/filling.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: lit
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
+  - type: Icon
+    sprite: _NC/Structures/Machines/Pharma/filling.rsi
+    state: icon
   - type: ContainerContainer
     containers:
+      waste: !type:ContainerSlot
       pack: !type:ContainerSlot
   - type: ItemSlots
     slots:
+      waste:
+        name: nc-pharma-waste-slot
+        whitelist:
+          tags:
+          - NCPharmaWasteCanister
       pack:
         name: nc-pharma-pack-slot
         whitelist:
@@ -576,43 +743,63 @@
   - type: NCPharmaWasteTank
   - type: NCPharmaFillingStation
 - type: entity
-  parent: NCLabMachineBase
+  parent: NCLabMachineWithUi
   id: NCPharmaWasteBin
   components:
-  - type: NCPharmaWasteBin
-
-- type: entity
-  parent: BaseItem
-  id: NCPharmaWasteCanister
-  components:
   - type: Sprite
-    sprite: Objects/Specific/Chemistry/jug.rsi
-    state: icon_empty
-  - type: Item
-    size: Normal
-    sprite: Objects/Specific/Chemistry/jug.rsi
-  - type: NCPharmaWasteCanister
-    filledPrototype: NCPharmaWasteCanisterFull
-
-- type: entity
-  parent: NCPharmaWasteCanister
-  id: NCPharmaWasteCanisterFull
-  components:
-  - type: NCPharmaWasteCanister
-    filled: true
-    emptyPrototype: NCPharmaWasteCanister
+    sprite: _NC/Structures/Machines/Pharma/waste_bin.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: lit
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
+  - type: Icon
+    sprite: _NC/Structures/Machines/Pharma/waste_bin.rsi
+    state: icon
+  - type: ContainerContainer
+    containers:
+      canister: !type:ContainerSlot
+  - type: ItemSlots
+    slots:
+      canister:
+        name: nc-pharma-waste-slot
+        whitelist:
+          tags:
+          - NCPharmaWasteCanister
+  - type: NCPharmaWasteBin
 
 # --- Vivarium: an observation post; the test subjects are real bodies, players and NPCs ----------------------
 - type: entity
   parent: NCLabMachineBase
   id: NCLabVivarium
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Pharma/vivarium.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: lit
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
+  - type: Icon
+    sprite: _NC/Structures/Machines/Pharma/vivarium.rsi
+    state: icon
   - type: NCVivarium
 
 # --- Synthetic blood and blood components -----------------------------------------------------------------
 - type: ncPharmaFormula
   id: NCPharmaFormulaSyntheticBlood
   name: nc-pharma-formula-synthetic-blood
+  description: nc-pharma-formula-synthetic-blood-desc
   version: 1
   compound: NCDrugSyntheticOxygenCarrier
   deliveryForm: NCPharmaDeliveryTransfusion
@@ -637,6 +824,7 @@
 - type: ncDrugProfile
   id: NCDrugPlasmaFactors
   category: Procoagulant
+  feedstock: NCFeedstockHemato
   maximumConcentration: 25
   removalConcentration: 0.05
   minimumEffectiveConcentration: 0.75
@@ -652,6 +840,7 @@
 - type: ncDrugProfile
   id: NCDrugRedCells
   category: SyntheticOxygenCarrier
+  feedstock: NCFeedstockHemato
   maximumConcentration: 25
   removalConcentration: 0.05
   minimumEffectiveConcentration: 0.75
@@ -679,9 +868,24 @@
     component: Plasma
 
 - type: entity
-  parent: NCLabMachineBase
+  parent: NCLabMachineWithUi
   id: NCBloodCentrifuge
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Pharma/blood_centrifuge.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: lit
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
+  - type: Icon
+    sprite: _NC/Structures/Machines/Pharma/blood_centrifuge.rsi
+    state: icon
   - type: ContainerContainer
     containers:
       bag: !type:ContainerSlot
@@ -808,6 +1012,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaImmunosuppressant
   name: nc-pharma-formula-immunosuppressant
+  description: nc-pharma-formula-immunosuppressant-desc
   version: 1
   compound: NCDrugImmunosuppressant
   deliveryForm: NCPharmaDeliveryInfusion
@@ -818,10 +1023,64 @@
   regulatoryStatus: ClinicalOnly
 
 # --- The research console (R&D mode) ----------------------------------------------------------------------
+# What a laboratory has studied lives on a data chip in the console. Without the chip nothing is studied; a blank chip
+# has studied nothing and learns from quality control and analysis; a stock chip comes with the stock formulas studied.
+- type: entity
+  parent: BaseItem
+  id: NCPharmaResearchChip
+  suffix: blank
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Research/researchdisk.rsi
+    state: icon
+  - type: Item
+    size: Tiny
+  - type: NCPharmaResearchChip
+
+- type: entity
+  parent: NCPharmaResearchChip
+  id: NCPharmaResearchChipStock
+  suffix: stock formulas
+  components:
+  - type: NCPharmaResearchChip
+    stock: true
+
 - type: entity
   parent: NCLabMachineBase
   id: NCPharmaRdConsole
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Pharma/rd_console.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: lit
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: work
+      shader: unshaded
+      visible: false
+      map: ["enum.NCLabMachineVisualLayers.Working"]
+  - type: Icon
+    sprite: _NC/Structures/Machines/Pharma/rd_console.rsi
+    state: icon
+  - type: ContainerContainer
+    containers:
+      reagents: !type:ContainerSlot
+      chip: !type:ContainerSlot
+  - type: ItemSlots
+    slots:
+      reagents:
+        name: nc-pharma-rd-reagents-slot
+        whitelist:
+          components:
+          - DrainableSolution
+      chip:
+        name: nc-pharma-rd-chip-slot
+        startingItem: NCPharmaResearchChip
+        whitelist:
+          components:
+          - NCPharmaResearchChip
   - type: ActivatableUI
     key: enum.NCPharmaRdUiKey.Key
   - type: ActivatableUIRequiresPower
@@ -835,6 +1094,9 @@
 - type: ncDrugProfile
   id: NCDrugSedationReversal
   category: Antitoxin
+  feedstock: NCFeedstockImmune
+  alternateFeedstocks:
+    NCFeedstockNeuro: 0.6
   maximumConcentration: 25
   removalConcentration: 0.05
   minimumEffectiveConcentration: 0.75
@@ -862,6 +1124,9 @@
 - type: ncDrugProfile
   id: NCDrugStimulantReversal
   category: Antitoxin
+  feedstock: NCFeedstockImmune
+  alternateFeedstocks:
+    NCFeedstockNeuro: 0.6
   maximumConcentration: 25
   removalConcentration: 0.05
   minimumEffectiveConcentration: 0.75
@@ -887,6 +1152,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaSurgicalAnesthetic
   name: nc-pharma-formula-surgical-anesthetic
+  description: nc-pharma-formula-surgical-anesthetic-desc
   version: 1
   compound: NCDrugSurgicalAnesthetic
   deliveryForm: NCPharmaDeliveryInfusion
@@ -899,6 +1165,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaSedative
   name: nc-pharma-formula-sedative
+  description: nc-pharma-formula-sedative-desc
   version: 1
   compound: NCDrugSedative
   deliveryForm: NCPharmaDeliveryInfusion
@@ -911,6 +1178,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaVasopressor
   name: nc-pharma-formula-vasopressor
+  description: nc-pharma-formula-vasopressor-desc
   version: 1
   compound: NCDrugVasopressor
   deliveryForm: NCPharmaDeliveryInfusion
@@ -923,6 +1191,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaVasodilator
   name: nc-pharma-formula-vasodilator
+  description: nc-pharma-formula-vasodilator-desc
   version: 1
   compound: NCDrugVasodilator
   deliveryForm: NCPharmaDeliveryInfusion
@@ -935,6 +1204,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaAntiarrhythmic
   name: nc-pharma-formula-antiarrhythmic
+  description: nc-pharma-formula-antiarrhythmic-desc
   version: 1
   compound: NCDrugAntiarrhythmic
   deliveryForm: NCPharmaDeliveryInfusion
@@ -947,6 +1217,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaRespiratoryStimulant
   name: nc-pharma-formula-respiratory-stimulant
+  description: nc-pharma-formula-respiratory-stimulant-desc
   version: 1
   compound: NCDrugRespiratoryStimulant
   deliveryForm: NCPharmaDeliveryAutoinjector
@@ -959,6 +1230,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaAntitoxin
   name: nc-pharma-formula-antitoxin
+  description: nc-pharma-formula-antitoxin-desc
   version: 1
   compound: NCDrugAntitoxin
   deliveryForm: NCPharmaDeliveryAutoinjector
@@ -971,6 +1243,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaProcoagulant
   name: nc-pharma-formula-procoagulant
+  description: nc-pharma-formula-procoagulant-desc
   version: 1
   compound: NCDrugProcoagulant
   deliveryForm: NCPharmaDeliveryAutoinjector
@@ -983,6 +1256,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaAnticoagulant
   name: nc-pharma-formula-anticoagulant
+  description: nc-pharma-formula-anticoagulant-desc
   version: 1
   compound: NCDrugAnticoagulant
   deliveryForm: NCPharmaDeliveryInfusion
@@ -995,6 +1269,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaSedationReversal
   name: nc-pharma-formula-sedation-reversal
+  description: nc-pharma-formula-sedation-reversal-desc
   version: 1
   compound: NCDrugSedationReversal
   deliveryForm: NCPharmaDeliveryAutoinjector
@@ -1007,6 +1282,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaStimulantReversal
   name: nc-pharma-formula-stimulant-reversal
+  description: nc-pharma-formula-stimulant-reversal-desc
   version: 1
   compound: NCDrugStimulantReversal
   deliveryForm: NCPharmaDeliveryAutoinjector
@@ -1172,6 +1448,7 @@
 - type: ncPharmaFormula
   id: NCPharmaFormulaVasopressorAutoinjector
   name: nc-pharma-formula-vasopressor-autoinjector
+  description: nc-pharma-formula-vasopressor-autoinjector-desc
   version: 1
   compound: NCDrugVasopressor
   deliveryForm: NCPharmaDeliveryAutoinjector

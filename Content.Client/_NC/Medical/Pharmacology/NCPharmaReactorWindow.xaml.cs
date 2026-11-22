@@ -199,6 +199,7 @@ public sealed partial class NCPharmaReactorWindow : FancyWindow
     {
         NCPharmaReactorNotice.NoSource => "nc-pharma-station-notice-no-source",
         NCPharmaReactorNotice.NotEnoughSource => "nc-pharma-station-notice-not-enough",
+        NCPharmaReactorNotice.WrongFeedstock => "nc-pharma-station-notice-wrong-feedstock",
         NCPharmaReactorNotice.NotExperimental => "nc-pharma-reactor-notice-not-experimental",
         NCPharmaReactorNotice.UnitsLimit => "nc-pharma-reactor-notice-units-limit",
         NCPharmaReactorNotice.Busy => "nc-pharma-station-notice-busy",

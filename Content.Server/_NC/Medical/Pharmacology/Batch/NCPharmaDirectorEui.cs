@@ -141,7 +141,7 @@ public sealed partial class NCPharmaDirectorEui : BaseEui
         return batches.AllFormulas.OrderBy(formula => formula.ID, StringComparer.Ordinal).Select(formula =>
         {
             var name = formula.CustomName ?? Loc.GetString(formula.Name);
-            var detail = $"{formula.Compound} · {formula.DeliveryForm} · {formula.TargetConcentration:0.##} · " +
+            var detail = $"{formula.Compound}{(formula.SecondCompound is { } second ? " + " + second : string.Empty)} · {formula.DeliveryForm} · {formula.TargetConcentration:0.##} · " +
                          $"{string.Join(", ", formula.Modifiers.Select(modifier => modifier.Id))} · {formula.DerivedFrom} · {formula.Author}";
             return new NCPharmaDirectorRow(formula.ID, $"{name} v{formula.Version} · {formula.RegulatoryStatus}", detail);
         }).ToArray();

@@ -6,12 +6,30 @@
 <NCGuideLocalizedText Key="nc-guide-pharma-brewing-extract"/>
 <NCGuideLocalizedText Key="nc-guide-pharma-brewing-tips"/>
 <Box>
-<GuideEntityEmbed Entity="NCPharmaSubstrateJug"/>
-<GuideEntityEmbed Entity="NCPharmaSolventJug"/>
-<GuideEntityEmbed Entity="NCPharmaRawBiomass"/>
-<GuideEntityEmbed Entity="NCPharmaRawCorporateStock"/>
+<GuideEntityEmbed Entity="NCPharmaProteinJug"/>
+<GuideEntityEmbed Entity="NCPharmaNutrientJug"/>
+<GuideEntityEmbed Entity="NCPharmaSourceCanister"/>
 </Box>
 <Box>
+<GuideEntityEmbed Entity="NCPharmaSubstrateNeuroJug"/>
+<GuideEntityEmbed Entity="NCPharmaSubstrateCardioJug"/>
+<GuideEntityEmbed Entity="NCPharmaSubstrateHematoJug"/>
+<GuideEntityEmbed Entity="NCPharmaSubstrateMicrobialJug"/>
+<GuideEntityEmbed Entity="NCPharmaSubstrateImmuneJug"/>
+</Box>
+<Box>
+<GuideEntityEmbed Entity="NCPharmaRawBiomassNeuro"/>
+<GuideEntityEmbed Entity="NCPharmaRawBiomassCardio"/>
+<GuideEntityEmbed Entity="NCPharmaRawBiomassHemato"/>
+<GuideEntityEmbed Entity="NCPharmaRawBiomassMicrobial"/>
+<GuideEntityEmbed Entity="NCPharmaRawBiomassImmune"/>
+</Box>
+<Box>
+<GuideEntityEmbed Entity="NCPharmaRawCorporateNeuro"/>
+<GuideEntityEmbed Entity="NCPharmaRawCorporateCardio"/>
+<GuideEntityEmbed Entity="NCPharmaRawCorporateHemato"/>
+<GuideEntityEmbed Entity="NCPharmaRawCorporateMicrobial"/>
+<GuideEntityEmbed Entity="NCPharmaRawCorporateImmune"/>
 <GuideEntityEmbed Entity="NCPharmaRawSeizedSample"/>
 </Box>
 </Document>

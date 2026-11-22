@@ -5,6 +5,8 @@
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
 
+using Content.Shared._NC.Medical.Pharmacology.Lab;
+
 namespace Content.Shared._NC.Medical.Pharmacology.Batch;
 
 /// <summary>Market-facing class of a batch. It describes measured parameters, it never multiplies strength.</summary>
@@ -68,6 +70,30 @@ public enum NCPharmaJournalKind : byte
     Note,
 }
 
+/// <summary>The five branches of the formula tree.</summary>
+[Serializable, NetSerializable]
+public enum NCPharmaNodeBranch : byte
+{
+    Core,
+    Delivery,
+    Kinetics,
+    Safety,
+    Production,
+}
+
+/// <summary>How much a laboratory knows about one node of the formula tree.</summary>
+[Serializable, NetSerializable]
+public enum NCPharmaNodeState : byte
+{
+    Unknown,
+    Suspected,
+    Confirmed,
+}
+
+/// <summary>What the laboratory knows about one node. Nodes that are not listed are unknown.</summary>
+[Serializable, NetSerializable]
+public readonly record struct NCPharmaNodeKnowledge(string Id, NCPharmaNodeState State);
+
 /// <summary>Result of a research request to the formula registry.</summary>
 [Serializable, NetSerializable]
 public enum NCPharmaRdNotice : byte
@@ -78,11 +104,17 @@ public enum NCPharmaRdNotice : byte
     InvalidRequest,
     InvalidName,
     TooManyFormulas,
+    SameCore,
     NotExperimental,
     NotCertified,
     Unidentified,
     NoteSaved,
     InvalidNote,
+    Invented,
+    InventionInvalid,
+    NoReagents,
+    NoChip,
+    NotResearched,
 }
 
 public enum NCPharmaAuditKind : byte
@@ -186,7 +218,9 @@ public readonly record struct NCPharmaFormulaSummary(
     NCPharmaRegulatoryStatus Status,
     string? DerivedFrom,
     bool CanApprove,
-    float ToxicConcentration = 0f);
+    float ToxicConcentration = 0f,
+    NCPharmaFeedstockOption[]? Feedstocks = null,
+    string? SecondCompound = null);
 
 [Serializable, NetSerializable]
 public readonly record struct NCPharmaJournalSummary(
@@ -211,3 +245,19 @@ public readonly record struct NCPharmaStudyResult(
     float ToxicRatio,
     float Toxin,
     float Sepsis);
+
+/// <summary>A reagent and how much of it a container holds.</summary>
+[Serializable, NetSerializable]
+public readonly record struct NCPharmaReagentAmount(string Id, float Amount);
+
+/// <summary>Stable text ids of the nodes of the formula tree, shared by the server and the client.</summary>
+public static class NCPharmaNodeIds
+{
+    public static string Core(string id) => "core:" + id;
+
+    public static string Form(string id) => "form:" + id;
+
+    public static string Modifier(string id) => "mod:" + id;
+
+    public static string Profile(string id) => "profile:" + id;
+}

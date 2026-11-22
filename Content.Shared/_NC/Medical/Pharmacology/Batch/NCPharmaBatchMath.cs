@@ -12,6 +12,12 @@ public static class NCPharmaBatchMath
 {
     public const int MaximumModifiers = 2;
 
+    /// <summary>Share of the concentration each core gets when a formula has two.</summary>
+    public const float SecondCoreShare = 0.6f;
+
+    /// <summary>A pair of cores is this much more toxic than a single one.</summary>
+    public const float CombinationToxicity = 1.25f;
+
     /// <summary>Extra toxicity of a batch whose raw material was entirely contaminated.</summary>
     public const float ContaminantToxicityAtFull = 2f;
 
@@ -30,6 +36,27 @@ public static class NCPharmaBatchMath
                IsFiniteRange(formula.BaseStability, 0f, 1f) &&
                formula.Modifiers.Count <= MaximumModifiers &&
                modifiers.Count == formula.Modifiers.Count;
+    }
+
+    /// <summary>
+    /// The share of doses a source gives for a compound: 1 for its main feedstock, the listed share for an
+    /// alternative, and 0 when the material cannot make it at all. A compound with no feedstock accepts anything.
+    /// </summary>
+    public static float FeedstockYield(NCDrugProfilePrototype compound, string? sourceFeedstock)
+    {
+        if (compound.Feedstock is not { } required)
+            return 1f;
+        if (sourceFeedstock == null)
+            return 0f;
+        if (required.Id == sourceFeedstock)
+            return 1f;
+        foreach (var (id, share) in compound.AlternateFeedstocks)
+        {
+            if (id.Id == sourceFeedstock)
+                return Math.Clamp(share, 0f, 1f);
+        }
+
+        return 0f;
     }
 
     /// <summary>
@@ -57,6 +84,8 @@ public static class NCPharmaBatchMath
         }
 
         toxicity *= 1f + Math.Clamp(inputs.Contaminants, 0f, 1f) * ContaminantToxicityAtFull;
+        if (formula.SecondCompound != null)
+            toxicity *= CombinationToxicity;
         var calibration = Math.Clamp(inputs.CalibrationError, -0.5f, 0.5f);
         var concentration = MathF.Max(
             0f,
@@ -267,9 +296,9 @@ public static class NCPharmaBatchMath
         NCPharmaProductionProfilePrototype profile,
         float compoundToxicConcentration)
     {
-        var concentration = formula.TargetConcentration;
+        var concentration = formula.TargetConcentration * (formula.SecondCompound != null ? SecondCoreShare : 1f);
         var stability = formula.BaseStability;
-        var toxicity = 1f;
+        var toxicity = formula.SecondCompound != null ? CombinationToxicity : 1f;
         var cost = profile.CostMultiplier;
         foreach (var modifier in modifiers)
         {

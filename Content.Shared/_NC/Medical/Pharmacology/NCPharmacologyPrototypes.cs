@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using Content.Shared._NC.Medical.Pharmacology.Lab;
 using Content.Shared._NC.Medical.Systemic;
 using Robust.Shared.Prototypes;
 
@@ -124,6 +125,17 @@ public sealed partial class NCDrugProfilePrototype : IPrototype
 
     [DataField(required: true)]
     public NCDrugCategory Category { get; private set; }
+
+    /// <summary>
+    /// The raw material this compound is made from. Empty for compounds that are never produced, such as
+    /// withdrawal states.
+    /// </summary>
+    [DataField]
+    public ProtoId<NCPharmaFeedstockPrototype>? Feedstock { get; private set; }
+
+    /// <summary>Other feedstocks the compound can be made from, each with the share of doses it gives.</summary>
+    [DataField]
+    public Dictionary<ProtoId<NCPharmaFeedstockPrototype>, float> AlternateFeedstocks { get; private set; } = new();
 
     [DataField(required: true)]
     public float MaximumConcentration { get; private set; }

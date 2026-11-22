@@ -6,10 +6,10 @@ nc-guide-pharma-overview-h = [head=1]Pharmacology: overview[/head]
 nc-guide-pharma-overview-formula = [head=2]Formula and batch[/head]
     A [color=#58e6d9]formula[/color] is a recipe: which compound, in which delivery form, at which target concentration. A [color=#58e6d9]batch[/color] is one real production run of a formula. The label on a pack says what the producer claims; what is really inside is only known to the world and is revealed by quality control.
 nc-guide-pharma-overview-chain = [head=2]The production chain[/head]
-    1. [color=#58e6d9]Raw material[/color] — bought, found, seized, or brewed by players.
-    2. [color=#58e6d9]Extraction[/color] turns raw material into a source canister with its own purity.
+    1. [color=#58e6d9]Raw material[/color] of the right kind — bought, found, seized, or brewed by players.
+    2. [color=#58e6d9]Extraction[/color] turns raw material into a source canister of the same kind, with its own purity.
     3. [color=#58e6d9]Purifier[/color] (optional) removes impurities at a cost.
-    4. [color=#58e6d9]Synthesizer[/color] makes a batch of a known formula from the canister.
+    4. [color=#58e6d9]Synthesizer[/color] makes a batch of a known formula from a canister that suits it.
     5. [color=#58e6d9]Sterile cabinet[/color] and [color=#58e6d9]formulation station[/color] (optional) improve sterility and mixing.
     6. [color=#58e6d9]Filling station[/color] splits packs into single doses.
     7. [color=#58e6d9]QC analyzer[/color] tests what the batch really contains.
@@ -18,26 +18,44 @@ nc-guide-pharma-overview-quality = [head=2]What makes a batch good or bad[/head]
     Every batch has hidden [color=#58e6d9]purity[/color], [color=#58e6d9]sterility[/color], [color=#58e6d9]homogeneity[/color], [color=#58e6d9]stability[/color] and real concentration. Low purity brings toxic adulterants. Low sterility risks sepsis. Poor mixing makes doses uneven. Low stability makes a drug spoil over time; keep unstable batches in [color=#58e6d9]cold storage[/color].
 nc-guide-pharma-overview-dose = [head=2]Dosing the patient[/head]
     A dose is scaled to the patient's body mass. The same dose acts weaker on a heavy patient and harder on a light one. Check the patient's active drugs and toxic burden before administering anything, and repeat the scan afterwards. See also the Clinical Pharmacology page for the effects of each drug class.
+nc-guide-pharma-overview-kinds = [head=2]Kinds of raw material[/head]
+    Raw material comes in five kinds, and a canister keeps its kind:
+    • [color=#58e6d9]Neuro-organic[/color] — painkillers, anesthetic, sedatives, stimulants, the respiratory stimulant and the recreational compounds.
+    • [color=#58e6d9]Cardio-enzyme[/color] — vasopressor, vasodilator and antiarrhythmic.
+    • [color=#58e6d9]Hemo-factor[/color] — procoagulant, anticoagulant, synthetic blood, plasma and red cells.
+    • [color=#58e6d9]Microbial culture[/color] — every antibiotic.
+    • [color=#58e6d9]Immuno-modulator[/color] — immunosuppressant, antitoxin and the antidotes.
+    A formula is made from its main kind at full yield. Many can also be made from another kind, but only a share of the doses comes out; the formula card lists them. The synthesizer refuses a canister that cannot make the formula you picked.
 guide-entry-nc-pharma-overview = Pharmacology: overview
 nc-guide-pharma-brewing-h = [head=1]Brewing raw material[/head]
-nc-guide-pharma-brewing-intro = Raw material does not have to be bought. Players can brew it in an ordinary beaker or the chem master from two harmless precursors. The precursors do nothing inside a body: they only become useful once brewed and extracted.
+nc-guide-pharma-brewing-intro = Raw material is made, not found. Players cook it in ordinary beakers and jugs, in two steps: first the [color=#58e6d9]substrate[/color] is made from ordinary reagents, then the substrate is brewed into a [color=#58e6d9]broth[/color]. Raw material comes in [color=#58e6d9]kinds[/color]: neuro-organic, cardio-enzyme, hemo-factor, microbial and immuno-modulator. Every kind has its own substrate. Substrates do nothing inside a body: they only become useful once brewed and extracted.
 nc-guide-pharma-brewing-recipe = [head=2]Recipes[/head]
-    {""}[color=#58e6d9]Raw broth[/color]: 2 parts [color=#58e6d9]bio-substrate[/color] + 1 part [color=#58e6d9]sterile solvent[/color], kept warm between 330 K and 380 K. 3 parts of broth result.
-    {""}[color=#58e6d9]Brew sludge[/color]: broth heated above 400 K spoils into sludge. Stir, heat gently and take it off the heat in time.
+    {""}[color=#58e6d9]Substrate[/color] (kept warm, 310 K to 340 K, 4 parts result from each recipe):
+    {""}• neuro-organic: 2 protein + 1 lithium + 1 phosphorus;
+    {""}• cardio-enzyme: 2 blood + 1 potassium + 1 sugar;
+    {""}• hemo-factor: 2 blood + 1 iron + 1 protein;
+    {""}• microbial: 2 nutriment + 1 sugar + 1 ammonia;
+    {""}• immuno-modulator: 2 protein + 1 nutriment + 1 sodium.
+    {""}[color=#58e6d9]Broth[/color]: 2 parts of a [color=#58e6d9]substrate[/color] + 1 part of [color=#58e6d9]ethanol[/color], kept warm between 330 K and 380 K. The result is mostly the broth of the substrate's kind, with a little process residue.
+    {""}[color=#58e6d9]Brew sludge[/color]: a broth heated above 400 K spoils into sludge. Heat gently and take it off the heat in time.
     A cold mixture does not react at all.
-nc-guide-pharma-brewing-source = [head=2]Where to get precursors[/head]
-    Bio-substrate and sterile solvent come in precursor jugs. A jug holds 150 units of one precursor.
-nc-guide-pharma-brewing-extract = [head=2]From the beaker to a source canister[/head]
-    Put the beaker with the brew into the [color=#58e6d9]extraction station[/color] and start it. The extractor reads the beaker itself:
-    • the share of broth in the whole solution is the [color=#58e6d9]purity[/color] (never above 80% for a home brew);
-    • the share of sludge becomes hidden [color=#58e6d9]contamination[/color] in the extract, on top of a small base amount;
+nc-guide-pharma-brewing-source = [head=2]Where to get the ingredients[/head]
+    Lithium, phosphorus, potassium, iron, sodium, ammonia, sugar and ethanol come from the chemical dispenser. Protein and nutriment come in jugs of 150 units from the brewing supply crate, and [color=#58e6d9]blood[/color] comes from the blood bank, so the cardio and hemo kinds depend on donors.
+    Ready-made substrate jugs and raw material jugs also exist for those who can buy them: raw material is a jug of broth, diluted and spoiled the way its supplier made it.
+nc-guide-pharma-brewing-extract = [head=2]From the jug to a source canister[/head]
+    Put the jug or beaker with the brew into the [color=#58e6d9]extraction station[/color] and start it. The extractor reads the liquid itself:
+    • the [color=#58e6d9]kind[/color] of the extract is the broth there is most of;
+    • the share of that broth in the whole liquid is the [color=#58e6d9]purity[/color], so a mixture of kinds, leftover ingredients and process residue dilute it, and extraction loses a tenth of it;
+    • the share of sludge becomes hidden [color=#58e6d9]contamination[/color] in the extract;
     • every unit of broth gives about 0.6 units of raw material before extraction losses.
-    The beaker stays in the machine and is emptied. A solution without enough broth is refused.
-    Home brew always yields street-grade source material.
+    The vessel stays in the machine and is emptied. The extract is poured into a new [color=#58e6d9]source canister[/color], a real jug: pour it, split it, top it up. What it holds is what the synthesizer and the reactor read, so a canister that is topped up with another kind or with filler is a worse canister.
+    A liquid without enough broth is refused.
 nc-guide-pharma-brewing-tips = [head=2]Brewing tips[/head]
-    • Use exact ratios: leftover precursors dilute the broth and lower purity.
+    • Use exact ratios: leftover ingredients dilute the broth and lower purity.
+    • Do not mix kinds: the lesser kind only dilutes the greater one, in a brew and in a canister alike.
     • Do not overheat: sludge goes straight into the contamination of the extract.
     • To raise purity further, pass the canister through the [color=#58e6d9]purifier[/color].
+    • A spent canister is only empty: keep it and fill it again.
     • Never trust your own brew without QC: contamination is hidden from the label.
 guide-entry-nc-pharma-brewing = Brewing raw material
 nc-guide-pharma-stations-h = [head=1]Stations and equipment[/head]
@@ -55,12 +73,17 @@ nc-guide-pharma-stations-all = Every station needs power, takes time, produces w
     {""}[color=#58e6d9]Research console[/color] — develops new versions of formulas, approves certified ones and keeps the laboratory journal.
     {""}[color=#58e6d9]Waste incinerator[/color] and [color=#58e6d9]waste canisters[/color] — every station makes hazardous waste; full canisters must be burned.
 nc-guide-pharma-stations-kits = [head=2]Starter kits[/head]
-    {""}[color=#58e6d9]Street lab starter crate[/color] — raw material, source canisters, filters, waste canisters and vials.
-    {""}[color=#58e6d9]Clinical lab starter crate[/color] — clinical-grade source material and corporate raw stock with filters, waste canisters and vials.
+    {""}[color=#58e6d9]Street lab starter crate[/color] — raw material of four kinds, filters, a catalyst vial and a stabilizer vial, waste canisters and vials.
+    {""}[color=#58e6d9]Clinical lab starter crate[/color] — corporate raw stock of five kinds with filters, two catalyst and two stabilizer vials, waste canisters and vials.
+    {""}[color=#58e6d9]Brewing supply crate[/color] — protein and nutriment jugs, ethanol and four empty source canisters: what a first substrate brew needs besides dispenser chemistry and blood.
     {""}[color=#58e6d9]Sampling kit[/color] — blood samplers, wound swab kits and empty vials.
     {""}[color=#58e6d9]Blood bank kit[/color] — empty bags for collecting blood from donors.
     {""}[color=#58e6d9]Implant preparation kit[/color] — seed cultures for coating, antibacterial material, tissue interface, neural gel and regenerative matrix.
     {""}[color=#58e6d9]Unlabelled sample box[/color] — raw samples with no label; nobody knows what they hold.
+nc-guide-pharma-stations-consumables = [head=2]Process consumables[/head]
+    {""}[color=#58e6d9]Catalyst vial[/color] — an ordinary chemistry vial with reaction catalyst in it. Put it in the thermoreactor's catalyst slot. The run draws two units out of it for every charge, at most two charges, and the vial stays: top it up, pour it out or move it like any vial.
+    {""}[color=#58e6d9]Stabilizer vial[/color] — a vial of stabilizer for the synthesizer's additive slot. A formula with the stabilizer modifier needs five units in it for every run and uses them up; the formula card says so.
+    Ordinary stations need only power and a waste canister with room in it; a standard batch by hand takes about ten minutes from raw material to a tested pack.
 guide-entry-nc-pharma-stations = Stations and equipment
 nc-guide-pharma-formulary-h = [head=1]Formulary and production options[/head]
 nc-guide-pharma-formulary-formulas = [head=2]Known formulas[/head]
@@ -78,7 +101,7 @@ nc-guide-pharma-formulary-modifiers = [head=2]Modifiers[/head]
     • [color=#58e6d9]Fast release[/color] — stronger and faster, shorter-lived, a little more toxic.
     • [color=#58e6d9]Extended release[/color] — weaker and much slower, more stable.
     • [color=#58e6d9]Protective carrier[/color] — much less toxic, a little weaker.
-    • [color=#58e6d9]Stabilizer[/color] and [color=#58e6d9]Cold solvent[/color] — raise stability.
+    • [color=#58e6d9]Stabilizer[/color] and [color=#58e6d9]Cold solvent[/color] — raise stability. The stabilizer also uses up five units from a stabilizer vial on every production run.
     • [color=#58e6d9]Buffered[/color] — less toxic, absorbed slightly slower.
     • [color=#58e6d9]Concentrated[/color] and [color=#58e6d9]Potentiator[/color] — stronger but more toxic and less stable.
     • [color=#58e6d9]Purified[/color] — higher purity, expensive.
@@ -124,13 +147,12 @@ nc-guide-pharma-quality-impurities = [head=2]Impurities[/head]
 nc-guide-pharma-quality-cold = [head=2]Cold chain[/head]
     Some formulas are unstable and spoil at room temperature; examining a pack of such a formula says it must be kept refrigerated. [color=#58e6d9]Cold storage[/color] stops the spoilage while the batch is inside and the cabinet has power. A stabilizer, a cold solvent and clean synthesis all make a batch more stable. Keep unstable batches cold from the moment they are made.
 nc-guide-pharma-quality-waste = [head=2]Waste[/head]
-    Every station makes hazardous waste into its own tank and refuses to work when the tank is full. Swap in an empty [color=#58e6d9]waste canister[/color] and burn the full one in the [color=#58e6d9]waste incinerator[/color], which needs power.
+    Every station makes hazardous waste and pours it into the [color=#58e6d9]waste canister[/color] standing in its waste slot. Without a canister with room in it the station will not run. The canister is an ordinary jug: carry it, pour it, spill it, but the waste is poisonous. Take it to the [color=#58e6d9]waste incinerator[/color] (it needs power): the incinerator burns the waste and leaves you the empty canister. A canister with waste in it that is left lying around leaks toxic fumes.
 guide-entry-nc-pharma-quality = Quality control and storage
 nc-guide-pharma-reactor-h = [head=1]Thermoreactor and experimental formulas[/head]
 nc-guide-pharma-reactor-rd = [head=2]The research console[/head]
-    The [color=#58e6d9]research console[/color] lists the laboratory's formulas. Pick a formula to see its card and develop a [color=#58e6d9]new version[/color]: choose a name, a delivery form, a concentration and up to two modifiers. The console shows a forecast before you commit: peak concentration, toxic margin, absorption time, toxicity and cost. A new version is [color=#58e6d9]experimental[/color].
-    An experimental version can be approved only after quality control has certified a batch of it. A compound that has not been identified by chemical analysis cannot be approved. The laboratory holds a limited number of derived formulas.
-    The [color=#58e6d9]laboratory journal[/color] records what was produced, tested, administered, approved and created, with who did it and details such as input purity, number of QC tests, and how a patient took a dose. You can attach your own [color=#58e6d9]note[/color] to a version.
+    The [color=#58e6d9]research console[/color] lists the laboratory's formulas and is where new ones are built; see Building a formula. The [color=#58e6d9]laboratory journal[/color] records what was produced, tested, administered, approved and created, with who did it and details such as input purity, number of QC tests, and how a patient took a dose. You can attach your own [color=#58e6d9]note[/color] to a version.
+    An experimental version can be approved only after quality control has certified a batch of it. A compound that has not been identified by chemical analysis cannot be approved.
 nc-guide-pharma-reactor-unknown = [head=2]Unknown compounds[/head]
     An unlabelled raw sample hides an unidentified compound. Run it through the extraction station to [color=#58e6d9]isolate[/color] it. The result is an experimental formula with a code name. Its card starts mostly unknown; each study fills lines in as suspected, then confirmed. Use the vivarium and the metabolic analyzer to learn what it does before anyone takes it for real.
 nc-guide-pharma-reactor-reactor = [head=2]The thermoreactor[/head]
@@ -177,7 +199,7 @@ nc-guide-pharma-pharmacopoeia-reversal = [head=2]Antidotes[/head]
     {""}[color=#58e6d9]Sedation reversal agent[/color] cuts the effect of sedatives, the surgical anesthetic, euphoric and maintenance analgesic to under half and lowers their toxicity. [color=#58e6d9]Stimulant reversal agent[/color] does the same for the clinical stimulant, the social stimulant and NC-X17. Use them to wake a patient or to take the edge off a bad reaction.
 nc-guide-pharma-pharmacopoeia-dep = [head=2]Tolerance and withdrawal[/head]
     Stimulants, analgesics, sedatives, euphorics and the social stimulant build [color=#58e6d9]tolerance[/color] with every dose, and it fades slowly. When tolerance is high and the drug is gone, [color=#58e6d9]withdrawal[/color] sets in: after stimulants it is [color=#58e6d9]fatigue[/color] that begins after about two minutes and deepens over several, and the social stimulant also leaves fatigue; after analgesics, sedatives and euphorics it is [color=#58e6d9]tremor[/color]. The [color=#58e6d9]maintenance analgesic[/color] gives a weaker, safer level of pain relief to step down from a stronger drug.
-    Recreational compounds go through phases the user feels: onset, peak, decline and comedown. Stimulation, sedation, euphoria, perception, sociability and dissociation each have their own messages.
+    Recreational compounds go through phases the user feels: onset, peak, decline and comedown. Stimulation, sedation, euphoria, perception, sociability and dissociation each have their own messages. The first dose is always at full strength: the tolerance a dose earns applies from the next dose on, and a single dose leaves none behind.
 guide-entry-nc-pharma-pharmacopoeia = Pharmacopoeia and interactions
 nc-guide-pharma-fielduse-h = [head=1]Field use: local effect and kits[/head]
 nc-guide-pharma-fielduse-local = [head=2]Local effect on wounds[/head]
@@ -190,6 +212,8 @@ nc-guide-pharma-fielduse-dress = [head=2]Dressings[/head]
     A dressing soaks through and can carry contamination: check its saturation and replace a saturated one. [color=#58e6d9]Synthetic skin dressing[/color] is grown in the tissue incubator and is used like a sterile bandage. See the field treatment page for tourniquets and packing.
 nc-guide-pharma-fielduse-bag = [head=2]Trauma Team combat medic bag[/head]
     A corporate bag for stabilising yourself and the person next to you. It holds 4 trauma analgesic pens, 3 procoagulant pens, 2 respiratory stimulant pens, 2 antitoxin pens, 2 vasopressor pens, 2 gauze and 2 tourniquets. The pens are corporate-grade autoinjectors from clean production: high purity, sterility and stability. The bag is only a container of ready items; it is a quick way to deal with bleeding, pain, poisoning and collapse, not a replacement for a doctor.
+nc-guide-pharma-fielduse-injectors = [head=2]Ready-made injectors[/head]
+    Stock medicine comes as an [color=#58e6d9]autoinjector[/color], an [color=#58e6d9]IV bag[/color] or a [color=#58e6d9]blood bag[/color], depending on the formula's delivery form. Each is only a sprite and a dose from a real batch: it cannot be drawn from, poured out or mixed. Use it on the patient and the dose goes in with the delivery time of its form; an autoinjector is quick, an IV bag and a blood bag take several seconds.
 guide-entry-nc-pharma-fielduse = Field use: local effect and kits
 nc-guide-pharma-implants-h = [head=1]Implants and transplants[/head]
 nc-guide-pharma-implants-prep = [head=2]Preparing a module for living tissue[/head]
@@ -204,13 +228,38 @@ nc-guide-pharma-implants-trans = [head=2]Transplants[/head]
     After a transplant the body may reject the graft. The [color=#58e6d9]immunosuppressant[/color] suppresses rejection but raises the patient's vulnerability to infection, so keep the wounds clean and watch for infection while it is active. Donated blood must be matched to the recipient and kept cold.
 guide-entry-nc-pharma-implants = Implants and transplants
 nc-guide-pharma-walkthrough-h = [head=1]Your first drug, step by step[/head]
-nc-guide-pharma-walkthrough-steps = 1. [color=#58e6d9]Get raw material[/color]: a starter crate, a corporate or street purchase, a seized sample, or brew your own (see Brewing raw material).
-    2. [color=#58e6d9]Extract[/color]: put the raw material into the extraction station and activate it. You get a source canister with a purity of its own. Empty the waste tank when it fills.
+nc-guide-pharma-walkthrough-steps = 1. [color=#58e6d9]Get raw material[/color] of the kind your formula needs: a starter crate, a corporate or street purchase, a seized sample, or brew your own (see Brewing raw material).
+    2. [color=#58e6d9]Extract[/color]: put the raw material into the extraction station and activate it. You get a source canister of the same kind, with a purity of its own. Empty the waste tank when it fills.
     3. [color=#58e6d9]Purify[/color] (optional): pass the canister through the purifier for higher purity at a cost in material, filters and time.
-    4. [color=#58e6d9]Synthesize[/color]: put the canister into the synthesizer, pick a formula, a production mode and how much material to use. The forecast shows doses, time and cost. Start production. You get a batch with its own code.
+    4. [color=#58e6d9]Synthesize[/color]: put the canister into the synthesizer, pick a formula, a production mode and how much material to use. The formula card shows which kinds it can be made from; a canister of another kind gives fewer doses or is refused. If the formula uses a stabilizer, put a stabilizer vial in the additive slot. The forecast shows doses, time and cost. Start production. You get a batch with its own code.
     5. [color=#58e6d9]Treat[/color] (optional): put the pack into the sterile cabinet to raise sterility, or the formulation station to even out the mixing; both cost a little stability.
     6. [color=#58e6d9]Fill[/color] (optional): the filling station splits a pack into single-dose packs.
     7. [color=#58e6d9]Test[/color]: insert a spare pack into the QC analyzer and tick the tests you care about. Do not use a batch that fails.
     8. [color=#58e6d9]Store[/color]: keep unstable batches in cold storage.
     9. [color=#58e6d9]Administer[/color]: scan the patient, check active drugs and toxic burden, give the dose, then scan again and watch the response.
+    Doing it by hand, a standard batch takes about ten minutes. Your own formula is built in the research console (see Building a formula) and is never faster than its tests.
 guide-entry-nc-pharma-walkthrough = Your first drug, step by step
+nc-guide-pharma-build-h = [head=1]Building a formula[/head]
+nc-guide-pharma-build-tree = [head=2]The map[/head]
+    The research console shows the formula as a [color=#58e6d9]map[/color]: a hub in the middle and five branches around it. Click the round nodes to take them into the formula; click again to drop one. Drag the map to move it, use the wheel to zoom. A question mark on a node means nobody has tested it. Nothing is built for you: start from the empty hub, or continue an existing line from the Lines tab.
+    • [color=#58e6d9]Core[/color] — the compound, one or two.
+    • [color=#58e6d9]Delivery[/color] — the delivery form, one.
+    • [color=#58e6d9]Kinetics[/color] — the concentration, and modifiers for peak, speed and duration.
+    • [color=#58e6d9]Safety[/color] — modifiers that make the drug gentler.
+    • [color=#58e6d9]Production[/color] — the production mode, and modifiers for stability, purity and masking.
+    The side panel lists what is chosen and what is still missing, what the pointed node does, and the [color=#58e6d9]materials[/color] of the chosen core: its raw material kind, the recipe of the substrate and the broth. At most two modifiers in all. Changing one thing at a time is the only way to tell what did what.
+nc-guide-pharma-build-cores = [head=2]One core or two, and new compounds[/head]
+    A core is a compound the laboratory has identified. With two cores each is delivered at 60% of the concentration, the pair is 25% more toxic than a single one, and the raw material must suit both; the yield is the worse of the two. Two cores are a choice with a price, not an upgrade.
+    New compounds are [color=#58e6d9]invented[/color] on the second tab of the console. Put a beaker with reagents into the console, take two or three [color=#58e6d9]ingredients[/color] and make the compound: 5 units of each are used up. What an ingredient leans towards (pain relief, sedation, stimulation, fighting bacteria, immune suppression, clearing toxins), how strong it is and how harmful, you read by pointing at it. The result follows from the ingredients alone: ingredients that pull the same way make a stronger compound that needs less of it; ones that pull apart, or are harmful, narrow the safe window; charcoal leans towards nothing and takes harm away. The same ingredients always make the same compound, so a good recipe can be written down and repeated.
+    An invented compound appears on the map locked and unidentified. Make a batch of it, test it and study it: only then can it be a core of your own formulas.
+nc-guide-pharma-build-names = [head=2]Names and versions[/head]
+    You do not name a drug. A formula built on the same cores as the one you selected is its [color=#58e6d9]next version[/color]. Any other combination starts a new [color=#58e6d9]line[/color], named after its first core, with the second core added after a plus. A laboratory can develop 30 lines; versions inside a line are not counted.
+nc-guide-pharma-build-knowledge = [head=2]What the laboratory knows[/head]
+    Every node is [color=#58e6d9]untested[/color] (grey), [color=#58e6d9]suspected[/color] (amber) or [color=#58e6d9]confirmed[/color]. Everything the stock formulas use is confirmed. A node used only by a version you developed is suspected until a batch of such a version is certified by quality control. Hover over a node to read what is known: exact numbers for a confirmed one, only the direction for a suspected one, nothing for an untested one.
+    The [color=#58e6d9]forecast[/color] counts only confirmed nodes and says which it left out; the real batch will include them. If the delivery form or production mode is untested there is no forecast at all. The only way to learn a node is to make a batch with it, test it, and write down what you saw.
+nc-guide-pharma-build-approve = [head=2]From idea to regular production[/head]
+    A new version is [color=#58e6d9]experimental[/color]. Make a small batch, run QC and, where it matters, a vivarium study. Once a batch of the version is certified you can approve it, and it joins regular production. Notes in the laboratory journal are yours: say what you tried and what you concluded.
+guide-entry-nc-pharma-build = Building a formula
+
+nc-guide-pharma-build-chip = [head=2]The research chip[/head]
+    What a laboratory has studied is kept on a [color=#58e6d9]research chip[/color] in the console's chip slot. Without a chip nothing is studied and nothing can be built. A blank chip has studied nothing: every node on the map is untested and no compound can be a core yet. What the laboratory learns is written to the chips that stand in consoles at that moment: running quality control on a batch teaches the chip the compound and the nodes of that formula, and developing a formula marks the nodes it used. Take the chip out and the console is blank again; put it back and its record returns, but it learns nothing while it is out. A [color=#58e6d9]stock chip[/color] comes with the stock formulas already studied.

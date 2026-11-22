@@ -33,21 +33,26 @@ public sealed partial class NCPharmaStationSystem : EntitySystem
     [Dependency] private ItemSlotsSystem _slots = default!;
     [Dependency] private SharedPowerReceiverSystem _power = default!;
     [Dependency] private NCPharmaBatchSystem _batches = default!;
+    [Dependency] private NCPharmaSourceSystem _sources = default!;
     [Dependency] private NCBiotechActionSystem _actions = default!;
     [Dependency] private NCPharmaWasteSystem _waste = default!;
     [Dependency] private SharedSolutionContainerSystem _solutions = default!;
+    [Dependency] private IPrototypeManager _prototypes = default!;
 
     public override void Initialize()
     {
         base.Initialize();
 
         SubscribeLocalEvent<NCPharmaRawMaterialComponent, ExaminedEvent>(OnRawExamined);
-        SubscribeLocalEvent<NCPharmaExtractorComponent, ActivateInWorldEvent>(OnExtractorActivate);
+        SubscribeLocalEvent<NCPharmaExtractorComponent, NCLabMachineStartEvent>(OnExtractorActivate);
         SubscribeLocalEvent<NCPharmaExtractorComponent, NCPharmaExtractDoAfterEvent>(OnExtractDone);
-        SubscribeLocalEvent<NCPharmaTreatmentStationComponent, ActivateInWorldEvent>(OnTreatActivate);
+        SubscribeLocalEvent<NCPharmaTreatmentStationComponent, NCLabMachineStartEvent>(OnTreatActivate);
         SubscribeLocalEvent<NCPharmaTreatmentStationComponent, NCPharmaTreatDoAfterEvent>(OnTreatDone);
-        SubscribeLocalEvent<NCPharmaFillingStationComponent, ActivateInWorldEvent>(OnFillActivate);
+        SubscribeLocalEvent<NCPharmaFillingStationComponent, NCLabMachineStartEvent>(OnFillActivate);
         SubscribeLocalEvent<NCPharmaFillingStationComponent, NCPharmaFillDoAfterEvent>(OnFillDone);
+        SubscribeLocalEvent<NCPharmaTreatmentStationComponent, NCLabMachineStatusEvent>(OnTreatStatus);
+        SubscribeLocalEvent<NCPharmaFillingStationComponent, NCLabMachineStatusEvent>(OnFillStatus);
+        SubscribeLocalEvent<NCPharmaExtractorComponent, NCLabMachineStatusEvent>(OnExtractStatus);
     }
 
     private void OnRawExamined(Entity<NCPharmaRawMaterialComponent> raw, ref ExaminedEvent args)
@@ -100,9 +105,9 @@ public sealed partial class NCPharmaStationSystem : EntitySystem
 
     // ---- extraction -----------------------------------------------------------------------------------
 
-    private void OnExtractorActivate(Entity<NCPharmaExtractorComponent> machine, ref ActivateInWorldEvent args)
+    private void OnExtractorActivate(Entity<NCPharmaExtractorComponent> machine, ref NCLabMachineStartEvent args)
     {
-        if (args.Handled || !args.Complex)
+        if (args.Handled)
             return;
 
         args.Handled = true;
@@ -123,22 +128,15 @@ public sealed partial class NCPharmaStationSystem : EntitySystem
             return;
         }
 
-        // Ready-made raw material, or a container with a brew the players cooked up themselves.
-        float units, purity, contaminants;
-        EntProtoId output;
+        // NC: raw material is liquid in a jug, brewed by the players or bought ready-made. Only a seized sample of an
+        // unidentified compound is a different thing.
         string? unknownPool = null;
-        Entity<SolutionComponent>? brew = null;
         if (TryComp<NCPharmaRawMaterialComponent>(item, out var raw))
-        {
-            (units, purity, contaminants, output, unknownPool) =
-                (raw.Units, raw.Purity, raw.Contaminants, raw.Output, raw.UnknownPool);
-        }
-        else if (TryReadBrew(machine.Comp, item, out var read))
-        {
-            (units, purity, contaminants, output) = (read.Units, read.Purity, read.Contaminants, machine.Comp.BrewOutput);
-            brew = read.Solution;
-        }
-        else
+            unknownPool = raw.UnknownPool;
+
+        (float Units, float Purity, float Contaminants, ProtoId<NCPharmaFeedstockPrototype> Feedstock,
+            Entity<SolutionComponent> Solution) brew = default;
+        if (unknownPool == null && !TryReadBrew(machine.Comp, item, out brew))
         {
             _popup.PopupEntity(Loc.GetString("nc-pharma-brew-unusable"), machine, args.User);
             return;
@@ -161,57 +159,81 @@ public sealed partial class NCPharmaStationSystem : EntitySystem
         }
 
         var quality = _actions.Resolve(args.User, "NCBiotechExtract", machine.Owner).Quality;
-        var extract = Spawn(output, coordinates);
-        if (TryComp<NCPharmaSourceComponent>(extract, out var source))
-        {
-            source.Units = units * machine.Comp.Efficiency * quality;
-            source.Purity = Math.Clamp(purity * machine.Comp.PurityRetention, 0f, 1f);
-            Dirty(extract, source);
-        }
+        var extract = Spawn(machine.Comp.BrewOutput, coordinates);
+        _sources.Fill(extract, brew.Feedstock,
+            brew.Units * machine.Comp.Efficiency * quality,
+            Math.Clamp(brew.Purity * machine.Comp.PurityRetention, 0f, 1f),
+            brew.Contaminants);
 
-        // The extract inherits the hidden contaminants of the raw material.
-        EnsureComp<NCPharmaSourceHiddenComponent>(extract).Contaminants = contaminants;
-
-        // A brew is drawn out of the container, which stays in the machine; ready-made material is used up.
-        if (brew is { } solution)
-            _solutions.RemoveAllSolution(solution);
-        else
-            QueueDel(item);
+        // The jug stays in the machine, empty: the extract is a liquid in a new canister.
+        _solutions.RemoveAllSolution(brew.Solution);
         _hands.TryPickupAnyHand(args.User, extract);
         _popup.PopupEntity(Loc.GetString("nc-pharma-extracted"), machine, args.User);
     }
 
     /// <summary>
-    /// Reads a player-brewed solution. The share of broth in the whole solution is its purity, the share of
-    /// sludge its hidden contamination, so a clean reaction gives a clean extract and a ruined one does not.
+    /// Reads the liquid in a jug. The kind of raw material is the broth there is most of. The share of that broth in
+    /// the whole liquid is its purity and the share of sludge its hidden contamination, so a clean brew gives a clean
+    /// extract, a ruined one does not, and a mixture of kinds dilutes the result.
     /// </summary>
     private bool TryReadBrew(
         NCPharmaExtractorComponent extractor,
         EntityUid container,
-        out (float Units, float Purity, float Contaminants, Entity<SolutionComponent> Solution) brew)
+        out (float Units, float Purity, float Contaminants, ProtoId<NCPharmaFeedstockPrototype> Feedstock,
+            Entity<SolutionComponent> Solution) brew)
     {
         brew = default;
         if (!_solutions.TryGetDrainableSolution(container, out var soln, out var solution))
             return false;
 
-        var broth = (float) solution.GetTotalPrototypeQuantity(extractor.BrewReagent);
         var total = (float) solution.Volume;
-        if (broth < extractor.MinimumBrew || total <= 0f)
+        if (total <= 0f)
             return false;
 
-        var sludge = (float) solution.GetTotalPrototypeQuantity(extractor.SludgeReagent);
-        var purity = Math.Clamp(broth / total, 0f, 1f) * extractor.BrewPurityCeiling;
-        var contaminants = Math.Clamp(
-            extractor.BrewBaseContaminants + sludge / total * extractor.SludgeContamination, 0f, 1f);
-        brew = (broth * extractor.UnitsPerReagent, purity, contaminants, soln.Value);
+        NCPharmaFeedstockPrototype? best = null;
+        var broth = 0f;
+        foreach (var candidate in _prototypes.EnumeratePrototypes<NCPharmaFeedstockPrototype>())
+        {
+            var amount = (float) solution.GetTotalPrototypeQuantity(candidate.Broth);
+            if (amount <= broth)
+                continue;
+            best = candidate;
+            broth = amount;
+        }
+
+        if (best == null || broth < extractor.MinimumBrew)
+            return false;
+
+        var sludge = (float) solution.GetTotalPrototypeQuantity(NCPharmaSourceSystem.SludgeReagent);
+        brew = (broth * extractor.UnitsPerReagent, Math.Clamp(broth / total, 0f, 1f),
+            Math.Clamp(sludge / total, 0f, 1f), best.ID, soln.Value);
         return true;
+    }
+
+    private void OnTreatStatus(Entity<NCPharmaTreatmentStationComponent> machine, ref NCLabMachineStatusEvent args)
+    {
+        args.Readouts.Add(new NCLabMachineReadout("nc-lab-machine-ui-treatment", string.Empty,
+            machine.Comp.Treatment == NCPharmaTreatment.Sterilize
+                ? "nc-lab-machine-ui-treatment-sterilize"
+                : "nc-lab-machine-ui-treatment-formulate"));
+    }
+
+    private void OnFillStatus(Entity<NCPharmaFillingStationComponent> machine, ref NCLabMachineStatusEvent args)
+    {
+        args.Readouts.Add(new NCLabMachineReadout("nc-lab-machine-ui-doses", machine.Comp.DosesPerPack.ToString()));
+    }
+
+    private void OnExtractStatus(Entity<NCPharmaExtractorComponent> machine, ref NCLabMachineStatusEvent args)
+    {
+        args.Readouts.Add(new NCLabMachineReadout("nc-lab-machine-ui-efficiency",
+            (machine.Comp.Efficiency * 100f).ToString("0") + "%"));
     }
 
     // ---- sterile cabinet / formulation station ---------------------------------------------------------
 
-    private void OnTreatActivate(Entity<NCPharmaTreatmentStationComponent> machine, ref ActivateInWorldEvent args)
+    private void OnTreatActivate(Entity<NCPharmaTreatmentStationComponent> machine, ref NCLabMachineStartEvent args)
     {
-        if (args.Handled || !args.Complex)
+        if (args.Handled)
             return;
 
         args.Handled = true;
@@ -248,9 +270,9 @@ public sealed partial class NCPharmaStationSystem : EntitySystem
 
     // ---- filling station -------------------------------------------------------------------------------
 
-    private void OnFillActivate(Entity<NCPharmaFillingStationComponent> machine, ref ActivateInWorldEvent args)
+    private void OnFillActivate(Entity<NCPharmaFillingStationComponent> machine, ref NCLabMachineStartEvent args)
     {
-        if (args.Handled || !args.Complex)
+        if (args.Handled)
             return;
 
         args.Handled = true;

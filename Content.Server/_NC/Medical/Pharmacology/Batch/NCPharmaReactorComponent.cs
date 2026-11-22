@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Shared._NC.Medical.Pharmacology.Batch;
+using Content.Shared.Chemistry.Reagent;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server._NC.Medical.Pharmacology.Batch;
@@ -16,6 +17,18 @@ public sealed partial class NCPharmaReactorComponent : Component
 {
     [DataField]
     public string SourceSlot = "source";
+
+    /// <summary>Where a vial of catalyst is put. The run draws its catalyst from the vial when it starts.</summary>
+    [DataField]
+    public string CatalystSlot = "catalyst";
+
+    /// <summary>The reagent a catalyst vial holds.</summary>
+    [DataField]
+    public ProtoId<ReagentPrototype> CatalystReagent = "NCPharmaCatalyst";
+
+    /// <summary>Units of catalyst one charge takes out of the vial.</summary>
+    [DataField]
+    public float UnitsPerCharge = 2f;
 
     [DataField]
     public float EquipmentSterility = 0.85f;
@@ -50,6 +63,9 @@ public sealed partial class NCPharmaReactorRunComponent : Component
     public float SourcePurity;
     public float SourceContaminants;
     public int Units;
+
+    /// <summary>Share of the doses the raw material gives for this formula; below 1 for an alternative feedstock.</summary>
+    public float FeedstockYield = 1f;
     public string Operator = string.Empty;
     public TimeSpan NextStep;
     public bool Warned;

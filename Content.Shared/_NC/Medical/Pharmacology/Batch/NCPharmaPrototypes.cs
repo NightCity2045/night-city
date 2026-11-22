@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Shared._NC.Medical.Systemic;
+using Content.Shared.Chemistry.Reagent;
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared._NC.Medical.Pharmacology.Batch;
@@ -86,6 +87,10 @@ public sealed partial class NCPharmaTuningPrototype : IPrototype
     /// <summary>Most versions a laboratory may develop in one world.</summary>
     [DataField]
     public int MaximumDerivedFormulas { get; private set; } = 256;
+
+    /// <summary>How many separate formula lines a laboratory can develop. Versions of one line are not counted.</summary>
+    [DataField]
+    public int MaximumLineages { get; private set; } = 30;
 
     [DataField]
     public int MaximumJournalEntries { get; private set; } = 2048;
@@ -257,6 +262,21 @@ public sealed partial class NCPharmaModifierPrototype : IPrototype
     [DataField(required: true)]
     public LocId Name { get; private set; }
 
+    /// <summary>Which branch of the formula tree this modifier belongs to.</summary>
+    [DataField]
+    public NCPharmaNodeBranch Branch { get; private set; } = NCPharmaNodeBranch.Kinetics;
+
+    /// <summary>
+    /// A reagent the production run uses up from a vial in the synthesizer's additive slot, such as the stabilizer. A
+    /// formula with this modifier cannot be produced without it, so the modifier has a price that is not only money.
+    /// </summary>
+    [DataField]
+    public ProtoId<ReagentPrototype>? RequiredReagent { get; private set; }
+
+    /// <summary>How many units of <see cref="RequiredReagent"/> one production run uses up.</summary>
+    [DataField]
+    public float RequiredAmount { get; private set; } = 5f;
+
     [DataField]
     public float ConcentrationMultiplier { get; private set; } = 1f;
 
@@ -353,12 +373,23 @@ public sealed partial class NCPharmaFormulaPrototype : IPrototype
     [DataField(required: true)]
     public LocId Name { get; private set; }
 
+    /// <summary>What the formula is for, in a sentence or two. Absent for versions developed in game.</summary>
+    [DataField]
+    public LocId? Description { get; private set; }
+
     [DataField]
     public int Version { get; private set; } = 1;
 
     /// <summary>The existing physiological drug profile this formula delivers.</summary>
     [DataField(required: true)]
     public ProtoId<NCDrugProfilePrototype> Compound { get; private set; }
+
+    /// <summary>
+    /// An optional second core. Both compounds are delivered at a share of the concentration and the pair is
+    /// more toxic than either alone, so it is a choice with a price, not an upgrade.
+    /// </summary>
+    [DataField]
+    public ProtoId<NCDrugProfilePrototype>? SecondCompound { get; private set; }
 
     [DataField(required: true)]
     public ProtoId<NCPharmaDeliveryFormPrototype> DeliveryForm { get; private set; }
@@ -409,7 +440,8 @@ public sealed partial class NCPharmaFormulaPrototype : IPrototype
         string? derivedFrom,
         string? customName,
         string? author,
-        ProtoId<NCPharmaReactionProfilePrototype>? reaction = null)
+        ProtoId<NCPharmaReactionProfilePrototype>? reaction = null,
+        ProtoId<NCDrugProfilePrototype>? secondCompound = null)
     {
 #pragma warning disable RA0039 // Derived formula versions are runtime objects and are never registered as prototypes.
         return new NCPharmaFormulaPrototype
@@ -418,6 +450,7 @@ public sealed partial class NCPharmaFormulaPrototype : IPrototype
             Name = name,
             Version = version,
             Compound = compound,
+            SecondCompound = secondCompound,
             DeliveryForm = deliveryForm,
             TargetConcentration = targetConcentration,
             Modifiers = modifiers,
@@ -435,5 +468,5 @@ public sealed partial class NCPharmaFormulaPrototype : IPrototype
     /// <summary>Same formula with another regulatory status, used when a version is approved or recalled.</summary>
     public NCPharmaFormulaPrototype WithStatus(NCPharmaRegulatoryStatus status) => Create(
         ID, Name, Version, Compound, DeliveryForm, TargetConcentration, [.. Modifiers],
-        DefaultProductionProfile, BaseStability, status, DerivedFrom, CustomName, Author, Reaction);
+        DefaultProductionProfile, BaseStability, status, DerivedFrom, CustomName, Author, Reaction, SecondCompound);
 }

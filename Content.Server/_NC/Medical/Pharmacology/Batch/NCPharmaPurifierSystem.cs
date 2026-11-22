@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using Content.Server._NC.Medical.Pharmacology.Lab;
 using Content.Shared._NC.Medical.Pharmacology.Batch;
 using Content.Shared._NC.Medical.Pharmacology.Lab;
 using Content.Shared.Containers.ItemSlots;
 using Content.Shared.DoAfter;
+using Content.Shared.Examine;
 using Content.Shared.Interaction;
 using Content.Shared.Popups;
 using Content.Shared.Power.EntitySystems;
@@ -26,7 +28,7 @@ public sealed partial class NCPharmaPurifierComponent : Component
     public int FilterCharges = 10;
 
     [DataField]
-    public TimeSpan PassDuration = TimeSpan.FromSeconds(20);
+    public TimeSpan PassDuration = TimeSpan.FromSeconds(45);
 }
 
 /// <summary>A replacement filter for a purifier.</summary>
@@ -46,6 +48,7 @@ public sealed partial class NCPharmaPurifierSystem : EntitySystem
     [Dependency] private ItemSlotsSystem _slots = default!;
     [Dependency] private SharedPowerReceiverSystem _power = default!;
     [Dependency] private NCPharmaBatchSystem _batches = default!;
+    [Dependency] private NCPharmaSourceSystem _sources = default!;
     [Dependency] private Content.Server._NC.Medical.Pharmacology.Lab.NCBiotechActionSystem _actions = default!;
     [Dependency] private Content.Server._NC.Medical.Pharmacology.Lab.NCPharmaWasteSystem _waste = default!;
 
@@ -55,9 +58,29 @@ public sealed partial class NCPharmaPurifierSystem : EntitySystem
     {
         base.Initialize();
 
-        SubscribeLocalEvent<NCPharmaPurifierComponent, ActivateInWorldEvent>(OnActivate);
+        SubscribeLocalEvent<NCPharmaPurifierComponent, NCLabMachineStartEvent>(OnActivate);
         SubscribeLocalEvent<NCPharmaPurifierComponent, InteractUsingEvent>(OnInteractUsing);
         SubscribeLocalEvent<NCPharmaPurifierComponent, NCPharmaPurifyDoAfterEvent>(OnDone);
+        SubscribeLocalEvent<NCPharmaPurifierComponent, ExaminedEvent>(OnPurifierExamined);
+        SubscribeLocalEvent<NCPharmaPurifierComponent, NCLabMachineStatusEvent>(OnPurifierStatus);
+        SubscribeLocalEvent<NCPharmaFilterCartridgeComponent, ExaminedEvent>(OnCartridgeExamined);
+    }
+
+    private void OnPurifierStatus(Entity<NCPharmaPurifierComponent> purifier, ref NCLabMachineStatusEvent args)
+    {
+        args.Readouts.Add(new NCLabMachineReadout("nc-lab-machine-ui-filter", purifier.Comp.FilterCharges.ToString()));
+        if (purifier.Comp.FilterCharges <= 0)
+            args.CanStart = false;
+    }
+
+    private void OnPurifierExamined(Entity<NCPharmaPurifierComponent> purifier, ref ExaminedEvent args)
+    {
+        args.PushMarkup(Loc.GetString("nc-pharma-purifier-examine", ("charges", purifier.Comp.FilterCharges)));
+    }
+
+    private void OnCartridgeExamined(Entity<NCPharmaFilterCartridgeComponent> cartridge, ref ExaminedEvent args)
+    {
+        args.PushMarkup(Loc.GetString("nc-pharma-filter-examine", ("charges", cartridge.Comp.Charges)));
     }
 
     private void OnInteractUsing(Entity<NCPharmaPurifierComponent> purifier, ref InteractUsingEvent args)
@@ -71,9 +94,9 @@ public sealed partial class NCPharmaPurifierSystem : EntitySystem
         _popup.PopupEntity(Loc.GetString("nc-pharma-purifier-refilled"), purifier, args.User);
     }
 
-    private void OnActivate(Entity<NCPharmaPurifierComponent> purifier, ref ActivateInWorldEvent args)
+    private void OnActivate(Entity<NCPharmaPurifierComponent> purifier, ref NCLabMachineStartEvent args)
     {
-        if (args.Handled || !args.Complex)
+        if (args.Handled)
             return;
 
         args.Handled = true;
@@ -126,7 +149,7 @@ public sealed partial class NCPharmaPurifierSystem : EntitySystem
 
         args.Handled = true;
         if (!_power.IsPowered(purifier.Owner) || purifier.Comp.FilterCharges <= 0 ||
-            GetSource(purifier) is not { } item || !TryComp<NCPharmaSourceComponent>(item, out var source) ||
+            GetSource(purifier) is not { } item || !_sources.TryRead(item, out var source) ||
             !_batches.TryGetTuning(out var tuning))
         {
             return;
@@ -138,9 +161,8 @@ public sealed partial class NCPharmaPurifierSystem : EntitySystem
         // The common action-resolution layer decides how well the pass went; a plain pass has quality 1.
         var quality = _actions.Resolve(args.User, "NCBiotechPurify", purifier.Owner).Quality;
         var purity = source.Purity + (gained - source.Purity) * quality;
-        source.Purity = purity;
-        source.Units = units;
-        Dirty(item, source);
+        // NC: the cleaned material goes back into the canister as a composition; contamination stays what it was.
+        _sources.Fill(item, source.Feedstock, units, purity, source.Contaminants);
         _popup.PopupEntity(Loc.GetString("nc-pharma-purifier-done",
             ("purity", purity.ToString("P1")), ("units", units.ToString("0.#"))), purifier, args.User);
     }

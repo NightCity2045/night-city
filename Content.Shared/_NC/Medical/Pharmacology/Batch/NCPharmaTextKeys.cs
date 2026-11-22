@@ -47,11 +47,17 @@ public static class NCPharmaTextKeys
         NCPharmaRdNotice.InvalidRequest => "nc-pharma-rd-notice-invalid",
         NCPharmaRdNotice.InvalidName => "nc-pharma-rd-notice-invalid-name",
         NCPharmaRdNotice.TooManyFormulas => "nc-pharma-rd-notice-too-many",
+        NCPharmaRdNotice.SameCore => "nc-pharma-rd-notice-same-core",
         NCPharmaRdNotice.NotExperimental => "nc-pharma-rd-notice-not-experimental",
         NCPharmaRdNotice.NotCertified => "nc-pharma-rd-notice-not-certified",
         NCPharmaRdNotice.Unidentified => "nc-pharma-rd-notice-unidentified",
         NCPharmaRdNotice.NoteSaved => "nc-pharma-rd-notice-note-saved",
         NCPharmaRdNotice.InvalidNote => "nc-pharma-rd-notice-invalid-note",
+        NCPharmaRdNotice.Invented => "nc-pharma-rd-notice-invented",
+        NCPharmaRdNotice.InventionInvalid => "nc-pharma-rd-notice-invention-invalid",
+        NCPharmaRdNotice.NoReagents => "nc-pharma-rd-notice-no-reagents",
+        NCPharmaRdNotice.NoChip => "nc-pharma-rd-notice-no-chip",
+        NCPharmaRdNotice.NotResearched => "nc-pharma-rd-notice-not-researched",
         _ => string.Empty,
     };
 

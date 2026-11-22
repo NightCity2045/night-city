@@ -2,6 +2,7 @@
 <NCGuideLocalizedText Key="nc-guide-pharma-fielduse-h"/>
 <NCGuideLocalizedText Key="nc-guide-pharma-fielduse-local"/>
 <NCGuideLocalizedText Key="nc-guide-pharma-fielduse-dress"/>
+<NCGuideLocalizedText Key="nc-guide-pharma-fielduse-injectors"/>
 <NCGuideLocalizedText Key="nc-guide-pharma-fielduse-bag"/>
 <Box>
 <GuideEntityEmbed Entity="NCTraumaTeamCombatMedicBag"/>

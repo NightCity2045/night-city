@@ -41,6 +41,19 @@ public sealed class NCDependenceMathTests
     }
 
     [Test]
+    public void ADoseNeverWeakensItselfButTheNextOneFeelsIt()
+    {
+        var profile = Profile();
+        var state = new NCDrugDependenceState();
+
+        NCDependenceMath.RegisterDose(profile, state, 6f, Seconds(0));
+        Assert.That(NCDependenceMath.EffectFactor(profile, state), Is.EqualTo(1f), "the first dose is at full strength");
+
+        NCDependenceMath.RegisterDose(profile, state, 6f, Seconds(60));
+        Assert.That(NCDependenceMath.EffectFactor(profile, state), Is.LessThan(1f), "the second dose feels the first");
+    }
+
+    [Test]
     public void ToleranceNeverRemovesMoreThanItsMaximum()
     {
         var profile = Profile();

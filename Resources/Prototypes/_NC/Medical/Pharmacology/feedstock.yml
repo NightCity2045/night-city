@@ -1,0 +1,633 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Raw material comes in kinds. Every compound is made from one main kind and, with a poorer yield, from a few others.
+# Players can brew a kind themselves: a typed substrate warmed with ethanol from the chemical dispenser gives a broth of
+# that kind, and the extractor turns the broth into a source canister of the same kind.
+
+- type: ncPharmaFeedstock
+  id: NCFeedstockNeuro
+  name: nc-pharma-feedstock-neuro
+  description: nc-pharma-feedstock-neuro-desc
+  broth: NCPharmaBrothNeuro
+  source: NCPharmaSourceNeuro
+  substrate: NCPharmaSubstrateNeuro
+
+- type: ncPharmaFeedstock
+  id: NCFeedstockCardio
+  name: nc-pharma-feedstock-cardio
+  description: nc-pharma-feedstock-cardio-desc
+  broth: NCPharmaBrothCardio
+  source: NCPharmaSourceCardio
+  substrate: NCPharmaSubstrateCardio
+
+- type: ncPharmaFeedstock
+  id: NCFeedstockHemato
+  name: nc-pharma-feedstock-hemato
+  description: nc-pharma-feedstock-hemato-desc
+  broth: NCPharmaBrothHemato
+  source: NCPharmaSourceHemato
+  substrate: NCPharmaSubstrateHemato
+
+- type: ncPharmaFeedstock
+  id: NCFeedstockMicrobial
+  name: nc-pharma-feedstock-microbial
+  description: nc-pharma-feedstock-microbial-desc
+  broth: NCPharmaBrothMicrobial
+  source: NCPharmaSourceMicrobial
+  substrate: NCPharmaSubstrateMicrobial
+
+- type: ncPharmaFeedstock
+  id: NCFeedstockImmune
+  name: nc-pharma-feedstock-immune
+  description: nc-pharma-feedstock-immune-desc
+  broth: NCPharmaBrothImmune
+  source: NCPharmaSourceImmune
+  substrate: NCPharmaSubstrateImmune
+
+# --- Reagents players brew from ---------------------------------------------------------------------------------
+- type: reagent
+  id: NCPharmaSubstrateNeuro
+  name: reagent-name-nc-pharma-substrate-neuro
+  group: Biological
+  desc: reagent-desc-nc-pharma-substrate-neuro
+  physicalDesc: reagent-physical-desc-viscous
+  flavor: bitter
+  color: "#8E6BB5"
+
+- type: reagent
+  id: NCPharmaBrothNeuro
+  name: reagent-name-nc-pharma-broth-neuro
+  group: Biological
+  desc: reagent-desc-nc-pharma-broth-neuro
+  physicalDesc: reagent-physical-desc-opaque
+  flavor: bitter
+  color: "#8E6BB5"
+
+- type: reagent
+  id: NCPharmaSubstrateCardio
+  name: reagent-name-nc-pharma-substrate-cardio
+  group: Biological
+  desc: reagent-desc-nc-pharma-substrate-cardio
+  physicalDesc: reagent-physical-desc-viscous
+  flavor: bitter
+  color: "#C2455A"
+
+- type: reagent
+  id: NCPharmaBrothCardio
+  name: reagent-name-nc-pharma-broth-cardio
+  group: Biological
+  desc: reagent-desc-nc-pharma-broth-cardio
+  physicalDesc: reagent-physical-desc-opaque
+  flavor: bitter
+  color: "#C2455A"
+
+- type: reagent
+  id: NCPharmaSubstrateHemato
+  name: reagent-name-nc-pharma-substrate-hemato
+  group: Biological
+  desc: reagent-desc-nc-pharma-substrate-hemato
+  physicalDesc: reagent-physical-desc-viscous
+  flavor: bitter
+  color: "#9B2D30"
+
+- type: reagent
+  id: NCPharmaBrothHemato
+  name: reagent-name-nc-pharma-broth-hemato
+  group: Biological
+  desc: reagent-desc-nc-pharma-broth-hemato
+  physicalDesc: reagent-physical-desc-opaque
+  flavor: bitter
+  color: "#9B2D30"
+
+- type: reagent
+  id: NCPharmaSubstrateMicrobial
+  name: reagent-name-nc-pharma-substrate-microbial
+  group: Biological
+  desc: reagent-desc-nc-pharma-substrate-microbial
+  physicalDesc: reagent-physical-desc-viscous
+  flavor: bitter
+  color: "#5FA14C"
+
+- type: reagent
+  id: NCPharmaBrothMicrobial
+  name: reagent-name-nc-pharma-broth-microbial
+  group: Biological
+  desc: reagent-desc-nc-pharma-broth-microbial
+  physicalDesc: reagent-physical-desc-opaque
+  flavor: bitter
+  color: "#5FA14C"
+
+- type: reagent
+  id: NCPharmaSubstrateImmune
+  name: reagent-name-nc-pharma-substrate-immune
+  group: Biological
+  desc: reagent-desc-nc-pharma-substrate-immune
+  physicalDesc: reagent-physical-desc-viscous
+  flavor: bitter
+  color: "#4A90B8"
+
+- type: reagent
+  id: NCPharmaBrothImmune
+  name: reagent-name-nc-pharma-broth-immune
+  group: Biological
+  desc: reagent-desc-nc-pharma-broth-immune
+  physicalDesc: reagent-physical-desc-opaque
+  flavor: bitter
+  color: "#4A90B8"
+
+- type: reagent
+  id: NCPharmaSludge
+  name: reagent-name-nc-pharma-sludge
+  group: Biological
+  desc: reagent-desc-nc-pharma-sludge
+  physicalDesc: reagent-physical-desc-murky
+  flavor: bitter
+  color: "#3A2A1B"
+
+# Two parts of a substrate and one part of ethanol, kept warm, give a broth of the substrate's kind and a little residue.
+- type: reaction
+  id: NCPharmaBrewNeuro
+  minTemp: 330
+  maxTemp: 380
+  reactants:
+    NCPharmaSubstrateNeuro:
+      amount: 2
+    Ethanol:
+      amount: 1
+  products:
+    NCPharmaBrothNeuro: 2.7
+    NCPharmaImpurity: 0.3
+
+- type: reaction
+  id: NCPharmaBrewCardio
+  minTemp: 330
+  maxTemp: 380
+  reactants:
+    NCPharmaSubstrateCardio:
+      amount: 2
+    Ethanol:
+      amount: 1
+  products:
+    NCPharmaBrothCardio: 2.7
+    NCPharmaImpurity: 0.3
+
+- type: reaction
+  id: NCPharmaBrewHemato
+  minTemp: 330
+  maxTemp: 380
+  reactants:
+    NCPharmaSubstrateHemato:
+      amount: 2
+    Ethanol:
+      amount: 1
+  products:
+    NCPharmaBrothHemato: 2.7
+    NCPharmaImpurity: 0.3
+
+- type: reaction
+  id: NCPharmaBrewMicrobial
+  minTemp: 330
+  maxTemp: 380
+  reactants:
+    NCPharmaSubstrateMicrobial:
+      amount: 2
+    Ethanol:
+      amount: 1
+  products:
+    NCPharmaBrothMicrobial: 2.7
+    NCPharmaImpurity: 0.3
+
+- type: reaction
+  id: NCPharmaBrewImmune
+  minTemp: 330
+  maxTemp: 380
+  reactants:
+    NCPharmaSubstrateImmune:
+      amount: 2
+    Ethanol:
+      amount: 1
+  products:
+    NCPharmaBrothImmune: 2.7
+    NCPharmaImpurity: 0.3
+
+# --- Source material: what the extractor pours into a canister -----------------------------------------------------
+
+- type: reagent
+  id: NCPharmaSourceNeuro
+  name: reagent-name-nc-pharma-source-neuro
+  group: Biological
+  desc: reagent-desc-nc-pharma-source-neuro
+  physicalDesc: reagent-physical-desc-viscous
+  flavor: bitter
+  color: "#8E6BB5"
+
+- type: reagent
+  id: NCPharmaSourceCardio
+  name: reagent-name-nc-pharma-source-cardio
+  group: Biological
+  desc: reagent-desc-nc-pharma-source-cardio
+  physicalDesc: reagent-physical-desc-viscous
+  flavor: bitter
+  color: "#C2455A"
+
+- type: reagent
+  id: NCPharmaSourceHemato
+  name: reagent-name-nc-pharma-source-hemato
+  group: Biological
+  desc: reagent-desc-nc-pharma-source-hemato
+  physicalDesc: reagent-physical-desc-viscous
+  flavor: bitter
+  color: "#9B2D30"
+
+- type: reagent
+  id: NCPharmaSourceMicrobial
+  name: reagent-name-nc-pharma-source-microbial
+  group: Biological
+  desc: reagent-desc-nc-pharma-source-microbial
+  physicalDesc: reagent-physical-desc-viscous
+  flavor: bitter
+  color: "#5FA14C"
+
+- type: reagent
+  id: NCPharmaSourceImmune
+  name: reagent-name-nc-pharma-source-immune
+  group: Biological
+  desc: reagent-desc-nc-pharma-source-immune
+  physicalDesc: reagent-physical-desc-viscous
+  flavor: bitter
+  color: "#4A90B8"
+
+# A neutral filler. It dilutes whatever it is mixed into and does nothing else.
+- type: reagent
+  id: NCPharmaImpurity
+  name: reagent-name-nc-pharma-impurity
+  group: Biological
+  desc: reagent-desc-nc-pharma-impurity
+  physicalDesc: reagent-physical-desc-murky
+  flavor: bitter
+  color: "#6B6F57"
+
+# --- Substrate is made, not found: warm organic matter and one reagent of the kind's own chemistry -----------------
+
+- type: reaction
+  id: NCPharmaMakeSubstrateNeuro
+  minTemp: 310
+  maxTemp: 340
+  reactants:
+    Protein:
+      amount: 2
+    Lithium:
+      amount: 1
+    Phosphorus:
+      amount: 1
+  products:
+    NCPharmaSubstrateNeuro: 4
+
+- type: reaction
+  id: NCPharmaMakeSubstrateCardio
+  minTemp: 310
+  maxTemp: 340
+  reactants:
+    Blood:
+      amount: 2
+    Potassium:
+      amount: 1
+    Sugar:
+      amount: 1
+  products:
+    NCPharmaSubstrateCardio: 4
+
+- type: reaction
+  id: NCPharmaMakeSubstrateHemato
+  minTemp: 310
+  maxTemp: 340
+  reactants:
+    Blood:
+      amount: 2
+    Iron:
+      amount: 1
+    Protein:
+      amount: 1
+  products:
+    NCPharmaSubstrateHemato: 4
+
+- type: reaction
+  id: NCPharmaMakeSubstrateMicrobial
+  minTemp: 310
+  maxTemp: 340
+  reactants:
+    Nutriment:
+      amount: 2
+    Sugar:
+      amount: 1
+    Ammonia:
+      amount: 1
+  products:
+    NCPharmaSubstrateMicrobial: 4
+
+- type: reaction
+  id: NCPharmaMakeSubstrateImmune
+  minTemp: 310
+  maxTemp: 340
+  reactants:
+    Protein:
+      amount: 2
+    Nutriment:
+      amount: 1
+    Sodium:
+      amount: 1
+  products:
+    NCPharmaSubstrateImmune: 4
+
+# Overheat a broth and it spoils into sludge, which later ends up as contamination in the extract.
+- type: reaction
+  id: NCPharmaSpoilNeuro
+  minTemp: 400
+  reactants:
+    NCPharmaBrothNeuro:
+      amount: 1
+  products:
+    NCPharmaSludge: 1
+
+- type: reaction
+  id: NCPharmaSpoilCardio
+  minTemp: 400
+  reactants:
+    NCPharmaBrothCardio:
+      amount: 1
+  products:
+    NCPharmaSludge: 1
+
+- type: reaction
+  id: NCPharmaSpoilHemato
+  minTemp: 400
+  reactants:
+    NCPharmaBrothHemato:
+      amount: 1
+  products:
+    NCPharmaSludge: 1
+
+- type: reaction
+  id: NCPharmaSpoilMicrobial
+  minTemp: 400
+  reactants:
+    NCPharmaBrothMicrobial:
+      amount: 1
+  products:
+    NCPharmaSludge: 1
+
+- type: reaction
+  id: NCPharmaSpoilImmune
+  minTemp: 400
+  reactants:
+    NCPharmaBrothImmune:
+      amount: 1
+  products:
+    NCPharmaSludge: 1
+
+- type: entity
+  parent: Jug
+  id: NCPharmaSubstrateNeuroJug
+  suffix: substrate
+  components:
+  - type: Label
+    localizedLabel: reagent-name-nc-pharma-substrate-neuro
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCPharmaSubstrateNeuro
+        Quantity: 150
+
+- type: entity
+  parent: Jug
+  id: NCPharmaSubstrateCardioJug
+  suffix: substrate
+  components:
+  - type: Label
+    localizedLabel: reagent-name-nc-pharma-substrate-cardio
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCPharmaSubstrateCardio
+        Quantity: 150
+
+- type: entity
+  parent: Jug
+  id: NCPharmaSubstrateHematoJug
+  suffix: substrate
+  components:
+  - type: Label
+    localizedLabel: reagent-name-nc-pharma-substrate-hemato
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCPharmaSubstrateHemato
+        Quantity: 150
+
+- type: entity
+  parent: Jug
+  id: NCPharmaSubstrateMicrobialJug
+  suffix: substrate
+  components:
+  - type: Label
+    localizedLabel: reagent-name-nc-pharma-substrate-microbial
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCPharmaSubstrateMicrobial
+        Quantity: 150
+
+- type: entity
+  parent: Jug
+  id: NCPharmaSubstrateImmuneJug
+  suffix: substrate
+  components:
+  - type: Label
+    localizedLabel: reagent-name-nc-pharma-substrate-immune
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCPharmaSubstrateImmune
+        Quantity: 150
+
+# --- Raw material of each kind: a jug of broth, diluted and spoiled the way the supplier made it -------------------------
+
+- type: entity
+  parent: NCPharmaRawBiomass
+  id: NCPharmaRawBiomassNeuro
+  components:
+  - type: Label
+    localizedLabel: reagent-name-nc-pharma-broth-neuro
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCPharmaBrothNeuro
+        Quantity: 50
+      - ReagentId: NCPharmaImpurity
+        Quantity: 22
+      - ReagentId: NCPharmaSludge
+        Quantity: 5
+
+- type: entity
+  parent: NCPharmaRawCorporateStock
+  id: NCPharmaRawCorporateNeuro
+  components:
+  - type: Label
+    localizedLabel: reagent-name-nc-pharma-broth-neuro
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCPharmaBrothNeuro
+        Quantity: 40
+      - ReagentId: NCPharmaImpurity
+        Quantity: 4
+
+- type: entity
+  parent: NCPharmaRawBiomass
+  id: NCPharmaRawBiomassCardio
+  components:
+  - type: Label
+    localizedLabel: reagent-name-nc-pharma-broth-cardio
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCPharmaBrothCardio
+        Quantity: 50
+      - ReagentId: NCPharmaImpurity
+        Quantity: 22
+      - ReagentId: NCPharmaSludge
+        Quantity: 5
+
+- type: entity
+  parent: NCPharmaRawCorporateStock
+  id: NCPharmaRawCorporateCardio
+  components:
+  - type: Label
+    localizedLabel: reagent-name-nc-pharma-broth-cardio
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCPharmaBrothCardio
+        Quantity: 40
+      - ReagentId: NCPharmaImpurity
+        Quantity: 4
+
+- type: entity
+  parent: NCPharmaRawBiomass
+  id: NCPharmaRawBiomassHemato
+  components:
+  - type: Label
+    localizedLabel: reagent-name-nc-pharma-broth-hemato
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCPharmaBrothHemato
+        Quantity: 50
+      - ReagentId: NCPharmaImpurity
+        Quantity: 22
+      - ReagentId: NCPharmaSludge
+        Quantity: 5
+
+- type: entity
+  parent: NCPharmaRawCorporateStock
+  id: NCPharmaRawCorporateHemato
+  components:
+  - type: Label
+    localizedLabel: reagent-name-nc-pharma-broth-hemato
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCPharmaBrothHemato
+        Quantity: 40
+      - ReagentId: NCPharmaImpurity
+        Quantity: 4
+
+- type: entity
+  parent: NCPharmaRawBiomass
+  id: NCPharmaRawBiomassMicrobial
+  components:
+  - type: Label
+    localizedLabel: reagent-name-nc-pharma-broth-microbial
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCPharmaBrothMicrobial
+        Quantity: 50
+      - ReagentId: NCPharmaImpurity
+        Quantity: 22
+      - ReagentId: NCPharmaSludge
+        Quantity: 5
+
+- type: entity
+  parent: NCPharmaRawCorporateStock
+  id: NCPharmaRawCorporateMicrobial
+  components:
+  - type: Label
+    localizedLabel: reagent-name-nc-pharma-broth-microbial
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCPharmaBrothMicrobial
+        Quantity: 40
+      - ReagentId: NCPharmaImpurity
+        Quantity: 4
+
+- type: entity
+  parent: NCPharmaRawBiomass
+  id: NCPharmaRawBiomassImmune
+  components:
+  - type: Label
+    localizedLabel: reagent-name-nc-pharma-broth-immune
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCPharmaBrothImmune
+        Quantity: 50
+      - ReagentId: NCPharmaImpurity
+        Quantity: 22
+      - ReagentId: NCPharmaSludge
+        Quantity: 5
+
+- type: entity
+  parent: NCPharmaRawCorporateStock
+  id: NCPharmaRawCorporateImmune
+  components:
+  - type: Label
+    localizedLabel: reagent-name-nc-pharma-broth-immune
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCPharmaBrothImmune
+        Quantity: 40
+      - ReagentId: NCPharmaImpurity
+        Quantity: 4
+
+# --- Stock for brewing substrate ----------------------------------------------------------------------------------
+# Organic matter comes in jugs; the rest of a recipe is chemistry from the dispenser, and blood from the blood bank.
+- type: entity
+  parent: Jug
+  id: NCPharmaProteinJug
+  suffix: protein stock
+  components:
+  - type: Label
+    localizedLabel: reagent-name-protein
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: Protein
+        Quantity: 150
+
+- type: entity
+  parent: Jug
+  id: NCPharmaNutrientJug
+  suffix: nutrient stock
+  components:
+  - type: Label
+    localizedLabel: reagent-name-nutriment
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: Nutriment
+        Quantity: 150

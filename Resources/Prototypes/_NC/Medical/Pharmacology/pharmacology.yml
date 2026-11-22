@@ -34,6 +34,9 @@
 - type: ncDrugProfile
   id: NCDrugTraumaAnalgesic
   category: Analgesic
+  feedstock: NCFeedstockNeuro
+  alternateFeedstocks:
+    NCFeedstockImmune: 0.5
   dependence: NCDependenceAnalgesic
   maximumConcentration: 30
   removalConcentration: 0.05
@@ -48,6 +51,9 @@
   sedationAtTherapeutic: 0.15
   overdoseBurdenPerSecondAtMaximum: 1.2
   interactions:
+    NCDrugEuphoric:
+      therapeuticMultiplier: 1
+      toxicityMultiplier: 1.4
     NCDrugSedative:
       therapeuticMultiplier: 1
       toxicityMultiplier: 1.25
@@ -55,6 +61,9 @@
 - type: ncDrugProfile
   id: NCDrugSurgicalAnesthetic
   category: Anesthetic
+  feedstock: NCFeedstockNeuro
+  alternateFeedstocks:
+    NCFeedstockCardio: 0.4
   maximumConcentration: 30
   removalConcentration: 0.05
   minimumEffectiveConcentration: 1
@@ -81,6 +90,9 @@
 - type: ncDrugProfile
   id: NCDrugSedative
   category: Sedative
+  feedstock: NCFeedstockNeuro
+  alternateFeedstocks:
+    NCFeedstockImmune: 0.5
   dependence: NCDependenceSedative
   maximumConcentration: 30
   removalConcentration: 0.05
@@ -97,6 +109,9 @@
   respiratoryTransferMultiplierAtTherapeutic: 0.85
   overdoseBurdenPerSecondAtMaximum: 1.5
   interactions:
+    NCDrugEuphoric:
+      therapeuticMultiplier: 1.1
+      toxicityMultiplier: 1.5
     NCDrugSedationReversal:
       therapeuticMultiplier: 0.45
       toxicityMultiplier: 0.7
@@ -116,6 +131,9 @@
 - type: ncDrugProfile
   id: NCDrugVasopressor
   category: Vasopressor
+  feedstock: NCFeedstockCardio
+  alternateFeedstocks:
+    NCFeedstockNeuro: 0.6
   maximumConcentration: 25
   removalConcentration: 0.05
   minimumEffectiveConcentration: 0.75
@@ -138,6 +156,9 @@
 - type: ncDrugProfile
   id: NCDrugAntiarrhythmic
   category: Antiarrhythmic
+  feedstock: NCFeedstockCardio
+  alternateFeedstocks:
+    NCFeedstockNeuro: 0.5
   maximumConcentration: 25
   removalConcentration: 0.05
   minimumEffectiveConcentration: 0.75
@@ -158,6 +179,9 @@
 - type: ncDrugProfile
   id: NCDrugRespiratoryStimulant
   category: RespiratoryStimulant
+  feedstock: NCFeedstockNeuro
+  alternateFeedstocks:
+    NCFeedstockCardio: 0.6
   maximumConcentration: 25
   removalConcentration: 0.05
   minimumEffectiveConcentration: 0.75
@@ -178,6 +202,9 @@
 - type: ncDrugProfile
   id: NCDrugBroadAntibiotic
   category: Antibiotic
+  feedstock: NCFeedstockMicrobial
+  alternateFeedstocks:
+    NCFeedstockImmune: 0.5
   maximumConcentration: 30
   removalConcentration: 0.05
   minimumEffectiveConcentration: 1
@@ -193,6 +220,9 @@
 - type: ncDrugProfile
   id: NCDrugAntitoxin
   category: Antitoxin
+  feedstock: NCFeedstockImmune
+  alternateFeedstocks:
+    NCFeedstockMicrobial: 0.6
   maximumConcentration: 30
   removalConcentration: 0.05
   minimumEffectiveConcentration: 1
@@ -208,6 +238,9 @@
 - type: ncDrugProfile
   id: NCDrugImmunosuppressant
   category: Immunosuppressant
+  feedstock: NCFeedstockImmune
+  alternateFeedstocks:
+    NCFeedstockMicrobial: 0.6
   maximumConcentration: 30
   removalConcentration: 0.05
   minimumEffectiveConcentration: 1
@@ -223,6 +256,9 @@
 - type: ncDrugProfile
   id: NCDrugProcoagulant
   category: Procoagulant
+  feedstock: NCFeedstockHemato
+  alternateFeedstocks:
+    NCFeedstockImmune: 0.6
   maximumConcentration: 25
   removalConcentration: 0.05
   minimumEffectiveConcentration: 0.75
@@ -242,6 +278,9 @@
 - type: ncDrugProfile
   id: NCDrugStimulant
   category: Stimulant
+  feedstock: NCFeedstockNeuro
+  alternateFeedstocks:
+    NCFeedstockCardio: 0.5
   dependence: NCDependenceStimulant
   maximumConcentration: 25
   removalConcentration: 0.05
@@ -257,6 +296,9 @@
   respiratoryTransferMultiplierAtTherapeutic: 1.1
   overdoseBurdenPerSecondAtMaximum: 1.8
   interactions:
+    NCDrugSocial:
+      therapeuticMultiplier: 1
+      toxicityMultiplier: 1.4
     NCDrugStimulantReversal:
       therapeuticMultiplier: 0.45
       toxicityMultiplier: 0.7
@@ -267,6 +309,9 @@
 - type: ncDrugProfile
   id: NCDrugAnticoagulant
   category: Anticoagulant
+  feedstock: NCFeedstockHemato
+  alternateFeedstocks:
+    NCFeedstockImmune: 0.6
   maximumConcentration: 25
   removalConcentration: 0.05
   minimumEffectiveConcentration: 0.75
@@ -286,6 +331,9 @@
 - type: ncDrugProfile
   id: NCDrugVasodilator
   category: Vasodilator
+  feedstock: NCFeedstockCardio
+  alternateFeedstocks:
+    NCFeedstockNeuro: 0.6
   maximumConcentration: 25
   removalConcentration: 0.05
   minimumEffectiveConcentration: 0.75
@@ -305,6 +353,9 @@
 - type: ncDrugProfile
   id: NCDrugSyntheticOxygenCarrier
   category: SyntheticOxygenCarrier
+  feedstock: NCFeedstockHemato
+  alternateFeedstocks:
+    NCFeedstockCardio: 0.5
   maximumConcentration: 30
   removalConcentration: 0.05
   minimumEffectiveConcentration: 1

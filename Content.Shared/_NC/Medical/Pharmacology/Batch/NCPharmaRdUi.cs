@@ -17,27 +17,69 @@ public enum NCPharmaRdUiKey : byte
 public sealed class NCPharmaRdState(
     NCPharmaFormulaSummary[] formulas,
     NCPharmaJournalSummary[] journal,
-    NCPharmaRdNotice notice) : BoundUserInterfaceState
+    NCPharmaRdNotice notice,
+    string[] cores,
+    NCPharmaNodeKnowledge[] knowledge,
+    bool hasBeaker,
+    NCPharmaReagentAmount[] beaker,
+    bool hasChip,
+    int researched) : BoundUserInterfaceState
 {
     public readonly NCPharmaFormulaSummary[] Formulas = formulas;
     public readonly NCPharmaJournalSummary[] Journal = journal;
     public readonly NCPharmaRdNotice Notice = notice;
+
+    /// <summary>Compounds the laboratory may build a formula on: identified ones that some formula already uses.</summary>
+    public readonly string[] Cores = cores;
+
+    /// <summary>What the laboratory knows about each node. Anything not listed is unknown.</summary>
+    public readonly NCPharmaNodeKnowledge[] Knowledge = knowledge;
+
+    /// <summary>Whether a beaker stands in the console's reagent slot.</summary>
+    public readonly bool HasBeaker = hasBeaker;
+
+    /// <summary>What the beaker holds. Inventing a compound spends ingredients from it.</summary>
+    public readonly NCPharmaReagentAmount[] Beaker = beaker;
+
+    /// <summary>Whether a research chip stands in the console. Without one nothing is studied.</summary>
+    public readonly bool HasChip = hasChip;
+
+    /// <summary>How many nodes of the tree the chip has studied.</summary>
+    public readonly int Researched = researched;
 }
 
-/// <summary>Develops a new experimental version of a formula. The server revalidates every field.</summary>
+/// <summary>
+/// Invents a compound from two or three ingredient reagents in the console's beaker. The server checks that the
+/// beaker holds enough of each, spends it and returns the new compound as an experimental formula.
+/// </summary>
 [Serializable, NetSerializable]
-public sealed class NCPharmaRdDeriveMessage(
-    string parent,
-    string name,
+public sealed class NCPharmaRdInventMessage(string[] ingredients) : BoundUserInterfaceMessage
+{
+    public readonly string[] Ingredients = ingredients;
+}
+
+/// <summary>
+/// Builds a formula from the tree: one or two cores, a delivery form, a concentration, up to two modifiers and
+/// a production mode. The parent only says which line the result continues; the name is never typed by the
+/// player. The server revalidates every field.
+/// </summary>
+[Serializable, NetSerializable]
+public sealed class NCPharmaRdComposeMessage(
+    string? parent,
+    string firstCore,
+    string? secondCore,
     string deliveryForm,
     float concentration,
-    string[] modifiers) : BoundUserInterfaceMessage
+    string[] modifiers,
+    string profile) : BoundUserInterfaceMessage
 {
-    public readonly string Parent = parent;
-    public readonly string Name = name;
+    public readonly string? Parent = parent;
+    public readonly string FirstCore = firstCore;
+    public readonly string? SecondCore = secondCore;
     public readonly string DeliveryForm = deliveryForm;
     public readonly float Concentration = concentration;
     public readonly string[] Modifiers = modifiers;
+    public readonly string Profile = profile;
 }
 
 /// <summary>Moves a verified experimental version to regular production.</summary>

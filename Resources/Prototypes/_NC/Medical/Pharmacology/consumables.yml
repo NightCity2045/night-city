@@ -1,0 +1,103 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Process consumables are real chemistry containers: vials built on the ordinary chemistry vial, so they can be
+# opened and closed, poured out, topped up and moved with the usual tools. Stations draw the reagent out of them.
+
+- type: reagent
+  id: NCPharmaCatalyst
+  name: reagent-name-nc-pharma-catalyst
+  group: Biological
+  desc: reagent-desc-nc-pharma-catalyst
+  physicalDesc: reagent-physical-desc-viscous
+  flavor: bitter
+  color: "#E0A94B"
+
+- type: reagent
+  id: NCPharmaStabilizer
+  name: reagent-name-nc-pharma-stabilizer
+  group: Biological
+  desc: reagent-desc-nc-pharma-stabilizer
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: bitter
+  color: "#6FB6D9"
+
+- type: entity
+  parent: ChemistryEmptyVial
+  id: NCPharmaCatalystVial
+  suffix: catalyst
+  components:
+  - type: Label
+    localizedLabel: reagent-name-nc-pharma-catalyst
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCPharmaCatalyst
+        Quantity: 10
+  - type: Tag
+    tags:
+    - CentrifugeCompatible
+
+- type: entity
+  parent: ChemistryEmptyVial
+  id: NCPharmaStabilizerVial
+  suffix: stabilizer
+  components:
+  - type: Label
+    localizedLabel: reagent-name-nc-pharma-stabilizer
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCPharmaStabilizer
+        Quantity: 15
+  - type: Tag
+    tags:
+    - CentrifugeCompatible
+
+# --- Waste -----------------------------------------------------------------------------------------------------
+# Machines pour their hazardous waste into the canister in their waste slot, and a canister is an ordinary jug.
+
+- type: Tag
+  id: NCPharmaWasteCanister
+
+- type: reagent
+  id: NCPharmaWaste
+  name: reagent-name-nc-pharma-waste
+  group: Toxins
+  desc: reagent-desc-nc-pharma-waste
+  physicalDesc: reagent-physical-desc-murky
+  flavor: bitter
+  color: "#4A3B2A"
+  metabolisms:
+    Bloodstream:
+      effects:
+      - !type:HealthChange
+        damage:
+          types:
+            Poison: 2
+
+- type: entity
+  parent: Jug
+  id: NCPharmaWasteCanister
+  components:
+  - type: Solution
+    solution:
+      maxVol: 60
+  - type: Tag
+    tags:
+    - NCPharmaWasteCanister
+  - type: NCPharmaWasteCanister
+
+# --- Samples ---------------------------------------------------------------------------------------------------
+# A sample is a real fluid in a real vial. Pour it out and the laboratory has nothing to read.
+
+- type: reagent
+  id: NCLabSampleFluid
+  name: reagent-name-nc-lab-sample-fluid
+  group: Biological
+  desc: reagent-desc-nc-lab-sample-fluid
+  physicalDesc: reagent-physical-desc-opaque
+  flavor: bitter
+  color: "#B04A55"
+

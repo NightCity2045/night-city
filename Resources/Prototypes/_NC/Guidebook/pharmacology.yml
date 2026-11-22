@@ -56,3 +56,8 @@
   id: NCPharmaWalkthroughGuide
   name: guide-entry-nc-pharma-walkthrough
   text: "/ServerInfo/Guidebook/_NC/Medical/Pharma/Walkthrough.xml"
+
+- type: guideEntry
+  id: NCPharmaBuildGuide
+  name: guide-entry-nc-pharma-build
+  text: "/ServerInfo/Guidebook/_NC/Medical/Pharma/Build.xml"
