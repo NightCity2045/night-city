@@ -52,7 +52,7 @@ public sealed partial class NCPharmaExtractorComponent : Component
     public string Slot = "material";
 
     [DataField]
-    public TimeSpan Duration = TimeSpan.FromSeconds(15);
+    public TimeSpan Duration = TimeSpan.FromSeconds(30);
 
     /// <summary>Share of the raw units that ends up in the extract.</summary>
     [DataField]
@@ -110,7 +110,7 @@ public sealed partial class NCPharmaTreatmentStationComponent : Component
     public NCPharmaTreatment Treatment;
 
     [DataField]
-    public TimeSpan Duration = TimeSpan.FromSeconds(25);
+    public TimeSpan Duration = TimeSpan.FromSeconds(60);
 
     /// <summary>Share of the gap to the quality ceiling this treatment closes.</summary>
     [DataField]
@@ -131,7 +131,7 @@ public sealed partial class NCPharmaFillingStationComponent : Component
     public string Slot = "pack";
 
     [DataField]
-    public TimeSpan Duration = TimeSpan.FromSeconds(10);
+    public TimeSpan Duration = TimeSpan.FromSeconds(20);
 
     [DataField]
     public int DosesPerPack = 1;

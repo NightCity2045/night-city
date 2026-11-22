@@ -1214,3 +1214,31 @@
   baseStability: 0.86
   reaction: NCPharmaReactionStable
   regulatoryStatus: ClinicalOnly
+
+# --- Process consumables -------------------------------------------------------------------------------------
+- type: entity
+  parent: BaseItem
+  id: NCPharmaCatalystVial
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Chemistry/vial.rsi
+    state: vial
+    color: "#E0A94B"
+  - type: Item
+    size: Tiny
+    sprite: Objects/Specific/Chemistry/vial.rsi
+  - type: NCPharmaCatalyst
+    charges: 2
+
+- type: entity
+  parent: BaseItem
+  id: NCPharmaStabilizerVial
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Chemistry/vial.rsi
+    state: vial
+    color: "#6FB6D9"
+  - type: Item
+    size: Tiny
+    sprite: Objects/Specific/Chemistry/vial.rsi
+  - type: NCPharmaAdditive

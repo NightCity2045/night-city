@@ -408,6 +408,11 @@ public sealed partial class NCPharmaRdWindow : FancyWindow
                 lines.Add(Loc.GetString("nc-pharma-rd-effect-local"));
             if (modifier.MaskingStrength > 0f)
                 lines.Add(Loc.GetString("nc-pharma-rd-effect-masking"));
+            if (modifier.RequiredItem is { } required)
+            {
+                var itemName = _prototypes.TryIndex<EntityPrototype>(required.Id, out var entity) ? entity.Name : required.Id;
+                lines.Add(Loc.GetString("nc-pharma-rd-effect-requires", ("item", itemName)));
+            }
         }
         else if (node.StartsWith("form:", StringComparison.Ordinal) && _prototypes.TryIndex<NCPharmaDeliveryFormPrototype>(node[5..], out var form))
         {

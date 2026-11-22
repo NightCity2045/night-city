@@ -18,6 +18,8 @@
         - id: NCPharmaRawBiomassMicrobial
         - id: NCPharmaFilterCartridge
           amount: 2
+        - id: NCPharmaCatalystVial
+        - id: NCPharmaStabilizerVial
         - id: NCPharmaWasteCanister
           amount: 4
         - id: NCLabSampleVial
@@ -37,6 +39,10 @@
         - id: NCPharmaRawCorporateMicrobial
         - id: NCPharmaRawCorporateImmune
         - id: NCPharmaFilterCartridge
+          amount: 2
+        - id: NCPharmaCatalystVial
+          amount: 2
+        - id: NCPharmaStabilizerVial
           amount: 2
         - id: NCPharmaWasteCanister
           amount: 4

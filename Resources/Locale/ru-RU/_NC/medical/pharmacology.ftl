@@ -35,61 +35,47 @@ nc-reagent-desc-cyberware-coolant-agent = Циркулирует через со
 
 # Предзаполненные шприцы
 
-ent-NCSyringeTraumaAnalgesic = шприц с травматологическим анальгетиком
-    .desc = { nc-reagent-desc-trauma-analgesic }
-    .suffix = { "" }
+ent-NCSyringeTraumaAnalgesic = автоинъектор травматологического анальгетика
+    .desc = { nc-pharma-formula-trauma-analgesic-desc }
 
-ent-NCSyringeSurgicalAnesthetic = шприц с хирургическим анестетиком
-    .desc = { nc-reagent-desc-surgical-anesthetic }
-    .suffix = { "" }
+ent-NCSyringeSurgicalAnesthetic = капельница с хирургическим анестетиком
+    .desc = { nc-pharma-formula-surgical-anesthetic-desc }
 
-ent-NCSyringeSedative = шприц с клиническим седативом
-    .desc = { nc-reagent-desc-sedative }
-    .suffix = { "" }
+ent-NCSyringeSedative = капельница с седативным
+    .desc = { nc-pharma-formula-sedative-desc }
 
-ent-NCSyringeVasopressor = шприц с вазопрессором
-    .desc = { nc-reagent-desc-vasopressor }
-    .suffix = { "" }
+ent-NCSyringeVasopressor = автоинъектор вазопрессора
+    .desc = { nc-pharma-formula-vasopressor-autoinjector-desc }
 
-ent-NCSyringeAntiarrhythmic = шприц с антиаритмиком
-    .desc = { nc-reagent-desc-antiarrhythmic }
-    .suffix = { "" }
+ent-NCSyringeAntiarrhythmic = капельница с антиаритмиком
+    .desc = { nc-pharma-formula-antiarrhythmic-desc }
 
-ent-NCSyringeRespiratoryStimulant = шприц со стимулятором дыхания
-    .desc = { nc-reagent-desc-respiratory-stimulant }
-    .suffix = { "" }
+ent-NCSyringeRespiratoryStimulant = автоинъектор респираторного стимулятора
+    .desc = { nc-pharma-formula-respiratory-stimulant-desc }
 
-ent-NCSyringeBroadAntibiotic = шприц с антибиотиком широкого спектра
-    .desc = { nc-reagent-desc-broad-antibiotic }
-    .suffix = { "" }
+ent-NCSyringeBroadAntibiotic = капельница с антибиотиком широкого спектра
+    .desc = { nc-pharma-formula-broad-antibiotic-desc }
 
-ent-NCSyringeAntitoxin = шприц с системным антитоксином
-    .desc = { nc-reagent-desc-antitoxin }
-    .suffix = { "" }
+ent-NCSyringeAntitoxin = автоинъектор антитоксина
+    .desc = { nc-pharma-formula-antitoxin-desc }
 
-ent-NCSyringeImmunosuppressant = шприц с иммунодепрессантом
-    .desc = { nc-reagent-desc-immunosuppressant }
-    .suffix = { "" }
+ent-NCSyringeImmunosuppressant = капельница с иммуносупрессантом
+    .desc = { nc-pharma-formula-immunosuppressant-desc }
 
-ent-NCSyringeProcoagulant = шприц с прокоагулянтом
-    .desc = { nc-reagent-desc-procoagulant }
-    .suffix = { "" }
+ent-NCSyringeProcoagulant = автоинъектор прокоагулянта
+    .desc = { nc-pharma-formula-procoagulant-desc }
 
-ent-NCSyringeStimulant = шприц с клиническим стимулятором
-    .desc = { nc-reagent-desc-stimulant }
-    .suffix = { "" }
+ent-NCSyringeStimulant = автоинъектор полевого стимулятора
+    .desc = { nc-pharma-formula-field-stimulant-desc }
 
-ent-NCSyringeAnticoagulant = шприц с антикоагулянтом
-    .desc = { nc-reagent-desc-anticoagulant }
-    .suffix = { "" }
+ent-NCSyringeAnticoagulant = капельница с антикоагулянтом
+    .desc = { nc-pharma-formula-anticoagulant-desc }
 
-ent-NCSyringeVasodilator = шприц с вазодилататором
-    .desc = { nc-reagent-desc-vasodilator }
-    .suffix = { "" }
+ent-NCSyringeVasodilator = капельница с вазодилататором
+    .desc = { nc-pharma-formula-vasodilator-desc }
 
-ent-NCSyringeSyntheticOxygenCarrier = шприц с синтетическим переносчиком кислорода
-    .desc = { nc-reagent-desc-synthetic-oxygen-carrier }
-    .suffix = { "" }
+ent-NCSyringeSyntheticOxygenCarrier = пакет синтетической крови
+    .desc = { nc-pharma-formula-synthetic-blood-desc }
 
 ent-NCSyringeCyberwareCoolantAgent = шприц с охлаждающим агентом для киберимплантов
     .desc = { nc-reagent-desc-cyberware-coolant-agent }

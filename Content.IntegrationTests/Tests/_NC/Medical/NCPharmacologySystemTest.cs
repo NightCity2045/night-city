@@ -158,8 +158,7 @@ public sealed class NCPharmacologySystemTest : GameTest
         Assert.Multiple(() =>
         {
             Assert.That(baseline, Is.EqualTo(100f));
-            // The dose also builds a little tolerance (6 per 0.01), which weakens the effect it is measured with.
-            Assert.That(SComp<NCPhysiologyComponent>(body).TotalPain, Is.EqualTo(29.5f).Within(0.01f));
+            Assert.That(SComp<NCPhysiologyComponent>(body).TotalPain, Is.EqualTo(25f).Within(0.001f));
             Assert.That(wounds.Wounds[woundId].Pain, Is.EqualTo(100f));
             Assert.That(wounds.Wounds, Has.Count.EqualTo(1));
             Assert.That(_scheduler.GetRemainingDelay(body), Is.GreaterThan(TimeSpan.Zero));

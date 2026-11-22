@@ -29,6 +29,7 @@ public sealed partial class NCPharmaStationWindow : FancyWindow
     private bool _busy;
     private bool _sourcePresent;
     private string? _sourceFeedstock;
+    private string? _additive;
 
     public event Action<string, string, int>? StartRequested;
 
@@ -65,6 +66,7 @@ public sealed partial class NCPharmaStationWindow : FancyWindow
     {
         _sourcePresent = state.SourcePresent;
         _sourceFeedstock = state.SourceFeedstock;
+        _additive = state.Additive;
         _sourceUnits = state.SourceUnits;
         UpdateFormulas(state.Formulas);
         _busy = state.Busy;
@@ -76,6 +78,11 @@ public sealed partial class NCPharmaStationWindow : FancyWindow
                 ("type", FeedstockName(state.SourceFeedstock)))
             : Loc.GetString("nc-pharma-station-source-missing");
         NoticeLabel.Text = NoticeText(state.Notice);
+        if (state.Notice == NCPharmaStationNotice.MissingAdditive && SelectedFormula() is { } needing &&
+            RequiredItem(needing) is { } missing)
+        {
+            NoticeLabel.Text = Loc.GetString("nc-pharma-station-notice-missing-additive", ("item", ItemName(missing)));
+        }
         Refresh();
     }
 
@@ -106,6 +113,21 @@ public sealed partial class NCPharmaStationWindow : FancyWindow
         id != null && _prototypes.TryIndex<NCPharmaFeedstockPrototype>(id, out var type)
             ? Loc.GetString(type.Name)
             : Loc.GetString("nc-pharma-feedstock-none");
+
+    /// <summary>The additive a formula uses up when it is produced, if one of its modifiers asks for it.</summary>
+    private string? RequiredItem(NCPharmaFormulaSummary formula)
+    {
+        foreach (var id in formula.Modifiers)
+        {
+            if (_prototypes.TryIndex<NCPharmaModifierPrototype>(id, out var modifier) && modifier.RequiredItem is { } item)
+                return item.Id;
+        }
+
+        return null;
+    }
+
+    private string ItemName(string prototypeId) =>
+        _prototypes.TryIndex<EntityPrototype>(prototypeId, out var entity) ? entity.Name : prototypeId;
 
     /// <summary>Share of doses the inserted material gives for the formula: 1 main, below 1 alternative, 0 unfit.</summary>
     private float SourceYield(NCPharmaFormulaSummary formula)
@@ -151,7 +173,8 @@ public sealed partial class NCPharmaStationWindow : FancyWindow
         var formula = SelectedFormula();
         var profile = SelectedProfile();
         StartButton.Disabled = _busy || !_sourcePresent || _sourceUnits < _units || formula == null || profile == null ||
-                               SourceYield(formula.Value) <= 0f;
+                               SourceYield(formula.Value) <= 0f ||
+                               (RequiredItem(formula.Value) is { } needed && needed != _additive);
         if (formula == null || profile == null)
             return;
 
@@ -192,7 +215,10 @@ public sealed partial class NCPharmaStationWindow : FancyWindow
                     : Loc.GetString("nc-pharma-station-feedstock-alternative",
                         ("type", FeedstockName(option.Id)), ("yield", option.Yield.ToString("P0")))))))
             : string.Empty;
-        return card + description + feedstocks;
+        var additive = RequiredItem(formula) is { } needed
+            ? "\n" + Loc.GetString("nc-pharma-station-additive-line", ("item", ItemName(needed)))
+            : string.Empty;
+        return card + description + feedstocks + additive;
     }
 
     private static string NoticeText(NCPharmaStationNotice notice) => notice switch

@@ -17,6 +17,10 @@ public sealed partial class NCPharmaSynthesizerComponent : Component
     [DataField]
     public string SourceSlot = "source";
 
+    /// <summary>Where a process additive such as a stabilizer vial is put.</summary>
+    [DataField]
+    public string AdditiveSlot = "additive";
+
     /// <summary>Sterility of the equipment, before the production mode scales it.</summary>
     [DataField]
     public float EquipmentSterility = 0.9f;

@@ -404,3 +404,14 @@ nc-pharma-feedstock-none = unknown
 nc-pharma-station-feedstock-line = Made from: {$types}.
 nc-pharma-station-feedstock-alternative = {$type} ({$yield} of the doses)
 nc-pharma-station-notice-wrong-feedstock = This material cannot make that formula.
+
+# --- Process consumables ------------------------------------------------------------------------------------
+ent-NCPharmaCatalystVial = catalyst vial
+    .desc = A vial of reaction catalyst. The thermoreactor takes it when a run starts; the operator can then add catalyst that many times.
+ent-NCPharmaStabilizerVial = stabilizer vial
+    .desc = A vial of stabilizer. A formula with the stabilizer modifier uses up one for every production run.
+nc-pharma-station-additive-slot = additive
+nc-pharma-reactor-catalyst-slot = catalyst
+nc-pharma-catalyst-examine = Catalyst charges: {$charges}.
+nc-pharma-station-notice-missing-additive = This formula needs {$item} in the additive slot.
+nc-pharma-station-additive-line = Uses up: {$item}.

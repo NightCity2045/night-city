@@ -48,6 +48,13 @@ public sealed partial class NCDrugDependenceState
     [DataField]
     public float Tolerance;
 
+    /// <summary>
+    /// Tolerance the last dose has earned but not yet applied. A dose never weakens itself: its tolerance takes
+    /// effect from the next dose on, so a single dose is always at full strength.
+    /// </summary>
+    [DataField]
+    public float PendingTolerance;
+
     [DataField]
     public float Dependence;
 
@@ -96,10 +103,12 @@ public static class NCDependenceMath
         if (!float.IsFinite(concentration) || concentration <= 0f)
             return;
 
+        // The tolerance of earlier doses applies now; this dose's own is held back until the next one.
         state.Tolerance = Math.Clamp(
-            state.Tolerance + concentration * profile.ToleranceGainPerConcentration,
+            state.Tolerance + state.PendingTolerance,
             0f,
             Math.Clamp(profile.MaximumTolerance, 0f, 0.95f));
+        state.PendingTolerance = concentration * profile.ToleranceGainPerConcentration;
         state.Dependence = Math.Clamp(state.Dependence + concentration * profile.DependenceGainPerConcentration, 0f, 1f);
         state.Craving = 0f;
         state.LastDose = now;
@@ -242,6 +251,7 @@ public static class NCDependenceMath
 
     public static bool Validate(NCDrugDependenceState state) =>
         IsRange(state.Tolerance, 0f, 1f) &&
+        IsRange(state.PendingTolerance, 0f, 1000f) &&
         IsRange(state.Dependence, 0f, 1f) &&
         IsRange(state.Craving, 0f, 1f) &&
         IsRange(state.Comedown, 0f, 1000f) &&

@@ -26,7 +26,7 @@ public sealed partial class NCPharmaPurifierComponent : Component
     public int FilterCharges = 10;
 
     [DataField]
-    public TimeSpan PassDuration = TimeSpan.FromSeconds(20);
+    public TimeSpan PassDuration = TimeSpan.FromSeconds(45);
 }
 
 /// <summary>A replacement filter for a purifier.</summary>

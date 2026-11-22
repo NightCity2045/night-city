@@ -340,3 +340,4 @@ nc-pharma-rd-effect-window = therapeutic {$therapeutic}, toxic {$toxic}
 nc-pharma-rd-forecast-unknown = No forecast: the delivery form or production mode is untested.
 nc-pharma-rd-forecast-excluded = The forecast leaves out untested nodes: {$nodes}. The real batch will include them.
 nc-pharma-rd-notice-same-core = The two cores must be different compounds.
+nc-pharma-rd-effect-requires = uses up {$item} per run

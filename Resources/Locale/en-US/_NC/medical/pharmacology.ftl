@@ -35,61 +35,47 @@ nc-reagent-desc-cyberware-coolant-agent = Circulates through compatible implants
 
 # Prefilled syringes
 
-ent-NCSyringeTraumaAnalgesic = trauma analgesic syringe
-    .desc = { nc-reagent-desc-trauma-analgesic }
-    .suffix = { "" }
+ent-NCSyringeTraumaAnalgesic = trauma analgesic autoinjector
+    .desc = { nc-pharma-formula-trauma-analgesic-desc }
 
-ent-NCSyringeSurgicalAnesthetic = surgical anesthetic syringe
-    .desc = { nc-reagent-desc-surgical-anesthetic }
-    .suffix = { "" }
+ent-NCSyringeSurgicalAnesthetic = surgical anesthetic IV bag
+    .desc = { nc-pharma-formula-surgical-anesthetic-desc }
 
-ent-NCSyringeSedative = clinical sedative syringe
-    .desc = { nc-reagent-desc-sedative }
-    .suffix = { "" }
+ent-NCSyringeSedative = sedative IV bag
+    .desc = { nc-pharma-formula-sedative-desc }
 
-ent-NCSyringeVasopressor = vasopressor syringe
-    .desc = { nc-reagent-desc-vasopressor }
-    .suffix = { "" }
+ent-NCSyringeVasopressor = vasopressor autoinjector
+    .desc = { nc-pharma-formula-vasopressor-autoinjector-desc }
 
-ent-NCSyringeAntiarrhythmic = antiarrhythmic syringe
-    .desc = { nc-reagent-desc-antiarrhythmic }
-    .suffix = { "" }
+ent-NCSyringeAntiarrhythmic = antiarrhythmic IV bag
+    .desc = { nc-pharma-formula-antiarrhythmic-desc }
 
-ent-NCSyringeRespiratoryStimulant = respiratory stimulant syringe
-    .desc = { nc-reagent-desc-respiratory-stimulant }
-    .suffix = { "" }
+ent-NCSyringeRespiratoryStimulant = respiratory stimulant autoinjector
+    .desc = { nc-pharma-formula-respiratory-stimulant-desc }
 
-ent-NCSyringeBroadAntibiotic = broad-spectrum antibiotic syringe
-    .desc = { nc-reagent-desc-broad-antibiotic }
-    .suffix = { "" }
+ent-NCSyringeBroadAntibiotic = broad-spectrum antibiotic IV bag
+    .desc = { nc-pharma-formula-broad-antibiotic-desc }
 
-ent-NCSyringeAntitoxin = systemic antitoxin syringe
-    .desc = { nc-reagent-desc-antitoxin }
-    .suffix = { "" }
+ent-NCSyringeAntitoxin = antitoxin autoinjector
+    .desc = { nc-pharma-formula-antitoxin-desc }
 
-ent-NCSyringeImmunosuppressant = immunosuppressant syringe
-    .desc = { nc-reagent-desc-immunosuppressant }
-    .suffix = { "" }
+ent-NCSyringeImmunosuppressant = immunosuppressant IV bag
+    .desc = { nc-pharma-formula-immunosuppressant-desc }
 
-ent-NCSyringeProcoagulant = procoagulant syringe
-    .desc = { nc-reagent-desc-procoagulant }
-    .suffix = { "" }
+ent-NCSyringeProcoagulant = procoagulant autoinjector
+    .desc = { nc-pharma-formula-procoagulant-desc }
 
-ent-NCSyringeStimulant = clinical stimulant syringe
-    .desc = { nc-reagent-desc-stimulant }
-    .suffix = { "" }
+ent-NCSyringeStimulant = field stimulant autoinjector
+    .desc = { nc-pharma-formula-field-stimulant-desc }
 
-ent-NCSyringeAnticoagulant = anticoagulant syringe
-    .desc = { nc-reagent-desc-anticoagulant }
-    .suffix = { "" }
+ent-NCSyringeAnticoagulant = anticoagulant IV bag
+    .desc = { nc-pharma-formula-anticoagulant-desc }
 
-ent-NCSyringeVasodilator = vasodilator syringe
-    .desc = { nc-reagent-desc-vasodilator }
-    .suffix = { "" }
+ent-NCSyringeVasodilator = vasodilator IV bag
+    .desc = { nc-pharma-formula-vasodilator-desc }
 
-ent-NCSyringeSyntheticOxygenCarrier = synthetic oxygen carrier syringe
-    .desc = { nc-reagent-desc-synthetic-oxygen-carrier }
-    .suffix = { "" }
+ent-NCSyringeSyntheticOxygenCarrier = synthetic blood bag
+    .desc = { nc-pharma-formula-synthetic-blood-desc }
 
 ent-NCSyringeCyberwareCoolantAgent = cyberware coolant agent syringe
     .desc = { nc-reagent-desc-cyberware-coolant-agent }

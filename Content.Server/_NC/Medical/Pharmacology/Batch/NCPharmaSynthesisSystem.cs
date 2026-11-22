@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using System.Linq;
 using Content.Shared._NC.Medical.Pharmacology.Batch;
 using Content.Shared.Containers.ItemSlots;
 using Content.Shared.Popups;
@@ -111,6 +112,18 @@ public sealed partial class NCPharmaSynthesisSystem : EntitySystem
         if (yield <= 0f)
             return NCPharmaStationNotice.WrongFeedstock;
 
+        // NC: a modifier may ask for an additive; the run uses one up when it starts.
+        var requiredItem = formula.Modifiers
+            .Select(modifier => _prototypes.TryIndex(modifier, out var found) ? found.RequiredItem : null)
+            .FirstOrDefault(item => item != null);
+        EntityUid? additive = null;
+        if (requiredItem != null)
+        {
+            additive = GetAdditive(station);
+            if (additive == null || MetaData(additive.Value).EntityPrototype?.ID != requiredItem.Value.Id)
+                return NCPharmaStationNotice.MissingAdditive;
+        }
+
         var inputs = new NCPharmaProductionInputs(
             units * yield,
             source.Purity,
@@ -123,6 +136,8 @@ public sealed partial class NCPharmaSynthesisSystem : EntitySystem
         Dirty(sourceUid, source);
         if (source.Units <= 0f)
             QueueDel(sourceUid);
+        if (additive is { } used)
+            QueueDel(used);
 
         var run = EnsureComp<NCPharmaSynthesisRunComponent>(station);
         run.Formula = formula.ID;
@@ -166,6 +181,14 @@ public sealed partial class NCPharmaSynthesisSystem : EntitySystem
         UpdateUi(station, NCPharmaStationNotice.Finished);
     }
 
+    private EntityUid? GetAdditive(Entity<NCPharmaSynthesizerComponent> station)
+    {
+        return _itemSlots.TryGetSlot(station, station.Comp.AdditiveSlot, out var slot) &&
+               slot.Item is { } item && HasComp<NCPharmaAdditiveComponent>(item)
+            ? item
+            : null;
+    }
+
     private bool TryGetSource(
         Entity<NCPharmaSynthesizerComponent> station,
         out EntityUid sourceUid,
@@ -207,6 +230,7 @@ public sealed partial class NCPharmaSynthesisSystem : EntitySystem
                 progress,
                 notice,
                 _batches.BuildFormulaSummaries(true),
-                hasSource ? source.Feedstock?.Id : null));
+                hasSource ? source.Feedstock?.Id : null,
+                GetAdditive(station) is { } slotted ? MetaData(slotted).EntityPrototype?.ID : null));
     }
 }

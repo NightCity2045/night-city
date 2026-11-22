@@ -21,6 +21,7 @@ public enum NCPharmaStationNotice : byte
     NotEnoughSource,
     InvalidRequest,
     WrongFeedstock,
+    MissingAdditive,
     ExperimentalLimit,
     Busy,
     Started,
@@ -41,7 +42,8 @@ public sealed class NCPharmaStationState(
     float progress,
     NCPharmaStationNotice notice,
     NCPharmaFormulaSummary[] formulas,
-    string? sourceFeedstock = null) : BoundUserInterfaceState
+    string? sourceFeedstock = null,
+    string? additive = null) : BoundUserInterfaceState
 {
     public readonly bool SourcePresent = sourcePresent;
     public readonly float SourceUnits = sourceUnits;
@@ -55,6 +57,9 @@ public sealed class NCPharmaStationState(
 
     /// <summary>The kind of raw material in the inserted canister, if any.</summary>
     public readonly string? SourceFeedstock = sourceFeedstock;
+
+    /// <summary>Prototype id of the additive in the additive slot, if any.</summary>
+    public readonly string? Additive = additive;
 }
 
 /// <summary>Request to produce a known formula. The server revalidates every field.</summary>

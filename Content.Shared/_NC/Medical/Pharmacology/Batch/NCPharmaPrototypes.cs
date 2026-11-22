@@ -265,6 +265,13 @@ public sealed partial class NCPharmaModifierPrototype : IPrototype
     [DataField]
     public NCPharmaNodeBranch Branch { get; private set; } = NCPharmaNodeBranch.Kinetics;
 
+    /// <summary>
+    /// An additive the production run uses up, such as a vial of stabilizer. A formula with this modifier cannot be
+    /// produced without it, so the modifier has a price that is not only money.
+    /// </summary>
+    [DataField]
+    public EntProtoId? RequiredItem { get; private set; }
+
     [DataField]
     public float ConcentrationMultiplier { get; private set; } = 1f;
 

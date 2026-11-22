@@ -404,3 +404,14 @@ nc-pharma-feedstock-none = неизвестно
 nc-pharma-station-feedstock-line = Делается из: {$types}.
 nc-pharma-station-feedstock-alternative = {$type} ({$yield} доз)
 nc-pharma-station-notice-wrong-feedstock = Из этого сырья такую формулу не сделать.
+
+# --- Расходники процесса ------------------------------------------------------------------------------------
+ent-NCPharmaCatalystVial = флакон катализатора
+    .desc = Флакон катализатора реакции. Термореактор забирает его при запуске, после чего оператор может добавить катализатор столько раз, сколько в нём зарядов.
+ent-NCPharmaStabilizerVial = флакон стабилизатора
+    .desc = Флакон стабилизатора. Формуле с модификатором «стабилизатор» нужен один такой на каждый запуск производства.
+nc-pharma-station-additive-slot = добавка
+nc-pharma-reactor-catalyst-slot = катализатор
+nc-pharma-catalyst-examine = Зарядов катализатора: {$charges}.
+nc-pharma-station-notice-missing-additive = Для этой формулы в слот добавки нужен предмет: {$item}.
+nc-pharma-station-additive-line = Расходует: {$item}.

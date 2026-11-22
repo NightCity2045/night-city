@@ -17,6 +17,10 @@ public sealed partial class NCPharmaReactorComponent : Component
     [DataField]
     public string SourceSlot = "source";
 
+    /// <summary>Where a vial of catalyst is put. The run takes it when it starts.</summary>
+    [DataField]
+    public string CatalystSlot = "catalyst";
+
     [DataField]
     public float EquipmentSterility = 0.85f;
 

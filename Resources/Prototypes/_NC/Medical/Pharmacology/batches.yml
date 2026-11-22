@@ -152,6 +152,7 @@
   id: NCPharmaModifierStabilizer
   name: nc-pharma-modifier-stabilizer
   branch: Production
+  requiredItem: NCPharmaStabilizerVial
   purityDelta: -0.02
   stabilityDelta: 0.15
   costMultiplier: 1.2
@@ -235,7 +236,7 @@
   stabilityMultiplier: 0.8
   concentrationBias: 0.05
   costMultiplier: 0.6
-  duration: 20s
+  duration: 60s
   labelPurity: 0.9
   labelSterile: false
   labelGrade: Street
@@ -249,7 +250,7 @@
   homogeneityMultiplier: 1
   stabilityMultiplier: 1
   costMultiplier: 1
-  duration: 40s
+  duration: 150s
   labelPurity: 0.9
   labelSterile: true
   labelGrade: Medical
@@ -263,7 +264,7 @@
   homogeneityMultiplier: 1.1
   stabilityMultiplier: 1.1
   costMultiplier: 2
-  duration: 90s
+  duration: 300s
   labelPurity: 0.97
   labelSterile: true
   labelGrade: Corporate
@@ -401,6 +402,7 @@
   - type: ContainerContainer
     containers:
       source: !type:ContainerSlot
+      additive: !type:ContainerSlot
   - type: ItemSlots
     slots:
       source:
@@ -408,6 +410,11 @@
         whitelist:
           components:
           - NCPharmaSource
+      additive:
+        name: nc-pharma-station-additive-slot
+        whitelist:
+          components:
+          - NCPharmaAdditive
   - type: Appearance
   - type: GenericVisualizer
     visuals:
@@ -639,6 +646,7 @@
   - type: ContainerContainer
     containers:
       source: !type:ContainerSlot
+      catalyst: !type:ContainerSlot
   - type: ItemSlots
     slots:
       source:
@@ -646,6 +654,11 @@
         whitelist:
           components:
           - NCPharmaSource
+      catalyst:
+        name: nc-pharma-reactor-catalyst-slot
+        whitelist:
+          components:
+          - NCPharmaCatalyst
   - type: Appearance
   - type: GenericVisualizer
     visuals:

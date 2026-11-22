@@ -175,7 +175,14 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
         run.State = NCReactorMath.Start(profile);
         run.Controls = default;
         run.Ventilation = false;
-        run.CatalystLeft = tuning.CatalystCharges;
+        // NC: the catalyst is a real vial in the catalyst slot. The run takes it; with none there is nothing to add.
+        run.CatalystLeft = 0;
+        if (_itemSlots.TryGetSlot(reactor, reactor.Comp.CatalystSlot, out var catalystSlot) &&
+            catalystSlot.Item is { } vial && TryComp<NCPharmaCatalystComponent>(vial, out var catalyst))
+        {
+            run.CatalystLeft = Math.Min(catalyst.Charges, tuning.CatalystCharges);
+            QueueDel(vial);
+        }
         run.SourcePurity = source.Purity;
         run.SourceContaminants = TryComp<NCPharmaSourceHiddenComponent>(sourceUid, out var hidden) ? hidden.Contaminants : 0f; // NC
         run.Units = units;
