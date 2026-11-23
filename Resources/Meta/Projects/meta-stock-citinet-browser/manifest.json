@@ -13,17 +13,17 @@
     {
       "path": "main.meta",
       "sourcePath": "Resources/Meta/Browser/main.meta",
-      "sha256": "df3323329c67280e7d277439449fa901158b5e61fa26f463581eac99105cdb8b"
+      "sha256": "12fc1f5d5ec9ce2d9b2e4c7cd9e66a141dce0009e709c6ff5d821a004fdfead7"
     },
     {
       "path": "app.json",
       "sourcePath": "Resources/Meta/Browser/app.json",
-      "sha256": "20c67be2a92948e5404bac3ec600849192df59261692a920af0c0d606754bc82"
+      "sha256": "40f5f88041494d63169a09b707c1b74fffd8433eaa9561cd4cf1dc1c10185398"
     },
     {
       "path": "ui/main.mui",
       "sourcePath": "Resources/Meta/Browser/main.mui",
-      "sha256": "e88f10d44bdb172c49248634e4bb070258910ba0ffc8458df30a3f867c1b9ad7"
+      "sha256": "2b84313a865cb89833c746bb5b5c5df5de452c7f039ab2d0391f2e7f971d40f7"
     },
     {
       "path": "ui/style.mstyle",

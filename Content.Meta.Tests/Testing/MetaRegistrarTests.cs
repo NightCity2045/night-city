@@ -1,14 +1,12 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
-using System.Text.Json;
 using Content.Meta.Language;
-using Content.Meta.Runtime;
 using Content.Meta.Testing;
 using Content.Meta.Verification;
 using NUnit.Framework;
 
 namespace Content.Meta.Tests.Testing;
 
-/// <summary>The CitiNet name registrar written in META answers register and resolve messages.</summary>
+/// <summary>The CitiNet name registrar written in META: quotes, paid registrations and resolution over messages.</summary>
 [TestFixture]
 public sealed class MetaRegistrarTests
 {
@@ -31,49 +29,55 @@ public sealed class MetaRegistrarTests
         return MetaVerifier.Verify(compiled.Artifact!, MetaApiCatalog.Default.CreateVerificationCatalog(compiled.Module!));
     }
 
-    private static string Fixture(string topic, string payload, string expectedCommand, string expectedReply)
-    {
-        // The write is only answered when the test expects the registrar to save.
-        var write = expectedCommand.Length == 0 ? "" : "{ \"member\": \"meta.files.FileStore.writeTextAtomic\", \"value\": null, \"pending\": true, \"completeAfterSlices\": 2 },";
-        return $$"""
-        {
-          "rootModule": "citinet.registrar",
-          "responses": [
-            { "member": "meta.files.FileStore.readText", "value": "", "pending": true, "completeAfterSlices": 2 },
-            {{write}}
-            { "member": "meta.net.MessagePort.send", "value": { "messageId": "fixture-1", "accepted": true }, "pending": false, "completeAfterSlices": 1 }
-          ],
-          "events": [
-            { "slot": "registrar-port", "event": "messageReceived",
-              "arguments": [ { "replyTo": "peer-a", "topic": "{{topic}}", "payload": "{{payload}}", "stamp": { "epoch": 1, "sequence": 1, "tick": 60 } } ],
-              "sequence": 1, "nowMs": 1000, "tick": 60 }
-          ],
-          "expectedLogs": [],
-          "expectedCommands": [ "readText(registry/names.txt)"{{expectedCommand}}, "send(peer-a,{{expectedReply}})" ],
-          "epoch": 1, "nowMs": 1000, "tick": 60
-        }
-        """;
-    }
+    private const string Reads =
+        "{ \"member\": \"meta.files.FileStore.readText\", \"value\": \"\", \"pending\": true, \"completeAfterSlices\": 2 }," +
+        "{ \"member\": \"meta.files.FileStore.readText\", \"value\": \"\", \"pending\": true, \"completeAfterSlices\": 2 },";
+    private const string Write = "{ \"member\": \"meta.files.FileStore.writeTextAtomic\", \"value\": null, \"pending\": true, \"completeAfterSlices\": 2 },";
+    private const string Send = "{ \"member\": \"meta.net.MessagePort.send\", \"value\": { \"messageId\": \"fixture-1\", \"accepted\": true }, \"pending\": false, \"completeAfterSlices\": 1 }";
+    private static readonly string[] Starts = ["readText(registry/names.txt)", "readText(registry/receipts.txt)"];
 
-    private static void Run(string topic, string payload, string expectedCommand, string expectedReply)
+    private static void Run(string topic, string payload, string responses, string[] commands)
     {
-        var run = MetaTestHost.Run(Compile(), MetaTestHost.ParseFixture(Fixture(topic, payload, expectedCommand, expectedReply)));
+        var expected = string.Join(",", Starts.Concat(commands).Select(command => "\"" + command.Replace("\"", "\\\"") + "\""));
+        var fixture = $$"""
+            {
+              "rootModule": "citinet.registrar",
+              "responses": [ {{Reads}} {{responses}} {{Send}} ],
+              "events": [
+                { "slot": "registrar-port", "event": "messageReceived",
+                  "arguments": [ { "replyTo": "peer-a", "topic": "{{topic}}", "payload": "{{payload}}", "stamp": { "epoch": 1, "sequence": 1, "tick": 60 } } ],
+                  "sequence": 1, "nowMs": 1000, "tick": 60 }
+              ],
+              "expectedLogs": [],
+              "expectedCommands": [ {{expected}} ],
+              "epoch": 1, "nowMs": 1000, "tick": 60
+            }
+            """;
+        var run = MetaTestHost.Run(Compile(), MetaTestHost.ParseFixture(fixture));
         Assert.That(run.Passed, Is.True, run.FailureCode + ":" + run.Fault);
     }
 
+    private const string SelfDevice = "{ \"member\": \"meta.economy.Wallet.selfDevice\", \"value\": \"K7Q4MD\", \"pending\": false, \"completeAfterSlices\": 1 },";
+    private const string Paid = "{ \"member\": \"meta.economy.Wallet.received\", \"value\": { \"id\": \"r1\", \"amount\": 100, \"memo\": \"citi:demo\" }, \"pending\": true, \"completeAfterSlices\": 2 },";
+
     [Test]
-    public void AFreeNameIsRegisteredSavedAndConfirmed() =>
-        Run("dns.register", "demo|K7Q4MD|main", ", \"writeTextAtomic(registry/names.txt,demo|K7Q4MD|main|peer-a\\n)\"", "dns.registered,ok|demo");
+    public void AFreeNameIsQuotedWithItsPriceAndTheRegistrarsDevice() =>
+        Run("dns.quote", "demo", SelfDevice, ["selfDevice()", "send(peer-a,dns.price,ok|demo|100|K7Q4MD)"]);
+
+    [Test]
+    public void ANewNameWithoutAReceiptIsNotRegistered() =>
+        Run("dns.register", "demo|K7Q4MD|main|", "", ["send(peer-a,dns.registered,unpaid|demo)"]);
+
+    [Test]
+    public void ANewNameWithAMatchingReceiptIsRegisteredSavedAndConfirmed() =>
+        Run("dns.register", "demo|K7Q4MD|main|r1", Paid + Write + Write,
+            ["received(r1)", "writeTextAtomic(registry/names.txt,demo|K7Q4MD|main|peer-a\\n)", "writeTextAtomic(registry/receipts.txt,r1\\n)", "send(peer-a,dns.registered,ok|demo)"]);
 
     [Test]
     public void ANameWithCapitalsIsInvalid() =>
-        Run("dns.register", "Demo|K7Q4MD|main", "", "dns.registered,invalid|Demo");
-
-    [Test]
-    public void ADeviceCodeOfTheWrongLengthIsInvalid() =>
-        Run("dns.register", "demo|K7Q|main", "", "dns.registered,invalid|demo");
+        Run("dns.register", "Demo|K7Q4MD|main|r1", "", ["send(peer-a,dns.registered,invalid|Demo)"]);
 
     [Test]
     public void AnUnknownNameResolvesToNothing() =>
-        Run("dns.resolve", "ghost", "", "dns.answer,none|ghost");
+        Run("dns.resolve", "ghost", "", ["send(peer-a,dns.answer,none|ghost)"]);
 }

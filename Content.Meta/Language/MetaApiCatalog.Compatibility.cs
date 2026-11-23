@@ -21,6 +21,7 @@ public sealed partial class MetaApiCatalog
     public static MetaApiCatalog ResolveTrustedCatalog(string hash)
     {
         if (hash == Default.Hash) return Default;
+        if (hash == PreWalletCatalogHash) return PreWallet.Value;
         if (hash == PreCitiNetCatalogHash) return PreCitiNet.Value;
         if (hash == PreDoorOccupancyCatalogHash) return PreDoorOccupancy.Value;
         if (hash == PreDoorSafetyCatalogHash) return PreDoorSafety.Value;

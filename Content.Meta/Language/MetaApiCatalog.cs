@@ -132,6 +132,13 @@ public sealed partial class MetaApiCatalog
         Capability("meta.citinet", "Browser"); Capability("meta.citinet", "Gateway");
         Method("meta.citinet.Browser", "open", "result<void>", "citinet.browse", true, "string");
         Method("meta.citinet.Gateway", "visitorDevice", "result<string>", "citinet.visitor", false, "meta.app.SessionRef");
+        // Money moves only through the ledger: a person pays from their own account when they press a button, and the
+        // owner of the receiving device checks a receipt before giving anything for it.
+        Capability("meta.economy", "Wallet");
+        Dto("meta.economy", "PaymentReceipt", "id:string", "amount:int", "memo:string");
+        Method("meta.economy.Wallet", "pay", "result<meta.economy.PaymentReceipt>", "economy.pay", true, "string", "int", "string");
+        Method("meta.economy.Wallet", "received", "result<meta.economy.PaymentReceipt>", "economy.receive", true, "string");
+        Method("meta.economy.Wallet", "selfDevice", "result<string>", "economy.receive", false);
         Method("meta.files.FileStore", "readText", "result<string>", "files.read", true, "string");
         Method("meta.files.FileStore", "writeTextAtomic", "result<void>", "files.write", true, "string", "string");
         Capability("meta.net", "MessagePort");

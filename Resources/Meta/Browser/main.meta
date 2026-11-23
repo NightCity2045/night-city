@@ -6,6 +6,7 @@ import meta.text;
 import meta.net;
 import meta.citinet;
 import meta.files;
+import meta.economy;
 
 // The CitiNet browser, written in META. It keeps the pages you visited and marked, and asks the computer to open an
 // address in a window of its own: a local site as DEVICECODE/view, a published site by its device code, or a city
@@ -14,12 +15,19 @@ import meta.files;
 link web: Browser = "citinet-browser";
 link port: MessagePort = "browser-port";
 link data: FileStore = "browser-data";
+link wallet: Wallet = "browser-wallet";
 
 var history: list<string> = new list<string>();
 var marks: list<string> = new list<string>();
 var current: string = "";
 var pending: string = "";
 var notice: string = "";
+var offerName: string = "";
+var offerDevice: string = "";
+var offerView: string = "";
+var offerPayee: string = "";
+var offerPrice: int = 0;
+var offerReady: bool = false;
 
 pub struct PageRow {
     address: string;
@@ -37,12 +45,26 @@ pub struct BrowserState {
     historyHeading: string;
     marksHeading: string;
     hint: string;
+    registerHeading: string;
+    nameLabel: string;
+    deviceLabel: string;
+    viewLabel: string;
+    registerLabel: string;
+    offerVisible: bool;
+    offerText: string;
+    confirmLabel: string;
     history: list<PageRow>;
     marks: list<PageRow>;
 }
 
 pub struct OpenInput {
     address: string;
+}
+
+pub struct RegisterInput {
+    name: string;
+    device: string;
+    view: string;
 }
 
 pub struct MarkInput {
@@ -60,6 +82,14 @@ fn describe(ru: bool, code: string) -> string {
     if (code == "unknown") { return tr(ru, "No such name.", "Нет такого имени."); }
     if (code == "noroute") { return tr(ru, "No route to the registrar.", "Нет связи с регистратором."); }
     if (code == "unreachable") { return tr(ru, "No such page, or no route to it.", "Нет такой страницы или нет связи."); }
+    if (code == "quoting") { return tr(ru, "Asking the registrar for a price...", "Спрашиваю у регистратора цену..."); }
+    if (code == "offer") { return tr(ru, "The registrar quotes a price. Confirm to pay and register.", "Регистратор назвал цену. Подтвердите, чтобы оплатить и зарегистрировать."); }
+    if (code == "taken") { return tr(ru, "That name is already taken.", "Это имя уже занято."); }
+    if (code == "invalid") { return tr(ru, "Names are 3 to 32 letters, digits or dashes, in lower case.", "Имя: от 3 до 32 строчных букв, цифр или дефисов."); }
+    if (code == "nofunds") { return tr(ru, "The payment did not go through.", "Платёж не прошёл."); }
+    if (code == "paid") { return tr(ru, "Paid. Waiting for the registrar...", "Оплачено. Жду регистратора..."); }
+    if (code == "registered") { return tr(ru, "Done: the name is registered.", "Готово: имя зарегистрировано."); }
+    if (code == "unpaid") { return tr(ru, "The registrar did not accept the payment.", "Регистратор не принял оплату."); }
     return code;
 }
 
@@ -182,6 +212,18 @@ async fn main() -> void {
     }
 }
 
+async fn quote(name: string, device: string, view: string) -> void {
+    offerReady = false;
+    offerName = name;
+    offerDevice = device;
+    offerView = view;
+    notice = "quoting";
+    match (await port.send("citinet-registrar", "dns.quote", name)) {
+        ok(receipt) => { }
+        err(problem) => { notice = "noroute"; }
+    }
+}
+
 async fn visit(address: string) -> void {
     if (address.length < 1) {
         notice = "empty";
@@ -214,6 +256,29 @@ async fn visit(address: string) -> void {
 }
 
 async watch port.messageReceived(message) {
+    if (message.topic == "dns.price") {
+        if (field(message.payload, 1) != offerName) { return; }
+        if (field(message.payload, 0) != "ok") {
+            notice = field(message.payload, 0);
+            return;
+        }
+        match (text.parseInt(field(message.payload, 2))) {
+            ok(price) => {
+                offerPrice = price;
+                offerPayee = field(message.payload, 3);
+                offerReady = true;
+                notice = "offer";
+            }
+            err(problem) => { notice = "invalid"; }
+        }
+        return;
+    }
+    if (message.topic == "dns.registered") {
+        if (field(message.payload, 1) != offerName) { return; }
+        notice = field(message.payload, 0);
+        if (notice == "ok") { notice = "registered"; }
+        return;
+    }
     if (message.topic != "dns.answer") { return; }
     let name: string = field(message.payload, 1);
     if (pending.length < 1 || name != pending) { return; }
@@ -253,6 +318,14 @@ pub fn view(context: app.AppContext) -> BrowserState {
         historyHeading: tr(ru, "Recent pages", "Недавние страницы"),
         marksHeading: tr(ru, "Bookmarks", "Закладки"),
         hint: tr(ru, "Local site: CODE/view. City page: citi://name", "Локальный сайт: КОД/вид. Городская страница: citi://имя"),
+        registerHeading: tr(ru, "Register a city name", "Зарегистрировать имя"),
+        nameLabel: tr(ru, "Name", "Имя"),
+        deviceLabel: tr(ru, "Host device code", "Код устройства-хоста"),
+        viewLabel: tr(ru, "Site view", "Вид сайта"),
+        registerLabel: tr(ru, "Get a price", "Узнать цену"),
+        offerVisible: offerReady,
+        offerText: tr(ru, "Register ", "Зарегистрировать ") + offerName + tr(ru, " for ", " за ") + text.fromInt(offerPrice),
+        confirmLabel: tr(ru, "Pay and register", "Оплатить и зарегистрировать"),
         history: rowsNewestFirst(history),
         marks: rowsNewestFirst(marks));
 }
@@ -277,5 +350,26 @@ pub async fn mark(context: app.AppContext, input: MarkInput) -> result<void> {
         marks = kept;
     }
     await save();
+    return ok(());
+}
+
+pub async fn register(context: app.AppContext, input: RegisterInput) -> result<void> {
+    await quote(input.name, input.device, input.view);
+    return ok(());
+}
+
+pub async fn confirm(context: app.AppContext, input: MarkInput) -> result<void> {
+    if (!offerReady) { return ok(()); }
+    offerReady = false;
+    match (await wallet.pay(offerPayee, offerPrice, "citi:" + offerName)) {
+        ok(receipt) => {
+            notice = "paid";
+            match (await port.send("citinet-registrar", "dns.register", offerName + "|" + offerDevice + "|" + offerView + "|" + receipt.id)) {
+                ok(sent) => { }
+                err(problem) => { notice = "noroute"; }
+            }
+        }
+        err(problem) => { notice = "nofunds"; }
+    }
     return ok(());
 }

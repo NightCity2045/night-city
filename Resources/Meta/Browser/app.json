@@ -46,6 +46,37 @@
           "type": "string",
           "maxLength": 256
         },
+        "registerHeading": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "nameLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "deviceLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "viewLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "registerLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "offerText": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "confirmLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "offerVisible": {
+          "type": "boolean"
+        },
         "history": {
           "type": "array",
           "maxLength": 512
@@ -57,7 +88,9 @@
       },
       "actions": [
         "open",
-        "mark"
+        "mark",
+        "register",
+        "confirm"
       ]
     }
   },
@@ -69,6 +102,37 @@
         "address": {
           "type": "string",
           "maxLength": 192
+        }
+      },
+      "scopes": []
+    },
+    "register": {
+      "function": "citinet.browser.register",
+      "inputType": "citinet.browser.RegisterInput",
+      "inputs": {
+        "name": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "device": {
+          "type": "string",
+          "maxLength": 6
+        },
+        "view": {
+          "type": "string",
+          "maxLength": 32
+        }
+      },
+      "scopes": []
+    },
+    "confirm": {
+      "function": "citinet.browser.confirm",
+      "inputType": "citinet.browser.MarkInput",
+      "inputs": {
+        "note": {
+          "type": "string",
+          "maxLength": 32,
+          "required": false
         }
       },
       "scopes": []

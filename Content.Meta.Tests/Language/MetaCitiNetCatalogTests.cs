@@ -23,4 +23,14 @@ public sealed class MetaCitiNetCatalogTests
         Assert.That(members["meta.citinet.Browser.open"].Scope, Is.EqualTo("citinet.browse"));
         Assert.That(members["meta.citinet.Gateway.visitorDevice"].Scope, Is.EqualTo("citinet.visitor"));
     }
+
+    [Test]
+    public void TheCatalogBeforeTheWalletStaysTrustedAndLacksIt()
+    {
+        var old = MetaApiCatalog.ResolveTrustedCatalog(MetaApiCatalog.PreWalletCatalogHash);
+        Assert.That(old.Hash, Is.EqualTo(MetaApiCatalog.PreWalletCatalogHash));
+        Assert.That(old.Members.Any(member => member.Owner == "meta.economy.Wallet"), Is.False);
+        var pay = MetaApiCatalog.Default.Members.Single(member => member.QualifiedName == "meta.economy.Wallet.pay");
+        Assert.That(pay.Scope, Is.EqualTo("economy.pay"));
+    }
 }

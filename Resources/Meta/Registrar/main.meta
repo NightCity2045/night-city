@@ -4,15 +4,22 @@ import meta.system;
 import meta.text;
 import meta.net;
 import meta.files;
+import meta.economy;
 
 // The CitiNet name registrar, written in META. A site owner asks for a name that points at a host and a view; a browser
 // asks what a name points at. Requests and answers are plain messages:
-//   dns.register  name|device|view   ->  dns.registered  ok|name  /  taken|name  /  invalid|name
-//   dns.resolve   name               ->  dns.answer      ok|name|device|view  /  none|name
-// The first to register a name owns it; only the same sender may point it somewhere else.
+//   dns.quote     name                     ->  dns.price       ok|name|price|device  /  taken|name  /  invalid|name
+//   dns.register  name|device|view|receipt ->  dns.registered  ok|name  /  taken|name  /  invalid|name  /  unpaid|name
+//   dns.resolve   name                     ->  dns.answer      ok|name|device|view  /  none|name
+// A new name is paid for first: the buyer pays the registrar's owner through the wallet with the memo citi:name and
+// sends the receipt, which the registrar checks and keeps so it can never be used twice. The first to register a name
+// owns it; only the same sender may point it somewhere else, and that costs nothing.
 
 link port: MessagePort = "registrar-port";
 link data: FileStore = "registrar-data";
+link wallet: Wallet = "registrar-wallet";
+
+var used: list<string> = new list<string>();
 
 var names: list<string> = new list<string>();
 var devices: list<string> = new list<string>();
@@ -117,8 +124,39 @@ fn parse(source: string) -> void {
     }
 }
 
+fn joinUsed() -> string {
+    var joined: string = "";
+    for (let item in used) {
+        joined = joined + item + "\n";
+    }
+    return joined;
+}
+
+fn parseUsed(source: string) -> void {
+    var line: string = "";
+    var index: int = 0;
+    while (index < source.length) {
+        match (text.slice(source, index, 1)) {
+            ok(symbol) => {
+                if (symbol == "\n") {
+                    if (line.length > 0 && used.length < 256) { used.push(line); }
+                    line = "";
+                } else {
+                    line = line + symbol;
+                }
+            }
+            err(problem) => { }
+        }
+        index = index + 1;
+    }
+}
+
 async fn save() -> void {
     match (await data.writeTextAtomic("registry/names.txt", serialize())) {
+        ok(done) => { }
+        err(problem) => { system.log(problem.message); }
+    }
+    match (await data.writeTextAtomic("registry/receipts.txt", joinUsed())) {
         ok(done) => { }
         err(problem) => { system.log(problem.message); }
     }
@@ -127,6 +165,10 @@ async fn save() -> void {
 async fn main() -> void {
     match (await data.readText("registry/names.txt")) {
         ok(saved) => { parse(saved); }
+        err(problem) => { }
+    }
+    match (await data.readText("registry/receipts.txt")) {
+        ok(saved) => { parseUsed(saved); }
         err(problem) => { }
     }
 }
@@ -147,10 +189,52 @@ async fn resolve(sender: string, name: string) -> void {
     await reply(sender, "dns.answer", "ok|" + name + "|" + devices[position] + "|" + views[position]);
 }
 
+async fn quote(sender: string, name: string) -> void {
+    if (!validName(name)) {
+        await reply(sender, "dns.price", "invalid|" + name);
+        return;
+    }
+    if (indexOf(name) >= 0) {
+        await reply(sender, "dns.price", "taken|" + name);
+        return;
+    }
+    var me: string = "";
+    match (wallet.selfDevice()) {
+        ok(code) => { me = code; }
+        err(problem) => { }
+    }
+    await reply(sender, "dns.price", "ok|" + name + "|100|" + me);
+}
+
+// A new name costs 100 and the receipt must name it in its memo; each receipt is accepted once.
+async fn paidFor(name: string, receipt: string) -> bool {
+    if (receipt.length < 1 || indexOfUsed(receipt) >= 0 || used.length >= 256) { return false; }
+    match (await wallet.received(receipt)) {
+        ok(found) => {
+            if (found.amount >= 100 && found.memo == "citi:" + name) {
+                used.push(receipt);
+                return true;
+            }
+            return false;
+        }
+        err(problem) => { return false; }
+    }
+}
+
+fn indexOfUsed(receipt: string) -> int {
+    var index: int = 0;
+    while (index < used.length) {
+        if (used[index] == receipt) { return index; }
+        index = index + 1;
+    }
+    return -1;
+}
+
 async fn register(sender: string, payload: string) -> void {
     let name: string = field(payload, 0);
     let device: string = field(payload, 1);
     let view: string = field(payload, 2);
+    let receipt: string = field(payload, 3);
     if (!validName(name) || !validTarget(device, view)) {
         await reply(sender, "dns.registered", "invalid|" + name);
         return;
@@ -168,6 +252,11 @@ async fn register(sender: string, payload: string) -> void {
             await reply(sender, "dns.registered", "invalid|" + name);
             return;
         }
+        let paid: bool = await paidFor(name, receipt);
+        if (!paid) {
+            await reply(sender, "dns.registered", "unpaid|" + name);
+            return;
+        }
         names.push(name);
         devices.push(device);
         views.push(view);
@@ -180,6 +269,10 @@ async fn register(sender: string, payload: string) -> void {
 async watch port.messageReceived(message) {
     if (message.topic == "dns.resolve") {
         await resolve(message.replyTo, message.payload);
+        return;
+    }
+    if (message.topic == "dns.quote") {
+        await quote(message.replyTo, message.payload);
         return;
     }
     if (message.topic == "dns.register") {
