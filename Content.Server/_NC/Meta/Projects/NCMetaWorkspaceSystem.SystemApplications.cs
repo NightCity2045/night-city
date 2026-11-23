@@ -31,8 +31,10 @@ public sealed partial class NCMetaWorkspaceSystem
             if (project == null) return;
             // Preparing leaves the service panel on its installer view; a computer goes back to where it was.
             await OnMainAsync(() => { SelectNativeTools(context, new(NCMetaWorkspaceOperation.OpenNativeTools, request.RequestId, source: "editor")); return true; });
+            context = await FreshClockAsync(context);
             await RuntimeRequestAsync(context, project, new(NCMetaWorkspaceOperation.Install, Guid.NewGuid(),
                 projectId: project.Id, deviceId: context.DeviceId), state);
+            context = await FreshClockAsync(context);
             if (previous != null && await _persistence.ReadDeviceAsync(context.DeviceId) is { } current && current.ActiveProject != previous.Id)
                 await _persistence.ManageProjectAsync(NCMetaWorkspaceOperation.SelectProject, Guid.NewGuid(), current, previous,
                     Guid.Empty, 0, "", context.Epoch, context.Time, WorkspaceAuthority(context));
@@ -44,11 +46,20 @@ public sealed partial class NCMetaWorkspaceSystem
         if (installation == null) return;
         var host = await OnMainAsync<EntityUid?>(() => _devices.TryResolve(context.DeviceId, out var found) ? found.Entity : null);
         if (host == null) return;
+        context = await FreshClockAsync(context);
         var running = await OnMainAsync(() => _runtime.TryGetInstallation(host.Value, context.Owner, installation.Id, out _));
         if (!running)
             await RuntimeRequestAsync(context, project, new(NCMetaWorkspaceOperation.Start, Guid.NewGuid(),
                 projectId: project.Id, deviceId: context.DeviceId, installationId: installation.Id), state);
+        context = await FreshClockAsync(context);
         await RuntimeRequestAsync(context, project, new(NCMetaWorkspaceOperation.OpenApplication, Guid.NewGuid(), source: system.View,
             projectId: project.Id, deviceId: context.DeviceId, installationId: installation.Id), state);
     }
+
+    /// <summary>
+    /// Each durable write is stamped with the world clock, and the database refuses a stamp older than its own. A chain of
+    /// writes (copy, build, install, start) outlives the time the request was admitted at, so every step takes a new one.
+    /// </summary>
+    private Task<Context> FreshClockAsync(Context context) => OnMainAsync(() =>
+        _persistence.TryCaptureTime(out var epoch, out var time) ? context with { Epoch = epoch, Time = time } : context);
 }

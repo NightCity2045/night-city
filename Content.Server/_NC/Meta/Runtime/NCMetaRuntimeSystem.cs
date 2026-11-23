@@ -540,7 +540,10 @@ public sealed partial class NCMetaRuntimeSystem : EntitySystem
         capability == "meta.doors.Door" && HasComp<DoorComponent>(uid) ||
         capability == "meta.doors.DoorPanel" && HasComp<NCMetaDoorPanelComponent>(uid) ||
         TryComp<NCMetaDeviceComponent>(uid, out var device) && device.Interfaces.Contains(capability) &&
-        _adapters.Values.Distinct().Any(adapter => adapter.CanBind(uid, capability));
+        _adapters.Values.Distinct().Any(adapter => adapter.CanBind(uid, capability)) ||
+        // A computer or a server offers what its hardware profile lists, as long as a native adapter agrees it can serve it.
+        TryComp<NCMetaHostComponent>(uid, out var host) && _prototypes.TryIndex(host.Profile, out var hostProfile) &&
+        hostProfile.Interfaces.Contains(capability) && _adapters.Values.Distinct().Any(adapter => adapter.CanBind(uid, capability));
 
     public bool CanReach(EntityUid host, EntityUid target)
     {

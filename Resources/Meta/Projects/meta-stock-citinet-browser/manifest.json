@@ -13,22 +13,22 @@
     {
       "path": "main.meta",
       "sourcePath": "Resources/Meta/Browser/main.meta",
-      "sha256": "e0c334b5f4d5ecd990445faf7c190a81f28c63b1ede4edbe1697129e8b1d0de8"
+      "sha256": "cd2d791e2014d366bf0f653108056eadc366c1ccda505a744a43ebe1c7a98130"
     },
     {
       "path": "app.json",
       "sourcePath": "Resources/Meta/Browser/app.json",
-      "sha256": "593e6015fb7396c374a63e6a96ed574218fc5b212a440692f62787dfcaa36533"
+      "sha256": "c70b618bc0154475573f12eca85c4e0fbf94d203e5db0b987af9db3310a264f0"
     },
     {
       "path": "ui/main.mui",
       "sourcePath": "Resources/Meta/Browser/main.mui",
-      "sha256": "16aad879937ad0e76061ceaa3715454353a3eaa9dfc2b9d3ce5aead0c56acdf1"
+      "sha256": "5b4d3637734180552895a5dba173d826d80b361a1b4f95dc6207c7d50e879145"
     },
     {
       "path": "ui/style.mstyle",
       "sourcePath": "Resources/Meta/Browser/style.mstyle",
-      "sha256": "74d01a4628e6e6f8f5a1c80a98d19c81c3e305e135dacae3011a72be002135bb"
+      "sha256": "d9db8557458b3ee2efd7908c094b235290641145f56dd31a7397522baf398c3c"
     }
   ],
   "startMode": "Manual",

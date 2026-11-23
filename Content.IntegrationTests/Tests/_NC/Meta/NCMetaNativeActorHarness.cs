@@ -32,26 +32,9 @@ internal static class NCMetaNativeActorHarness
         await NCMetaNativeTestTasks.Run(server, async () => { await Task.WhenAll(barriers); return true; });
     }
 
-    public static async Task RestoreBinding(RobustIntegrationTest.ServerIntegrationInstance server, NCActorId actor, EntityUid body)
+    /// <summary>A native owner is an actor bound to a body; there is no resident record to restore.</summary>
+    public static Task RestoreBinding(RobustIntegrationTest.ServerIntegrationInstance server, NCActorId actor, EntityUid body)
     {
-        var domains = server.System<NCCityActorDomainRegistrySystem>();
-        Assert.That(await NCMetaNativeTestTasks.Run(server, () => server.System<NCCityActorRegistrySystem>().GetAsync(actor)), Is.Not.Null);
-        var health = await NCMetaNativeTestTasks.Run(server, () => domains.GetHealthAsync(actor));
-        var inventory = await NCMetaNativeTestTasks.Run(server, () => domains.GetInventoryAsync(actor));
-        Assert.That(health, Is.Not.Null); Assert.That(inventory, Is.Not.Null);
-        var physicalization = server.System<NCEconomicPhysicalizationSystem>();
-        var plan = await NCMetaNativeTestTasks.Run(server, () => physicalization.BuildActorInventoryPlanAsync(actor, inventory!.Snapshot));
-        Assert.That(plan.IsSuccess, Is.True, plan.Error);
-        await server.WaitAssertion(() =>
-        {
-            var manager = server.ResolveDependency<IEntityManager>();
-            var adapter = manager.EnsureComponent<NCCityActorInventoryAdapterComponent>(body);
-            adapter.AuthorityVersion = inventory!.Snapshot.SourceAuthorityVersion;
-            adapter.EquippedLoadoutId = inventory.Snapshot.Summary.EquippedLoadoutId;
-            Assert.That(physicalization.TryMaterialize(body, plan.Plan!, out var error), Is.True, error);
-            Assert.That(server.System<NCCityActorRuntimeIndexSystem>().TryBind(actor, body), Is.True);
-            Assert.That(server.System<NCActiveWorldTimeSystem>().TryGetCurrentTime(out _, out var now), Is.True);
-            Assert.That(domains.TryCaptureMaterialized(actor, body, health!.AggregateVersion, inventory.AggregateVersion, now, out _, out error), Is.True, error);
-        });
+        return server.WaitAssertion(() => Assert.That(server.System<NCCityActorRuntimeIndexSystem>().TryBind(actor, body), Is.True));
     }
 }

@@ -59,6 +59,7 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                         <Label Name="DesktopNetworkInfo" FontColorOverride="#7FA3BF" />
                         <Label Name="DesktopProgramsInfo" FontColorOverride="#7FA3BF" />
                         <Label Name="DesktopUptime" FontColorOverride="#7FA3BF" />
+                        <Label Name="DesktopNotice" FontColorOverride="#FFC233" ClipText="True" MaxWidth="320" />
                     </BoxContainer>
                 </PanelContainer>
             </BoxContainer>
@@ -95,7 +96,7 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                 <CheckBox Name="ChipOpen" Text="{Loc 'nc-meta-chip-open'}" ToolTip="{Loc 'nc-meta-chip-open-tip'}" />
                 <Button StyleClasses="ncMetaAction" Name="ExportMedia" Text="{Loc 'nc-meta-export-media'}" />
                 <Label Name="ChipInSlot" StyleClasses="ncMetaMuted" Visible="False" />
-                <Button StyleClasses="ncMetaAction" Name="ImportMedia" Text="{Loc 'nc-meta-import-media'}" Visible="False" />
+                <Button StyleClasses="ncMetaAction" Name="ImportMedia" Text="{Loc 'nc-meta-copy-chip'}" Visible="False" />
                 <Button StyleClasses="ncMetaAction" Name="HackMedia" Text="{Loc 'nc-meta-hack-chip'}" Visible="False" />
                 <OptionButton Name="ApplicationViews" MinWidth="100" />
                 <Button StyleClasses="ncMetaAction" Name="OpenApplication" Text="{Loc 'nc-meta-open-application'}" />

@@ -62,17 +62,6 @@ public sealed partial class NCMetaNativeNetworkTest : GameTest
     private async Task<string> CreateOwner(EntityUid body, string name)
     {
         var actor = new NCActorId(Guid.NewGuid());
-        HumanoidCharacterProfile profile = null!;
-        await Server.WaitAssertion(() =>
-        {
-            profile = HumanoidCharacterProfile.Random();
-        });
-        var payload = NCHumanoidProfilePayload.Serialize(Server.ResolveDependency<ISerializationManager>(), profile);
-        var request = Guid.NewGuid();
-        var created = await Server.System<NCCityActorRegistrySystem>().CreateResidentAsync(new(request, actor, name,
-            new("NCLivingCityResident"), new("NCDefaultResidentPersona"), payload, default, null, request,
-            AuditSource: "integration.meta-native-network"));
-        Assert.That(created.Status, Is.EqualTo(NCCityActorMutationStatus.Applied), created.Error);
         await NCMetaNativeActorHarness.RestoreBinding(Server, actor, body);
         return NCPartyRef.ForActor(actor).ToString();
     }

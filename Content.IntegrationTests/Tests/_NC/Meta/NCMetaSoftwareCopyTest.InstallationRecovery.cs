@@ -123,18 +123,6 @@ public sealed partial class NCMetaSoftwareCopyTest
         return (current!, admission!);
     }
 
-    private async Task CreateNativeServiceOwnerAsync(NCActorId actorId, string name)
-    {
-        HumanoidCharacterProfile profile = null!;
-        await Server.WaitPost(() => profile = HumanoidCharacterProfile.Random());
-        var payload = NCHumanoidProfilePayload.Serialize(Server.ResolveDependency<ISerializationManager>(), profile);
-        var command = Guid.NewGuid();
-        var created = await Server.System<NCCityActorRegistrySystem>().CreateResidentAsync(new(command, actorId, name,
-            new("NCLivingCityResident"), new("NCDefaultResidentPersona"), payload, default, null, command,
-            AuditSource: "integration.meta-service-owner"));
-        Assert.That(created.Status, Is.EqualTo(NCCityActorMutationStatus.Applied), created.Error);
-    }
-
     [TestCase("Private", "Conflict")]
     [TestCase("Licensed", "Conflict")]
     [TestCase("Firmware", "Conflict")]

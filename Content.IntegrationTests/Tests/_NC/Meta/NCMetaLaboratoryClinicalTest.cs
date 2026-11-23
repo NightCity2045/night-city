@@ -174,12 +174,6 @@ public sealed partial class NCMetaLaboratoryClinicalTest : GameTest
                 Assert.That(network.TryConnectCable(cable, physical.Operator, physical.Objects["host"]), Is.True);
             }
         });
-        var request = Guid.NewGuid();
-        var payload = NCHumanoidProfilePayload.Serialize(Server.ResolveDependency<ISerializationManager>(), profile);
-        var created = await Durable(() => Server.System<NCCityActorRegistrySystem>().CreateResidentAsync(new(request, actorId,
-            "Native laboratory practitioner", new("NCLivingCityResident"), new("NCDefaultResidentPersona"), payload,
-            default, null, request, AuditSource: "integration.meta-laboratory")));
-        Assert.That(created.Status, Is.EqualTo(NCCityActorMutationStatus.Applied), created.Error);
         var scene = new Scene(physical, NCPartyRef.ForActor(actorId).ToString(), actorId, clinical);
         await RestoreActorBinding(scene);
         foreach (var uid in physical.Objects.Where(value => value.Key is "host" or "bedside" or "scanner" or "grinder" or "chemMaster").Select(value => value.Value)

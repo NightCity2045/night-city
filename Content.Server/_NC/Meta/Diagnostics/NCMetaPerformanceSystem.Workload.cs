@@ -154,12 +154,6 @@ public sealed partial class NCMetaPerformanceSystem
                     if (!_actorIndex.TryBind(actorId, actor)) throw new InvalidOperationException("Native actor binding failed.");
                     var entry = new Owner(actor, actorId, NCPartyRef.ForActor(actorId).ToString(), origin); _owners.Add(entry); return entry;
                 });
-                var appearance = await Main(() => NCHumanoidProfilePayload.Serialize(_serialization, HumanoidCharacterProfile.Random()));
-                var command = Guid.NewGuid();
-                var created = await _actors.CreateResidentAsync(new(command, actorId, Loc.GetString("nc-meta-performance-bot-name"),
-                    new("NCLivingCityResident"), new("NCDefaultResidentPersona"), appearance, default, null, command,
-                    AuditSource: "isolated.meta-performance-owner"));
-                if (created.Status != NCCityActorMutationStatus.Applied) throw new InvalidOperationException("Native test principal creation rejected.");
                 owner.Sender = await CreateDeviceAsync(id, owner, new(-1.5f, -0.5f));
                 owner.Silent = await CreateDeviceAsync(id, owner, new(1.5f, -0.5f));
                 var shape = Shape(request.Workload);

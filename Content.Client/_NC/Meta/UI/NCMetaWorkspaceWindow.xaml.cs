@@ -293,6 +293,8 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
             Editor.TrySetSource("");
         }
         _state = state;
+        // What the server said about the last request; on the desktop this is the only place the player sees it.
+        DesktopNotice.Text = state.Notice;
         ProjectName.Text = state.ProjectName;
         Files.Clear();
         foreach (var file in state.Files.Take(256))

@@ -78,7 +78,28 @@
           "type": "string",
           "maxLength": 256
         },
+        "tagline": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "homeLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "backLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
         "offerVisible": {
+          "type": "boolean"
+        },
+        "startVisible": {
+          "type": "boolean"
+        },
+        "pageVisible": {
+          "type": "boolean"
+        },
+        "linked": {
           "type": "boolean"
         },
         "history": {
@@ -98,7 +119,9 @@
         "open",
         "mark",
         "register",
-        "confirm"
+        "confirm",
+        "home",
+        "back"
       ]
     }
   },
@@ -135,6 +158,30 @@
     },
     "confirm": {
       "function": "citinet.browser.confirm",
+      "inputType": "citinet.browser.MarkInput",
+      "inputs": {
+        "note": {
+          "type": "string",
+          "maxLength": 32,
+          "required": false
+        }
+      },
+      "scopes": []
+    },
+    "home": {
+      "function": "citinet.browser.home",
+      "inputType": "citinet.browser.MarkInput",
+      "inputs": {
+        "note": {
+          "type": "string",
+          "maxLength": 32,
+          "required": false
+        }
+      },
+      "scopes": []
+    },
+    "back": {
+      "function": "citinet.browser.back",
       "inputType": "citinet.browser.MarkInput",
       "inputs": {
         "note": {

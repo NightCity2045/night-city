@@ -1,81 +1,72 @@
 <Page id="root" title="{bind title}">
-  <Column id="layout" gap="10" margin="14" class="page">
-    <Panel id="hero" class="hero">
-      <Column id="heroText" gap="2">
-        <Header id="title" text="{bind title}" class="title"/>
-        <Text id="subtitle" text="{bind subtitle}" class="subtitle"/>
-      </Column>
-    </Panel>
+  <Column id="layout" gap="0" class="page">
 
-    <Panel id="bar" class="card">
-      <Column id="barBody" gap="6">
-        <Text id="addressLabel" text="{bind addressLabel}" class="label"/>
-        <Form id="openForm" action="open">
-          <Row id="openRow" gap="8">
-            <Input id="addressInput" field="address" maxLength="192"/>
-            <Button id="openButton" action="open" text="{bind openLabel}"/>
-          </Row>
-        </Form>
+    <Row id="toolbar" gap="6" class="toolbar">
+      <Form id="backForm" action="back">
+        <Button id="backButton" action="back" text="{bind backLabel}" class="tool"/>
+      </Form>
+      <Form id="homeForm" action="home">
+        <Button id="homeButton" action="home" text="{bind homeLabel}" class="tool"/>
+      </Form>
+      <Form id="openForm" action="open">
+        <Row id="openRow" gap="6">
+          <Text id="scheme" text="citi://" class="scheme"/>
+          <Input id="addressInput" field="address" maxLength="192"/>
+          <Button id="openButton" action="open" text="{bind openLabel}" class="go"/>
+        </Row>
+      </Form>
+      <Form id="markForm" action="mark">
+        <Button id="markButton" action="mark" text="{bind markLabel}" class="tool"/>
+      </Form>
+    </Row>
+
+    <Panel id="start" class="start" visible="{bind startVisible}">
+      <Column id="startBody" gap="10">
+        <Text id="logo" text="CITINET" class="logo"/>
+        <Text id="tagline" text="{bind tagline}" class="tagline"/>
         <Text id="hint" text="{bind hint}" class="hint"/>
+        <Text id="sitesHeading" text="{bind sitesHeading}" class="section"/>
+        <Table id="sites" items="{bind sites}" columns="label" rowAction="open" rowKey="address" rowField="address"/>
       </Column>
     </Panel>
-
-    <Text id="status" text="{bind status}" class="status"/>
-
-    <Form id="markForm" action="mark">
-      <Button id="markButton" action="mark" text="{bind markLabel}"/>
-    </Form>
 
     <Site id="page"/>
 
-    <Scroll id="more" height="200">
-      <Column id="moreBody" gap="10">
-        <Panel id="sitesCard" class="card">
-          <Column id="sitesBody" gap="6">
-            <Text id="sitesHeading" text="{bind sitesHeading}" class="heading"/>
-            <Table id="sites" items="{bind sites}" columns="label" rowAction="open" rowKey="address" rowField="address"/>
+    <Tabs id="more" class="more">
+      <Tab id="tabMarks" title="{bind marksHeading}">
+        <Table id="marks" items="{bind marks}" columns="label" rowAction="open" rowKey="address" rowField="address"/>
+      </Tab>
+      <Tab id="tabHistory" title="{bind historyHeading}">
+        <Table id="history" items="{bind history}" columns="label" rowAction="open" rowKey="address" rowField="address"/>
+      </Tab>
+      <Tab id="tabNames" title="{bind registerHeading}">
+        <Form id="registerForm" action="register">
+          <Column id="registerFields" gap="4">
+            <Text id="nameLabel" text="{bind nameLabel}" class="label"/>
+            <Input id="regName" field="name" maxLength="32"/>
+            <Text id="deviceLabel" text="{bind deviceLabel}" class="label"/>
+            <Input id="regDevice" field="device" maxLength="6"/>
+            <Text id="viewLabel" text="{bind viewLabel}" class="label"/>
+            <Input id="regView" field="view" maxLength="32"/>
+            <Button id="registerButton" action="register" text="{bind registerLabel}" class="go"/>
           </Column>
-        </Panel>
-
-      <Panel id="marksCard" class="card">
-        <Column id="marksBody" gap="6">
-          <Text id="marksHeading" text="{bind marksHeading}" class="heading"/>
-          <Table id="marks" items="{bind marks}" columns="label" rowAction="open" rowKey="address" rowField="address"/>
-        </Column>
-      </Panel>
-
-      <Panel id="registerCard" class="card">
-        <Column id="registerBody" gap="6">
-          <Text id="registerHeading" text="{bind registerHeading}" class="heading"/>
-          <Form id="registerForm" action="register">
-            <Column id="registerFields" gap="4">
-              <Text id="nameLabel" text="{bind nameLabel}" class="label"/>
-              <Input id="regName" field="name" maxLength="32"/>
-              <Text id="deviceLabel" text="{bind deviceLabel}" class="label"/>
-              <Input id="regDevice" field="device" maxLength="6"/>
-              <Text id="viewLabel" text="{bind viewLabel}" class="label"/>
-              <Input id="regView" field="view" maxLength="32"/>
-              <Button id="registerButton" action="register" text="{bind registerLabel}"/>
+        </Form>
+        <Panel id="offerCard" class="offer" visible="{bind offerVisible}">
+          <Form id="confirmForm" action="confirm">
+            <Column id="offerBody" gap="4">
+              <Text id="offerText" text="{bind offerText}" class="section"/>
+              <Button id="confirmButton" action="confirm" text="{bind confirmLabel}" class="go"/>
             </Column>
           </Form>
-          <Panel id="offerCard" class="card" visible="{bind offerVisible}">
-            <Form id="confirmForm" action="confirm">
-              <Column id="offerBody" gap="4">
-                <Text id="offerText" text="{bind offerText}" class="heading"/>
-                <Button id="confirmButton" action="confirm" text="{bind confirmLabel}"/>
-              </Column>
-            </Form>
-          </Panel>
-        </Column>
-      </Panel>
+        </Panel>
+      </Tab>
+    </Tabs>
 
-      <Panel id="historyCard" class="card">
-        <Column id="historyBody" gap="6">
-          <Text id="historyHeading" text="{bind historyHeading}" class="heading"/>
-          <Table id="history" items="{bind history}" columns="label" rowAction="open" rowKey="address" rowField="address"/>
-        </Column>
-      </Panel>
-      </Column>
-    </Scroll>
+    <Row id="statusbar" gap="8" class="statusbar">
+      <Text id="dotOn" text="●" class="dotOn" visible="{bind linked}"/>
+      <Text id="dotOff" text="●" class="dotOff" visible="{bind !linked}"/>
+      <Text id="status" text="{bind status}" class="status"/>
+    </Row>
+
   </Column>
 </Page>

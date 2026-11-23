@@ -22,6 +22,7 @@ var marks: list<string> = new list<string>();
 var current: string = "";
 var pending: string = "";
 var notice: string = "";
+var linked: bool = false;
 var sites: list<string> = new list<string>();
 var offerName: string = "";
 var offerDevice: string = "";
@@ -46,6 +47,12 @@ pub struct BrowserState {
     historyHeading: string;
     marksHeading: string;
     hint: string;
+    tagline: string;
+    homeLabel: string;
+    backLabel: string;
+    startVisible: bool;
+    pageVisible: bool;
+    linked: bool;
     sitesHeading: string;
     sites: list<PageRow>;
     registerHeading: string;
@@ -319,6 +326,7 @@ async fn visit(address: string) -> void {
 }
 
 async watch port.messageReceived(message) {
+    linked = true;
     if (message.topic == "dns.found") {
         sites = splitNames(field(message.payload, 1));
         if (sites.length == 0) { notice = "nothing"; }
@@ -387,6 +395,12 @@ pub fn view(context: app.AppContext) -> BrowserState {
         historyHeading: tr(ru, "Recent pages", "Недавние страницы"),
         marksHeading: tr(ru, "Bookmarks", "Закладки"),
         hint: tr(ru, "Type a name to search the city, or an address: CODE/view, citi://name", "Введите имя для поиска или адрес: КОД/вид, citi://имя"),
+        tagline: tr(ru, "The city network", "Сеть города"),
+        homeLabel: tr(ru, "Home", "Домой"),
+        backLabel: tr(ru, "Back", "Назад"),
+        startVisible: current.length < 1,
+        pageVisible: current.length > 0,
+        linked: linked,
         sitesHeading: tr(ru, "Sites on the network", "Сайты сети"),
         sites: siteRows(),
         registerHeading: tr(ru, "Register a city name", "Зарегистрировать имя"),
@@ -442,5 +456,19 @@ pub async fn confirm(context: app.AppContext, input: MarkInput) -> result<void> 
         }
         err(problem) => { notice = "nofunds"; }
     }
+    return ok(());
+}
+
+// Back to the start page: the page of the last site stays loaded behind it until another one is opened.
+pub async fn home(context: app.AppContext, input: MarkInput) -> result<void> {
+    current = "";
+    notice = "";
+    await ask("");
+    return ok(());
+}
+
+// One step back through the pages that were opened.
+pub async fn back(context: app.AppContext, input: MarkInput) -> result<void> {
+    if (history.length >= 2) { await visit(history[history.length - 2]); }
     return ok(());
 }

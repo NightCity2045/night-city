@@ -133,7 +133,7 @@ public sealed partial class NCMetaMuiRenderer : BoxContainer
         if (node.Kind == MuiControlKind.Site && control is BoxContainer siteBox)
         {
             siteBox.VerticalExpand = true;
-            siteBox.MinHeight = 280;
+            siteBox.MinHeight = 300;
             SiteHost ??= siteBox;
         }
         control.Name = node.Id;

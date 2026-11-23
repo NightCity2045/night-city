@@ -187,7 +187,6 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
         var actorId = new NCActorId(Guid.NewGuid());
         if (firmwareHost || nativeOwner || hotFirmware)
         {
-            await CreateNativeServiceOwnerAsync(actorId, "Fixture device owner");
             await NCMetaNativeActorHarness.RestoreBinding(Server, actorId, actor);
             _nativeSoftwareBodies.Add(actor);
         }
@@ -195,7 +194,6 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
         var sourceActorId = new NCActorId(Guid.NewGuid());
         if (sourceActor is { } nativeSourceActor)
         {
-            await CreateNativeServiceOwnerAsync(sourceActorId, "Fixture software publisher");
             await NCMetaNativeActorHarness.RestoreBinding(Server, sourceActorId, nativeSourceActor);
             _nativeSoftwareBodies.Add(nativeSourceActor);
         }

@@ -109,6 +109,9 @@ public sealed partial class NCMetaWorkspaceSystem : EntitySystem
     }
 
     /// <summary>A package identity is a hash; players see its first symbols rather than the whole thing.</summary>
+    /// <summary>What the server last told a player about a request; read by tests and diagnostics, never by gameplay.</summary>
+    public string? LastNotice { get; set; }
+
     private static string ShortPackageName(string identity) => identity.Length <= 16 ? identity : identity[..16] + "...";
 
     private void OnOpened(Entity<NCMetaTerminalComponent> ent, ref BoundUIOpenedEvent args)
@@ -449,6 +452,7 @@ public sealed partial class NCMetaWorkspaceSystem : EntitySystem
                         HasComp<NCMetaStorageComponent>(entry.Entity) ? ["meta.files.FileStore"] : [])).ToList();
                 PopulateNativeTools(context, state);
                 state.Chip = ReadChip(context);
+                LastNotice = state.Notice;
                 _ui.ServerSendUiMessage(context.Terminal, NCMetaUiKey.Workspace,
                     new NCMetaWorkspaceUpdateMessage(state), context.User);
                 return true;
