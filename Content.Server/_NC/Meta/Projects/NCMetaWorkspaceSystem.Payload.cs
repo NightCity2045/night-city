@@ -29,6 +29,7 @@ public sealed partial class NCMetaWorkspaceSystem
         NCMetaGrantApprovalRequest value => JsonSerializer.Serialize(value),
         NCMetaBindingsPayload value => JsonSerializer.Serialize(value.Bindings),
         NCMetaHostingQuotePayload value => JsonSerializer.Serialize(value),
+        NCMetaChipPayload value => JsonSerializer.Serialize(value),
         _ => null,
     };
 
@@ -59,6 +60,7 @@ public sealed partial class NCMetaWorkspaceSystem
                 Text(binding.Slot) && Text(binding.TargetDeviceId) && Strings(binding.Members) && Strings(binding.Scopes)),
             NCMetaBindingsPayload value => Bindings(value.Bindings),
             NCMetaHostingQuotePayload value => Text(value.Domain) && Text(value.View),
+            NCMetaChipPayload value => Text(value.Name) && Text(value.Description),
             NCMetaSoftwarePurchaseRequest or NCMetaSoftwareAcceptResaleRequest or NCMetaSoftwareDiscardCopyRequest or NCMetaFirmwareSelection => true,
             _ => false,
         };

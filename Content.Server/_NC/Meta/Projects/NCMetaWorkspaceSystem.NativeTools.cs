@@ -3,6 +3,7 @@ using Content.Server._NC.Meta.Runtime;
 using Content.Server._NC.Meta.Persistence;
 using Content.Shared._NC.Meta;
 using Content.Shared._NC.Meta.UI;
+using Content.Shared.Containers.ItemSlots;
 using Content.Shared.UserInterface;
 using Content.Shared.Verbs;
 
@@ -10,25 +11,50 @@ namespace Content.Server._NC.Meta.Projects;
 
 public sealed partial class NCMetaWorkspaceSystem
 {
+    [Dependency] private ItemSlotsSystem _chipSlots = default!;
     private readonly Dictionary<(EntityUid Terminal, EntityUid User), string> _nativeTools = [];
-    private static readonly string[] NativeToolViews = ["installer", "recovery", "hardware", "diagnostics"];
+    private static readonly string[] NativeToolViews = ["installer", "recovery", "hardware", "diagnostics", "network"];
 
     private void InitializeNativeTools()
     {
-        SubscribeLocalEvent<NCMetaTerminalComponent, GetVerbsEvent<AlternativeVerb>>(OnNativeToolsVerbs);
         SubscribeLocalEvent<NCMetaTerminalComponent, ComponentShutdown>(OnNativeToolsShutdown);
     }
 
-    private void OnNativeToolsVerbs(Entity<NCMetaTerminalComponent> ent, ref GetVerbsEvent<AlternativeVerb> args)
+    /// <summary>
+    /// Using a terminal or server is just opening it: no menu verbs. A device nobody owns becomes the user's on first use,
+    /// and whatever is cabled to it and owned by nobody joins the user's network. Called from OnOpened.
+    /// </summary>
+    private void ClaimOnOpen(EntityUid terminal, EntityUid user) =>
+        UseDevice(terminal, user, _devices.CanManage(terminal, user), () => { });
+
+    private void UseDevice(EntityUid terminal, EntityUid user, bool owned, Action open)
     {
-        if (!args.CanAccess || !args.CanInteract || !_devices.CanManage(ent.Owner, args.User)) return;
-        var actor = args.User;
-        // One service panel switches between installer, recovery, hardware monitor and diagnostics itself.
-        args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString("nc-meta-panel-open"),
-            Act = () => TryOpenNativeTools(ent.Owner, actor, NativeToolViews[0]) });
-        if (ent.Comp.AllowEditor)
-            args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString("nc-meta-domain-workspace"),
-                Act = () => TryOpenDevelopmentWorkspace(ent.Owner, actor) });
+        if (owned)
+        {
+            ClaimCabled(terminal, user);
+            open();
+            return;
+        }
+
+        _devices.TryClaim(terminal, user, claimed =>
+        {
+            if (!claimed) return;
+            ClaimCabled(terminal, user);
+            open();
+        });
+    }
+
+    /// <summary>Whatever is cabled to the user's device and belongs to nobody joins the user's network.</summary>
+    private void ClaimCabled(EntityUid terminal, EntityUid user)
+    {
+        var count = 0;
+        foreach (var entry in _devices.GetRegistered().ToList())
+        {
+            if (count >= 16) break;
+            if (entry.Entity == terminal || entry.Owner.Length != 0 || !_devices.CanClaim(entry.Entity, user, requireRange: false) ||
+                !_runtime.CanReach(terminal, entry.Entity)) continue;
+            if (_devices.TryClaim(entry.Entity, user, requireRange: false)) count++;
+        }
     }
 
     /// <summary>Whether the device offers the source editor; servers only offer the service panel.</summary>
@@ -141,7 +167,21 @@ public sealed partial class NCMetaWorkspaceSystem
                 profile.MemoryBytes, usage?.WindowGas ?? 0, profile.GasPerWindow, physical?.ThrottlePermille ?? 0,
                 physical?.LoadFactor ?? 0, physical?.AppliedWatts ?? 0, physical?.TemperatureKelvin, linkReserve, linkCapacity));
         }
-        state.NativeTools = new(view, hardware);
+        var chipId = ""; var chipName = "";
+        if (_chipSlots.TryGetSlot(context.Terminal, NCMetaChipSlot.Id, out var slot) && slot.Item is { } chip &&
+            _devices.TryGetEntry(chip, out var chipEntry) && _devices.CanManage(chipEntry.Entity, context.User, requireRange: false))
+        { chipId = chipEntry.Id; chipName = Name(chip); }
+        var network = new List<NCMetaConnectedDevice>();
+        foreach (var entry in _devices.GetOwned(context.Owner).Take(128))
+        {
+            if (network.Count >= 64) break;
+            if (entry.Entity == context.Terminal || !_devices.CanManage(entry.Entity, context.User, requireRange: false) ||
+                !_runtime.TryGetConnection(context.Terminal, entry.Entity, out var cost, out var inUse)) continue;
+            network.Add(new(entry.Id, Name(entry.Entity), cost, inUse));
+        }
+        _citiNet.WarmLocalSites(context.Terminal);
+        var localSites = _citiNet.GetLocalSites(context.Terminal).Select(site => new NCMetaLocalSite(site.Address, site.Host, site.View)).ToList();
+        state.NativeTools = new(view, hardware, chipId, chipName, network, CanOpenDevelopmentWorkspace(context.Terminal), localSites, context.DeviceId);
         state.Files.Clear(); state.Contents.Clear(); state.DebugVariables.Clear();
         state.Templates = state.Templates.Where(value => IsStockTemplate(value.Id)).ToList();
     }

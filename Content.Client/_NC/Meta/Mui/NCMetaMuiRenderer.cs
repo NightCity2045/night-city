@@ -49,6 +49,8 @@ public sealed partial class NCMetaMuiRenderer : BoxContainer
     public long Revision => _state.Revision;
     public Guid SessionId => _state.SessionId;
     public int NativeControlCount => Count(this) - 1;
+    /// <summary>The root page title as the player sees it (a literal or the current value of its binding).</summary>
+    public string PageTitle => _rejected ? "" : Value(_contract.Root, "title");
     private static int Count(Control control) => 1 + control.Children.Sum(Count);
 
     public NCMetaMuiRenderer(NCMetaMuiPresentation contract, string viewId,

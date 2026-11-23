@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 nc-meta-tools-title = Device service tools
-nc-meta-tools-installer = Software installer
-nc-meta-tools-recovery = Installation recovery
-nc-meta-tools-hardware = Hardware monitor
-nc-meta-tools-diagnostics = Device diagnostics
+nc-meta-tools-installer = Programs
+nc-meta-tools-recovery = Rollback
+nc-meta-tools-hardware = Overview
+nc-meta-tools-diagnostics = Log
 nc-meta-tools-description = Install a licensed product, review its connections and permissions, or restore a known working version. Source editing is available in the separate development workspace.
 nc-meta-tools-refresh = Refresh measurements
-nc-meta-tools-hardware-row = {$name}: {$power}, {$health}
+nc-meta-tools-hardware-row = {$name} [{$id}]: {$power}, {$health}
 nc-meta-tools-processes = Processes: {$used} / {$limit}
 nc-meta-tools-links = Link capacity: {$used} / {$limit}
 nc-meta-tools-memory = Reserved memory: {$used} / {$limit} bytes
@@ -35,3 +35,17 @@ nc-meta-tools-binding-consent = I approve the displayed connections and permissi
 nc-meta-panel-open = META service panel
 nc-meta-tools-maintenance-confirm = Stops every installed program. Press again to confirm.
 nc-meta-tools-maintenance-leave-confirm = Reboots the host. Press again to confirm.
+nc-meta-chip-slot = META chip slot
+nc-meta-tools-load-chip = Load the program from the chip: {$name}
+ent-NCMetaProgramChip = META program chip
+    .desc = A small chip for a device chip slot. Its capacity fits what an embedded host can run. Strong protection needs a server.
+nc-meta-tools-network = Network
+nc-meta-tools-network-help = Devices this host reaches by cable or radio. Each running link reserves capacity; a program can only be bound to a device listed here. Write the code in the program as link door: Door = "K7Q-4MD".
+nc-meta-tools-network-row = [{$id}] {$name} — link cost {$cost}
+nc-meta-tools-network-row-used = [{$id}] {$name} — link cost {$cost}, in use by a program
+nc-meta-tools-network-empty = No other device is reachable. Lay a data cable to the host or bring a radio port into range.
+nc-meta-tools-installed = Installed programs
+nc-meta-tools-installation-row = {$name} - {$startup}
+nc-meta-tools-step-program = 1. Program
+nc-meta-tools-step-connections = 2. Connections
+nc-meta-tools-no-program = Put a program chip into the slot of this device, then open the panel again.

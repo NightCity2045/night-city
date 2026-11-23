@@ -116,6 +116,10 @@
     {
       "id": "meta-stock-security-journal",
       "manifest": "Resources/Meta/Projects/meta-stock-security-journal/manifest.json"
+    },
+    {
+      "id": "meta-example-citypulse",
+      "manifest": "Resources/Meta/Projects/meta-example-citypulse/manifest.json"
     }
   ]
 }

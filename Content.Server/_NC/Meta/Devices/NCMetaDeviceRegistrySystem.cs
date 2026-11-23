@@ -38,6 +38,8 @@ public sealed partial class NCMetaDeviceRegistrySystem : EntitySystem
     private readonly Dictionary<string, NCMetaDeviceEntry> _devices = new(StringComparer.Ordinal);
     private readonly Dictionary<EntityUid, string> _entities = [];
     private readonly Dictionary<string, HashSet<string>> _owners = new(StringComparer.Ordinal);
+    private readonly Dictionary<EntityUid, string> _reserved = [];
+    private readonly HashSet<string> _reservedCodes = new(StringComparer.Ordinal);
     private readonly List<Func<EntityUid, bool?>> _powerPolicies = [];
     private Func<EntityUid, string, bool>? _managementAuthority;
     public void RegisterManagementAuthority(Func<EntityUid, string, bool> authority)
@@ -61,12 +63,44 @@ public sealed partial class NCMetaDeviceRegistrySystem : EntitySystem
     {
         base.Initialize();
         InitializeInteractions();
+        SubscribeLocalEvent<NCMetaHostComponent, ComponentInit>(OnHostComponentInit);
+        SubscribeLocalEvent<NCMetaDeviceComponent, ComponentInit>(OnDeviceComponentInit);
         SubscribeLocalEvent<NCMetaHostComponent, MapInitEvent>(OnHostInit);
         SubscribeLocalEvent<NCMetaDeviceComponent, MapInitEvent>(OnDeviceInit);
         SubscribeLocalEvent<NCMetaHostComponent, ComponentShutdown>(OnHostShutdown);
         SubscribeLocalEvent<NCMetaDeviceComponent, ComponentShutdown>(OnDeviceShutdown);
         SubscribeLocalEvent<NCMetaHostComponent, PowerChangedEvent>(OnHostPower);
         SubscribeLocalEvent<NCMetaDeviceComponent, PowerChangedEvent>(OnDevicePower);
+    }
+
+    // A device gets its code when it is created, not when the round starts, so the code is saved with a mapped entity.
+    private void OnHostComponentInit(Entity<NCMetaHostComponent> ent, ref ComponentInit args) => Reserve(ent.Owner, ref ent.Comp.DeviceId);
+    private void OnDeviceComponentInit(Entity<NCMetaDeviceComponent> ent, ref ComponentInit args) => Reserve(ent.Owner, ref ent.Comp.DeviceId);
+
+    private void Reserve(EntityUid uid, ref string id)
+    {
+        if (id.Length != 0 || HasComp<NCCityPersistentItemAdapterComponent>(uid))
+            return;
+        if (!_reserved.TryGetValue(uid, out var code))
+        {
+            code = NewCode();
+            _reserved.Add(uid, code);
+            _reservedCodes.Add(code);
+        }
+
+        id = code;
+    }
+
+    private string NewCode()
+    {
+        for (var attempt = 0; attempt < 64; attempt++)
+        {
+            var code = NCMetaDeviceIds.Random();
+            if (!_devices.ContainsKey(code) && !_reservedCodes.Contains(code))
+                return code;
+        }
+
+        return Guid.NewGuid().ToString("D");
     }
 
     private void OnHostInit(Entity<NCMetaHostComponent> ent, ref MapInitEvent args) =>
@@ -85,11 +119,14 @@ public sealed partial class NCMetaDeviceRegistrySystem : EntitySystem
             id = previous;
             return;
         }
+        if (_reserved.Remove(uid, out var reserved))
+            _reservedCodes.Remove(reserved);
+        var itemBacked = TryComp<NCCityPersistentItemAdapterComponent>(uid, out var item) && item.ItemId.IsValid;
         if (id.Length == 0)
-            id = TryComp<NCCityPersistentItemAdapterComponent>(uid, out var item) && item.ItemId.IsValid
-                ? NCMetaPersistenceSystem.StableGuid("meta-device:item:" + item.ItemId).ToString("D")
-                : Guid.NewGuid().ToString("D");
-        if (!Guid.TryParseExact(id, "D", out var stable) || stable == Guid.Empty || _devices.ContainsKey(id))
+            id = itemBacked ? NCMetaDeviceIds.FromKey("meta-device:item:" + item!.ItemId) : NewCode();
+        else if (!itemBacked && NCMetaDeviceIds.IsValid(id) && _devices.ContainsKey(id))
+            id = NewCode(); // a copy of a mapped entity keeps the code of its original; the copy is a new device
+        if (!NCMetaDeviceIds.IsValid(id) || _devices.ContainsKey(id))
         {
             Log.Error($"Rejected duplicate or invalid META device identity for {ToPrettyString(uid)}.");
             return;
@@ -134,6 +171,8 @@ public sealed partial class NCMetaDeviceRegistrySystem : EntitySystem
 
     private void Remove(EntityUid uid)
     {
+        if (_reserved.Remove(uid, out var reserved))
+            _reservedCodes.Remove(reserved);
         if (!_entities.Remove(uid, out var id) || !_devices.Remove(id, out var entry))
             return;
         entry.Available = false;
@@ -176,11 +215,11 @@ public sealed partial class NCMetaDeviceRegistrySystem : EntitySystem
         return !requireRange || _interaction.InRangeUnobstructed(user, uid, range: 2);
     }
 
-    public bool CanClaim(EntityUid uid, EntityUid user)
+    public bool CanClaim(EntityUid uid, EntityUid user, bool requireRange = true)
     {
         if (!CanClaimNative(uid, user) || !TryGetEntry(uid, out var entry) || !entry.Ready || entry.Owner.Length != 0 ||
             !_parties.TryResolve(user, out _) || !IsPowered(uid) ||
-            !_interaction.InRangeUnobstructed(user, uid, range: 2))
+            requireRange && !_interaction.InRangeUnobstructed(user, uid, range: 2))
             return false;
         return TryComp<NCMetaHostComponent>(uid, out var host) && host.AllowClaim ||
                TryComp<NCMetaDeviceComponent>(uid, out var device) && device.AllowClaim;

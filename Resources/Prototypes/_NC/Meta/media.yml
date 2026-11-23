@@ -1,11 +1,31 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Removable META media. A terminal exports a project release to it; a device with a chip slot reads it back from the
+# service panel. Both carry the tag that the chip slot accepts.
+- type: Tag
+  id: NCMetaChip
+
 - type: entity
   parent: BaseItem
   id: NCMetaDataCartridge
+  name: META data cartridge
+  description: Removable media for META projects. Claim it, export a release to it at a terminal, then load it elsewhere.
   components:
   - type: Sprite
     sprite: Objects/Misc/module.rsi
     state: generic
+  - type: Tag
+    tags:
+    - NCMetaChip
   - type: NCMetaDevice
     allowClaim: true
   - type: NCMetaRemovableMedia
+
+- type: entity
+  parent: NCMetaDataCartridge
+  id: NCMetaProgramChip
+  name: META program chip
+  description: A small chip for a device's chip slot. Its capacity fits what an embedded host can run. Strong protection needs a server.
+  components:
+  - type: NCMetaRemovableMedia
+    capacityBytes: 262144

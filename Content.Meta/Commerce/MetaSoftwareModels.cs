@@ -117,7 +117,14 @@ public static class MetaSoftwarePolicy
         terms.SupportTicks is >= 0 and <= 315360000000000 && terms.OfflineGraceTicks is >= 0 and <= 25920000000000 &&
         (terms.Offline == MetaOfflinePolicy.GracePeriod ? terms.OfflineGraceTicks > 0 : terms.OfflineGraceTicks == 0);
     public static bool Digest(string? text) => text is { Length: 64 } && text.All(character => character is >= '0' and <= '9' or >= 'a' and <= 'f');
-    public static bool Device(string? text) => Guid.TryParseExact(text, "D", out var value) && value != Guid.Empty && text == value.ToString("D");
+    public static bool Device(string? text) => ShortDevice(text) || Guid.TryParseExact(text, "D", out var value) && value != Guid.Empty && text == value.ToString("D");
+    /// <summary>The six-symbol device code (Crockford base32); long GUIDs stay valid for data saved before codes existed.</summary>
+    public static bool ShortDevice(string? text)
+    {
+        if (text is not { Length: 6 }) return false;
+        foreach (var symbol in text) if ("0123456789ABCDEFGHJKMNPQRSTVWXYZ".IndexOf(symbol) < 0) return false;
+        return true;
+    }
     public static MetaSoftwareScopeDiff ScopeDiff(IEnumerable<string> current, IEnumerable<string> proposed)
     {
         var before = current.ToHashSet(StringComparer.Ordinal); var after = proposed.ToHashSet(StringComparer.Ordinal);

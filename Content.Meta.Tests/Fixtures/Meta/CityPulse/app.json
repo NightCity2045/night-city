@@ -1,0 +1,229 @@
+{
+  "version": "1.0",
+  "views": {
+    "main": {
+      "function": "examples.citypulse.view",
+      "document": "ui/main.mui",
+      "stateType": "examples.citypulse.PulseState",
+      "fields": {
+        "title": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "subtitle": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "live": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "clock": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "footer": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "tabOverview": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "tabDistricts": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "tabMarket": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "tabNews": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "kpiThreatLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "kpiThreatValue": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "kpiThreatNote": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "kpiEddiesLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "kpiEddiesValue": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "kpiEddiesNote": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "kpiNetLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "kpiNetValue": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "kpiNetNote": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "kpiPowerLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "kpiPowerValue": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "kpiPowerNote": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "chartEddiesTitle": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "chartThreatTitle": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "chartPowerTitle": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "mapTitle": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "gridTitle": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "filterTitle": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "filterStatus": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "optAll": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "dangerLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "applyLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "refreshLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "districtsHeading": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "marketHeading": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "newsHeading": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "filterDistrict": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "filterDanger": {
+          "type": "boolean"
+        },
+        "chartEddies": {
+          "type": "array",
+          "maxLength": 512
+        },
+        "chartThreat": {
+          "type": "array",
+          "maxLength": 512
+        },
+        "chartPower": {
+          "type": "array",
+          "maxLength": 512
+        },
+        "hotspots": {
+          "type": "array",
+          "maxLength": 512
+        },
+        "powerNodes": {
+          "type": "array",
+          "maxLength": 512
+        },
+        "districts": {
+          "type": "array",
+          "maxLength": 512
+        },
+        "market": {
+          "type": "array",
+          "maxLength": 512
+        },
+        "news": {
+          "type": "array",
+          "maxLength": 512
+        }
+      },
+      "actions": [
+        "setFilter",
+        "refresh"
+      ]
+    }
+  },
+  "actions": {
+    "setFilter": {
+      "function": "examples.citypulse.setFilter",
+      "inputType": "examples.citypulse.FilterInput",
+      "inputs": {
+        "district": {
+          "type": "string",
+          "maxLength": 48
+        },
+        "danger": {
+          "type": "boolean"
+        }
+      },
+      "scopes": []
+    },
+    "refresh": {
+      "function": "examples.citypulse.refresh",
+      "inputType": "examples.citypulse.RefreshInput",
+      "inputs": {
+        "note": {
+          "type": "string",
+          "maxLength": 32,
+          "required": false
+        }
+      },
+      "scopes": []
+    }
+  },
+  "resources": [
+    "fonts/noto-bold",
+    "fonts/mono",
+    "images/home",
+    "images/info"
+  ]
+}

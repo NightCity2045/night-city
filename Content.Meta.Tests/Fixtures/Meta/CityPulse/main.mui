@@ -1,0 +1,135 @@
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<Page id="root" title="{bind title}">
+    <Column id="layout" gap="10" margin="12" class="page">
+      <Panel id="hero" class="hero">
+        <Row id="heroRow" gap="14">
+          <Image id="logo" resource="images/home" width="56" height="56"/>
+          <Column id="heroText" gap="2">
+            <Header id="title" text="{bind title}" class="title"/>
+            <Text id="subtitle" text="{bind subtitle}" class="subtitle"/>
+            <Row id="statusRow" gap="12">
+              <Text id="live" text="{bind live}" class="live"/>
+              <Text id="clock" text="{bind clock}" class="clock"/>
+            </Row>
+          </Column>
+        </Row>
+      </Panel>
+
+      <Grid id="kpis" columns="4" gap="8">
+        <Panel id="kpiThreat" class="card threat">
+          <Column id="kpiThreatBody" gap="2">
+            <Text id="kpiThreatLabel" text="{bind kpiThreatLabel}" class="kpiLabel"/>
+            <Text id="kpiThreatValue" text="{bind kpiThreatValue}" class="kpiValue"/>
+            <Text id="kpiThreatNote" text="{bind kpiThreatNote}" class="kpiNote"/>
+          </Column>
+        </Panel>
+        <Panel id="kpiEddies" class="card money">
+          <Column id="kpiEddiesBody" gap="2">
+            <Text id="kpiEddiesLabel" text="{bind kpiEddiesLabel}" class="kpiLabel"/>
+            <Text id="kpiEddiesValue" text="{bind kpiEddiesValue}" class="kpiValue"/>
+            <Text id="kpiEddiesNote" text="{bind kpiEddiesNote}" class="kpiNote"/>
+          </Column>
+        </Panel>
+        <Panel id="kpiNet" class="card net">
+          <Column id="kpiNetBody" gap="2">
+            <Text id="kpiNetLabel" text="{bind kpiNetLabel}" class="kpiLabel"/>
+            <Text id="kpiNetValue" text="{bind kpiNetValue}" class="kpiValue"/>
+            <Text id="kpiNetNote" text="{bind kpiNetNote}" class="kpiNote"/>
+          </Column>
+        </Panel>
+        <Panel id="kpiPower" class="card power">
+          <Column id="kpiPowerBody" gap="2">
+            <Text id="kpiPowerLabel" text="{bind kpiPowerLabel}" class="kpiLabel"/>
+            <Text id="kpiPowerValue" text="{bind kpiPowerValue}" class="kpiValue"/>
+            <Text id="kpiPowerNote" text="{bind kpiPowerNote}" class="kpiNote"/>
+          </Column>
+        </Panel>
+      </Grid>
+
+      <Tabs id="tabs">
+        <Tab id="tabOverview" title="{bind tabOverview}">
+          <Column id="overview" gap="8" margin="6">
+            <Grid id="charts" columns="3" gap="8">
+              <Panel id="chartEddiesCard" class="card">
+                <Column id="chartEddiesBody" gap="4">
+                  <Text id="chartEddiesTitle" text="{bind chartEddiesTitle}" class="cardTitle"/>
+                  <Chart id="chartEddies" items="{bind chartEddies}" min="0" max="100" height="110"/>
+                </Column>
+              </Panel>
+              <Panel id="chartThreatCard" class="card">
+                <Column id="chartThreatBody" gap="4">
+                  <Text id="chartThreatTitle" text="{bind chartThreatTitle}" class="cardTitle"/>
+                  <Chart id="chartThreat" items="{bind chartThreat}" min="0" max="100" height="110"/>
+                </Column>
+              </Panel>
+              <Panel id="chartPowerCard" class="card">
+                <Column id="chartPowerBody" gap="4">
+                  <Text id="chartPowerTitle" text="{bind chartPowerTitle}" class="cardTitle"/>
+                  <Chart id="chartPower" items="{bind chartPower}" min="0" max="100" height="110"/>
+                </Column>
+              </Panel>
+            </Grid>
+            <Grid id="maps" columns="2" gap="8">
+              <Panel id="mapCard" class="card">
+                <Column id="mapBody" gap="4">
+                  <Text id="mapTitle" text="{bind mapTitle}" class="cardTitle"/>
+                  <Map id="hotspots" items="{bind hotspots}" height="170"/>
+                </Column>
+              </Panel>
+              <Panel id="gridCard" class="card">
+                <Column id="gridBody" gap="4">
+                  <Text id="gridTitle" text="{bind gridTitle}" class="cardTitle"/>
+                  <Schematic id="powerNodes" items="{bind powerNodes}" height="170"/>
+                </Column>
+              </Panel>
+            </Grid>
+          </Column>
+        </Tab>
+
+        <Tab id="tabDistricts" title="{bind tabDistricts}">
+          <Column id="districtsBody" gap="8" margin="6">
+            <Text id="districtsHeading" text="{bind districtsHeading}" class="heading"/>
+            <Form id="filterForm" action="setFilter">
+              <Row id="filterRow" gap="8">
+                <Select id="filterDistrict" field="district" value="{bind filterDistrict}">
+                  <Option id="optAll" value="all" text="{bind optAll}"/>
+                  <Option id="optCombat" value="Combat Zone" text="Combat Zone"/>
+                  <Option id="optCorp" value="Corporate Center" text="Corporate Center"/>
+                  <Option id="optHeywood" value="Heywood" text="Heywood"/>
+                  <Option id="optJapantown" value="Japantown" text="Japantown"/>
+                  <Option id="optPacifica" value="Pacifica" text="Pacifica"/>
+                  <Option id="optWatson" value="Watson" text="Watson"/>
+                  <Option id="optDomingo" value="Santo Domingo" text="Santo Domingo"/>
+                </Select>
+                <Toggle id="filterDanger" field="danger" value="{bind filterDanger}" text="{bind dangerLabel}"/>
+                <Button id="apply" action="setFilter" text="{bind applyLabel}"/>
+              </Row>
+            </Form>
+            <Text id="filterStatus" text="{bind filterStatus}" class="status"/>
+            <Table id="districts" items="{bind districts}" columns="name threat population rent boss"/>
+          </Column>
+        </Tab>
+
+        <Tab id="tabMarket" title="{bind tabMarket}">
+          <Column id="marketBody" gap="8" margin="6">
+            <Text id="marketHeading" text="{bind marketHeading}" class="heading"/>
+            <Table id="market" items="{bind market}" columns="item price change stock"/>
+          </Column>
+        </Tab>
+
+        <Tab id="tabNews" title="{bind tabNews}">
+          <Column id="newsBody" gap="8" margin="6">
+            <Text id="newsHeading" text="{bind newsHeading}" class="heading"/>
+            <Table id="news" items="{bind news}" columns="time source headline"/>
+          </Column>
+        </Tab>
+      </Tabs>
+
+      <Form id="refreshForm" action="refresh">
+        <Row id="refreshRow" gap="10">
+          <Button id="refresh" action="refresh" text="{bind refreshLabel}"/>
+          <Text id="footer" text="{bind footer}" class="footer"/>
+        </Row>
+      </Form>
+    </Column>
+</Page>

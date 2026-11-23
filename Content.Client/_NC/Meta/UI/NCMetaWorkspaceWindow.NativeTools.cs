@@ -15,13 +15,17 @@ public sealed partial class NCMetaWorkspaceWindow
     private string _toolsSlot = "";
     private readonly Dictionary<string, string> _toolsBindings = [];
     private readonly List<NCMetaDeviceSummary> _toolsLinkDevices = [];
+    private readonly List<NCMetaInstallationSummary> _toolsInstallations = [];
 
     private void InitializeNativeTools()
     {
         TabContainer.SetTabTitle(NativeToolsPanel, Loc.GetString("nc-meta-tools-title"));
         TabContainer.SetTabVisible(NativeToolsPanel, false);
+        // The software catalog and licences are not part of the game: the tab is never shown.
+        TabContainer.SetTabVisible(SoftwareTab, false);
         ToolsInstaller.OnPressed += _ => Request(NCMetaWorkspaceOperation.OpenNativeTools, "installer");
         ToolsRecovery.OnPressed += _ => Request(NCMetaWorkspaceOperation.OpenNativeTools, "recovery");
+        ToolsNetwork.OnPressed += _ => Request(NCMetaWorkspaceOperation.OpenNativeTools, "network");
         ToolsHardware.OnPressed += _ => Request(NCMetaWorkspaceOperation.OpenNativeTools, "hardware");
         ToolsDiagnostics.OnPressed += _ => Request(NCMetaWorkspaceOperation.OpenNativeTools, "diagnostics");
         ToolsMaintenance.OnPressed += _ =>
@@ -30,7 +34,18 @@ public sealed partial class NCMetaWorkspaceWindow
             var host = _state.NativeTools?.Hardware.FirstOrDefault(row => row.DeviceId == _selectedDeviceId);
             if (host != null) Request(NCMetaWorkspaceOperation.SetMaintenance, host.Maintenance ? "leave" : "enter");
         };
-        ToolsMarket.OnPressed += _ => MainContentTabs.CurrentTab = 1;
+        ToolsLoadChip.OnPressed += _ =>
+        {
+            // The chip is the media device; the program it carries becomes the active project of this device and goes
+            // through the ordinary bindings, consent and install below.
+            if (_state.NativeTools is { ChipDeviceId.Length: > 0 } chip)
+                Requested?.Invoke(new(NCMetaWorkspaceOperation.ImportMedia, Guid.NewGuid(), deviceId: chip.ChipDeviceId, projectId: _state.ProjectId));
+        };
+        ToolsLocalSites.OnItemSelected += args =>
+        {
+            if (_state.NativeTools?.LocalSites is { } sites && args.ItemIndex >= 0 && args.ItemIndex < sites.Count)
+                Request(NCMetaWorkspaceOperation.OpenLocalSite, sites[args.ItemIndex].Address);
+        };
         ToolsPermissions.OnPressed += _ => MainContentTabs.CurrentTab = 2;
         ToolsStock.OnItemSelected += args => ToolsStock.SelectId(args.Id);
         ToolsPrepare.OnPressed += _ =>
@@ -53,6 +68,19 @@ public sealed partial class NCMetaWorkspaceWindow
             ToolsBindingConsent.Pressed = false;
             UpdateToolsLinks();
         };
+        ToolsInstallations.OnItemSelected += args =>
+        {
+            if (_applying || args.ItemIndex < 0 || args.ItemIndex >= _toolsInstallations.Count) return;
+            _selectedInstallationId = _toolsInstallations[args.ItemIndex].Id;
+        };
+        ToolsStart.OnPressed += _ => { if (_selectedInstallationId != Guid.Empty) Request(NCMetaWorkspaceOperation.Start); };
+        ToolsPublishLocal.OnPressed += _ =>
+        {
+            // The view to publish: the first one the program declares, "main" by convention.
+            if (_selectedInstallationId != Guid.Empty)
+                Request(NCMetaWorkspaceOperation.PublishLocalSite, _state.ApplicationViews.FirstOrDefault() ?? "main");
+        };
+        ToolsStop.OnPressed += _ => { if (_selectedInstallationId != Guid.Empty) Request(NCMetaWorkspaceOperation.Stop); };
         ToolsBindingConsent.OnToggled += _ => UpdateToolsInstall();
         ToolsInstall.OnPressed += _ =>
         {
@@ -84,11 +112,12 @@ public sealed partial class NCMetaWorkspaceWindow
             ClearSoftwareSource(); Conflict.Visible = false;
         }
         _nativeToolsMode = mode; _nativeToolsView = view;
+        // On a computer the service panel is a section of the desktop; servers have no Studio to go back to.
+        ToolsDesktop.Visible = mode && tools!.CanOpenStudio;
         Title = Loc.GetString(mode ? "nc-meta-tools-title" : "nc-meta-workspace-title");
         NativeToolsMenu.Visible = mode; ProjectToolbar.Visible = !mode; ReleaseInfo.Visible = !mode;
-        Save.Visible = Build.Visible = Tests.Visible = Install.Visible = ExportMedia.Visible = ImportMedia.Visible = !mode;
+        Save.Visible = Build.Visible = Tests.Visible = ExportMedia.Visible = ChipName.Visible = ChipDescription.Visible = !mode;
         TabContainer.SetTabVisible(EditorTab, !mode);
-        TabContainer.SetTabVisible(DevelopmentTab, !mode);
         TabContainer.SetTabVisible(SoftwarePublishPanel, !mode);
         TabContainer.SetTabVisible(SoftwareSourcePanel, !mode);
         TabContainer.SetTabVisible(NativeToolsPanel, mode);
@@ -100,9 +129,12 @@ public sealed partial class NCMetaWorkspaceWindow
         Editor.Editable = false;
         if (change) MainContentTabs.CurrentTab = MainContentTabs.Children.ToList().IndexOf(NativeToolsPanel);
         ToolsHelp.SetMessage(Loc.GetString(tools.View == "recovery" ? "nc-meta-tools-recovery-help" :
-            tools.View == "diagnostics" ? "nc-meta-tools-diagnostics-help" : "nc-meta-tools-description"));
+            tools.View == "diagnostics" ? "nc-meta-tools-diagnostics-help" : tools.View == "network" ? "nc-meta-tools-network-help" : "nc-meta-tools-description"));
         ToolsStockPanel.Visible = tools.View == "installer";
-        ToolsMeasurements.Visible = tools.View is "hardware" or "diagnostics";
+        ToolsLoadChip.Visible = tools.View == "installer" && tools.ChipDeviceId.Length > 0;
+        ToolsLoadChip.Text = Loc.GetString("nc-meta-tools-load-chip", ("name", tools.ChipName));
+        ToolsMeasurements.Visible = tools.View == "hardware";
+        ToolsNetworkList.Visible = ToolsLocalSites.Visible = ToolsLocalSitesTitle.Visible = tools.View == "network";
         var maintenanceHost = tools.Hardware.FirstOrDefault(row => row.DeviceId == _selectedDeviceId);
         ToolsMaintenance.Visible = tools.View == "hardware" && maintenanceHost != null;
         if (maintenanceHost != null)
@@ -115,6 +147,14 @@ public sealed partial class NCMetaWorkspaceWindow
         {
             _toolsRelease = _state.ActiveReleaseId; _toolsDevice = _selectedDeviceId;
             _toolsBindings.Clear(); _toolsSlot = ""; ToolsBindingConsent.Pressed = false;
+            // A link written as a device code (link door: Door = "K7Q-4MD") proposes that device; the owner still approves it.
+            foreach (var link in _state.Links.Take(64))
+            {
+                var code = link.Slot.Replace("-", "").Trim().ToUpperInvariant();
+                var device = code.Length == 6 ? _state.Devices.Take(64).FirstOrDefault(row => row.DeviceId == code &&
+                    row.Interfaces?.Contains(link.Capability) == true) : null;
+                if (device != null) _toolsBindings[link.Slot] = device.DeviceId;
+            }
         }
         var selectedStock = ToolsStock.SelectedId;
         ToolsStock.Clear();
@@ -124,10 +164,24 @@ public sealed partial class NCMetaWorkspaceWindow
         ToolsPrepare.Disabled = ToolsStock.ItemCount == 0;
         ToolsStock.Visible = ToolsPrepare.Visible = ToolsStock.ItemCount > 0;
         UpdateToolsLinks();
+        ToolsConnections.Visible = _state.Links.Count > 0 || _state.ActiveReleaseId != Guid.Empty;
+        ToolsNoProgram.Visible = tools.ChipDeviceId.Length == 0 && _state.Links.Count == 0 && ToolsStock.ItemCount == 0;
+        // The programs installed on this host, with Start and Stop: nothing runs until it is started.
+        _toolsInstallations.Clear();
+        _toolsInstallations.AddRange(_state.Installations.Where(installation => installation.DeviceId == _selectedDeviceId).Take(64));
+        if (_selectedInstallationId == Guid.Empty && _toolsInstallations.Count == 1) _selectedInstallationId = _toolsInstallations[0].Id;
+        ToolsInstallations.Clear();
+        foreach (var installation in _toolsInstallations)
+        {
+            var item = ToolsInstallations.AddItem(Loc.GetString("nc-meta-tools-installation-row", ("name", installation.Name),
+                ("startup", Loc.GetString(installation.AutoStart ? "nc-meta-installation-startup" : "nc-meta-installation-manual"))));
+            item.Selected = installation.Id == _selectedInstallationId;
+        }
+        ToolsStart.Disabled = ToolsStop.Disabled = ToolsPublishLocal.Disabled = _toolsInstallations.Count == 0;
         ToolsMeasurements.Clear();
         foreach (var row in tools.Hardware.Take(64))
         {
-            ToolsMeasurements.AddItem(Loc.GetString("nc-meta-tools-hardware-row", ("name", row.Name),
+            ToolsMeasurements.AddItem(Loc.GetString("nc-meta-tools-hardware-row", ("name", row.Name), ("id", ShortDeviceId(row.DeviceId)),
                 ("power", Loc.GetString(row.PowerKey)), ("health", Loc.GetString(row.HealthKey))), selectable: false);
             ToolsMeasurements.AddItem(Loc.GetString("nc-meta-tools-processes", ("used", row.Processes), ("limit", row.MaximumProcesses)), selectable: false);
             ToolsMeasurements.AddItem(Loc.GetString("nc-meta-tools-links", ("used", row.LinkReserve), ("limit", row.LinkCapacity)), selectable: false);
@@ -138,9 +192,20 @@ public sealed partial class NCMetaWorkspaceWindow
             ToolsMeasurements.AddItem(row.TemperatureKelvin is { } kelvin ? Loc.GetString("nc-meta-tools-temperature", ("kelvin", kelvin)) :
                 Loc.GetString("nc-meta-tools-temperature-unavailable"), selectable: false);
         }
+        ToolsNetworkList.Clear();
+        foreach (var device in tools.Network ?? [])
+            ToolsNetworkList.AddItem(Loc.GetString(device.InUse ? "nc-meta-tools-network-row-used" : "nc-meta-tools-network-row",
+                ("id", ShortDeviceId(device.DeviceId)), ("name", device.Name), ("cost", device.Cost)), selectable: false);
+        ToolsLocalSites.Clear();
+        foreach (var site in tools.LocalSites ?? [])
+            ToolsLocalSites.AddItem(Loc.GetString("nc-meta-tools-local-site-row", ("host", site.Host), ("address", site.Address)));
+        if (tools.Network is not { Count: > 0 }) ToolsNetworkList.AddItem(Loc.GetString("nc-meta-tools-network-empty"), selectable: false);
         if (tools.Hardware.Count == 0) ToolsMeasurements.AddItem(Loc.GetString("nc-meta-tools-no-hosts"), selectable: false);
         ToolsLogs.Clear(); foreach (var log in _state.Logs.TakeLast(256)) ToolsLogs.AddItem(log, selectable: false);
     }
+
+    /// <summary>People read and say device codes in groups of three: K7Q-4MD.</summary>
+    private static string ShortDeviceId(string id) => id.Length == 6 ? id[..3] + "-" + id[3..] : id;
 
     private void UpdateToolsLinks()
     {
@@ -149,7 +214,7 @@ public sealed partial class NCMetaWorkspaceWindow
         {
             var device = _toolsBindings.TryGetValue(link.Slot, out var id) ? _state.Devices.FirstOrDefault(row => row.DeviceId == id) : null;
             var item = ToolsLinks.AddItem(Loc.GetString("nc-meta-market-link", ("slot", link.Slot), ("interface", link.Capability),
-                ("device", device?.Name ?? Loc.GetString("nc-meta-market-link-unassigned"))));
+                ("device", device == null ? Loc.GetString("nc-meta-market-link-unassigned") : device.Name + " [" + ShortDeviceId(device.DeviceId) + "]")));
             item.Selected = link.Slot == _toolsSlot;
         }
         UpdateToolsLinkDevices(); UpdateToolsInstall();
@@ -162,7 +227,7 @@ public sealed partial class NCMetaWorkspaceWindow
         ToolsLinkDevice.Disabled = link == null;
         if (link == null) return;
         _toolsLinkDevices.AddRange(_state.Devices.Take(64).Where(row => row.Interfaces?.Contains(link.Capability) == true));
-        for (var i = 0; i < _toolsLinkDevices.Count; i++) ToolsLinkDevice.AddItem(_toolsLinkDevices[i].Name, i + 1);
+        for (var i = 0; i < _toolsLinkDevices.Count; i++) ToolsLinkDevice.AddItem(_toolsLinkDevices[i].Name + " [" + ShortDeviceId(_toolsLinkDevices[i].DeviceId) + "]", i + 1);
         ToolsLinkDevice.SelectId(_toolsBindings.TryGetValue(link.Slot, out var id) ? _toolsLinkDevices.FindIndex(row => row.DeviceId == id) + 1 : 0);
     }
     private void UpdateToolsInstall() => ToolsInstall.Disabled = !ToolsBindingConsent.Pressed || _state.ActiveReleaseId == Guid.Empty ||

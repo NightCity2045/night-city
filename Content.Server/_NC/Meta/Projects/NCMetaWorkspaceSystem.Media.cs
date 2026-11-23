@@ -20,14 +20,69 @@ public sealed partial class NCMetaWorkspaceSystem
         NCMetaRelease[] Releases, long Revision);
     [Dependency] private SharedInteractionSystem _mediaInteraction = default!;
 
+    [Dependency] private MetaDataSystem _chipMeta = default!;
+    [Dependency] private Content.Shared.Hands.EntitySystems.SharedHandsSystem _chipHands = default!;
+
+    /// <summary>Makes a program chip next to the terminal, in the user's hand if it is free, owned by the user.</summary>
+    private async Task<string?> CreateChipAsync(Context context, NCMetaChipPayload spec)
+    {
+        var name = spec.Name.Trim();
+        var description = spec.Description.Trim();
+        if (name.Length is < 1 or > 40 || description.Length > 200) return null;
+        var made = await OnMainAsync(() =>
+        {
+            if (!IsCurrent(context)) return default((EntityUid Chip, string Id, Content.Shared._NC.Persistence.Identity.NCItemId? Item)?);
+            var chip = Spawn("NCMetaProgramChip", Transform(context.Terminal).Coordinates);
+            _chipMeta.SetEntityName(chip, name);
+            _chipMeta.SetEntityDescription(chip, description);
+            _chipHands.TryPickupAnyHand(context.User, chip);
+            return _devices.TryGetEntry(chip, out var entry)
+                ? (Chip: chip, Id: entry.Id, Item: _devices.GetEconomicItemId(chip))
+                : default((EntityUid Chip, string Id, Content.Shared._NC.Persistence.Identity.NCItemId? Item)?);
+        });
+        if (made is not { } value) return null;
+        // A new device becomes ready only after the registry has read its durable record.
+        var ready = false;
+        for (var attempt = 0; attempt < 30 && !ready; attempt++)
+        {
+            ready = await OnMainAsync(() => _devices.TryGetEntry(value.Chip, out var current) && current.Ready);
+            if (!ready) await Task.Delay(100);
+        }
+        if (!ready)
+        {
+            await OnMainAsync(() => { if (Exists(value.Chip)) Del(value.Chip); return true; });
+            return null;
+        }
+        var record = await _persistence.ClaimDeviceAsync(Guid.NewGuid(), value.Id, context.Owner,
+            Loc.GetString("nc-meta-default-project"), context.Epoch, context.Time, value.Item);
+        var owned = record != null && await OnMainAsync(() => Exists(value.Chip) &&
+            _devices.TryApplyOwner(value.Chip, value.Id, string.Empty, context.Owner, record.AuthorityEpoch));
+        if (!owned) await OnMainAsync(() => { if (Exists(value.Chip)) Del(value.Chip); return true; });
+        return owned ? value.Id : null;
+    }
+
     private async Task<NCMetaMutationOutcome> TransferMediaAsync(Context context, NCMetaDeviceRecord device,
         NCMetaProject project, NCMetaWorkspaceRequestMessage request)
     {
         using var lease = _persistence.TryBeginNativeMutation();
         if (lease == null) return new(false, "nc-meta-error-busy");
+        var mediaId = request.DeviceId;
+        var programName = project.Name;
+        if (request.Operation == NCMetaWorkspaceOperation.ExportMedia)
+        {
+            // A chip is made from the project: the player only names and describes it.
+            // The request payload arrives as JSON in Source, like every other typed workspace payload.
+            NCMetaChipPayload? spec = null;
+            try { spec = JsonSerializer.Deserialize<NCMetaChipPayload>(request.Source); }
+            catch (JsonException) { }
+            if (spec == null || await CreateChipAsync(context, spec) is not { } created)
+                return new(false, "nc-meta-error-access");
+            mediaId = created;
+            programName = spec.Name.Trim();
+        }
         var target = await OnMainAsync(() =>
         {
-            if (!IsCurrent(context) || !_devices.TryResolve(request.DeviceId, out var media) ||
+            if (!IsCurrent(context) || !_devices.TryResolve(mediaId, out var media) ||
                 !_devices.CanManage(media.Entity, context.User) ||
                 !_mediaInteraction.InRangeUnobstructed(context.Terminal, media.Entity, range: 2) ||
                 !TryComp<NCMetaRemovableMediaComponent>(media.Entity, out var component)) return null;
@@ -55,7 +110,7 @@ public sealed partial class NCMetaWorkspaceSystem
                 bytes += artifact.Length;
             }
             if (bytes > target.CapacityBytes) return new(false, "nc-meta-error-quota");
-            var package = new MediaPackage(target.Id, project.Name, project.Files, releases, checked((stored?.AggregateVersion ?? 0) + 1));
+            var package = new MediaPackage(target.Id, programName, project.Files, releases, checked((stored?.AggregateVersion ?? 0) + 1));
             var payload = JsonSerializer.Serialize(package);
             if (payload.Length > 256 * 1024 || !await OnMainAsync(Current)) return new(false, "nc-meta-error-access");
             var result = await _contactDatabase.ApplyNCPersistentMutationAsync(new(request.RequestId, "meta.media.export", "meta.owner", context.Owner,

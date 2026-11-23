@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+using Content.Server._NC.Meta.Devices;
 using System.Text.Json;
 using Content.Server.Database;
 using Content.Shared._NC.Persistence.Identity;
@@ -22,7 +23,7 @@ public sealed partial class NCMetaPersistenceSystem
         try
         {
             var mapping = JsonSerializer.Deserialize<EconomicDevice>(snapshot.Payload, Json);
-            return mapping?.ItemId == itemId && Guid.TryParseExact(mapping.DeviceId, "D", out var id) && id != Guid.Empty
+            return mapping?.ItemId == itemId && NCMetaDeviceIds.IsValid(mapping.DeviceId)
                 ? mapping.DeviceId : null;
         }
         catch (JsonException) { return null; }
@@ -31,7 +32,7 @@ public sealed partial class NCMetaPersistenceSystem
     /// <summary>Trusted outer CAS participant only; caller must join physical item and device owner guards.</summary>
     public async Task<(bool Valid, NCPersistentAggregateWrite? Write)> PrepareEconomicDeviceMappingAsync(NCItemId itemId, string deviceId)
     {
-        if (!itemId.IsValid || !Guid.TryParseExact(deviceId, "D", out var id) || id == Guid.Empty) return (false, null);
+        if (!itemId.IsValid || !NCMetaDeviceIds.IsValid(deviceId)) return (false, null);
         var snapshot = await _snapshots.ReadCurrentAsync(EconomicDeviceType, itemId.ToString());
         if (snapshot != null) return (await ReadEconomicDeviceIdAsync(itemId) == deviceId, null);
         return (true, new(Guid.NewGuid(), "meta.economic-device.claimed", EconomicDeviceType, itemId.ToString(),

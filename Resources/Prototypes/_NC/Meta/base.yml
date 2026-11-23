@@ -39,6 +39,13 @@
     allowClaim: true
   - type: NCMetaTerminal
     allowEditor: false
+  - type: ItemSlots
+    slots:
+      nc_meta_chip:
+        name: nc-meta-chip-slot
+        whitelist:
+          tags:
+          - NCMetaChip
   - type: NCMetaStorage
     capacityBytes: 268435456
   - type: NCMetaPort

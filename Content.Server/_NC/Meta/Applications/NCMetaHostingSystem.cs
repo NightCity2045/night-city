@@ -597,7 +597,7 @@ public sealed partial class NCMetaHostingSystem : EntitySystem
     private static bool Valid(object value, string id, long revision)
     {
         static bool Party(string? party) => party is not null && NCPartyRef.TryParse(party, out _);
-        static bool Host(string? host) => Guid.TryParseExact(host, "D", out var guid) && guid != Guid.Empty && host == guid.ToString("D");
+        static bool Host(string? host) => NCMetaDeviceIds.IsValid(host);
         static bool Digest(string? digest) => digest is { Length: 64 } && digest.All(c => c is >= '0' and <= '9' or >= 'a' and <= 'f');
         static bool View(string? view) => view is not null && MuiBinding.IsPath(view);
         static bool Domain(string? domain) => domain is not null && MuiCitiNetAddress.IsDomain(domain);

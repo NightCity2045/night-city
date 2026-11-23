@@ -64,7 +64,7 @@ public sealed partial class NCMetaApplicationView : BoxContainer
 #endif
         Notice.Text = result == MuiUpdateResult.Invalid ? Loc.GetString("nc-meta-view-invalid") :
             result == MuiUpdateResult.Gap ? Loc.GetString("nc-meta-view-resync") : state.Notice;
-        TitleChanged?.Invoke(state.Title);
+        TitleChanged?.Invoke(_renderer.PageTitle is { Length: > 0 } pageTitle ? pageTitle : state.Title);
     }
 
     private void RequestAction(string action, string json)

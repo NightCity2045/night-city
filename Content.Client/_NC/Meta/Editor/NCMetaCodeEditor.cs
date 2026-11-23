@@ -715,7 +715,8 @@ public sealed partial class NCMetaCodeEditor : Control
         {
             var visual = _visual[line];
             var top = (line - _firstLine) * height;
-            var baseline = top + _font.GetAscent(UIScale);
+            // DrawString takes the top-left corner and adds the ascent itself; passing a baseline drew text a row below the caret.
+            var baseline = top;
             if (visual.Start == _lines[visual.Line])
                 handle.DrawString(_font, new Vector2(4 * UIScale, baseline), (visual.Line + 1).ToString(CultureInfo.InvariantCulture), Color.Gray);
             var x = 52 * UIScale;

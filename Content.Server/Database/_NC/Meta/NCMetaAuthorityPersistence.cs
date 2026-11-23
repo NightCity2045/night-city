@@ -68,8 +68,7 @@ public abstract partial class ServerDbBase
         if (authority == null) return;
         if (authority.Devices is not { Length: > 0 and <= 65 } ||
             authority.Devices.Any(device => device == null || device.AuthorityEpoch < 2 ||
-                !Guid.TryParseExact(device.DeviceId, "D", out var id) || id == Guid.Empty ||
-                device.DeviceId != id.ToString("D") || !NCPartyRef.TryParse(device.Owner, out var owner) ||
+                !Content.Meta.Commerce.MetaSoftwarePolicy.Device(device.DeviceId) || !NCPartyRef.TryParse(device.Owner, out var owner) ||
                 owner.ToString() != device.Owner) ||
             authority.Devices.Select(device => device.DeviceId).Distinct(StringComparer.Ordinal).Count() != authority.Devices.Length ||
             authority.Employment is { } proof && (proof.CharacterId <= 0 || proof.LastEventId <= 0 ||

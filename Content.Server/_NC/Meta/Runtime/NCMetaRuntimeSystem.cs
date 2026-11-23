@@ -257,6 +257,39 @@ public sealed partial class NCMetaRuntimeSystem : EntitySystem
                CanInstallOwned(host, device.Owner, artifact, bindings);
     }
 
+    /// <summary>The first reason an installation is refused, for the player; null when nothing blocks it.</summary>
+    public string? DiagnoseInstall(EntityUid host, EntityUid user, VerifiedArtifact artifact, NCMetaBinding[] bindings)
+    {
+        if (!_devices.TryGetEntry(host, out var device)) return "host-missing";
+        if (!_devices.CanManage(host, user)) return "host-not-managed";
+        if (!device.Ready) return "host-not-ready";
+        if (IsOperationallyBlocked(artifact)) return "artifact-blocked";
+        if (!_devices.IsPowered(host)) return "host-unpowered";
+        if (!TryComp<NCMetaHostComponent>(host, out var hardware) || hardware.Disabled ||
+            !_prototypes.TryIndex(hardware.Profile, out var profile) || !profile.AllowUserPackages) return "host-unsupported";
+        if (!_hardware.CanRun(host, profile)) return "host-cannot-run";
+        if (artifact.Manifest.RuntimeAbi != profile.RuntimeAbi || artifact.Manifest.LanguageVersion != profile.LanguageVersion) return "abi";
+        if (bindings.Length != artifact.GetLinks().Length) return "bindings";
+        foreach (var link in artifact.GetLinks())
+        {
+            var binding = bindings.SingleOrDefault(value => value.Slot == link.SlotName);
+            var capability = artifact.GetType(link.CapabilityTypeId);
+            if (binding == null || binding.ContractHash != link.ContractHash) return "bindings";
+            if (!profile.Interfaces.Contains(capability.Name)) return "host-interface";
+            if (!_devices.TryResolve(binding.DeviceId, out var target)) return "device-missing";
+            if (!target.Ready) return "device-not-ready";
+            if (target.Owner != device.Owner) return "device-not-owned";
+            if (!_devices.IsPowered(target.Entity)) return "device-unpowered";
+            if (!HasInterface(target.Entity, capability.Name)) return "device-interface";
+            if (!CanReach(host, target.Entity)) return "device-unreachable";
+            var requested = MetaApiCatalog.Default.Members.Where(member => member.Owner == capability.Name &&
+                artifact.Manifest.RequiredScopes.Contains(member.Scope)).Select(member => member.Scope);
+            if (requested.Any(scope => !binding.Scopes.Contains(scope, StringComparer.Ordinal))) return "scopes";
+        }
+
+        return null;
+    }
+
     public bool CanInstallFirmware(EntityUid host, EntityUid user, VerifiedArtifact artifact, NCMetaBinding[] bindings) =>
         _devices.CanManage(host, user) && _hardware.CanStageFirmware(host, user) && _devices.TryGetEntry(host, out var device) &&
         CanInstallOwned(host, device.Owner, artifact, bindings, "Firmware", firmwareStaging: true);
@@ -338,7 +371,7 @@ public sealed partial class NCMetaRuntimeSystem : EntitySystem
         var count = GetProcessCount(host) - (old == null ? 0 : 1);
         if (!MetaMemoryAdmission.TryPlan(profile.MemoryBytes, profile.MaxProcesses, artifact.ResidentMemoryBytes,
             artifact.MinimumProcessMemoryBytes, installation.MemoryLimitBytes, reserved, out var memory)) return false;
-        if (!CanReserveLinks(host, profile, installation, old)) return false;
+        if (!CanReserveLinks(host, profile, installation, old) || IsDeviceTaken(host, installation)) return false;
         if (count >= profile.MaxProcesses ||
             artifact.MaximumConstantStringBytes > 32768 ||
             installation.SlotKind == "Firmware" && _hosts.TryGetValue(host, out var slots) &&

@@ -11,6 +11,7 @@ using Content.Meta.Mui;
 using Content.Server.Database;
 using Content.Server._NC.Agent;
 using Content.Server._NC.Meta.Devices;
+using Content.Server._NC.Meta.Network;
 using Content.Server._NC.Meta.Persistence;
 using Content.Server._NC.Meta.Authority;
 using Content.Server._NC.Meta.Commerce;
@@ -24,13 +25,13 @@ using Robust.Shared.Timing;
 
 namespace Content.Server._NC.Meta.Applications;
 
-public sealed record NCMetaSiteOutcome(bool Success, string Address = "");
+public sealed record NCMetaSiteOutcome(bool Success, string Address = "", string Reason = "");
 
 /// <summary>Durable, explicit publications on the existing authenticated CitiNet Agent route.</summary>
 public sealed partial class NCMetaCitiNetSystem : EntitySystem
 {
     private const string PublicationType = "meta.site-publication";
-    private sealed record Publication(string HostId, string Owner, string PackageDigest, string View, bool Active, long Revision);
+    private sealed record Publication(string HostId, string Owner, string PackageDigest, string View, bool Active, long Revision, bool Local = false);
     private static readonly JsonSerializerOptions Json = new() { MaxDepth = 8 };
     [Dependency] private NCMetaDeviceRegistrySystem _devices = default!;
     [Dependency] private NCMetaApplicationSystem _applications = default!;
@@ -43,6 +44,7 @@ public sealed partial class NCMetaCitiNetSystem : EntitySystem
     [Dependency] private NCAgentSystem _agents = default!;
     [Dependency] private SharedUserInterfaceSystem _ui = default!;
     [Dependency] private IGameTiming _timing = default!;
+    [Dependency] private NCMetaNetworkSystem _network = default!;
     private readonly Dictionary<Guid, Publication> _sites = [];
     private readonly Dictionary<EntityUid, (MetaRateLimit Rate, Guid LastRequest, TimeSpan Expires)> _navigation = [];
     private NCSessionEpoch _epoch;
@@ -55,43 +57,43 @@ public sealed partial class NCMetaCitiNetSystem : EntitySystem
         SubscribeLocalEvent<NCMetaBrowserUiLifecycleComponent, ComponentShutdown>(OnShutdown);
     }
 
-    public async Task<NCMetaSiteOutcome> TryPublishSelfHostedAsync(EntityUid host, EntityUid user, Guid requestId, string view, Guid runtimeGeneration = default)
+    public async Task<NCMetaSiteOutcome> TryPublishSelfHostedAsync(EntityUid host, EntityUid user, Guid requestId, string view, Guid runtimeGeneration = default, bool local = false)
     {
         using var mutation = _persistence.TryBeginNativeMutation();
-        if (mutation is null) return new(false);
+        if (mutation is null) return new(false, "", "busy");
         if (requestId == Guid.Empty || !_devices.CanManage(host, user) || !_devices.TryGetEntry(host, out var device) ||
             !_authority.TryGetManagementProof(user, device.Owner, out var management) ||
-            !Guid.TryParseExact(device.Id, "D", out var id) || !Connected(host) ||
+            !NCMetaDeviceIds.TryToGuid(device.Id, out var id) || !(local || Connected(host)) ||
             !(runtimeGeneration == Guid.Empty ? _applications.TryGetRegistration(host, out var app) :
                 _applications.TryGetRegistration(host, runtimeGeneration, out app)) || !app.Application.Views.ContainsKey(view) ||
             !_persistence.TryCaptureTime(out var epoch, out var time))
-            return new(false);
+            return new(false, "", PublishFailure(host, user, local, runtimeGeneration, view));
         var hostId = device.Id;
         var owner = app.Owner;
         var generation = app.RuntimeGeneration;
         var packageDigest = app.Application.PackageDigest;
         if (management.Owner.ToString() != owner) return new(false);
         var current = await ReadPublicationAsync(id);
-        var next = new Publication(hostId, owner, packageDigest, view, true, (current?.Revision ?? 0) + 1);
+        var next = new Publication(hostId, owner, packageDigest, view, true, (current?.Revision ?? 0) + 1, local);
         var authority = await Main(() => _authority.IsCurrent(management) && _devices.CanManage(host, user) &&
             _devices.TryGetEntry(host, out var deviceNow) && deviceNow.Id == hostId && deviceNow.Owner == owner &&
             deviceNow.DeviceEpoch == device.DeviceEpoch && deviceNow.AuthorityEpoch == device.AuthorityEpoch &&
             _applications.TryGetRegistration(host, generation, out var fresh) &&
-            fresh.Owner == owner && fresh.RuntimeGeneration == generation && Connected(host) &&
+            fresh.Owner == owner && fresh.RuntimeGeneration == generation && (local || Connected(host)) &&
             _persistence.TryCaptureTime(out var currentEpoch, out _) && currentEpoch == epoch
                 ? _authority.CaptureWriteConstraints(management, host) : null);
         if (authority == null)
-            return new(false);
+            return new(false, "", "authority");
         var persisted = await _database.ApplyNCPersistentMutationAsync(new(requestId, "meta.site.publish", "meta.owner", owner,
-            Guid.NewGuid(), "meta.site.published", PublicationType, hostId, current?.Revision ?? 0, 1,
+            Guid.NewGuid(), "meta.site.published", PublicationType, id.ToString("D"), current?.Revision ?? 0, 1,
             JsonSerializer.Serialize(next, Json), "{}", "{}", requestId, null, epoch, time, [],
-            RequestFingerprint: Fingerprint(owner, hostId, packageDigest, view), Authority: authority));
+            RequestFingerprint: Fingerprint(owner, hostId, packageDigest, view, local ? "local" : "citinet"), Authority: authority));
         if (persisted.Status is not (NCPersistentMutationStatus.Applied or NCPersistentMutationStatus.DuplicateCompleted))
-            return new(false);
+            return new(false, "", "storage");
         var committed = await ReadPublicationAsync(id);
         var enabled = committed is not null && committed.Active && committed.Owner == owner && committed.PackageDigest == packageDigest &&
             committed.View == view && await Main(() => Restore(id, committed));
-        return new(enabled, enabled ? new MuiCitiNetAddress(id, view).ToString() : "");
+        return new(enabled, enabled ? (local ? NCMetaDeviceIds.Format(hostId) + "/" + view : new MuiCitiNetAddress(id, view).ToString()) : "");
     }
 
     public async Task<bool> TryWithdrawAsync(EntityUid host, EntityUid user, Guid requestId)
@@ -100,7 +102,7 @@ public sealed partial class NCMetaCitiNetSystem : EntitySystem
         if (mutation is null) return false;
         if (requestId == Guid.Empty || !_devices.CanManage(host, user) || !_devices.TryGetEntry(host, out var device) ||
             !_authority.TryGetManagementProof(user, device.Owner, out var management) ||
-            !Guid.TryParseExact(device.Id, "D", out var id) || !_persistence.TryCaptureTime(out var epoch, out var time))
+            !NCMetaDeviceIds.TryToGuid(device.Id, out var id) || !_persistence.TryCaptureTime(out var epoch, out var time))
             return false;
         var owner = device.Owner;
         var current = await ReadPublicationAsync(id);
@@ -115,7 +117,7 @@ public sealed partial class NCMetaCitiNetSystem : EntitySystem
             return false;
         var next = current with { Active = false, Revision = current.Revision + 1 };
         var result = await _database.ApplyNCPersistentMutationAsync(new(requestId, "meta.site.withdraw", "meta.owner", owner,
-            Guid.NewGuid(), "meta.site.withdrawn", PublicationType, device.Id, current.Revision, 1,
+            Guid.NewGuid(), "meta.site.withdrawn", PublicationType, id.ToString("D"), current.Revision, 1,
             JsonSerializer.Serialize(next, Json), "{}", "{}", requestId, null, epoch, time, [],
             RequestFingerprint: Fingerprint(owner, device.Id, "withdraw"), Authority: authority));
         if (result.Status is not (NCPersistentMutationStatus.Applied or NCPersistentMutationStatus.DuplicateCompleted))
@@ -127,10 +129,73 @@ public sealed partial class NCMetaCitiNetSystem : EntitySystem
     }
 
     private bool Connected(EntityUid host) => _marketplace.HasCitiNetRoute(host);
+
+    /// <summary>The first reason a site cannot be published, in plain terms, for the player.</summary>
+    private string PublishFailure(EntityUid host, EntityUid user, bool local, Guid generation, string view)
+    {
+        if (!_devices.TryGetEntry(host, out var device)) return "not-registered";
+        if (!_devices.CanManage(host, user)) return "not-managed";
+        if (!_authority.TryGetManagementProof(user, device.Owner, out _)) return "no-proof";
+        if (!local && !Connected(host)) return "no-route";
+        if (!(generation == Guid.Empty ? _applications.TryGetRegistration(host, out var app) :
+                _applications.TryGetRegistration(host, generation, out app))) return "not-running";
+        if (!app.Application.Views.ContainsKey(view)) return "no-view";
+        return "no-time";
+    }
+
+    /// <summary>Sites published for the local network only, on hosts this device can reach. Read from the cache.</summary>
+    public List<(string Address, string Host, string View)> GetLocalSites(EntityUid terminal)
+    {
+        var result = new List<(string, string, string)>();
+        foreach (var publication in _sites.Values)
+        {
+            if (result.Count >= 32) break;
+            if (!publication.Active || !publication.Local || !_devices.TryResolve(publication.HostId, out var host) ||
+                !_network.CanRoute(terminal, host.Entity)) continue;
+            result.Add((NCMetaDeviceIds.Format(host.Id) + "/" + publication.View, MetaName(host.Entity), publication.View));
+        }
+
+        return result;
+    }
+
+    private string MetaName(EntityUid entity) => Name(entity);
+
+    /// <summary>Loads publications of reachable hosts into the cache, so the next refresh lists them after a restart.</summary>
+    public async void WarmLocalSites(EntityUid terminal)
+    {
+        try
+        {
+            var hosts = _devices.GetRegistered().Where(entry => entry.Entity != terminal && _network.CanRoute(terminal, entry.Entity))
+                .Take(32).ToList();
+            foreach (var entry in hosts)
+            {
+                if (!NCMetaDeviceIds.TryToGuid(entry.Id, out var id) || _sites.ContainsKey(id)) continue;
+                var publication = await ReadPublicationAsync(id);
+                if (publication is { Local: true, Active: true })
+                    await Main(() => { Cache(id, publication); return true; });
+            }
+        }
+        catch (Exception exception) { Log.Error($"META local site warm-up failed: {exception}"); }
+    }
+
+    /// <summary>Opens a local site on a computer. Only hosts the computer can reach, and only sites published locally.</summary>
+    public bool TryOpenLocal(EntityUid terminal, EntityUid user, string address)
+    {
+        var split = address.Split('/', 2);
+        if (split.Length != 2 || !NCMetaDeviceIds.TryNormalize(split[0], out var code) || !_devices.TryResolve(code, out var host) ||
+            !NCMetaDeviceIds.TryToGuid(code, out var id) || !_sites.TryGetValue(id, out var publication) || !publication.Active ||
+            !publication.Local || publication.View != split[1] || !_network.CanRoute(terminal, host.Entity) ||
+            !_applications.TryRestorePublishedView(host.Entity, publication.Owner, publication.PackageDigest, publication.View) ||
+            !_applications.TryGetRegistration(host.Entity, publication.PackageDigest, out var registration))
+            return false;
+        return _applications.TryOpen(terminal, user, host.Entity, publication.View, NCMetaAppPresentation.Website,
+            NCMetaUiKey.Application, () => publication.Active && _network.CanRoute(terminal, host.Entity), out _,
+            runtimeGeneration: registration.RuntimeGeneration);
+    }
     private bool Restore(Guid id, Publication publication)
     {
         Cache(id, publication);
-        return publication.Active && _devices.TryResolve(publication.HostId, out var device) && device.Owner == publication.Owner && Connected(device.Entity) &&
+        return publication.Active && _devices.TryResolve(publication.HostId, out var device) && device.Owner == publication.Owner && (publication.Local || Connected(device.Entity)) &&
             _applications.TryRestorePublishedView(device.Entity, publication.Owner, publication.PackageDigest, publication.View);
     }
     private void Cache(Guid id, Publication publication)
@@ -141,7 +206,7 @@ public sealed partial class NCMetaCitiNetSystem : EntitySystem
     }
     private bool IsCurrent(Guid id, Publication publication) => _persistence.TryCaptureTime(out var epoch, out _) && epoch == _epoch &&
         _sites.TryGetValue(id, out var current) && current == publication && publication.Active &&
-        _devices.TryResolve(publication.HostId, out var device) && device.Owner == publication.Owner && Connected(device.Entity) &&
+        _devices.TryResolve(publication.HostId, out var device) && device.Owner == publication.Owner && (publication.Local || Connected(device.Entity)) &&
         _applications.TryGetRegistration(device.Entity, publication.PackageDigest, out var app) && app.Owner == publication.Owner &&
         app.Application.PackageDigest == publication.PackageDigest && app.Policy.PublicViews.Contains(publication.View);
 
@@ -153,7 +218,7 @@ public sealed partial class NCMetaCitiNetSystem : EntitySystem
         try
         {
             var value = JsonSerializer.Deserialize<Publication>(snapshot.Payload, Json);
-            return value is not null && value.HostId == id.ToString("D") && value.Revision == snapshot.AggregateVersion &&
+            return value is not null && NCMetaDeviceIds.TryToGuid(value.HostId, out var hostGuid) && hostGuid == id && value.Revision == snapshot.AggregateVersion &&
                 value.Owner.Length is > 0 and <= 128 && value.PackageDigest.Length == 64 && MuiBinding.IsPath(value.View) ? value : null;
         }
         catch (JsonException) { return null; }
@@ -198,7 +263,7 @@ public sealed partial class NCMetaCitiNetSystem : EntitySystem
                     opened = _applications.TryOpen(agent, user, target.Entity, lease.View, NCMetaAppPresentation.Website, PdaUiKey.Key,
                         () => _agents.CanUseMetaCitiNet(agent, user) && Connected(target.Entity) && _hosting.CanUseLease(lease.Id, lease.Revision),
                         out _, lease.Units > 0 ? lease.Id : Guid.Empty, lease.MaxSessions, leasedApplication.RuntimeGeneration);
-                else if (publication is not null && (address.View is null || address.View == publication.View) && Restore(address.HostDeviceId, publication) &&
+                else if (publication is not null && !publication.Local && (address.View is null || address.View == publication.View) && Restore(address.HostDeviceId, publication) &&
                     IsCurrent(address.HostDeviceId, publication) && _devices.TryResolve(publication.HostId, out var device) &&
                     _applications.TryGetRegistration(device.Entity, publication.PackageDigest, out var publishedApplication))
                     opened = _applications.TryOpen(agent, user, device.Entity, publication.View, NCMetaAppPresentation.Website, PdaUiKey.Key,

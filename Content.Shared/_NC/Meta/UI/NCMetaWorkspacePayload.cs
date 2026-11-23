@@ -12,3 +12,7 @@ public sealed record NCMetaBindingsPayload(List<NCMetaSoftwareBinding> Bindings)
 
 [Serializable, NetSerializable]
 public sealed record NCMetaHostingQuotePayload(string Domain, string View, int Units) : NCMetaWorkspacePayload;
+
+/// <summary>A new program chip made from the project's last release: the player names and describes it.</summary>
+[Serializable, NetSerializable]
+public sealed record NCMetaChipPayload(string Name, string Description) : NCMetaWorkspacePayload;

@@ -33,6 +33,54 @@ public sealed partial class NCMetaRuntimeSystem
         return true;
     }
 
+    /// <summary>The reserve cost of the host's link to another device, and whether a running program is bound to it.</summary>
+    public bool TryGetConnection(EntityUid host, EntityUid device, out int cost, out bool inUse)
+    {
+        inUse = false;
+        cost = 0;
+        if (host == device || !_network.TryGetLinkCost(host, device, out cost))
+            return false;
+
+        if (_hosts.TryGetValue(host, out var instances))
+        {
+            foreach (var instance in instances)
+            {
+                foreach (var binding in instance.Bindings.Values)
+                    inUse |= binding.Device.Entity == device;
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// A device answers to one server: true when another host already runs a program bound to a device this installation
+    /// binds. The first server keeps it until its program is stopped or removed.
+    /// </summary>
+    public bool IsDeviceTaken(EntityUid host, NCMetaInstallation installation)
+    {
+        foreach (var binding in installation.Bindings)
+        {
+            if (!_devices.TryResolve(binding.DeviceId, out var target) || target.Entity == host)
+                continue;
+            foreach (var (other, instances) in _hosts)
+            {
+                if (other == host)
+                    continue;
+                foreach (var instance in instances)
+                {
+                    foreach (var bound in instance.Bindings.Values)
+                    {
+                        if (bound.Device.Entity == target.Entity)
+                            return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
     /// <summary>True when starting the installation would reserve more link capacity than the host has.</summary>
     public bool IsLinkCapacityExceeded(EntityUid host, NCMetaInstallation installation)
     {

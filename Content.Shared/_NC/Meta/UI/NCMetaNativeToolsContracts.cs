@@ -12,4 +12,20 @@ public sealed record NCMetaHardwareSummary(string DeviceId, string Name, string 
 
 /// <summary>Native modes reuse the ordinary installer, license, consent and recovery operations.</summary>
 [Serializable, NetSerializable]
-public sealed record NCMetaNativeToolsState(string View, List<NCMetaHardwareSummary> Hardware);
+public sealed record NCMetaNativeToolsState(string View, List<NCMetaHardwareSummary> Hardware, string ChipDeviceId = "", string ChipName = "",
+    List<NCMetaConnectedDevice>? Network = null, bool CanOpenStudio = false,
+    List<NCMetaLocalSite>? LocalSites = null, string HostDeviceId = "");
+
+/// <summary>A site published for the local network only. Address is what OpenLocalSite takes back.</summary>
+[Serializable, NetSerializable]
+public sealed record NCMetaLocalSite(string Address, string Host, string View);
+
+/// <summary>A device this host can reach, with the capacity its link reserves and whether a program uses it.</summary>
+[Serializable, NetSerializable]
+public sealed record NCMetaConnectedDevice(string DeviceId, string Name, int Cost, bool InUse);
+
+/// <summary>The item slot a device offers for a META program chip.</summary>
+public static class NCMetaChipSlot
+{
+    public const string Id = "nc_meta_chip";
+}

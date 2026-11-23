@@ -1,0 +1,10 @@
+{
+  "rootModule": "examples.citypulse",
+  "responses": [],
+  "events": [],
+  "expectedLogs": [],
+  "expectedCommands": [],
+  "epoch": 1,
+  "nowMs": 1000,
+  "tick": 60
+}

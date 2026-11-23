@@ -168,18 +168,20 @@ public sealed partial class NCMetaWorkspaceSystem
             _devices.CanManage(device.Entity, context.User, requireRange: false) && _runtime.CanReach(context.Terminal, device.Entity)
                 ? device.Entity : null);
         if (host == null) { state.Notice = Loc.GetString("nc-meta-error-access"); return; }
-        if (request.Operation is NCMetaWorkspaceOperation.OpenApplication or NCMetaWorkspaceOperation.PublishWebsite or NCMetaWorkspaceOperation.WithdrawWebsite)
+        if (request.Operation is NCMetaWorkspaceOperation.OpenApplication or NCMetaWorkspaceOperation.PublishWebsite or NCMetaWorkspaceOperation.PublishLocalSite or NCMetaWorkspaceOperation.WithdrawWebsite)
         {
-            if (request.Operation == NCMetaWorkspaceOperation.PublishWebsite)
+            if (request.Operation is NCMetaWorkspaceOperation.PublishWebsite or NCMetaWorkspaceOperation.PublishLocalSite)
             {
                 var publicationInstallation = await SelectInstallationAsync(target, context.Owner, project.Id, request.ReleaseId, request.InstallationId);
                 var publicationGeneration = await OnMainAsync(() => publicationInstallation != null &&
                     _runtime.TryGetInstallation(host.Value, context.Owner, publicationInstallation.Id, out var publicationRuntime)
                         ? publicationRuntime.Generation : Guid.Empty);
                 var published = await await OnMainAsync(() => _citiNet.TryPublishSelfHostedAsync(host.Value, context.User,
-                    request.RequestId, request.Source, publicationGeneration));
+                    request.RequestId, request.Source, publicationGeneration, request.Operation == NCMetaWorkspaceOperation.PublishLocalSite));
                 state.WebsiteAddress = published.Address;
-                if (!published.Success) state.Notice = Loc.GetString("nc-meta-error-access");
+                state.Notice = published.Success && request.Operation == NCMetaWorkspaceOperation.PublishLocalSite
+                    ? Loc.GetString("nc-meta-local-site-published", ("address", published.Address))
+                    : published.Success ? state.Notice : Loc.GetString(published.Reason.Length > 0 ? "nc-meta-error-publish-" + published.Reason : "nc-meta-error-access");
                 return;
             }
             if (request.Operation == NCMetaWorkspaceOperation.WithdrawWebsite)
@@ -250,7 +252,11 @@ public sealed partial class NCMetaWorkspaceSystem
             if (authorization == null)
             { state.Notice = Loc.GetString("nc-meta-error-access"); return; }
             var app = await ReadApplicationAsync(release, artifact);
-            if (app.Declared && app.Application == null) { state.Notice = Loc.GetString("nc-meta-error-artifact"); return; }
+            if (app.Declared && app.Application == null)
+            {
+                state.Notice = Loc.GetString("nc-meta-error-app-invalid", ("problem", await DiagnoseApplicationAsync(release, artifact)));
+                return;
+            }
             var serviceAdmission = installation == null ? null : await _authority.ResolveServiceAdmissionAsync(installation, artifact, unattended: false);
             if (serviceAdmission == null) { state.Notice = Loc.GetString("nc-meta-error-grant-required"); return; }
             var writeAuthority = await CaptureInstallationAuthorityAsync(context, host.Value);
@@ -273,6 +279,8 @@ public sealed partial class NCMetaWorkspaceSystem
                     NCMetaAppPolicy.OwnerOnly with { GrantedScopes = serviceAdmission.GetGrantedScopes().ToImmutableHashSet(StringComparer.Ordinal) }, runtime.Generation);
             });
             state.Notice = Loc.GetString(started ? "nc-meta-started" :
+                await OnMainAsync(() => installation != null && _runtime.IsDeviceTaken(host.Value, installation))
+                    ? "nc-meta-error-device-taken" :
                 await OnMainAsync(() => installation != null && _runtime.IsLinkCapacityExceeded(host.Value, installation))
                     ? "nc-meta-error-link-capacity" : "nc-meta-error-access");
             return;
@@ -292,7 +300,12 @@ public sealed partial class NCMetaWorkspaceSystem
             !await OnMainAsync(() => IsCurrent(context) && (request.Operation == NCMetaWorkspaceOperation.Rollback
                 ? installation != null && _runtime.CanRunInstallation(host.Value, context.User, installation, artifact, bindings)
                 : _runtime.CanInstall(host.Value, context.User, artifact, bindings))))
-        { state.Notice = Loc.GetString("nc-meta-error-access"); return; }
+        {
+            var reason = request.Operation == NCMetaWorkspaceOperation.Rollback ? null :
+                await OnMainAsync(() => _runtime.DiagnoseInstall(host.Value, context.User, artifact, bindings));
+            state.Notice = Loc.GetString(reason == null ? "nc-meta-error-access" : "nc-meta-error-install-" + reason);
+            return;
+        }
         if (!await CanRunReleaseAsync(context.Owner, target, release))
         { state.Notice = Loc.GetString("nc-meta-error-access"); return; }
         if (request.Operation == NCMetaWorkspaceOperation.Rollback)
@@ -325,6 +338,63 @@ public sealed partial class NCMetaWorkspaceSystem
                 bindings, autoStart: false, context.Epoch, context.Time, limits.Value.StorageBytes, limits.Value.Slots,
                 activationGuard: guard, authority: installAuthority), () => IsCurrent(context));
         state.Notice = Loc.GetString(outcome.MessageKey);
+        if (outcome.Success && await ApproveGrantsAfterInstallAsync(context, host.Value, target, project, release, artifact))
+            state.Notice = Loc.GetString("nc-meta-installed-approved");
+    }
+
+    /// <summary>
+    /// The owner already approved the connections and permissions at install, so the matching service grant is issued
+    /// with it; the program can then start, and keeps running without anyone attending it.
+    /// </summary>
+    private async Task<bool> ApproveGrantsAfterInstallAsync(Context context, EntityUid host, string target, NCMetaProject project,
+        NCMetaRelease release, VerifiedArtifact artifact)
+    {
+        var installation = await SelectInstallationAsync(target, context.Owner, project.Id, release.Id);
+        if (installation == null || installation.Active.Digest != artifact.ContentHash) return false;
+        var existing = await _persistence.ReadServiceGrantPolicyAsync(installation.Id);
+        var consents = new List<Content.Shared._NC.Meta.Authority.NCMetaGrantConsent>();
+        foreach (var link in artifact.GetLinks())
+        {
+            var binding = installation.Bindings.SingleOrDefault(value => value.Slot == link.SlotName);
+            if (binding == null) return false;
+            var capability = artifact.GetType(link.CapabilityTypeId).Name;
+            var members = MetaApiCatalog.Default.Members.Where(member => member.Owner == capability &&
+                artifact.Manifest.RequiredScopes.Contains(member.Scope)).ToArray();
+            consents.Add(new(link.SlotName, binding.DeviceId, members.Select(member => member.QualifiedName).Distinct(StringComparer.Ordinal).ToList(),
+                members.Select(member => member.Scope).Distinct(StringComparer.Ordinal).ToList()));
+        }
+
+        var approval = new Content.Shared._NC.Meta.Authority.NCMetaGrantApprovalRequest(existing?.Revision ?? 0, true, true, null, consents);
+        var result = await _authority.TryIssueInstallationGrantsAsync(context.Terminal, context.User, host, Guid.NewGuid(),
+            installation, artifact, approval);
+        return result.Success;
+    }
+
+    /// <summary>Why a declared application was not admitted, in the player's terms: the file and the line when it is the markup.</summary>
+    private async Task<string> DiagnoseApplicationAsync(NCMetaRelease release, VerifiedArtifact artifact)
+    {
+        var contract = await _persistence.ReadReleaseResourceAsync(release, "app.json");
+        if (contract == null) return "app.json is missing";
+        if (!MuiContractParser.TryParse(contract, out var parsed, out var contractError)) return "app.json " + contractError;
+        var documents = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var view in parsed!.Views.Values)
+        {
+            var document = await _persistence.ReadReleaseResourceAsync(release, view.Document);
+            if (document == null) return view.Document + " is missing";
+            documents[view.Document] = document;
+        }
+
+        var stylePath = release.Resources?.FirstOrDefault(value => value.Path.EndsWith(".mstyle", StringComparison.Ordinal))?.Path;
+        var style = stylePath == null ? string.Empty : await _persistence.ReadReleaseResourceAsync(release, stylePath) ?? string.Empty;
+        if (!MuiStyleSheet.TryParse(style, parsed, out _, out var styleError)) return stylePath + " " + styleError;
+        foreach (var view in parsed.Views.Values)
+        {
+            if (!MuiParser.TryParse(documents[view.Document], view, parsed, documents, out _, out var found))
+                return view.Document + " " + found?.Code + " line " + found?.Line + ", column " + found?.Column + " (" + found?.Detail + ")";
+        }
+
+        if (release.Exports == null) return "the program exports are missing";
+        return "the page or the actions do not match the program: names of functions, types or fields";
     }
 
     private async Task<(bool Declared, MuiVerifiedApplication? Application)> ReadApplicationAsync(NCMetaRelease release, VerifiedArtifact artifact)

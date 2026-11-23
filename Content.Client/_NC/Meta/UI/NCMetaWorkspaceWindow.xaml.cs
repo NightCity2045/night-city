@@ -64,7 +64,10 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
         InitializeSoftwareResale();
         InitializeFirmware();
         InitializeServiceGrants();
-        InitializeDevelopment();
+        ContentsContainer.Visible = false;
+        DesktopStudio.OnPressed += _ => { SetDesktop(false); Request(NCMetaWorkspaceOperation.Open); };
+        DesktopNetwork.OnPressed += _ => { SetDesktop(false); Request(NCMetaWorkspaceOperation.OpenNativeTools, "network"); };
+        ToolsDesktop.OnPressed += _ => Request(NCMetaWorkspaceOperation.Open);
         InitializeNativeTools();
         InitializeLayout();
         for (var tab = 0; tab < Output.ChildCount; tab++) OutputSelector.AddItem(Output.GetActualTabTitle(tab), tab);
@@ -89,19 +92,6 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
             if (args.Id >= 0 && args.Id < _state.Projects.Count)
                 Requested?.Invoke(new(NCMetaWorkspaceOperation.SelectProject, Guid.NewGuid(), projectId: _state.Projects[args.Id].ProjectId));
         };
-        Devices.OnItemSelected += args =>
-        {
-            if (_applying) return;
-            Devices.SelectId(args.Id);
-            if (args.Id >= 0 && args.Id < _state.Devices.Count)
-                _selectedDeviceId = _state.Devices[args.Id].DeviceId;
-            InvalidateSoftwareQuote();
-            InvalidateFirmware();
-            SoftwareScopeConsent.Pressed = false;
-            UpdateInstallations();
-            UpdateDeviceControls();
-            Request(NCMetaWorkspaceOperation.Open);
-        };
         Installations.OnItemSelected += args =>
         {
             if (_applying || args.Id < 0 || args.Id > _visibleInstallations.Count) return;
@@ -119,7 +109,6 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
         {
             if (MainContentTabs.CurrentTab == 1) RefreshCommerce();
             else if (MainContentTabs.CurrentTab == 2) RefreshServiceGrants();
-            else if (MainContentTabs.CurrentTab == 3) ReadDevelopment();
             else Request(Output.CurrentTab == 1 ? NCMetaWorkspaceOperation.Logs : NCMetaWorkspaceOperation.Open);
         };
         Templates.OnItemSelected += args => Templates.SelectId(args.Id);
@@ -131,21 +120,18 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
         Save.OnPressed += _ => SaveFile();
         Build.OnPressed += _ => SaveThen(NCMetaWorkspaceOperation.Compile);
         Tests.OnPressed += _ => SaveThen(NCMetaWorkspaceOperation.Test);
-        Install.OnPressed += _ =>
-        {
-            var json = Rope.Collapse(BindingsInput.TextRope);
-            if (Encoding.UTF8.GetByteCount(json) <= 32 * 1024)
-                Request(NCMetaWorkspaceOperation.Install, json);
-        };
         BindingsInput.OnTextChanged += _ => { if (!_applying) _bindingsEdited = true; };
-        Start.OnPressed += _ => Request(NCMetaWorkspaceOperation.Start);
-        Stop.OnPressed += _ => Request(NCMetaWorkspaceOperation.Stop);
         Rollback.OnPressed += _ => Request(NCMetaWorkspaceOperation.Rollback);
         ApplicationViews.OnItemSelected += args => ApplicationViews.SelectId(args.Id);
         OpenApplication.OnPressed += _ =>
         {
             if (ApplicationViews.ItemCount > 0 && ApplicationViews.SelectedId < _state.ApplicationViews.Count)
                 Request(NCMetaWorkspaceOperation.OpenApplication, _state.ApplicationViews[ApplicationViews.SelectedId]);
+        };
+        PublishLocal.OnPressed += _ =>
+        {
+            if (ApplicationViews.ItemCount > 0 && ApplicationViews.SelectedId < _state.ApplicationViews.Count)
+                Request(NCMetaWorkspaceOperation.PublishLocalSite, _state.ApplicationViews[ApplicationViews.SelectedId]);
         };
         PublishWebsite.OnPressed += _ =>
         {
@@ -160,8 +146,13 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
             }
         };
         WithdrawWebsite.OnPressed += _ => Request(NCMetaWorkspaceOperation.WithdrawWebsite);
-        ExportMedia.OnPressed += _ => Request(NCMetaWorkspaceOperation.ExportMedia);
-        ImportMedia.OnPressed += _ => Request(NCMetaWorkspaceOperation.ImportMedia);
+        ExportMedia.OnPressed += _ =>
+        {
+            var name = ChipName.Text.Trim();
+            if (name.Length == 0) { Status.Text = Loc.GetString("nc-meta-chip-name-required"); return; }
+            Requested?.Invoke(new(NCMetaWorkspaceOperation.ExportMedia, Guid.NewGuid(), projectId: _state.ProjectId,
+                payload: new NCMetaChipPayload(name, ChipDescription.Text.Trim())));
+        };
         HostingOffer.OnPressed += _ =>
         {
             if (ApplicationViews.ItemCount > 0 && ApplicationViews.SelectedId < _state.ApplicationViews.Count)
@@ -264,14 +255,27 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
         };
     }
 
+    private void SetDesktop(bool shown)
+    {
+        DesktopPanel.Visible = shown;
+        WorkArea.Visible = !shown;
+    }
+
     public void ApplyState(NCMetaWorkspaceState state)
     {
+        // The window stays blank until the server says what this device is (editor or service panel), so a server
+        // never flashes the editor first.
+        if (!ContentsContainer.Visible && !state.Partial)
+        {
+            ContentsContainer.Visible = true;
+            // A computer opens on its desktop; a server goes straight to its service panel.
+            if (state.NativeTools == null) SetDesktop(true);
+        }
         ApplyLanguageSymbols(state);
         if (state.Partial)
         {
             Status.Text = state.Notice;
             RejectServiceGrantRequest(state.AcknowledgedRequestId);
-            RejectDevelopment(state.AcknowledgedRequestId);
             if (_saveRequest != Guid.Empty && state.AcknowledgedRequestId == _saveRequest)
             {
                 if (state.SaveStatus == NCMetaSaveStatus.Rejected) RejectPendingSave();
@@ -297,19 +301,10 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
         var activeProject = state.Projects.FindIndex(x => x.ProjectId == state.ProjectId);
         if (activeProject >= 0)
             Projects.SelectId(activeProject);
-        if (_selectedDeviceId.Length == 0 && state.Devices.Count > 0)
+        // A service panel works on the device it is opened on, not on the first device of the list.
+        if (state.NativeTools is { HostDeviceId.Length: > 0 } panel) _selectedDeviceId = panel.HostDeviceId;
+        else if (_selectedDeviceId.Length == 0 && state.Devices.Count > 0)
             _selectedDeviceId = state.Devices[0].DeviceId;
-        var selectedDevice = state.Devices.Take(64).ToList().FindIndex(device => device.DeviceId == _selectedDeviceId);
-        Devices.Clear();
-        for (var i = 0; i < Math.Min(64, state.Devices.Count); i++)
-            Devices.AddItem(Loc.GetString("nc-meta-device-entry", ("name", state.Devices[i].Name), ("status", state.Devices[i].Status)), i);
-        if (selectedDevice >= 0)
-            Devices.SelectId(selectedDevice);
-        else if (_selectedDeviceId.Length > 0)
-        {
-            Devices.AddItem(Loc.GetString("nc-meta-device-unavailable"), 64);
-            Devices.SelectId(64);
-        }
         if (state.SaveStatus == NCMetaSaveStatus.Committed && _saveRequest != Guid.Empty && state.AcknowledgedRequestId == _saveRequest &&
             _pendingSave is { Complete: true } pendingCommit && _uploads.Count == 0 && !state.RevisionConflict &&
             _buffers.TryGetValue(_savedFile, out var savedBuffer) && state.Files.FirstOrDefault(file => file.FileId == _savedFile) is { } savedFile &&
@@ -376,7 +371,7 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
         for (var i = 0; i < Math.Min(32, state.ApplicationViews.Count); i++)
             ApplicationViews.AddItem(state.ApplicationViews[i], i);
         OpenApplication.Disabled = ApplicationViews.ItemCount == 0;
-        PublishWebsite.Disabled = ApplicationViews.ItemCount == 0;
+        PublishWebsite.Disabled = PublishLocal.Disabled = ApplicationViews.ItemCount == 0;
         var website = state.HostingLeases.Take(64).FirstOrDefault(lease => lease.HostDeviceId == _selectedDeviceId &&
             lease.Status == "nc-meta-hosting-active");
         WebsiteAddress.Text = website is null ? "" : "citi://" + website.Domain;
@@ -423,7 +418,6 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
         ApplyCommerceState(state.Commerce);
         ApplyFirmwareState(state.Firmware);
         ApplyServiceGrantState(state.ServiceGrants);
-        ApplyDevelopmentState(state.Development);
         ApplyNativeTools();
         _applying = false;
         RebuildTabs();
@@ -641,7 +635,6 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
         base.FrameUpdate(args);
         TickSemanticProof();
         TickServiceGrantRequest(args.DeltaSeconds);
-        TickDevelopment(args.DeltaSeconds);
         if (_saveRequest == Guid.Empty || _pendingSave is not { } request || _saveRetryAttempts >= 3) return;
         _saveRetryElapsed += args.DeltaSeconds;
         if (_saveRetryElapsed < 5) return;
@@ -674,7 +667,7 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
         NCMetaWorkspaceOperation.DebugAttach or NCMetaWorkspaceOperation.DebugDetach or NCMetaWorkspaceOperation.DebugPause or
         NCMetaWorkspaceOperation.DebugContinue or NCMetaWorkspaceOperation.DebugStepInto or NCMetaWorkspaceOperation.DebugStepOver or
         NCMetaWorkspaceOperation.DebugStepOut or NCMetaWorkspaceOperation.DebugSetBreakpoint or NCMetaWorkspaceOperation.DebugEvaluate or
-        NCMetaWorkspaceOperation.OpenApplication or NCMetaWorkspaceOperation.PublishWebsite or NCMetaWorkspaceOperation.EnableHostingOffer or
+        NCMetaWorkspaceOperation.OpenApplication or NCMetaWorkspaceOperation.PublishWebsite or NCMetaWorkspaceOperation.PublishLocalSite or NCMetaWorkspaceOperation.EnableHostingOffer or
         NCMetaWorkspaceOperation.QuoteHosting;
 
     private void UpdateInstallations()
@@ -720,18 +713,37 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
     private void UpdateDeviceControls()
     {
         var device = _state.Devices.Take(64).FirstOrDefault(candidate => candidate.DeviceId == _selectedDeviceId);
-        Install.Disabled = device is null || !device.CanInstall;
-        ExportMedia.Disabled = ImportMedia.Disabled = device is null;
-        Start.Disabled = Stop.Disabled = Rollback.Disabled = device is null || SelectedInstallation is null;
+        ExportMedia.Disabled = device is null;
+        Rollback.Disabled = device is null || SelectedInstallation is null;
         OpenApplication.Disabled = device is null || SelectedInstallation is null || ApplicationViews.ItemCount == 0;
-        HostingOffer.Disabled = PublishWebsite.Disabled = device is null || SelectedInstallation is null || ApplicationViews.ItemCount == 0;
+        HostingOffer.Disabled = PublishWebsite.Disabled = PublishLocal.Disabled = device is null || SelectedInstallation is null || ApplicationViews.ItemCount == 0;
         WithdrawWebsite.Disabled = device is null;
         UpdateSoftwareButtons();
         UpdateFirmwareControls();
         UpdateServiceGrantControls();
     }
 
-    private void TryPreview() => RunSemanticQuery(SemanticQuery.Preview);
+    private void TryPreview()
+    {
+        var path = _state.Files.FirstOrDefault(file => file.FileId == _selectedFile)?.Path ?? "";
+        if (!path.EndsWith(".mui", StringComparison.Ordinal))
+        {
+            // Only a page file can be previewed: say so instead of showing nothing.
+            Status.Text = Loc.GetString("nc-meta-preview-need-mui");
+            return;
+        }
+
+        if (MockState.Text.Trim() is "" or "{}")
+        {
+            // Fill the test state from the page's own bindings, so a fresh page renders without hand-written JSON.
+            var names = System.Text.RegularExpressions.Regex.Matches(Editor.Source, @"\{bind\s+([A-Za-z_][A-Za-z0-9_]*)\}")
+                .Select(match => match.Groups[1].Value).Distinct(StringComparer.Ordinal).Take(64).ToList();
+            if (names.Count > 0)
+                MockState.Text = "{" + string.Join(",", names.Select(name => "\"" + name + "\":\"" + name + "\"")) + "}";
+        }
+
+        RunSemanticQuery(SemanticQuery.Preview);
+    }
 
     private void AnalyzeSource()
     {
@@ -827,8 +839,6 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
             _firmwareLinkDevices.Clear();
             InvalidateServiceGrants();
             DisposePreviewWindow();
-            _developmentDialog?.Dispose(); _developmentDialog = null; _developmentView = null;
-            _developmentFixtureBytes = null; _developmentContacts.Clear(); _developmentFixtures.Clear();
             Requested = null;
         }
         base.Dispose(disposing);

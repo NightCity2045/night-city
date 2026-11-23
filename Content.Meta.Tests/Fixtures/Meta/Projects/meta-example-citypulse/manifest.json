@@ -1,0 +1,37 @@
+{
+  "version": "1.0",
+  "id": "meta-example-citypulse",
+  "name": "Night City Pulse",
+  "nameRu": "Пульс Найт-Сити",
+  "packageName": "examples.citypulse",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "examples.citypulse",
+  "files": [
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/CityPulse/main.meta",
+      "sha256": "6f58dfc5545f98c1da6e066b07d5f16a26ba8f6eba52f89347908173f356ab4e"
+    },
+    {
+      "path": "app.json",
+      "sourcePath": "Resources/Meta/CityPulse/app.json",
+      "sha256": "adf1dbac778f1688846390097ed8f8ace16ae36fda8a66b4fbb880210e07f95d"
+    },
+    {
+      "path": "ui/main.mui",
+      "sourcePath": "Resources/Meta/CityPulse/main.mui",
+      "sha256": "44c915d16f1227f71219398e98ccde6c307245babc993bae3d7f4095b97e9c69"
+    },
+    {
+      "path": "ui/style.mstyle",
+      "sourcePath": "Resources/Meta/CityPulse/style.mstyle",
+      "sha256": "4352e57e8cdd8e87e608856aa5ea3e2c41be6471e080de52a5ace0f37a187eff"
+    }
+  ],
+  "startMode": "Manual",
+  "bindings": [],
+  "testFixture": "meta.test.json"
+}

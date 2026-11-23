@@ -32,6 +32,7 @@ public enum NCMetaWorkspaceOperation : byte
     PrepareStockApplication,
     ReadLanguageSymbols,
     SetMaintenance,
+    PublishLocalSite, OpenLocalSite,
 }
 
 [Serializable, NetSerializable]

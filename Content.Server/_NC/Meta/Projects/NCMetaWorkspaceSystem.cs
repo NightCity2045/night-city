@@ -108,10 +108,15 @@ public sealed partial class NCMetaWorkspaceSystem : EntitySystem
                      .Select(pair => pair.Key).ToArray()) _requestRates.Remove(key);
     }
 
+    /// <summary>A package identity is a hash; players see its first symbols rather than the whole thing.</summary>
+    private static string ShortPackageName(string identity) => identity.Length <= 16 ? identity : identity[..16] + "...";
+
     private void OnOpened(Entity<NCMetaTerminalComponent> ent, ref BoundUIOpenedEvent args)
     {
-        if (args.Actor is { } user)
-            _ = BeginAuthorizedAsync(ent.Owner, user, new NCMetaWorkspaceRequestMessage(NCMetaWorkspaceOperation.Open, Guid.NewGuid()));
+        if (args.Actor is { } user && args.UiKey.Equals(NCMetaUiKey.Workspace))
+            ClaimOnOpen(ent.Owner, user);
+        if (args.Actor is { } opener)
+            _ = BeginAuthorizedAsync(ent.Owner, opener, new NCMetaWorkspaceRequestMessage(NCMetaWorkspaceOperation.Open, Guid.NewGuid()));
     }
 
     private void OnClosed(Entity<NCMetaTerminalComponent> ent, ref BoundUIClosedEvent args)
@@ -296,6 +301,10 @@ public sealed partial class NCMetaWorkspaceSystem : EntitySystem
                     device = await _persistence.ReadDeviceAsync(context.DeviceId) ?? device;
                     projectId = device.ActiveProject;
                     break;
+                case NCMetaWorkspaceOperation.OpenLocalSite:
+                    state.Notice = await OnMainAsync(() => IsCurrent(context) && _citiNet.TryOpenLocal(context.Terminal, context.User, request.Source)
+                        ? "" : Loc.GetString("nc-meta-error-access"));
+                    break;
                 case NCMetaWorkspaceOperation.ImportTemplate:
                     var template = await OnMainAsync(() => _catalog.TryGet(request.Source, out var found) ? found : null);
                     if (template == null) { state.Notice = Loc.GetString("nc-meta-error-input"); break; }
@@ -332,6 +341,7 @@ public sealed partial class NCMetaWorkspaceSystem : EntitySystem
                 case NCMetaWorkspaceOperation.Logs:
                 case NCMetaWorkspaceOperation.OpenApplication:
                 case NCMetaWorkspaceOperation.PublishWebsite:
+                case NCMetaWorkspaceOperation.PublishLocalSite:
                 case NCMetaWorkspaceOperation.WithdrawWebsite:
                 case NCMetaWorkspaceOperation.EnableHostingOffer:
                 case NCMetaWorkspaceOperation.QuoteHosting:
@@ -408,7 +418,8 @@ public sealed partial class NCMetaWorkspaceSystem : EntitySystem
             var responseDevice = request.DeviceId.Length == 0 ? context.DeviceId : request.DeviceId;
             foreach (var installation in await _persistence.ReadInstallationsAsync(responseDevice, context.Owner))
                 state.Installations.Add(new(installation.Id, installation.Active.Id, responseDevice,
-                    installation.PackageIdentity, installation.SlotKind, installation.AutoStart));
+                    installation.ProjectId == project.Id && project.Name.Length > 0 ? project.Name : ShortPackageName(installation.PackageIdentity),
+                    installation.SlotKind, installation.AutoStart));
             var responseInstallation = await SelectInstallationAsync(responseDevice, context.Owner, project.Id, request.ReleaseId, request.InstallationId);
             await OnMainAsync(() =>
             {

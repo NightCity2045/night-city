@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+using Content.Server._NC.Meta.Devices;
 using Content.Shared._NC.Meta.Network;
 
 namespace Content.Server._NC.Meta.Network;
@@ -17,7 +18,7 @@ public sealed partial class NCMetaNetworkSystem
         UnindexCachedEnds(cable);
         foreach (var id in new[] { cable.Comp.DeviceAId, cable.Comp.DeviceBId })
         {
-            if (!Guid.TryParseExact(id, "D", out _)) continue;
+            if (!NCMetaDeviceIds.IsValid(id)) continue;
             if (!_cablesByDevice.TryGetValue(id, out var cables)) _cablesByDevice.Add(id, cables = []);
             cables.Add(cable.Owner);
         }

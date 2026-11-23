@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using Content.Server._NC.Meta.Devices;
 using System.Text.Json;
 using Content.Meta.Hosting;
 using Content.Server.Database;
@@ -60,7 +61,7 @@ public sealed partial class NCMetaPersistenceSystem
                    ValidRelease(installation.Active) && (installation.Recovery == null || ValidRelease(installation.Recovery)) &&
                    installation.Bindings.All(binding =>
                        binding is { Slot.Length: > 0 and <= 128, Scopes.Length: <= 64, ContractHash.Length: 64 } &&
-                       Guid.TryParseExact(binding.DeviceId, "D", out _)) ? installation : null;
+                       NCMetaDeviceIds.IsValid(binding.DeviceId)) ? installation : null;
         }
         catch (JsonException) { return null; }
     }
@@ -76,7 +77,7 @@ public sealed partial class NCMetaPersistenceSystem
         using var lease = TryBeginMutation();
         if (lease == null) return new(false, "nc-meta-error-busy");
         if (owner != project.Owner || !TryResolveProjectRelease(project, release, out var canonicalRelease) || bindings.Length > 64 ||
-            !Guid.TryParseExact(hostId, "D", out _))
+            !NCMetaDeviceIds.IsValid(hostId))
             return new(false, "nc-meta-error-access");
         release = canonicalRelease;
         var fingerprint = InstallationFingerprint(hostId, owner, project.Id, release, bindings, autoStart, slotKind,

@@ -79,11 +79,20 @@ public sealed partial class NCMetaWorkspaceWindow
             var reply = await ReadLanguageEnvironmentAsync(snapshot, generation, query, token);
             _languageTasks.RunOnMainThread(() =>
             {
+            if (query == SemanticQuery.Preview && (reply == null || reply.Rejected))
+            {
+                Status.Text = Loc.GetString("nc-meta-preview-invalid", ("code", reply?.Diagnostics.FirstOrDefault()?.Code ?? "MUI"));
+                return;
+            }
             if (reply == null || reply.Rejected || !IsSemanticSnapshotCurrent(snapshot, generation) || _selectedFile != snapshot.Selected ||
                 Editor.Source != selected.Source || Editor.CaretUtf8 != snapshot.Caret || Editor.SelectionAnchorUtf16 != snapshot.Anchor) return;
             if (query == SemanticQuery.Preview)
             {
-                if (reply.Presentation == null || !NCMetaMuiValues.PresentationValid(reply.Presentation, reply.ViewId)) return;
+                if (reply.Presentation == null || !NCMetaMuiValues.PresentationValid(reply.Presentation, reply.ViewId))
+                {
+                    Status.Text = Loc.GetString("nc-meta-preview-invalid", ("code", reply.Diagnostics.FirstOrDefault()?.Code ?? "MUI"));
+                    return;
+                }
                 NCMetaUiLifecycle.RemoveChildren(PreviewHost);
                 _preview = new(reply.Presentation, reply.ViewId, Guid.NewGuid());
                 PreviewHost.AddChild(_preview);

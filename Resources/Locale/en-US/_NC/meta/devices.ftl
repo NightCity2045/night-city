@@ -6,7 +6,7 @@ ent-NCMetaCamera = META motion camera
 ent-NCMetaAlarm = META alarm
     .desc = A programmable local alarm. Its siren stops if its controller loses authority.
 
-nc-meta-media-exported = Project copied to the selected physical cartridge.
+nc-meta-media-exported = The chip is made and in your hands.
 ent-NCMetaDataCartridge = META data cartridge
     .desc = A physical cartridge for immutable project files and verified releases.
 

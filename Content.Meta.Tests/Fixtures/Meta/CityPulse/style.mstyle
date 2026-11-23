@@ -1,0 +1,61 @@
+{
+  "version": "1.0",
+  "tokens": {
+    "neon": "#00F0FF",
+    "pink": "#FF2A6D",
+    "gold": "#F5D300",
+    "violet": "#B967FF",
+    "mint": "#05FFA1",
+    "ink": "#070D17",
+    "panel": "#0E1A2B",
+    "panelHi": "#13263D",
+    "line": "#1F4A6B",
+    "dim": "#7FA3BF"
+  },
+  "rules": [
+    { "selector": "#root", "properties": { "background": "$ink" } },
+    { "selector": ".page", "properties": { "background": "$ink", "padding": "6" } },
+
+    { "selector": ".hero", "properties": { "gradient": "#1A0B2E,#0B2A44", "borderColor": "$pink", "borderWidth": "2", "cornerRadius": "6", "padding": "12" } },
+    { "selector": "#title", "properties": { "color": "$neon", "fontSize": "34", "font": "fonts/noto-bold" } },
+    { "selector": "#title", "minWidth": 0, "maxWidth": 760, "properties": { "fontSize": "24" } },
+    { "selector": ".subtitle", "properties": { "color": "$violet", "fontSize": "16" } },
+    { "selector": "#live", "properties": { "color": "$pink", "fontSize": "14", "font": "fonts/noto-bold", "animation": "pulse:900:0.35:1" } },
+    { "selector": ".clock", "properties": { "color": "$dim", "fontSize": "13", "font": "fonts/mono" } },
+    { "selector": "#logo", "properties": { "opacity": "0.9" } },
+
+    { "selector": ".card", "properties": { "background": "$panel", "borderColor": "$line", "borderWidth": "1", "cornerRadius": "4", "padding": "8" } },
+    { "selector": ".card", "state": "hover", "properties": { "background": "$panelHi", "borderColor": "$neon" } },
+    { "selector": ".threat", "properties": { "borderColor": "$pink" } },
+    { "selector": ".money", "properties": { "borderColor": "$gold" } },
+    { "selector": ".net", "properties": { "borderColor": "$mint" } },
+    { "selector": ".power", "properties": { "borderColor": "$violet" } },
+
+    { "selector": ".kpiLabel", "properties": { "color": "$dim", "fontSize": "11", "font": "fonts/mono" } },
+    { "selector": ".kpiValue", "properties": { "color": "$neon", "fontSize": "30", "font": "fonts/noto-bold" } },
+    { "selector": ".kpiValue", "minWidth": 0, "maxWidth": 760, "properties": { "fontSize": "20" } },
+    { "selector": "#kpiThreatValue", "properties": { "color": "$pink" } },
+    { "selector": "#kpiEddiesValue", "properties": { "color": "$gold" } },
+    { "selector": "#kpiNetValue", "properties": { "color": "$mint" } },
+    { "selector": "#kpiPowerValue", "properties": { "color": "$violet" } },
+    { "selector": ".kpiNote", "properties": { "color": "$dim", "fontSize": "12" } },
+
+    { "selector": ".cardTitle", "properties": { "color": "$neon", "fontSize": "14", "font": "fonts/noto-bold" } },
+    { "selector": ".heading", "properties": { "color": "$gold", "fontSize": "20", "font": "fonts/noto-bold" } },
+    { "selector": ".status", "properties": { "color": "$mint", "fontSize": "13", "font": "fonts/mono" } },
+    { "selector": ".footer", "properties": { "color": "$dim", "fontSize": "12" } },
+
+    { "selector": "#apply", "properties": { "background": "$neon", "color": "$ink", "cornerRadius": "4" } },
+    { "selector": "#apply", "state": "hover", "properties": { "background": "$mint" } },
+    { "selector": "#apply", "state": "pressed", "properties": { "background": "$gold" } },
+    { "selector": "#refresh", "properties": { "background": "$pink", "color": "#FFFFFF", "cornerRadius": "4", "fontSize": "15" } },
+    { "selector": "#refresh", "state": "hover", "properties": { "background": "$violet" } },
+    { "selector": "#refresh", "state": "pressed", "properties": { "background": "$gold", "color": "$ink" } },
+
+    { "selector": "#chartEddies", "properties": { "borderColor": "$gold", "borderWidth": "1" } },
+    { "selector": "#chartThreat", "properties": { "borderColor": "$pink", "borderWidth": "1" } },
+    { "selector": "#chartPower", "properties": { "borderColor": "$violet", "borderWidth": "1" } },
+    { "selector": "#hotspots", "properties": { "borderColor": "$mint", "borderWidth": "1" } },
+    { "selector": "#powerNodes", "properties": { "borderColor": "$neon", "borderWidth": "1" } }
+  ]
+}

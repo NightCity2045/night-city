@@ -17,6 +17,14 @@
     allowClaim: true
   - type: NCMetaStorage
   - type: NCMetaTerminal
+    allowEditor: false
+  - type: ItemSlots
+    slots:
+      nc_meta_chip:
+        name: nc-meta-chip-slot
+        whitelist:
+          tags:
+          - NCMetaChip
   - type: UserInterface
     interfaces:
       enum.NCMetaUiKey.Workspace:

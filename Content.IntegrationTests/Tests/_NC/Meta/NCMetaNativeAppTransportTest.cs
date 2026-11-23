@@ -125,6 +125,27 @@ public sealed class NCMetaNativeAppTransportTest : GameTest
     }
 
     [Test]
+    public async Task TheInstallerOffersTheProgramOfAChipOnlyWhileOneIsInTheSlot()
+    {
+        await Client.WaitAssertion(() =>
+        {
+            using var window = new NCMetaWorkspaceWindow();
+            window.OpenCentered();
+            window.ApplyState(new NCMetaWorkspaceState { NativeTools = new("installer", []) });
+            var button = window.FindControl<Button>("ToolsLoadChip");
+            Assert.That(button.Visible, Is.False, "Without a chip there is nothing to load.");
+
+            window.ApplyState(new NCMetaWorkspaceState { NativeTools = new("installer", [], "chip-device", "Door chip") });
+            Assert.That(button.Visible, Is.True);
+            Assert.That(button.Text, Does.Contain("Door chip"));
+
+            window.ApplyState(new NCMetaWorkspaceState { NativeTools = new("hardware", [], "chip-device", "Door chip") });
+            Assert.That(button.Visible, Is.False, "Loading a chip belongs to the installer view.");
+            window.Close();
+        });
+    }
+
+    [Test]
     public async Task HardwareMonitorShowsTheLinkCapacityOfAHost()
     {
         await Client.WaitAssertion(() =>

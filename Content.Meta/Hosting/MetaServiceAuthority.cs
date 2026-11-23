@@ -60,6 +60,5 @@ public static class MetaServiceAuthority
         value.All(character => character is >= '!' and <= '~');
     private static bool Digest(string? value) => value is { Length: 64 } &&
         value.All(character => character is >= '0' and <= '9' or >= 'a' and <= 'f');
-    private static bool Device(string? value) => Guid.TryParseExact(value, "D", out var id) && id != Guid.Empty &&
-        value == id.ToString("D");
+    private static bool Device(string? value) => Content.Meta.Commerce.MetaSoftwarePolicy.Device(value);
 }

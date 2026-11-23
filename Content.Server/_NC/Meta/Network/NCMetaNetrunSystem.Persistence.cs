@@ -216,8 +216,8 @@ public sealed partial class NCMetaNetrunSystem
         });
     }
     private static bool ValidPolicy(SecurityPolicy policy) => policy is { Revision: > 0, Owner.Length: > 0 and <= 128, Architecture.Length: > 0 and <= 128, Entries.Length: <= 64, Nodes.Length: <= 64 } &&
-        Guid.TryParseExact(policy.AccessDeviceId, "D", out _) && policy.Entries.All(id => id is { Length: > 0 and <= 128 }) &&
-        policy.Nodes.All(node => node is { Id.Length: > 0 and <= 128, Defense.Length: > 0 and <= 128, Neighbors.Length: <= 64, DataPath.Length: <= 512, ControlledDeviceId.Length: <= 128 } && Guid.TryParseExact(node.DeviceId, "D", out _) && Enum.IsDefined(node.Kind) && node.Neighbors.All(id => id is { Length: > 0 and <= 128 })) &&
+        NCMetaDeviceIds.IsValid(policy.AccessDeviceId) && policy.Entries.All(id => id is { Length: > 0 and <= 128 }) &&
+        policy.Nodes.All(node => node is { Id.Length: > 0 and <= 128, Defense.Length: > 0 and <= 128, Neighbors.Length: <= 64, DataPath.Length: <= 512, ControlledDeviceId.Length: <= 128 } && NCMetaDeviceIds.IsValid(node.DeviceId) && Enum.IsDefined(node.Kind) && node.Neighbors.All(id => id is { Length: > 0 and <= 128 })) &&
         policy.Nodes.Select(node => node.Id).Distinct(StringComparer.Ordinal).Count() == policy.Nodes.Length;
     private static bool MatchesPolicy(NodePolicy policy, NodeEntry node, bool compareControl = true) => policy.Kind == node.Component.Kind &&
         policy.Defense == node.Component.Defense.Id && policy.Neighbors.SequenceEqual(node.Component.Neighbors) &&

@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 nc-meta-tools-title = Обслуживание устройств
-nc-meta-tools-installer = Установка программ
-nc-meta-tools-recovery = Восстановление установки
-nc-meta-tools-hardware = Монитор оборудования
-nc-meta-tools-diagnostics = Диагностика устройств
+nc-meta-tools-installer = Программы
+nc-meta-tools-recovery = Откат
+nc-meta-tools-hardware = Обзор
+nc-meta-tools-diagnostics = Журнал
 nc-meta-tools-description = Установите лицензированный продукт, проверьте подключения и разрешения или восстановите рабочую версию. Для редактирования исходников откройте отдельную среду разработки.
 nc-meta-tools-refresh = Обновить измерения
-nc-meta-tools-hardware-row = {$name}: {$power}, {$health}
+nc-meta-tools-hardware-row = {$name} [{$id}]: {$power}, {$health}
 nc-meta-tools-processes = Процессы: {$used} / {$limit}
 nc-meta-tools-links = Ёмкость связей: {$used} / {$limit}
 nc-meta-tools-memory = Зарезервированная память: {$used} / {$limit} байт
@@ -35,3 +35,17 @@ nc-meta-tools-binding-consent = Я разрешаю показанные под�
 nc-meta-panel-open = Панель META
 nc-meta-tools-maintenance-confirm = Остановит все установленные программы. Нажмите ещё раз для подтверждения.
 nc-meta-tools-maintenance-leave-confirm = Перезагрузит хост. Нажмите ещё раз для подтверждения.
+nc-meta-chip-slot = Слот чипа META
+nc-meta-tools-load-chip = Загрузить программу с чипа: {$name}
+ent-NCMetaProgramChip = программный чип META
+    .desc = Маленький чип для слота устройства. Его ёмкости хватает на то, что потянет встроенный хост. Для сильной защиты нужен сервер.
+nc-meta-tools-network = Сеть
+nc-meta-tools-network-help = Устройства, до которых сервер дотягивается кабелем или радио. Каждая работающая связь занимает ёмкость; программу можно привязать только к устройству из этого списка. В коде пишите так: link door: Door = "K7Q-4MD".
+nc-meta-tools-network-row = [{$id}] {$name} — цена связи {$cost}
+nc-meta-tools-network-row-used = [{$id}] {$name} — цена связи {$cost}, используется программой
+nc-meta-tools-network-empty = Других устройств не видно. Проложите кабель данных до сервера или поднесите радиопорт ближе.
+nc-meta-tools-installed = Установленные программы
+nc-meta-tools-installation-row = {$name} - {$startup}
+nc-meta-tools-step-program = 1. Программа
+nc-meta-tools-step-connections = 2. Подключения
+nc-meta-tools-no-program = Вставьте чип с программой в слот этого устройства и откройте панель снова.
