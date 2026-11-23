@@ -1,0 +1,128 @@
+{
+  "version": "1.0",
+  "views": {
+    "main": {
+      "function": "access.site.view",
+      "document": "ui/main.mui",
+      "stateType": "access.site.SiteState",
+      "fields": {
+        "title": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "subtitle": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "status": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "loginVisible": {
+          "type": "boolean"
+        },
+        "adminVisible": {
+          "type": "boolean"
+        },
+        "userLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "passLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "loginLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "logoutLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "adminHeading": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "nameLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "addLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "hint": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "names": {
+          "type": "array",
+          "maxLength": 512
+        }
+      },
+      "actions": [
+        "login",
+        "logout",
+        "addName",
+        "removeName"
+      ]
+    }
+  },
+  "actions": {
+    "login": {
+      "function": "access.site.login",
+      "inputType": "access.site.LoginInput",
+      "inputs": {
+        "user": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "pass": {
+          "type": "string",
+          "maxLength": 32
+        }
+      },
+      "scopes": []
+    },
+    "logout": {
+      "function": "access.site.logout",
+      "inputType": "access.site.LogoutInput",
+      "inputs": {
+        "note": {
+          "type": "string",
+          "maxLength": 32,
+          "required": false
+        }
+      },
+      "scopes": []
+    },
+    "addName": {
+      "function": "access.site.addName",
+      "inputType": "access.site.NameInput",
+      "inputs": {
+        "name": {
+          "type": "string",
+          "maxLength": 48
+        }
+      },
+      "scopes": []
+    },
+    "removeName": {
+      "function": "access.site.removeName",
+      "inputType": "access.site.NameInput",
+      "inputs": {
+        "name": {
+          "type": "string",
+          "maxLength": 48
+        }
+      },
+      "scopes": []
+    }
+  },
+  "resources": [
+    "fonts/noto-bold",
+    "fonts/mono",
+    "images/info"
+  ]
+}

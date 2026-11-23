@@ -16,6 +16,8 @@ public sealed partial class NCMetaWorkspaceWindow
     private readonly Dictionary<string, string> _toolsBindings = [];
     private readonly List<NCMetaDeviceSummary> _toolsLinkDevices = [];
     private readonly List<NCMetaInstallationSummary> _toolsInstallations = [];
+    private float _logsElapsed = 99;
+    private string _logsView = "";
 
     private void InitializeNativeTools()
     {
@@ -73,6 +75,13 @@ public sealed partial class NCMetaWorkspaceWindow
             if (_applying || args.ItemIndex < 0 || args.ItemIndex >= _toolsInstallations.Count) return;
             _selectedInstallationId = _toolsInstallations[args.ItemIndex].Id;
         };
+        ToolsLogProgram.OnItemSelected += args =>
+        {
+            if (_applying || args.Id < 0 || args.Id >= _toolsInstallations.Count) return;
+            ToolsLogProgram.SelectId(args.Id);
+            _selectedInstallationId = _toolsInstallations[args.Id].Id;
+            _logsElapsed = 99;
+        };
         ToolsStart.OnPressed += _ => { if (_selectedInstallationId != Guid.Empty) Request(NCMetaWorkspaceOperation.Start); };
         ToolsPublishLocal.OnPressed += _ =>
         {
@@ -112,6 +121,16 @@ public sealed partial class NCMetaWorkspaceWindow
             ClearSoftwareSource(); Conflict.Visible = false;
         }
         _nativeToolsMode = mode; _nativeToolsView = view;
+        // The service panel is an application of its own: no editor toolbar, no tab strip, the current section lit in the menu.
+        MainToolbar.Visible = !mode;
+        MainContentTabs.TabsVisible = !mode;
+        if (mode) MoreRows.Visible = false;
+        else MoreRows.Visible = MoreToggle.Pressed;
+        ToolsInstaller.Pressed = view == "installer";
+        ToolsHardware.Pressed = view == "hardware";
+        ToolsNetwork.Pressed = view == "network";
+        ToolsDiagnostics.Pressed = view == "diagnostics";
+        ToolsRecovery.Pressed = view == "recovery";
         // On a computer the service panel is a section of the desktop; servers have no Studio to go back to.
         ToolsDesktop.Visible = mode && tools!.CanOpenStudio;
         Title = Loc.GetString(mode ? "nc-meta-tools-title" : "nc-meta-workspace-title");
@@ -133,8 +152,10 @@ public sealed partial class NCMetaWorkspaceWindow
         ToolsStockPanel.Visible = tools.View == "installer";
         ToolsLoadChip.Visible = tools.View == "installer" && tools.ChipDeviceId.Length > 0;
         ToolsLoadChip.Text = Loc.GetString("nc-meta-tools-load-chip", ("name", tools.ChipName));
-        ToolsMeasurements.Visible = tools.View == "hardware";
-        ToolsNetworkList.Visible = ToolsLocalSites.Visible = ToolsLocalSitesTitle.Visible = tools.View == "network";
+        // The list views fill the height themselves; the scrolling part holds only what grows with its content.
+        NativeToolsScroll.Visible = tools.View is "installer" or "network";
+        MeasurementsCard.Visible = tools.View == "hardware";
+        NetworkCard.Visible = LocalSitesCard.Visible = tools.View == "network";
         var maintenanceHost = tools.Hardware.FirstOrDefault(row => row.DeviceId == _selectedDeviceId);
         ToolsMaintenance.Visible = tools.View == "hardware" && maintenanceHost != null;
         if (maintenanceHost != null)
@@ -142,7 +163,7 @@ public sealed partial class NCMetaWorkspaceWindow
             ToolsMaintenance.Text = Loc.GetString(maintenanceHost.Maintenance ? "nc-meta-hardware-maintenance-leave" : "nc-meta-hardware-maintenance-enter");
             ToolsMaintenance.ConfirmationText = Loc.GetString(maintenanceHost.Maintenance ? "nc-meta-tools-maintenance-leave-confirm" : "nc-meta-tools-maintenance-confirm");
         }
-        ToolsLogs.Visible = tools.View is "diagnostics" or "recovery";
+        LogsCard.Visible = tools.View is "diagnostics" or "recovery";
         if (_toolsRelease != _state.ActiveReleaseId || _toolsDevice != _selectedDeviceId)
         {
             _toolsRelease = _state.ActiveReleaseId; _toolsDevice = _selectedDeviceId;
@@ -174,10 +195,22 @@ public sealed partial class NCMetaWorkspaceWindow
         foreach (var installation in _toolsInstallations)
         {
             var item = ToolsInstallations.AddItem(Loc.GetString("nc-meta-tools-installation-row", ("name", installation.Name),
-                ("startup", Loc.GetString(installation.AutoStart ? "nc-meta-installation-startup" : "nc-meta-installation-manual"))));
+                ("startup", Loc.GetString(installation.AutoStart ? "nc-meta-installation-startup" : "nc-meta-installation-manual")),
+                ("state", Loc.GetString(installation.Running ? "nc-meta-tools-state-running" : "nc-meta-tools-state-stopped"))));
             item.Selected = installation.Id == _selectedInstallationId;
         }
         ToolsStart.Disabled = ToolsStop.Disabled = ToolsPublishLocal.Disabled = _toolsInstallations.Count == 0;
+        // The program whose log is shown: the one chosen in the list above, the only one, or the first.
+        // A replaced program has a new identity: a stale choice falls back to the first program that exists now.
+        if (_toolsInstallations.All(installation => installation.Id != _selectedInstallationId))
+            _selectedInstallationId = _toolsInstallations.Count > 0 ? _toolsInstallations[0].Id : Guid.Empty;
+        ToolsLogProgram.Clear();
+        for (var logIndex = 0; logIndex < _toolsInstallations.Count; logIndex++)
+            ToolsLogProgram.AddItem(_toolsInstallations[logIndex].Name, logIndex);
+        var chosen = _toolsInstallations.FindIndex(installation => installation.Id == _selectedInstallationId);
+        if (chosen >= 0) ToolsLogProgram.SelectId(chosen);
+        ToolsLogProgram.Visible = _toolsInstallations.Count > 0;
+        if (_logsView != view) { _logsView = view; _logsElapsed = 99; }
         ToolsMeasurements.Clear();
         foreach (var row in tools.Hardware.Take(64))
         {
@@ -202,10 +235,21 @@ public sealed partial class NCMetaWorkspaceWindow
         if (tools.Network is not { Count: > 0 }) ToolsNetworkList.AddItem(Loc.GetString("nc-meta-tools-network-empty"), selectable: false);
         if (tools.Hardware.Count == 0) ToolsMeasurements.AddItem(Loc.GetString("nc-meta-tools-no-hosts"), selectable: false);
         ToolsLogs.Clear(); foreach (var log in _state.Logs.TakeLast(256)) ToolsLogs.AddItem(log, selectable: false);
+        if (_state.Logs.Count == 0) ToolsLogs.AddItem(Loc.GetString("nc-meta-tools-log-empty"), selectable: false);
     }
 
     /// <summary>People read and say device codes in groups of three: K7Q-4MD.</summary>
     private static string ShortDeviceId(string id) => id.Length == 6 ? id[..3] + "-" + id[3..] : id;
+
+    /// <summary>The log of the chosen program is read again every two seconds while its view is open.</summary>
+    private void TickNativeLogs(float seconds)
+    {
+        if (!_nativeToolsMode || _nativeToolsView is not ("diagnostics" or "recovery") || _selectedInstallationId == Guid.Empty) return;
+        _logsElapsed += seconds;
+        if (_logsElapsed < 2) return;
+        _logsElapsed = 0;
+        Request(NCMetaWorkspaceOperation.Logs);
+    }
 
     private void UpdateToolsLinks()
     {

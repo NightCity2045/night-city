@@ -711,14 +711,21 @@ public sealed partial class NCMetaCodeEditor : Control
         var visible = Math.Min(_visual.Count, _firstLine + (int) (PixelSize.Y / height) + 1);
         var start = Math.Min(_caret, _anchor);
         var end = Math.Max(_caret, _anchor);
+        var gutter = 48 * UIScale;
+        handle.DrawRect(new UIBox2(0, 0, gutter, PixelSize.Y), Color.FromHex("#060C14"));
+        handle.DrawLine(new Vector2(gutter, 0), new Vector2(gutter, PixelSize.Y), Color.FromHex("#1F4A6B"));
+        var caretLine = CaretLine;
         for (var line = _firstLine; line < visible; line++)
         {
             var visual = _visual[line];
             var top = (line - _firstLine) * height;
+            var active = visual.Line == caretLine && HasKeyboardFocus();
+            if (active)
+                handle.DrawRect(new UIBox2(gutter + 1, top, PixelSize.X, top + height), Color.FromHex("#0E2236"));
             // DrawString takes the top-left corner and adds the ascent itself; passing a baseline drew text a row below the caret.
             var baseline = top;
             if (visual.Start == _lines[visual.Line])
-                handle.DrawString(_font, new Vector2(4 * UIScale, baseline), (visual.Line + 1).ToString(CultureInfo.InvariantCulture), Color.Gray);
+                handle.DrawString(_font, new Vector2(4 * UIScale, baseline), (visual.Line + 1).ToString(CultureInfo.InvariantCulture), active ? Color.FromHex("#31E6FF") : Color.FromHex("#4A6580"));
             var x = 52 * UIScale;
             var source = _text[visual.Start..visual.End];
             foreach (var element in NCMetaGraphemes.Elements(source))

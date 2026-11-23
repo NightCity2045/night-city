@@ -149,6 +149,11 @@ public sealed partial class MetaApiCatalog
         Dto("meta.doors", "AccessResolution", "requestId:string", "subject:meta.access.Subject", "outcome:meta.doors.AccessOutcome", "stamp:" + S + "SampleStamp");
         Event("meta.doors.Door", "accessRequested", "meta.doors.AccessRequest", "door.access", "Ordered", 16);
         Method("meta.doors.Door", "answerAccess", "result<meta.doors.DoorState>", "door.access.answer", true, "string", "bool");
+        // The door's anti-crush interlock: off, the door closes on whoever stands in the way.
+        Method("meta.doors.Door", "setSafety", "result<meta.doors.DoorState>", "door.safety", true, "bool");
+        // Who stands in the doorway: the same set the door itself would crush when it closes.
+        Dto("meta.doors", "DoorOccupancy", "occupied:bool", "count:int", "stamp:" + S + "SampleStamp");
+        Event("meta.doors.Door", "occupancyChanged", "meta.doors.DoorOccupancy", "door.observe", "Ordered", 16);
         Event("meta.doors.Door", "accessResolved", "meta.doors.AccessResolution", "door.access", "Ordered", 16);
         Capability("meta.security", "Camera"); Capability("meta.security", "Alarm");
         Dto("meta.security", "Detection", "confidence:float", "stamp:" + S + "SampleStamp");

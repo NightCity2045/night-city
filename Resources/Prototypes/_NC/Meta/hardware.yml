@@ -111,3 +111,52 @@
   maxProcesses: 1
   cpuWeight: 1
   interfaces: [meta.implants.Optics, meta.implants.FunctionalController]
+
+- type: ncMetaHardware
+  id: NCMetaLaptop
+  linkCapacity: 8
+  gasPerWindow: 120000
+  idleWatts: 15
+  activeWatts: 45
+  interfaces: [meta.files.FileStore, meta.net.MessagePort, meta.doors.Door, meta.doors.DoorPanel, meta.sensors.TemperatureSensor, meta.security.Camera, meta.security.Alarm, meta.vehicle.EngineController, meta.vehicle.TransmissionController, meta.vehicle.VehicleDashboard, meta.vehicle.DriverAssistance, meta.vehicle.VehicleSecurity, meta.industrial.Conveyor, meta.industrial.LoadSensor, meta.industrial.Fabricator, meta.lab.Grinder, meta.lab.ChemMaster, meta.implants.FunctionalController, meta.implants.MedicalProgrammer, meta.drone.DroneController, meta.drone.NavigationSupervisor, meta.drone.Perception, meta.drone.Manipulator, meta.drone.WeaponController]
+  memoryBytes: 4194304
+  storageBytes: 33554432
+  maxProcesses: 4
+  cpuWeight: 4
+
+- type: ncMetaHardware
+  id: NCMetaWorkstation
+  linkCapacity: 24
+  gasPerWindow: 320000
+  idleWatts: 60
+  activeWatts: 180
+  interfaces: [meta.files.FileStore, meta.net.MessagePort, meta.doors.Door, meta.doors.DoorPanel, meta.sensors.TemperatureSensor, meta.security.Camera, meta.security.Alarm, meta.vehicle.EngineController, meta.vehicle.TransmissionController, meta.vehicle.VehicleDashboard, meta.vehicle.DriverAssistance, meta.vehicle.VehicleSecurity, meta.industrial.Conveyor, meta.industrial.LoadSensor, meta.industrial.Fabricator, meta.lab.Grinder, meta.lab.ChemMaster, meta.implants.FunctionalController, meta.implants.MedicalProgrammer, meta.drone.DroneController, meta.drone.NavigationSupervisor, meta.drone.Perception, meta.drone.Manipulator, meta.drone.WeaponController]
+  memoryBytes: 12582912
+  storageBytes: 134217728
+  maxProcesses: 12
+  cpuWeight: 12
+
+- type: ncMetaHardware
+  id: NCMetaServerNode
+  linkCapacity: 24
+  gasPerWindow: 200000
+  idleWatts: 40
+  activeWatts: 150
+  interfaces: [meta.files.FileStore, meta.net.MessagePort, meta.doors.Door, meta.doors.DoorPanel, meta.sensors.TemperatureSensor, meta.security.Camera, meta.security.Alarm, meta.vehicle.EngineController, meta.vehicle.TransmissionController, meta.vehicle.VehicleDashboard, meta.vehicle.DriverAssistance, meta.vehicle.VehicleSecurity, meta.industrial.Conveyor, meta.industrial.LoadSensor, meta.industrial.Fabricator, meta.lab.Grinder, meta.lab.ChemMaster, meta.implants.FunctionalController, meta.implants.MedicalProgrammer, meta.drone.DroneController, meta.drone.NavigationSupervisor, meta.drone.Perception, meta.drone.Manipulator, meta.drone.WeaponController]
+  memoryBytes: 4194304
+  storageBytes: 33554432
+  maxProcesses: 4
+  cpuWeight: 4
+
+- type: ncMetaHardware
+  id: NCMetaMainframe
+  linkCapacity: 160
+  gasPerWindow: 1500000
+  maxBurstGas: 786432
+  idleWatts: 300
+  activeWatts: 1200
+  interfaces: [meta.files.FileStore, meta.net.MessagePort, meta.doors.Door, meta.doors.DoorPanel, meta.sensors.TemperatureSensor, meta.security.Camera, meta.security.Alarm, meta.vehicle.EngineController, meta.vehicle.TransmissionController, meta.vehicle.VehicleDashboard, meta.vehicle.DriverAssistance, meta.vehicle.VehicleSecurity, meta.industrial.Conveyor, meta.industrial.LoadSensor, meta.industrial.Fabricator, meta.lab.Grinder, meta.lab.ChemMaster, meta.implants.FunctionalController, meta.implants.MedicalProgrammer, meta.drone.DroneController, meta.drone.NavigationSupervisor, meta.drone.Perception, meta.drone.Manipulator, meta.drone.WeaponController]
+  memoryBytes: 67108864
+  storageBytes: 1073741824
+  maxProcesses: 48
+  cpuWeight: 48

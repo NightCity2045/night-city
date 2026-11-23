@@ -416,10 +416,17 @@ public sealed partial class NCMetaWorkspaceSystem : EntitySystem
                 }
             }
             var responseDevice = request.DeviceId.Length == 0 ? context.DeviceId : request.DeviceId;
-            foreach (var installation in await _persistence.ReadInstallationsAsync(responseDevice, context.Owner))
+            var installed = await _persistence.ReadInstallationsAsync(responseDevice, context.Owner);
+            var runningNow = await OnMainAsync(() => _devices.TryResolve(responseDevice, out var runner)
+                ? installed.Select(value => _runtime.TryGetInstallation(runner.Entity, context.Owner, value.Id, out _)).ToArray()
+                : new bool[installed.Length]);
+            for (var installedIndex = 0; installedIndex < installed.Length; installedIndex++)
+            {
+                var installation = installed[installedIndex];
                 state.Installations.Add(new(installation.Id, installation.Active.Id, responseDevice,
                     installation.ProjectId == project.Id && project.Name.Length > 0 ? project.Name : ShortPackageName(installation.PackageIdentity),
-                    installation.SlotKind, installation.AutoStart));
+                    installation.SlotKind, installation.AutoStart, runningNow[installedIndex]));
+            }
             var responseInstallation = await SelectInstallationAsync(responseDevice, context.Owner, project.Id, request.ReleaseId, request.InstallationId);
             await OnMainAsync(() =>
             {

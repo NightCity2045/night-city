@@ -62,8 +62,8 @@ public sealed partial class NCMetaDeviceRegistrySystem
     private void OnHostExamined(Entity<NCMetaHostComponent> ent, ref ExaminedEvent args) => ExamineIdentity(ent.Owner, ref args);
     private void ExamineIdentity(EntityUid uid, ref ExaminedEvent args)
     {
-        var user = args.Examiner;
-        if (!CanManage(uid, user) || !TryGetEntry(uid, out var entry)) return;
+        // The code is an address, not a secret: anyone who looks at the device may read it, owner or not.
+        if (!TryGetEntry(uid, out var entry)) return;
         args.PushMarkup(Loc.GetString("nc-meta-device-id", ("id", NCMetaDeviceIds.Format(entry.Id))));
     }
 }

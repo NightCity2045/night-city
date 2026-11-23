@@ -331,6 +331,8 @@ public sealed partial class NCMetaWorkspaceSystem
             value.SlotKind == "User" && value.PackageIdentity == artifact.Manifest.PackageName);
         previous ??= installedBefore.Length == 1 && installedBefore[0].PackageIdentity.Length == 0 && installedBefore[0].ProjectId == project.Id
             ? installedBefore[0] : null;
+        // A rebuilt project is the same program: it replaces its earlier installation instead of running beside it.
+        previous ??= installedBefore.FirstOrDefault(value => value.SlotKind == "User" && value.ProjectId == project.Id);
         var installAuthority = await CaptureInstallationAuthorityAsync(context, host.Value);
         if (installAuthority == null) { state.Notice = Loc.GetString("nc-meta-error-access"); return; }
         var outcome = await TryCommitInstallationSwapAsync(host.Value, context.User, context.Terminal, artifact, bindings, "User", previous,

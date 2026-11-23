@@ -62,7 +62,7 @@ public sealed record NCMetaDeviceSummary(string DeviceId, string Name, string Pr
 public sealed record NCMetaLinkSummary(string Slot, string Capability, string ContractHash, List<string> RequiredScopes);
 
 [Serializable, NetSerializable]
-public sealed record NCMetaInstallationSummary(Guid Id, Guid ReleaseId, string DeviceId, string Name, string Slot, bool AutoStart);
+public sealed record NCMetaInstallationSummary(Guid Id, Guid ReleaseId, string DeviceId, string Name, string Slot, bool AutoStart, bool Running = false);
 
 /// <summary>Only the server creates the actor context. DeviceId and ReleaseId are requested targets, never authority.</summary>
 [Serializable, NetSerializable]

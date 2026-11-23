@@ -1,0 +1,47 @@
+<Page id="root" title="{bind title}">
+  <Column id="layout" gap="10" margin="14" class="page">
+    <Panel id="hero" class="hero">
+      <Row id="heroRow" gap="12">
+        <Image id="logo" resource="images/info" width="48" height="48"/>
+        <Column id="heroText" gap="2">
+          <Header id="title" text="{bind title}" class="title"/>
+          <Text id="subtitle" text="{bind subtitle}" class="subtitle"/>
+        </Column>
+      </Row>
+    </Panel>
+
+    <Text id="status" text="{bind status}" class="status"/>
+
+    <Panel id="loginCard" class="card" visible="{bind loginVisible}">
+      <Form id="loginForm" action="login">
+        <Column id="loginBody" gap="6">
+          <Text id="userLabel" text="{bind userLabel}" class="label"/>
+          <Input id="loginUser" field="user" maxLength="32"/>
+          <Text id="passLabel" text="{bind passLabel}" class="label"/>
+          <Input id="loginPass" field="pass" maxLength="32"/>
+          <Button id="loginButton" action="login" text="{bind loginLabel}"/>
+        </Column>
+      </Form>
+    </Panel>
+
+    <Panel id="adminCard" class="card" visible="{bind adminVisible}">
+      <Column id="adminBody" gap="8">
+        <Row id="adminHead" gap="10">
+          <Text id="adminHeading" text="{bind adminHeading}" class="heading"/>
+          <Form id="logoutForm" action="logout">
+            <Button id="logoutButton" action="logout" text="{bind logoutLabel}"/>
+          </Form>
+        </Row>
+        <Text id="nameLabel" text="{bind nameLabel}" class="label"/>
+        <Form id="addForm" action="addName">
+          <Row id="addRow" gap="8">
+            <Input id="addName" field="name" maxLength="48"/>
+            <Button id="addButton" action="addName" text="{bind addLabel}"/>
+          </Row>
+        </Form>
+        <Text id="hint" text="{bind hint}" class="hint"/>
+        <Table id="names" items="{bind names}" columns="label" rowAction="removeName" rowKey="name" rowField="name"/>
+      </Column>
+    </Panel>
+  </Column>
+</Page>

@@ -1,0 +1,34 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Three grades of server: a shelf node for a shop or a flat, the rack server, and a mainframe for a whole building.
+- type: entity
+  parent: NCMetaServerBase
+  id: NCMetaServerNode
+  name: server node
+  description: A small, cheap box with two drive trays. Enough for a shop door and a modest site, and it overheats if pushed.
+  components:
+  - type: NCMetaHost
+    profile: NCMetaServerNode
+    allowClaim: true
+  - type: NCMetaStorage
+    capacityBytes: 33554432
+  - type: ApcPowerReceiver
+    powerLoad: 400
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Meta/server_node.rsi
+
+- type: entity
+  parent: NCMetaServerBase
+  id: NCMetaMainframe
+  name: mainframe
+  description: A monolith with a glowing core and a wall of cooling fins. It runs a whole building and drinks power.
+  components:
+  - type: NCMetaHost
+    profile: NCMetaMainframe
+    allowClaim: true
+  - type: NCMetaStorage
+    capacityBytes: 1073741824
+  - type: ApcPowerReceiver
+    powerLoad: 3000
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Meta/mainframe.rsi

@@ -1,0 +1,19 @@
+{
+  "rootModule": "access.site",
+  "responses": [
+    {
+      "member": "meta.files.FileStore.readText",
+      "value": "Alice\nBob\n",
+      "pending": true,
+      "completeAfterSlices": 2
+    }
+  ],
+  "events": [],
+  "expectedLogs": [],
+  "expectedCommands": [
+    "readText(door/names.txt)"
+  ],
+  "epoch": 1,
+  "nowMs": 1000,
+  "tick": 60
+}

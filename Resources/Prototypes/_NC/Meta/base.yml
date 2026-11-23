@@ -29,16 +29,28 @@
   description: A programmable computer with a META development environment and recovery tools.
 
 - type: entity
-  parent: NCMetaTerminalBase
-  id: NCMetaServer
-  name: META application server
-  description: A physical host for META applications and CitiNet services.
+  abstract: true
+  parent: [ BaseMachinePowered, BaseMachineDestructible ]
+  id: NCMetaServerBase
   components:
   - type: NCMetaHost
     profile: NCMetaServer
     allowClaim: true
   - type: NCMetaTerminal
     allowEditor: false
+  - type: NCMetaPort
+    networkId: LOCAL
+  - type: NCMetaStorage
+    capacityBytes: 268435456
+  - type: ActivatableUIRequiresPower
+  - type: ActivatableUI
+    key: enum.NCMetaUiKey.Workspace
+  - type: UserInterface
+    interfaces:
+      enum.NCMetaUiKey.Workspace:
+        type: NCMetaWorkspaceBoundUserInterface
+      enum.NCMetaUiKey.Application:
+        type: NCMetaApplicationBoundUserInterface
   - type: ItemSlots
     slots:
       nc_meta_chip:
@@ -46,7 +58,68 @@
         whitelist:
           tags:
           - NCMetaChip
-  - type: NCMetaStorage
-    capacityBytes: 268435456
+  - type: Transform
+    noRot: false
+  - type: Rotatable
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Meta/server_rack.rsi
+    drawdepth: Objects
+    layers:
+    - state: base
+    - map: [ "enum.PowerDeviceVisualLayers.Powered" ]
+      state: glow
+      shader: unshaded
+      visible: false
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.PowerDeviceVisuals.Powered:
+        enum.PowerDeviceVisualLayers.Powered:
+          True: { visible: true }
+          False: { visible: false }
+
+- type: entity
+  abstract: true
+  parent: BaseItem
+  id: NCMetaTableComputerBase
+  components:
+  - type: NCMetaHost
+    profile: NCMetaComputer
+    allowClaim: true
+  - type: NCMetaTerminal
   - type: NCMetaPort
     networkId: LOCAL
+  - type: NCMetaStorage
+    capacityBytes: 67108864
+  # A battery or an internal supply keeps it running; a table has no cable to plug it into.
+  - type: ApcPowerReceiver
+    needsPower: false
+  - type: ActivatableUI
+    key: enum.NCMetaUiKey.Workspace
+  - type: UserInterface
+    interfaces:
+      enum.NCMetaUiKey.Workspace:
+        type: NCMetaWorkspaceBoundUserInterface
+      enum.NCMetaUiKey.Application:
+        type: NCMetaApplicationBoundUserInterface
+  - type: Sprite
+    sprite: _NC/Objects/Devices/Meta/desktop.rsi
+    layers:
+    - state: base
+    - map: [ "enum.PowerDeviceVisualLayers.Powered" ]
+      state: glow
+      shader: unshaded
+      visible: false
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.PowerDeviceVisuals.Powered:
+        enum.PowerDeviceVisualLayers.Powered:
+          True: { visible: true }
+          False: { visible: false }
+
+- type: entity
+  parent: NCMetaServerBase
+  id: NCMetaServer
+  name: META application server
+  description: A physical host for META applications and CitiNet services.

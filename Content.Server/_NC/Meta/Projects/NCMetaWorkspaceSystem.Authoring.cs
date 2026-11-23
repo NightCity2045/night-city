@@ -282,8 +282,49 @@ public sealed partial class NCMetaWorkspaceSystem
             var mock = sources.Single(file => file.FileId == "@preview").Text;
             result.Presentation = NCMetaMuiPresentationBuilder.Build(contract, document!, styles);
             result.ViewId = view.Key;
-            result.Values = NCMetaMuiPresentationBuilder.ReadValues(mock);
+            result.Values = NCMetaMuiPresentationBuilder.ReadValues(NormalizeMock(mock, viewContract.Fields));
         }
         return result;
     }
+
+    /// <summary>
+    /// The preview state the player typed, completed from the view's own field types: a missing or mistyped field gets a
+    /// plain sample value, so a page renders from "{}" without hand-written JSON and a typo does not blank it.
+    /// </summary>
+    private static string NormalizeMock(string mock, IReadOnlyDictionary<string, MuiField> fields)
+    {
+        System.Text.Json.Nodes.JsonObject? given = null;
+        try { given = System.Text.Json.Nodes.JsonNode.Parse(mock) as System.Text.Json.Nodes.JsonObject; }
+        catch (System.Text.Json.JsonException) { }
+        var result = new System.Text.Json.Nodes.JsonObject();
+        foreach (var (name, field) in fields)
+        {
+            System.Text.Json.Nodes.JsonNode? current = null;
+            given?.TryGetPropertyValue(name, out current);
+            result[name] = current != null && MockFits(current, field) ? current.DeepClone() : MockSample(name, field);
+        }
+
+        return result.ToJsonString();
+    }
+
+    private static bool MockFits(System.Text.Json.Nodes.JsonNode node, MuiField field) => (node.GetValueKind(), field.Kind) switch
+    {
+        (System.Text.Json.JsonValueKind.String, MuiValueKind.String) => node.GetValue<string>().Length <= field.MaxLength,
+        (System.Text.Json.JsonValueKind.True or System.Text.Json.JsonValueKind.False, MuiValueKind.Boolean) => true,
+        (System.Text.Json.JsonValueKind.Number, MuiValueKind.Integer) => long.TryParse(node.ToJsonString(), out _),
+        (System.Text.Json.JsonValueKind.Number, MuiValueKind.Number) => true,
+        (System.Text.Json.JsonValueKind.Object, MuiValueKind.Object) => true,
+        (System.Text.Json.JsonValueKind.Array, MuiValueKind.Array) => node.AsArray().Count <= field.MaxLength,
+        _ => false,
+    };
+
+    private static System.Text.Json.Nodes.JsonNode MockSample(string name, MuiField field) => field.Kind switch
+    {
+        MuiValueKind.String => System.Text.Json.Nodes.JsonValue.Create(name.Length <= field.MaxLength ? name : name[..field.MaxLength])!,
+        MuiValueKind.Boolean => System.Text.Json.Nodes.JsonValue.Create(true)!,
+        MuiValueKind.Integer => System.Text.Json.Nodes.JsonValue.Create((long) Math.Clamp(0, field.Minimum ?? long.MinValue, field.Maximum ?? long.MaxValue))!,
+        MuiValueKind.Number => System.Text.Json.Nodes.JsonValue.Create(Math.Clamp(0.0, field.Minimum ?? double.MinValue, field.Maximum ?? double.MaxValue))!,
+        MuiValueKind.Object => new System.Text.Json.Nodes.JsonObject(),
+        _ => new System.Text.Json.Nodes.JsonArray(),
+    };
 }

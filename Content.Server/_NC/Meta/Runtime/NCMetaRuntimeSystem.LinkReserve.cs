@@ -55,7 +55,7 @@ public sealed partial class NCMetaRuntimeSystem
 
     /// <summary>
     /// A device answers to one server: true when another host already runs a program bound to a device this installation
-    /// binds. The first server keeps it until its program is stopped or removed.
+    /// binds. The first server keeps it until its program is stopped or removed. A door also answers to one program.
     /// </summary>
     public bool IsDeviceTaken(EntityUid host, NCMetaInstallation installation)
     {
@@ -65,10 +65,14 @@ public sealed partial class NCMetaRuntimeSystem
                 continue;
             foreach (var (other, instances) in _hosts)
             {
-                if (other == host)
+                // Two programs on one server may share a sensor, but not a door: both would answer its requests and the
+                // first answer wins, so an old program silently overrules the new one.
+                if (other == host && !HasComp<Content.Shared.Doors.Components.DoorComponent>(target.Entity))
                     continue;
                 foreach (var instance in instances)
                 {
+                    if (instance.Installation.Id == installation.Id)
+                        continue;
                     foreach (var bound in instance.Bindings.Values)
                     {
                         if (bound.Device.Entity == target.Entity)

@@ -34,6 +34,8 @@ public sealed partial class NCMetaDeviceComponent : Component
     [DataField] public List<string> Interfaces = [];
     [DataField] public bool AllowClaim;
     [DataField] public bool AllowServiceControl;
+    /// <summary>Added by the universal device system to ordinary electronics: an address only, nothing to claim or restore.</summary>
+    [DataField] public bool Automatic;
 }
 
 [RegisterComponent]

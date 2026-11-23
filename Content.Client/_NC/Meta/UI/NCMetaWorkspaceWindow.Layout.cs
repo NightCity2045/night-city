@@ -23,6 +23,17 @@ public sealed partial class NCMetaWorkspaceWindow
         PreviewWindowButton.OnPressed += _ => OpenPreviewWindow();
     }
 
+    /// <summary>
+    /// The output panel (diagnostics, logs, debugger, hosting) shows itself when it has something to say, or when the
+    /// player asks for it, and stays out of the way of the editor otherwise.
+    /// </summary>
+    private void UpdateOutputArea()
+    {
+        var wanted = OutputToggle.Pressed || Diagnostics.Count > 0 || Logs.Count > 0 || Output.CurrentTab != 0;
+        if (OutputArea.Visible != wanted)
+            OutputArea.Visible = wanted;
+    }
+
     private void OpenPreviewWindow()
     {
         if (_previewWindow == null)

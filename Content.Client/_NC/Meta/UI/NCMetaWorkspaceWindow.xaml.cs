@@ -65,8 +65,7 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
         InitializeFirmware();
         InitializeServiceGrants();
         ContentsContainer.Visible = false;
-        DesktopStudio.OnPressed += _ => { SetDesktop(false); Request(NCMetaWorkspaceOperation.Open); };
-        DesktopNetwork.OnPressed += _ => { SetDesktop(false); Request(NCMetaWorkspaceOperation.OpenNativeTools, "network"); };
+        InitializeDesktop();
         ToolsDesktop.OnPressed += _ => Request(NCMetaWorkspaceOperation.Open);
         InitializeNativeTools();
         InitializeLayout();
@@ -259,6 +258,8 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
     {
         DesktopPanel.Visible = shown;
         WorkArea.Visible = !shown;
+        UpdateTaskbar();
+        if (shown) UpdateDesktop();
     }
 
     public void ApplyState(NCMetaWorkspaceState state)
@@ -269,6 +270,7 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
         {
             ContentsContainer.Visible = true;
             // A computer opens on its desktop; a server goes straight to its service panel.
+            SetDesktopAvailable(state.NativeTools == null || state.NativeTools.CanOpenStudio);
             if (state.NativeTools == null) SetDesktop(true);
         }
         ApplyLanguageSymbols(state);
@@ -419,6 +421,8 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
         ApplyFirmwareState(state.Firmware);
         ApplyServiceGrantState(state.ServiceGrants);
         ApplyNativeTools();
+        UpdateTaskbar();
+        if (DesktopPanel.Visible) UpdateDesktop();
         _applying = false;
         RebuildTabs();
         UpdateFileInfo();
@@ -633,6 +637,10 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
     protected override void FrameUpdate(FrameEventArgs args)
     {
         base.FrameUpdate(args);
+        UpdateOutputArea();
+        TickDesktopClock(args.DeltaSeconds);
+        TickDesktopRain(args.DeltaSeconds);
+        TickNativeLogs(args.DeltaSeconds);
         TickSemanticProof();
         TickServiceGrantRequest(args.DeltaSeconds);
         if (_saveRequest == Guid.Empty || _pendingSave is not { } request || _saveRetryAttempts >= 3) return;
@@ -839,6 +847,7 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
             _firmwareLinkDevices.Clear();
             InvalidateServiceGrants();
             DisposePreviewWindow();
+            CloseStartMenu();
             Requested = null;
         }
         base.Dispose(disposing);

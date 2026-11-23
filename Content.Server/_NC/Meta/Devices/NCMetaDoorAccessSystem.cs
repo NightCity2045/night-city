@@ -2,6 +2,7 @@
 using Content.Meta.Runtime;
 using Content.Server._NC.LivingCity.Identity;
 using Content.Server._NC.Meta.Runtime;
+using Content.Shared._NC.Meta;
 using Content.Shared._NC.Meta.Devices;
 using Content.Shared.Doors.Components;
 using Content.Shared.Doors.Systems;
@@ -21,6 +22,7 @@ public sealed class NCMetaDoorAccessSystem : SharedNCMetaDoorAccessSystem, INCMe
     private const string RequestedEvent = "meta.doors.Door.accessRequested";
     private const string ResolvedEvent = "meta.doors.Door.accessResolved";
     private const string AnswerMember = "meta.doors.Door.answerAccess";
+    private const string SafetyMember = "meta.doors.Door.setSafety";
     private const int MaxPending = 256;
     private const int MaxJournal = 32;
     private const int MaxNameLength = 128;
@@ -31,6 +33,7 @@ public sealed class NCMetaDoorAccessSystem : SharedNCMetaDoorAccessSystem, INCMe
     [Dependency] private NCMetaRuntimeSystem _runtime = default!;
     [Dependency] private NCEntityPartyResolverSystem _parties = default!;
     [Dependency] private SharedDoorSystem _doors = default!;
+    [Dependency] private SharedAirlockSystem _airlocks = default!;
     [Dependency] private IGameTiming _timing = default!;
 
     private readonly Dictionary<(EntityUid Door, EntityUid User), Pending> _byAttempt = [];
@@ -38,7 +41,7 @@ public sealed class NCMetaDoorAccessSystem : SharedNCMetaDoorAccessSystem, INCMe
     private readonly PriorityQueue<string, TimeSpan> _deadlines = new();
     private (EntityUid Door, EntityUid User)? _authorized;
 
-    public IEnumerable<string> Members => [AnswerMember];
+    public IEnumerable<string> Members => [AnswerMember, SafetyMember];
 
     public override void Initialize()
     {
@@ -166,6 +169,8 @@ public sealed class NCMetaDoorAccessSystem : SharedNCMetaDoorAccessSystem, INCMe
 
     public MetaHostResult Commit(NCMetaDeviceInvocation invocation)
     {
+        if (invocation.Member.QualifiedName == SafetyMember)
+            return CommitSafety(invocation);
         var process = invocation.Runtime.Process;
         var requestId = process.GetString(invocation.Request.Arguments[0]);
         var allow = invocation.Request.Arguments[1].AsBool();
@@ -179,6 +184,26 @@ public sealed class NCMetaDoorAccessSystem : SharedNCMetaDoorAccessSystem, INCMe
             }));
         if (!TryComp<DoorComponent>(invocation.Device, out var door))
             return MetaHostResult.Completed(Error(invocation, "NotFound"));
+        var phase = door.State switch
+        {
+            DoorState.Closed => 0, DoorState.Opening => 1, DoorState.Open => 2, DoorState.Closing => 3, _ => 4,
+        };
+        return MetaHostResult.Completed(process.CreateResult(process.GetImport(invocation.Request.ImportId).ReturnType!.Value,
+            process.CreateRecord(process.GetTypeId("meta.doors.DoorState"),
+                [MetaValue.Bool(door.State is DoorState.Open or DoorState.Opening),
+                    process.CreateEnum(process.GetTypeId("meta.doors.DoorPhase"), phase), _runtime.CreateStamp(process)])));
+    }
+
+    /// <summary>Switches the airlock's anti-crush interlock. Like closing the door, it needs an attending person or service control.</summary>
+    private MetaHostResult CommitSafety(NCMetaDeviceInvocation invocation)
+    {
+        var process = invocation.Runtime.Process;
+        if (!TryComp<DoorComponent>(invocation.Device, out var door) || !TryComp<AirlockComponent>(invocation.Device, out var airlock))
+            return MetaHostResult.Completed(Error(invocation, "Unsupported"));
+        var service = TryComp<NCMetaDeviceComponent>(invocation.Device, out var device) && device.AllowServiceControl;
+        if (invocation.Actor == null && !service)
+            return MetaHostResult.Completed(Error(invocation, "AccessDenied"));
+        _airlocks.SetSafety(airlock, invocation.Request.Arguments[0].AsBool());
         var phase = door.State switch
         {
             DoorState.Closed => 0, DoorState.Opening => 1, DoorState.Open => 2, DoorState.Closing => 3, _ => 4,

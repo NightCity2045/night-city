@@ -10,6 +10,8 @@
   - type: NCMetaDevice
     interfaces: [meta.doors.Door]
     allowClaim: true
+    # An approved program may open and close this door without anyone attending it.
+    allowServiceControl: true
   - type: NCMetaPort
     networkId: LOCAL
   - type: NCMetaHost

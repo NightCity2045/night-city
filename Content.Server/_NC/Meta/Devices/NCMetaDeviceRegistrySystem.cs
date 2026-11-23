@@ -131,9 +131,17 @@ public sealed partial class NCMetaDeviceRegistrySystem : EntitySystem
             Log.Error($"Rejected duplicate or invalid META device identity for {ToPrettyString(uid)}.");
             return;
         }
-        _devices.Add(id, new NCMetaDeviceEntry(uid, id, owner));
+        var created = new NCMetaDeviceEntry(uid, id, owner);
+        _devices.Add(id, created);
         _entities.Add(uid, id);
         if (owner.Length > 0) IndexOwner(owner, id);
+        // Ordinary electronics have no durable record to restore: they are ready at once, which keeps a map full of them cheap.
+        if (TryComp<NCMetaDeviceComponent>(uid, out var plain) && plain.Automatic)
+        {
+            created.Ready = true;
+            return;
+        }
+
         _ = RestoreOwnerAsync(uid, id);
     }
 

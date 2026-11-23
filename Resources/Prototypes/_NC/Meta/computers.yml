@@ -1,0 +1,45 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Computers small enough to stand on a table. They are items: drop one on a table, press the activate key to open it.
+- type: entity
+  parent: NCMetaTableComputerBase
+  id: NCMetaLaptop
+  name: laptop
+  description: A battered folding computer with a META development environment. Light, slow and easy to carry off.
+  components:
+  - type: NCMetaHost
+    profile: NCMetaLaptop
+    allowClaim: true
+  - type: NCMetaStorage
+    capacityBytes: 33554432
+  - type: Item
+    size: Large
+  - type: Sprite
+    sprite: _NC/Objects/Devices/Meta/laptop.rsi
+
+- type: entity
+  parent: NCMetaTableComputerBase
+  id: NCMetaDesktop
+  name: desktop computer
+  description: A monitor, a keyboard and a grey tower that hums all night. Does everything a terminal does, on a desk.
+  components:
+  - type: Item
+    size: Huge
+  - type: Sprite
+    sprite: _NC/Objects/Devices/Meta/desktop.rsi
+
+- type: entity
+  parent: NCMetaTableComputerBase
+  id: NCMetaWorkstation
+  name: workstation
+  description: Two monitors and a tower with a red intake. Built for people who compile for a living.
+  components:
+  - type: NCMetaHost
+    profile: NCMetaWorkstation
+    allowClaim: true
+  - type: NCMetaStorage
+    capacityBytes: 134217728
+  - type: Item
+    size: Huge
+  - type: Sprite
+    sprite: _NC/Objects/Devices/Meta/workstation.rsi

@@ -761,6 +761,9 @@ public sealed partial class NCMetaRuntimeSystem : EntitySystem
         }
     }
 
+    /// <summary>True when a running program is bound to the device, so sampling it is worth doing.</summary>
+    public bool HasDependants(EntityUid device) => _dependants.TryGetValue(device, out var set) && set.Count > 0;
+
     private void AddDependant(EntityUid uid, NCMetaRuntimeInstance instance)
     {
         if (!_dependants.TryGetValue(uid, out var set)) _dependants.Add(uid, set = []);
