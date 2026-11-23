@@ -15,7 +15,6 @@ using Content.Server._NC.LivingCity.Time;
 using Content.Server._NC.Meta.Authority;
 using Content.Server._NC.Meta.Devices;
 using Content.Server._NC.Meta.Persistence;
-using Content.Server._NC.Meta.Contracts;
 using Content.Server._NC.LivingCity.Economy;
 using Content.Shared._NC.LivingCity.Economy;
 using System.Text.Json;
@@ -152,7 +151,7 @@ public sealed partial class NCMetaOrganizationAuthorityTest : GameTest
                 "meta-contract:authority-regression", [new(payer.Snapshot.AccountId, payer.AggregateVersion, -100),
                     new(escrow, held.AggregateVersion, 100)], proof!.Actor, request,
                 ParticipantWrites: [new(Guid.NewGuid(), "meta.development.admitted", "meta.development.command", request.ToString("D"),
-                    0, 1, JsonSerializer.Serialize(new NCMetaDevelopmentCommand(proof!.Actor.ToString(), new string('a', 64), null, 1)), "{}")],
+                    0, 1, "{}", "{}")],
                 Authority: captured));
             Assert.That(result.Status, Is.EqualTo(accepted ? NCEconomyMutationStatus.Applied : NCEconomyMutationStatus.VersionConflict));
             Assert.That(await ledger.GetTransactionAsync(transaction, true) != null, Is.EqualTo(accepted));

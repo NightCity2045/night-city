@@ -15,6 +15,8 @@ using Content.Shared.Power.EntitySystems;
 using Content.Shared.PowerCell;
 using Content.Shared.PowerCell.Components;
 using Content.Shared.Temperature.Components;
+using Content.Shared.Temperature.Systems;
+using Robust.Shared.Random;
 using Content.Shared.Verbs;
 using Robust.Shared.Prototypes;
 using System.Security.Cryptography;
@@ -51,6 +53,9 @@ public sealed partial class NCMetaHardwareStateComponent : Component
     public int TransmittedBytes;
     public bool Observing;
     public int ThrottlePermille = 1000;
+    /// <summary>Weighted seconds of running under load; service in maintenance mode resets it.</summary>
+    public float WearSeconds;
+    public int Failures;
 }
 
 /// <summary>Physical supervision remains independent of guest execution and never changes native safety controls.</summary>
@@ -67,6 +72,14 @@ public sealed partial class NCMetaHardwareSystem : EntitySystem
     [Dependency] private NCVehicleConditionSystem _vehicles = default!;
     [Dependency] private NCMetaOpticsSystem _optics = default!;
     [Dependency] private NCMetaNetworkSystem _network = default!;
+    [Dependency] private SharedTemperatureSystem _temperature = default!;
+    [Dependency] private IRobustRandom _random = default!;
+    private const float AmbientKelvin = 293.15f;
+    /// <summary>A running host sheds this share of its heat even when idle.</summary>
+    private const float IdleHeatShare = 0.2f;
+    /// <summary>Crash chance per second at zero reliability; scaled by the missing reliability and by wear.</summary>
+    private const float BaseFailurePerSecond = 0.0005f;
+    private const float WearHorizonSeconds = 3600;
     private readonly Dictionary<EntityUid, NCMetaHardwareStateComponent> _hosts = [];
     private readonly Dictionary<string, Func<EntityUid, EntityUid, NCMetaFirmwareEligibility?>> _firmwarePolicies = new(StringComparer.Ordinal);
     private long _now;
@@ -196,7 +209,7 @@ public sealed partial class NCMetaHardwareSystem : EntitySystem
         if (!_devices.CanManage(host, user) || !_hosts.TryGetValue(host, out var state)) return false;
         state.Maintenance = maintenance;
         if (maintenance) _runtime.StopHost(host);
-        else state.Power = NCMetaPowerState.Off;
+        else { state.Power = NCMetaPowerState.Off; state.WearSeconds = 0; }
         Observe(host, state); return true;
     }
 
@@ -244,8 +257,37 @@ public sealed partial class NCMetaHardwareSystem : EntitySystem
             var watts = state.Power is NCMetaPowerState.On or NCMetaPowerState.Brownout or NCMetaPowerState.Booting
                 ? profile.IdleWatts + profile.ActiveWatts * state.LoadFactor + profile.RadioWatts * transmit : 0;
             ApplyLoad(host, state, watts, seconds);
+            ApplyThermal(host, state, profile, load, seconds);
+            ApplyWear(host, state, profile, load, seconds);
             Observe(host, state);
         }
+    }
+
+    /// <summary>A running host warms with its load and loses heat to the room, so a small box pushed hard settles above its throttle point.</summary>
+    private void ApplyThermal(EntityUid host, NCMetaHardwareStateComponent state, NCMetaHardwareProfilePrototype profile, float load, float seconds)
+    {
+        if (profile.HeatWatts <= 0 || seconds <= 0 || !TryComp<TemperatureComponent>(host, out var temperature) || temperature.HeatCapacity <= 0) return;
+        var running = state.Power is NCMetaPowerState.On or NCMetaPowerState.Brownout or NCMetaPowerState.Booting;
+        var produced = running ? profile.HeatWatts * (IdleHeatShare + (1 - IdleHeatShare) * load) : 0;
+        var removed = profile.CoolingWattsPerKelvin * (temperature.Temperature - AmbientKelvin);
+        var kelvin = (produced - removed) * seconds / profile.ThermalMass;
+        _temperature.ChangeHeat((host, temperature), kelvin * temperature.HeatCapacity, ignoreHeatResistance: true);
+    }
+
+    /// <summary>Load and heat age the host; a worn, poorly built one crashes and reboots at random.</summary>
+    private void ApplyWear(EntityUid host, NCMetaHardwareStateComponent state, NCMetaHardwareProfilePrototype profile, float load, float seconds)
+    {
+        if (profile.Reliability >= 1000 || seconds <= 0 || state.Power is not (NCMetaPowerState.On or NCMetaPowerState.Brownout)) return;
+        var span = Math.Max(1, profile.ShutdownTemperatureKelvin - profile.ThrottleTemperatureKelvin);
+        var overheat = state.TemperatureKelvin is { } kelvin ? Math.Clamp((kelvin - profile.ThrottleTemperatureKelvin) / span, 0, 1) : 0;
+        state.WearSeconds += seconds * (0.25f + load) * (1 + 4 * overheat);
+        var chance = (1 - Math.Max(0, profile.Reliability) / 1000f) * BaseFailurePerSecond * (1 + state.WearSeconds / WearHorizonSeconds) * seconds;
+        if (!_random.Prob(Math.Min(1f, chance))) return;
+        state.Failures++;
+        _runtime.StopHost(host, MetaStopReason.PowerLost);
+        _devices.TryInvalidate(host);
+        state.Power = NCMetaPowerState.Booting;
+        state.BootAt = _now + profile.BootMilliseconds;
     }
 
     private bool TryProfile(EntityUid host, out NCMetaHardwareProfilePrototype profile)
@@ -371,5 +413,7 @@ public sealed partial class NCMetaHardwareSystem : EntitySystem
         float.IsFinite(profile.BrownoutFraction) && profile.BrownoutFraction is >= 0 and <= 1 &&
         float.IsFinite(profile.DegradedDamage) && profile.DegradedDamage >= 0 && float.IsFinite(profile.HardwareFaultDamage) && profile.HardwareFaultDamage > profile.DegradedDamage &&
         float.IsFinite(profile.ThrottleTemperatureKelvin) && profile.ThrottleTemperatureKelvin > 0 &&
-        float.IsFinite(profile.ShutdownTemperatureKelvin) && profile.ShutdownTemperatureKelvin > profile.ThrottleTemperatureKelvin;
+        float.IsFinite(profile.ShutdownTemperatureKelvin) && profile.ShutdownTemperatureKelvin > profile.ThrottleTemperatureKelvin &&
+        float.IsFinite(profile.HeatWatts) && profile.HeatWatts >= 0 && float.IsFinite(profile.CoolingWattsPerKelvin) && profile.CoolingWattsPerKelvin > 0 &&
+        float.IsFinite(profile.ThermalMass) && profile.ThermalMass > 0 && profile.Reliability is >= 0 and <= 1000;
 }

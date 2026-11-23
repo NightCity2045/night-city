@@ -125,7 +125,6 @@ public sealed partial class NCMetaWorkspaceSystem : EntitySystem
         _queuedRequests.Remove((ent.Owner, actor));
         _commerceViews.Remove((ent.Owner, actor));
         _debug.Remove((ent.Owner, actor));
-        if (actor is { } contractUser) _development.CloseFor(ent.Owner, contractUser);
         _nativeTools.Remove((ent.Owner, actor));
         _languageTransfers.Remove((ent.Owner, actor));
         _languageBuildTokens.Remove((ent.Owner, actor));
@@ -287,13 +286,6 @@ public sealed partial class NCMetaWorkspaceSystem : EntitySystem
                 case NCMetaWorkspaceOperation.RevokeServiceGrant:
                     await ServiceGrantRequestAsync(context, project, request, state);
                     break;
-                case NCMetaWorkspaceOperation.DevelopmentContract:
-                    if (await DevelopmentRequestAsync(context, request, state))
-                    {
-                        device = await _persistence.ReadDeviceAsync(context.DeviceId) ?? device;
-                        projectId = device.ActiveProject;
-                    }
-                    break;
                 case NCMetaWorkspaceOperation.ExportMedia:
                 case NCMetaWorkspaceOperation.ImportMedia:
                     var transferred = await TransferMediaAsync(context, device, project, request);
@@ -444,6 +436,7 @@ public sealed partial class NCMetaWorkspaceSystem : EntitySystem
                     TryComp<NCMetaDeviceComponent>(entry.Entity, out var endpoint) ? endpoint.Interfaces.ToList() :
                         HasComp<NCMetaStorageComponent>(entry.Entity) ? ["meta.files.FileStore"] : [])).ToList();
                 PopulateNativeTools(context, state);
+                state.Chip = ReadChip(context);
                 _ui.ServerSendUiMessage(context.Terminal, NCMetaUiKey.Workspace,
                     new NCMetaWorkspaceUpdateMessage(state), context.User);
                 return true;

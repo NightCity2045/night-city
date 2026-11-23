@@ -26,6 +26,7 @@ public sealed partial class NCMetaWorkspaceWindow
     private static readonly Color IconPressed = Color.FromHex("#31E6FF58");
 
     private bool _desktopAvailable;
+    private NCMetaSurface _surface = NCMetaSurface.Studio;
     private Popup? _startMenu;
     private float _clockElapsed = 1;
     private Texture[]? _rainFrames;
@@ -45,7 +46,7 @@ public sealed partial class NCMetaWorkspaceWindow
         // The CitiNet browser is not available on computers yet; its icon is shown but does nothing.
         DesktopCitiNet.ToolTip = Loc.GetString("nc-meta-desktop-citinet-soon");
         DesktopCitiNet.Modulate = Color.FromHex("#FFFFFF90");
-        TaskDesktop.OnPressed += _ => { SetDesktop(true); UpdateTaskbar(); };
+        TaskDesktop.OnPressed += _ => ShowSurface(NCMetaSurface.Desktop);
         TaskStudio.OnPressed += _ => OpenStudioApplication();
         TaskNetwork.OnPressed += _ => OpenLocalNetworkApplication();
         StartButton.OnPressed += _ => ToggleStartMenu();
@@ -57,7 +58,7 @@ public sealed partial class NCMetaWorkspaceWindow
     /// <summary>The rain on the wallpaper: eight frames that loop without a seam, only while the desktop is on screen.</summary>
     private void TickDesktopRain(float seconds)
     {
-        if (_rainFrames == null || !DesktopPanel.Visible || !DesktopPanel.VisibleInTree) return;
+        if (_rainFrames == null || _surface != NCMetaSurface.Desktop || !DesktopPanel.VisibleInTree) return;
         _rainElapsed += seconds;
         if (_rainElapsed < RainFrameSeconds) return;
         _rainElapsed -= RainFrameSeconds;
@@ -86,17 +87,15 @@ public sealed partial class NCMetaWorkspaceWindow
     private void OpenStudioApplication()
     {
         CloseStartMenu();
-        SetDesktop(false);
+        ShowSurface(NCMetaSurface.Studio);
         Request(NCMetaWorkspaceOperation.Open);
-        UpdateTaskbar();
     }
 
     private void OpenLocalNetworkApplication()
     {
         CloseStartMenu();
-        SetDesktop(false);
+        ShowSurface(NCMetaSurface.ServicePanel);
         Request(NCMetaWorkspaceOperation.OpenNativeTools, "network");
-        UpdateTaskbar();
     }
 
     /// <summary>A computer has a desktop and a taskbar; a server shows its service panel directly.</summary>
@@ -104,16 +103,30 @@ public sealed partial class NCMetaWorkspaceWindow
     {
         _desktopAvailable = available;
         Taskbar.Visible = available;
+    }
+
+    /// <summary>
+    /// The only place that decides what the window shows. The server says whether the device is in the editor or the
+    /// service panel; the desktop is the shell a computer starts in and returns to. Nothing else toggles panels.
+    /// </summary>
+    private void ShowSurface(NCMetaSurface surface)
+    {
+        if (surface == NCMetaSurface.Desktop && !_desktopAvailable) surface = NCMetaSurface.ServicePanel;
+        _surface = surface;
+        var desktop = surface == NCMetaSurface.Desktop;
+        DesktopPanel.Visible = desktop;
+        WorkArea.Visible = !desktop;
         UpdateTaskbar();
+        if (desktop) UpdateDesktop();
     }
 
     private void UpdateTaskbar()
     {
+        Title = Loc.GetString(_surface switch { NCMetaSurface.Desktop => "nc-meta-start-title", NCMetaSurface.ServicePanel => "nc-meta-tools-title", _ => "nc-meta-workspace-title" });
         if (!_desktopAvailable) return;
-        TaskDesktop.Pressed = DesktopPanel.Visible;
-        TaskStudio.Pressed = !DesktopPanel.Visible && !_nativeToolsMode;
-        TaskNetwork.Pressed = !DesktopPanel.Visible && _nativeToolsMode;
-        Title = Loc.GetString(DesktopPanel.Visible ? "nc-meta-start-title" : _nativeToolsMode ? "nc-meta-tools-title" : "nc-meta-workspace-title");
+        TaskDesktop.Pressed = _surface == NCMetaSurface.Desktop;
+        TaskStudio.Pressed = _surface == NCMetaSurface.Studio;
+        TaskNetwork.Pressed = _surface == NCMetaSurface.ServicePanel;
     }
 
     private void ToggleStartMenu()
@@ -163,7 +176,7 @@ public sealed partial class NCMetaWorkspaceWindow
         citinet.ToolTip = Loc.GetString("nc-meta-desktop-citinet-soon");
         box.AddChild(citinet);
         box.AddChild(new PanelContainer { MinHeight = 2, PanelOverride = new StyleBoxFlat { BackgroundColor = Color.FromHex("#1F4A6B") } });
-        box.AddChild(MenuItem("nc-meta-start-show-desktop", () => { CloseStartMenu(); SetDesktop(true); UpdateTaskbar(); }));
+        box.AddChild(MenuItem("nc-meta-start-show-desktop", () => { CloseStartMenu(); ShowSurface(NCMetaSurface.Desktop); }));
         box.AddChild(MenuItem("nc-meta-start-shutdown", () => { CloseStartMenu(); Close(); }));
         panel.AddChild(box);
         popup.AddChild(panel);

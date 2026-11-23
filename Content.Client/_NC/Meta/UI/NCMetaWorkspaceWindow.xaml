@@ -92,7 +92,10 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                 <Button StyleClasses="ncMetaAction" Name="Rollback" Text="{Loc 'nc-meta-rollback'}" />
                 <LineEdit Name="ChipName" MinWidth="140" PlaceHolder="{Loc 'nc-meta-chip-name'}" />
                 <LineEdit Name="ChipDescription" MinWidth="200" PlaceHolder="{Loc 'nc-meta-chip-description'}" />
+                <CheckBox Name="ChipOpen" Text="{Loc 'nc-meta-chip-open'}" ToolTip="{Loc 'nc-meta-chip-open-tip'}" />
                 <Button StyleClasses="ncMetaAction" Name="ExportMedia" Text="{Loc 'nc-meta-export-media'}" />
+                <Label Name="ChipInSlot" StyleClasses="ncMetaMuted" Visible="False" />
+                <Button StyleClasses="ncMetaAction" Name="ImportMedia" Text="{Loc 'nc-meta-import-media'}" Visible="False" />
                 <OptionButton Name="ApplicationViews" MinWidth="100" />
                 <Button StyleClasses="ncMetaAction" Name="OpenApplication" Text="{Loc 'nc-meta-open-application'}" />
             </BoxContainer>

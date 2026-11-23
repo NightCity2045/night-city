@@ -95,5 +95,13 @@ public sealed partial class NCMetaHardwareProfilePrototype : IPrototype
     [DataField] public float HardwareFaultDamage = 100;
     [DataField] public float ThrottleTemperatureKelvin = 353.15f;
     [DataField] public float ShutdownTemperatureKelvin = 383.15f;
+    /// <summary>Heat the host sheds at full load, in watts. Zero means the device does not heat itself.</summary>
+    [DataField] public float HeatWatts;
+    /// <summary>Passive cooling, watts per kelvin above the room: sets how hot the host settles under a given load.</summary>
+    [DataField] public float CoolingWattsPerKelvin = 1;
+    /// <summary>Joules per kelvin of the host's thermal mass: how quickly it warms and cools.</summary>
+    [DataField] public float ThermalMass = 1000;
+    /// <summary>Build quality from 0 to 1000. Below 1000 the host wears and now and then crashes and reboots.</summary>
+    [DataField] public int Reliability = 1000;
     [DataField] public List<string> Interfaces = [];
 }

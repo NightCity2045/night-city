@@ -9,6 +9,10 @@ namespace Content.Shared._NC.Meta.UI;
 [Serializable, NetSerializable]
 public enum NCMetaUiKey : byte { Workspace, Application }
 
+/// <summary>The three faces of the workspace window. A server only ever has the service panel; a computer adds the desktop.</summary>
+[Serializable, NetSerializable]
+public enum NCMetaSurface : byte { Studio, ServicePanel, Desktop }
+
 [Serializable, NetSerializable]
 public enum NCMetaSaveStatus : byte { None, ChunkAccepted, Committed, Rejected }
 
@@ -27,7 +31,6 @@ public enum NCMetaWorkspaceOperation : byte
     SearchSoftwareContacts, OfferSoftwareResale, AcceptSoftwareResale,
     DiscardSoftwareCopy,
     ReadServiceGrants, IssueServiceGrants, RevokeServiceGrant,
-    DevelopmentContract,
     OpenNativeTools,
     PrepareStockApplication,
     ReadLanguageSymbols,
@@ -127,8 +130,10 @@ public sealed class NCMetaWorkspaceState : BoundUserInterfaceState
     public NCMetaCommerceState? Commerce;
     public NCMetaFirmwarePreview? Firmware;
     public Content.Shared._NC.Meta.Authority.NCMetaGrantPolicySummary? ServiceGrants;
-    public NCMetaDevelopmentState? Development;
     public NCMetaNativeToolsState? NativeTools;
+    public NCMetaChipSummary? Chip;
+    /// <summary>What the device shows: the editor workspace or its service panel. The desktop is a client-side shell around them.</summary>
+    public NCMetaSurface Surface;
     public NCMetaLanguageSymbols? LanguageSymbols;
     public List<string> Logs = [];
     public List<string> DebugVariables = [];

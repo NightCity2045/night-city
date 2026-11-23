@@ -45,6 +45,10 @@
   storageBytes: 268435456
   maxProcesses: 16
   cpuWeight: 16
+  heatWatts: 300
+  coolingWattsPerKelvin: 4
+  thermalMass: 900
+  reliability: 920
 
 - type: ncMetaHardware
   id: NCMetaCyberdeck
@@ -147,6 +151,10 @@
   storageBytes: 33554432
   maxProcesses: 4
   cpuWeight: 4
+  heatWatts: 120
+  coolingWattsPerKelvin: 1.6
+  thermalMass: 500
+  reliability: 750
 
 - type: ncMetaHardware
   id: NCMetaMainframe
@@ -160,3 +168,7 @@
   storageBytes: 1073741824
   maxProcesses: 48
   cpuWeight: 48
+  heatWatts: 900
+  coolingWattsPerKelvin: 16
+  thermalMass: 3000
+  reliability: 985

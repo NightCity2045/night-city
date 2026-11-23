@@ -13,6 +13,13 @@
     networkId: LOCAL
   - type: NCMetaStorage
     capacityBytes: 67108864
+  - type: ItemSlots
+    slots:
+      nc_meta_chip:
+        name: nc-meta-chip-slot
+        whitelist:
+          tags:
+          - NCMetaChip
   - type: ActivatableUI
     key: enum.NCMetaUiKey.Workspace
   - type: UserInterface
@@ -42,6 +49,14 @@
     networkId: LOCAL
   - type: NCMetaStorage
     capacityBytes: 268435456
+  # A server warms with its load; the hardware profile says how much and how fast it cools.
+  - type: Temperature
+    specificHeat: 500
+  # Every server is a node of the city network; its ICE comes from its grade (overridden below).
+  - type: NCMetaNetNode
+    architectureId: citinet
+    kind: Data
+    defense: NCMetaNetServerNode
   - type: ActivatableUIRequiresPower
   - type: ActivatableUI
     key: enum.NCMetaUiKey.Workspace
@@ -94,6 +109,13 @@
   # A battery or an internal supply keeps it running; a table has no cable to plug it into.
   - type: ApcPowerReceiver
     needsPower: false
+  - type: ItemSlots
+    slots:
+      nc_meta_chip:
+        name: nc-meta-chip-slot
+        whitelist:
+          tags:
+          - NCMetaChip
   - type: ActivatableUI
     key: enum.NCMetaUiKey.Workspace
   - type: UserInterface
@@ -123,3 +145,6 @@
   id: NCMetaServer
   name: META application server
   description: A physical host for META applications and CitiNet services.
+  components:
+  - type: NCMetaNetNode
+    defense: NCMetaNetServerRack

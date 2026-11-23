@@ -32,7 +32,7 @@ public sealed partial class NCMetaWorkspaceWindow
         (_state.NativeTools != null) != (state.NativeTools != null) || !_state.Files.SequenceEqual(state.Files);
     private SemanticSnapshot? CaptureSemanticSnapshot(SemanticQuery query)
     {
-        if (_nativeToolsMode || _state.NativeTools != null || _selectedFile == Guid.Empty) return null;
+        if (_state.Surface != NCMetaSurface.Studio || _state.NativeTools != null || _selectedFile == Guid.Empty) return null;
         var files = ImmutableArray.CreateBuilder<SemanticFile>(); var bytes = 0;
         foreach (var file in _state.Files.Where(value => query <= SemanticQuery.References
                      ? value.Path.EndsWith(".meta", StringComparison.Ordinal)
@@ -59,7 +59,7 @@ public sealed partial class NCMetaWorkspaceWindow
         if (_languageProofUntil != 0 && Stopwatch.GetTimestamp() >= _languageProofUntil) InvalidateLanguageQuery();
     }
     private bool IsSemanticSnapshotCurrent(SemanticSnapshot snapshot, long generation, bool requireProof = true) => !Disposed &&
-        (!requireProof || Stopwatch.GetTimestamp() < _languageProofUntil) && _languageGeneration == generation && !_nativeToolsMode &&
+        (!requireProof || Stopwatch.GetTimestamp() < _languageProofUntil) && _languageGeneration == generation && _state.Surface == NCMetaSurface.Studio &&
         _state.NativeTools == null && _state.ProjectId == snapshot.Project && _state.ProjectRevision == snapshot.ProjectRevision &&
         _state.CanEdit == snapshot.CanEdit && _state.Files.SequenceEqual(snapshot.Inventory) &&
         snapshot.Files.All(file => file.Id == Guid.Empty ? MockState.Text == file.Source :

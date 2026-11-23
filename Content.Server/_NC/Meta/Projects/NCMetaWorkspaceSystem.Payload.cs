@@ -25,7 +25,6 @@ public sealed partial class NCMetaWorkspaceSystem
         NCMetaSoftwareDiscardCopyRequest value => JsonSerializer.Serialize(value),
         NCMetaFirmwareSelection value => JsonSerializer.Serialize(value),
         NCMetaFirmwareInstallRequest value => JsonSerializer.Serialize(value),
-        NCMetaDevelopmentRequest value => JsonSerializer.Serialize(value),
         NCMetaGrantApprovalRequest value => JsonSerializer.Serialize(value),
         NCMetaBindingsPayload value => JsonSerializer.Serialize(value.Bindings),
         NCMetaHostingQuotePayload value => JsonSerializer.Serialize(value),
@@ -40,9 +39,6 @@ public sealed partial class NCMetaWorkspaceSystem
         bool Strings(List<string>? values, int maximum = 128) => values is { Count: <= 128 } && values.Count <= maximum && values.All(Text);
         bool Bindings(List<NCMetaSoftwareBinding>? values) => values is { Count: <= 64 } && values.All(value => value != null &&
             Text(value.Slot) && Text(value.DeviceId) && Text(value.ContractHash) && Strings(value.Scopes));
-        bool Offer(NCMetaDevelopmentOffer? value) => value == null || Text(value.Customer) && Text(value.Developer) && Text(value.Subject) &&
-            Text(value.Requirements) && Text(value.FailureConditions) && Strings(value.DeviceIds, 64) &&
-            value.FixtureFiles is { Count: <= 64 } && Strings(value.MaximumScopes) && (value.Arbitrator == null || Text(value.Arbitrator));
         return payload switch
         {
             NCMetaSoftwareBrowseRequest value => Text(value.LicenseOwner),
@@ -55,7 +51,6 @@ public sealed partial class NCMetaWorkspaceSystem
             NCMetaSoftwareContactRequest value => Text(value.Query),
             NCMetaSoftwareOfferResaleRequest value => Text(value.BuyerParty),
             NCMetaFirmwareInstallRequest value => Bindings(value.Bindings) && Strings(value.ApprovedScopes),
-            NCMetaDevelopmentRequest value => Text(value.ActingParty) && Text(value.TermsHash) && Text(value.Text) && Text(value.ResolutionHash) && Offer(value.Offer),
             NCMetaGrantApprovalRequest value => value.Bindings is { Count: <= 64 } && value.Bindings.All(binding => binding != null &&
                 Text(binding.Slot) && Text(binding.TargetDeviceId) && Strings(binding.Members) && Strings(binding.Scopes)),
             NCMetaBindingsPayload value => Bindings(value.Bindings),

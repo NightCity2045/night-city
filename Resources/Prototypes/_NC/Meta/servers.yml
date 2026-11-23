@@ -26,6 +26,8 @@
   - type: NCMetaHost
     profile: NCMetaMainframe
     allowClaim: true
+  - type: NCMetaNetNode
+    defense: NCMetaNetMainframe
   - type: NCMetaStorage
     capacityBytes: 1073741824
   - type: ApcPowerReceiver

@@ -305,7 +305,7 @@ public sealed class NCMetaReplayIntegrityTest : GameTest
     }
 
     [Test]
-    public async Task ProjectAndDevelopmentImportEarlyAcknowledgementsAuthenticateTheirRealParticipants()
+    public async Task ProjectEarlyAcknowledgementsAuthenticateTheirRealParticipants()
     {
         try
         {
@@ -326,39 +326,6 @@ public sealed class NCMetaReplayIntegrityTest : GameTest
                 Assert.That(await Evidence(receipt), Is.EqualTo(damaged));
             });
 
-            // Enter the already-settled source-transfer boundary with actual protected claim/inbox rows.
-            // Financial settlement itself is exercised by the separate native development-contract cases.
-            var claim = new NCMetaDevelopmentClaim(Guid.NewGuid(), Guid.NewGuid(), scene.Device.Owner, "Delivered source",
-                scene.Release.Digest, scene.Descriptor.ContainerDigest, new string('a', 64), true, scene.Release,
-                [Guid.NewGuid()], Guid.NewGuid(), 1);
-            var seed = await Native(() => Database.ApplyNCPersistentBatchMutationAsync(new(Guid.NewGuid(), "test.replay.delivery",
-                "meta.owner", scene.Device.Owner,
-                [new(Guid.NewGuid(), "test.delivery.claim", "meta.development.delivery-claim", claim.Id.ToString("D"), 0, 1,
-                    JsonSerializer.Serialize(claim), "{}"),
-                 new(Guid.NewGuid(), "test.delivery.inbox", "meta.development.inbox", scene.Device.Owner, 0, 1,
-                    JsonSerializer.Serialize(new NCMetaDevelopmentInbox(scene.Device.Owner, [claim.Id], 1)), "{}")],
-                "{}", Guid.NewGuid(), null, _epoch, _time, [])));
-            Assert.That(seed.Status, Is.EqualTo(NCPersistentMutationStatus.Applied));
-            var readClaim = await Native(() => Persistence.ReadDevelopmentClaimAsync(claim.Id, scene.Device.Owner));
-            Assert.That(readClaim, Is.Not.Null);
-            var authority = new NCMetaAuthorityConstraints(null, [new(scene.Device.DeviceId, scene.Device.Owner, scene.Device.AuthorityEpoch)]);
-            var importRequest = Guid.NewGuid();
-            Task<NCMetaMutationOutcome> Import() => Persistence.ImportDevelopmentSourceAsync(importRequest, scene.Device, readClaim!, _epoch, _time, authority);
-            var imported = await Native(Import);
-            Assert.That(imported.Success, Is.True, imported.MessageKey);
-            var importReceipt = await Receipt(importRequest);
-            evidence = await Evidence(importReceipt);
-            Assert.That((await Native(Import)).Success, Is.True);
-            Assert.That(await Evidence(importReceipt), Is.EqualTo(evidence));
-            var importedProject = importReceipt.Aggregates.Single(value => value.AggregateType == NCMetaPersistenceSystem.ProjectType);
-            await WithSnapshotFault(importedProject.AggregateType, importedProject.AggregateId, async () =>
-            {
-                var damaged = await Evidence(importReceipt);
-                Assert.That((await Native(Import)).Success, Is.False);
-                Assert.That(await Evidence(importReceipt), Is.EqualTo(damaged), "Import retry must not create another workspace.");
-            });
-            Assert.That((await Native(() => Persistence.ReadDeviceAsync(scene.Device.DeviceId)))!.Projects.Length,
-                Is.EqualTo(scene.Device.Projects.Length + 1));
         }
         finally { await EndRound(); }
     }

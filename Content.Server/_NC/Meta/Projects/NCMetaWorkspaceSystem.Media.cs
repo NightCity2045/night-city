@@ -12,6 +12,8 @@ namespace Content.Server._NC.Meta.Projects;
 public sealed partial class NCMetaRemovableMediaComponent : Component
 {
     [DataField] public int CapacityBytes = 2 * 1024 * 1024;
+    /// <summary>The author's choice: an open chip can be copied by anyone who holds it, a closed one only by its owner.</summary>
+    [DataField] public bool Open;
 }
 
 public sealed partial class NCMetaWorkspaceSystem
@@ -35,6 +37,7 @@ public sealed partial class NCMetaWorkspaceSystem
             var chip = Spawn("NCMetaProgramChip", Transform(context.Terminal).Coordinates);
             _chipMeta.SetEntityName(chip, name);
             _chipMeta.SetEntityDescription(chip, description);
+            if (TryComp<NCMetaRemovableMediaComponent>(chip, out var made)) made.Open = spec.Open;
             _chipHands.TryPickupAnyHand(context.User, chip);
             return _devices.TryGetEntry(chip, out var entry)
                 ? (Chip: chip, Id: entry.Id, Item: _devices.GetEconomicItemId(chip))
@@ -61,6 +64,20 @@ public sealed partial class NCMetaWorkspaceSystem
         return owned ? value.Id : null;
     }
 
+    /// <summary>The owner may do anything with a chip; anyone may read an open one but only the owner may write to it.</summary>
+    private bool MediaAccess(Context context, EntityUid media, NCMetaWorkspaceOperation operation) =>
+        _devices.CanManage(media, context.User) ||
+        operation == NCMetaWorkspaceOperation.ImportMedia && TryComp<NCMetaRemovableMediaComponent>(media, out var component) && component.Open;
+
+    /// <summary>The chip in the terminal's slot, shown to the player so code can be copied to or from it.</summary>
+    private NCMetaChipSummary? ReadChip(Context context)
+    {
+        if (!_chipSlots.TryGetSlot(context.Terminal, NCMetaChipSlot.Id, out var slot) || slot.Item is not { } chip ||
+            !_devices.TryGetEntry(chip, out var entry) || !TryComp<NCMetaRemovableMediaComponent>(chip, out var media)) return null;
+        var owned = _devices.CanManage(chip, context.User, requireRange: false);
+        return owned || media.Open ? new(entry.Id, Name(chip), media.Open, owned) : new(entry.Id, Name(chip), false, false);
+    }
+
     private async Task<NCMetaMutationOutcome> TransferMediaAsync(Context context, NCMetaDeviceRecord device,
         NCMetaProject project, NCMetaWorkspaceRequestMessage request)
     {
@@ -75,25 +92,41 @@ public sealed partial class NCMetaWorkspaceSystem
             NCMetaChipPayload? spec = null;
             try { spec = JsonSerializer.Deserialize<NCMetaChipPayload>(request.Source); }
             catch (JsonException) { }
-            if (spec == null || await CreateChipAsync(context, spec) is not { } created)
-                return new(false, "nc-meta-error-access");
-            mediaId = created;
-            programName = spec.Name.Trim();
+            if (spec == null) return new(false, "nc-meta-error-access");
+            if (request.DeviceId.Length == 0)
+            {
+                if (await CreateChipAsync(context, spec) is not { } created) return new(false, "nc-meta-error-access");
+                mediaId = created;
+                programName = spec.Name.Trim();
+            }
+            else
+            {
+                // Writing into a chip that sits in the terminal's slot: its flag follows the author's choice.
+                programName = spec.Name.Trim().Length > 0 ? spec.Name.Trim() : programName;
+                await OnMainAsync(() =>
+                {
+                    if (_devices.TryResolve(mediaId, out var existing) && _devices.CanManage(existing.Entity, context.User) &&
+                        TryComp<NCMetaRemovableMediaComponent>(existing.Entity, out var flag)) flag.Open = spec.Open;
+                    return true;
+                });
+            }
         }
         var target = await OnMainAsync(() =>
         {
             if (!IsCurrent(context) || !_devices.TryResolve(mediaId, out var media) ||
-                !_devices.CanManage(media.Entity, context.User) ||
+                !MediaAccess(context, media.Entity, request.Operation) ||
                 !_mediaInteraction.InRangeUnobstructed(context.Terminal, media.Entity, range: 2) ||
                 !TryComp<NCMetaRemovableMediaComponent>(media.Entity, out var component)) return null;
             return new { media.Id, media.Entity, media.DeviceEpoch, media.AuthorityEpoch, component.CapacityBytes };
         });
         if (target == null || target.CapacityBytes is < 1 or > 16 * 1024 * 1024) return new(false, "nc-meta-error-access");
-        var authority = await CaptureInstallationAuthorityAsync(context, target.Entity);
+        // Reading an open chip that belongs to someone else writes only to this terminal, so the terminal carries the authority.
+        var owned = await OnMainAsync(() => _devices.CanManage(target.Entity, context.User));
+        var authority = await CaptureInstallationAuthorityAsync(context, owned ? target.Entity : context.Terminal);
         if (authority == null) return new(false, "nc-meta-error-access");
         bool Current() => IsCurrent(context) && _devices.TryGetEntry(target.Entity, out var current) &&
             current.Id == target.Id && current.DeviceEpoch == target.DeviceEpoch && current.AuthorityEpoch == target.AuthorityEpoch &&
-            _devices.CanManage(target.Entity, context.User) &&
+            MediaAccess(context, target.Entity, request.Operation) &&
             _mediaInteraction.InRangeUnobstructed(context.Terminal, target.Entity, range: 2);
         var stored = await _persistence.ReadSnapshotAsync("meta.media", target.Id);
         if (request.Operation == NCMetaWorkspaceOperation.ExportMedia)

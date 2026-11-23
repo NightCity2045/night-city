@@ -148,9 +148,16 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
         ExportMedia.OnPressed += _ =>
         {
             var name = ChipName.Text.Trim();
-            if (name.Length == 0) { Status.Text = Loc.GetString("nc-meta-chip-name-required"); return; }
-            Requested?.Invoke(new(NCMetaWorkspaceOperation.ExportMedia, Guid.NewGuid(), projectId: _state.ProjectId,
-                payload: new NCMetaChipPayload(name, ChipDescription.Text.Trim())));
+            // A chip in the slot is written to as it is; otherwise a new chip is made and must be named.
+            var slotChip = _state.Chip is { Owned: true } ? _state.Chip.DeviceId : "";
+            if (name.Length == 0 && slotChip.Length == 0) { Status.Text = Loc.GetString("nc-meta-chip-name-required"); return; }
+            Requested?.Invoke(new(NCMetaWorkspaceOperation.ExportMedia, Guid.NewGuid(), deviceId: slotChip, projectId: _state.ProjectId,
+                payload: new NCMetaChipPayload(name, ChipDescription.Text.Trim(), ChipOpen.Pressed)));
+        };
+        ImportMedia.OnPressed += _ =>
+        {
+            if (_state.Chip is { } chip)
+                Requested?.Invoke(new(NCMetaWorkspaceOperation.ImportMedia, Guid.NewGuid(), deviceId: chip.DeviceId, projectId: _state.ProjectId));
         };
         HostingOffer.OnPressed += _ =>
         {
@@ -254,14 +261,6 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
         };
     }
 
-    private void SetDesktop(bool shown)
-    {
-        DesktopPanel.Visible = shown;
-        WorkArea.Visible = !shown;
-        UpdateTaskbar();
-        if (shown) UpdateDesktop();
-    }
-
     public void ApplyState(NCMetaWorkspaceState state)
     {
         // The window stays blank until the server says what this device is (editor or service panel), so a server
@@ -271,7 +270,7 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
             ContentsContainer.Visible = true;
             // A computer opens on its desktop; a server goes straight to its service panel.
             SetDesktopAvailable(state.NativeTools == null || state.NativeTools.CanOpenStudio);
-            if (state.NativeTools == null) SetDesktop(true);
+            ShowSurface(_desktopAvailable && state.Surface == NCMetaSurface.Studio ? NCMetaSurface.Desktop : state.Surface);
         }
         ApplyLanguageSymbols(state);
         if (state.Partial)
@@ -421,8 +420,8 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
         ApplyFirmwareState(state.Firmware);
         ApplyServiceGrantState(state.ServiceGrants);
         ApplyNativeTools();
-        UpdateTaskbar();
-        if (DesktopPanel.Visible) UpdateDesktop();
+        // The desktop stays up until the player opens an application; otherwise the window follows the server's surface.
+        ShowSurface(_surface == NCMetaSurface.Desktop ? NCMetaSurface.Desktop : state.Surface);
         _applying = false;
         RebuildTabs();
         UpdateFileInfo();
@@ -722,6 +721,13 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
     {
         var device = _state.Devices.Take(64).FirstOrDefault(candidate => candidate.DeviceId == _selectedDeviceId);
         ExportMedia.Disabled = device is null;
+        ExportMedia.Text = Loc.GetString(_state.Chip is { Owned: true } ? "nc-meta-export-to-chip" : "nc-meta-export-media");
+        ChipInSlot.Visible = ImportMedia.Visible = _state.Chip != null;
+        if (_state.Chip is { } slotted)
+        {
+            ChipInSlot.Text = Loc.GetString(slotted.Open ? "nc-meta-chip-in-slot-open" : "nc-meta-chip-in-slot-closed", ("name", slotted.Name));
+            ImportMedia.Disabled = !slotted.Open && !slotted.Owned;
+        }
         Rollback.Disabled = device is null || SelectedInstallation is null;
         OpenApplication.Disabled = device is null || SelectedInstallation is null || ApplicationViews.ItemCount == 0;
         HostingOffer.Disabled = PublishWebsite.Disabled = PublishLocal.Disabled = device is null || SelectedInstallation is null || ApplicationViews.ItemCount == 0;

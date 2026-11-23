@@ -8,7 +8,8 @@ namespace Content.Client._NC.Meta.UI;
 
 public sealed partial class NCMetaWorkspaceWindow
 {
-    private bool _nativeToolsMode;
+    /// <summary>The surface the work area was last laid out for; only used to notice the change.</summary>
+    private NCMetaSurface _laidOut = NCMetaSurface.Studio;
     private string _nativeToolsView = "";
     private Guid _toolsRelease;
     private string _toolsDevice = "";
@@ -104,10 +105,10 @@ public sealed partial class NCMetaWorkspaceWindow
     private void ApplyNativeTools()
     {
         var tools = _state.NativeTools;
-        var mode = tools != null;
+        var mode = tools != null && _state.Surface == NCMetaSurface.ServicePanel;
         var view = tools?.View ?? "";
-        var change = mode != _nativeToolsMode || view != _nativeToolsView;
-        if (mode && !_nativeToolsMode)
+        var change = mode != (_laidOut == NCMetaSurface.ServicePanel) || view != _nativeToolsView;
+        if (mode && _laidOut != NCMetaSurface.ServicePanel)
         {
             NCMetaUiLifecycle.BeforeRemove(Editor);
             _buffers.Clear(); _downloads.Clear(); _uploads.Clear();
@@ -120,7 +121,7 @@ public sealed partial class NCMetaWorkspaceWindow
             if (SoftwarePanels.CurrentTab is 1 or 2) SoftwarePanels.CurrentTab = 0;
             ClearSoftwareSource(); Conflict.Visible = false;
         }
-        _nativeToolsMode = mode; _nativeToolsView = view;
+        _laidOut = mode ? NCMetaSurface.ServicePanel : NCMetaSurface.Studio; _nativeToolsView = view;
         // The service panel is an application of its own: no editor toolbar, no tab strip, the current section lit in the menu.
         MainToolbar.Visible = !mode;
         MainContentTabs.TabsVisible = !mode;
@@ -133,7 +134,6 @@ public sealed partial class NCMetaWorkspaceWindow
         ToolsRecovery.Pressed = view == "recovery";
         // On a computer the service panel is a section of the desktop; servers have no Studio to go back to.
         ToolsDesktop.Visible = mode && tools!.CanOpenStudio;
-        Title = Loc.GetString(mode ? "nc-meta-tools-title" : "nc-meta-workspace-title");
         NativeToolsMenu.Visible = mode; ProjectToolbar.Visible = !mode; ReleaseInfo.Visible = !mode;
         Save.Visible = Build.Visible = Tests.Visible = ExportMedia.Visible = ChipName.Visible = ChipDescription.Visible = !mode;
         TabContainer.SetTabVisible(EditorTab, !mode);
@@ -224,6 +224,10 @@ public sealed partial class NCMetaWorkspaceWindow
             ToolsMeasurements.AddItem(Loc.GetString("nc-meta-tools-power", ("watts", row.AppliedWatts)), selectable: false);
             ToolsMeasurements.AddItem(row.TemperatureKelvin is { } kelvin ? Loc.GetString("nc-meta-tools-temperature", ("kelvin", kelvin)) :
                 Loc.GetString("nc-meta-tools-temperature-unavailable"), selectable: false);
+            if (row.Reliability < 1000)
+                ToolsMeasurements.AddItem(Loc.GetString("nc-meta-tools-wear", ("wear", row.WearPermille / 10), ("reliability", row.Reliability / 10), ("failures", row.Failures)), selectable: false);
+            if (row.IceRating >= 0)
+                ToolsMeasurements.AddItem(Loc.GetString("nc-meta-tools-ice", ("rating", row.IceRating)), selectable: false);
         }
         ToolsNetworkList.Clear();
         foreach (var device in tools.Network ?? [])
@@ -244,7 +248,7 @@ public sealed partial class NCMetaWorkspaceWindow
     /// <summary>The log of the chosen program is read again every two seconds while its view is open.</summary>
     private void TickNativeLogs(float seconds)
     {
-        if (!_nativeToolsMode || _nativeToolsView is not ("diagnostics" or "recovery") || _selectedInstallationId == Guid.Empty) return;
+        if (_surface != NCMetaSurface.ServicePanel || _nativeToolsView is not ("diagnostics" or "recovery") || _selectedInstallationId == Guid.Empty) return;
         _logsElapsed += seconds;
         if (_logsElapsed < 2) return;
         _logsElapsed = 0;
