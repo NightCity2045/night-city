@@ -11,6 +11,7 @@
   - type: NCMetaTerminal
   - type: NCMetaPort
     networkId: LOCAL
+  - type: NCMetaMessagePort
   - type: NCMetaStorage
     capacityBytes: 67108864
   - type: ItemSlots
@@ -99,6 +100,7 @@
   - type: NCMetaTerminal
   - type: NCMetaPort
     networkId: LOCAL
+  - type: NCMetaMessagePort
   - type: NCMetaStorage
     capacityBytes: 67108864
   # A battery or an internal supply keeps it running; a table has no cable to plug it into.

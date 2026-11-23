@@ -128,6 +128,10 @@ public sealed partial class MetaApiCatalog
         Opaque("meta.app", "UserRef"); Opaque("meta.app", "SessionRef");
         Dto("meta.app", "AppContext", "user:meta.app.UserRef", "session:meta.app.SessionRef", "view:string", "presentation:string", "locale:string");
         Intrinsic("app", "sameSession", 0x0030, "bool", MetaEffectFlags.ReadLocal, "meta.app.SessionRef", "meta.app.SessionRef");
+        // CitiNet: the browser opens an address in a window of its own; a site learns which device a visitor browses from.
+        Capability("meta.citinet", "Browser"); Capability("meta.citinet", "Gateway");
+        Method("meta.citinet.Browser", "open", "result<void>", "citinet.browse", true, "string");
+        Method("meta.citinet.Gateway", "visitorDevice", "result<string>", "citinet.visitor", false, "meta.app.SessionRef");
         Method("meta.files.FileStore", "readText", "result<string>", "files.read", true, "string");
         Method("meta.files.FileStore", "writeTextAtomic", "result<void>", "files.write", true, "string", "string");
         Capability("meta.net", "MessagePort");

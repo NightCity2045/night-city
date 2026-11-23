@@ -1,0 +1,43 @@
+<Page id="root" title="{bind title}">
+  <Column id="layout" gap="10" margin="14" class="page">
+    <Panel id="hero" class="hero">
+      <Column id="heroText" gap="2">
+        <Header id="title" text="{bind title}" class="title"/>
+        <Text id="subtitle" text="{bind subtitle}" class="subtitle"/>
+      </Column>
+    </Panel>
+
+    <Panel id="bar" class="card">
+      <Column id="barBody" gap="6">
+        <Text id="addressLabel" text="{bind addressLabel}" class="label"/>
+        <Form id="openForm" action="open">
+          <Row id="openRow" gap="8">
+            <Input id="addressInput" field="address" maxLength="192"/>
+            <Button id="openButton" action="open" text="{bind openLabel}"/>
+          </Row>
+        </Form>
+        <Text id="hint" text="{bind hint}" class="hint"/>
+      </Column>
+    </Panel>
+
+    <Text id="status" text="{bind status}" class="status"/>
+
+    <Form id="markForm" action="mark">
+      <Button id="markButton" action="mark" text="{bind markLabel}"/>
+    </Form>
+
+    <Panel id="marksCard" class="card">
+      <Column id="marksBody" gap="6">
+        <Text id="marksHeading" text="{bind marksHeading}" class="heading"/>
+        <Table id="marks" items="{bind marks}" columns="label" rowAction="open" rowKey="address" rowField="address"/>
+      </Column>
+    </Panel>
+
+    <Panel id="historyCard" class="card">
+      <Column id="historyBody" gap="6">
+        <Text id="historyHeading" text="{bind historyHeading}" class="heading"/>
+        <Table id="history" items="{bind history}" columns="label" rowAction="open" rowKey="address" rowField="address"/>
+      </Column>
+    </Panel>
+  </Column>
+</Page>

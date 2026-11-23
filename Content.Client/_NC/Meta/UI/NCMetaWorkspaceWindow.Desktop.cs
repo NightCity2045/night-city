@@ -43,9 +43,7 @@ public sealed partial class NCMetaWorkspaceWindow
         WireIcon(StartButton, StartButtonFrame);
         DesktopStudio.OnPressed += _ => OpenStudioApplication();
         DesktopNetwork.OnPressed += _ => OpenLocalNetworkApplication();
-        // The CitiNet browser is not available on computers yet; its icon is shown but does nothing.
-        DesktopCitiNet.ToolTip = Loc.GetString("nc-meta-desktop-citinet-soon");
-        DesktopCitiNet.Modulate = Color.FromHex("#FFFFFF90");
+        DesktopCitiNet.OnPressed += _ => OpenBrowserApplication();
         TaskDesktop.OnPressed += _ => ShowSurface(NCMetaSurface.Desktop);
         TaskStudio.OnPressed += _ => OpenStudioApplication();
         TaskNetwork.OnPressed += _ => OpenLocalNetworkApplication();
@@ -96,6 +94,41 @@ public sealed partial class NCMetaWorkspaceWindow
         CloseStartMenu();
         ShowSurface(NCMetaSurface.ServicePanel);
         Request(NCMetaWorkspaceOperation.OpenNativeTools, "network");
+    }
+
+    /// <summary>The stock browser is a META program: the icon starts it if it is installed and offers it in the installer if not.</summary>
+    private const string BrowserInstallationName = "CitiNet browser";
+    private bool _browserLaunchPending;
+
+    private NCMetaInstallationSummary? FindBrowser() => _state.Installations.Take(64)
+        .FirstOrDefault(installation => installation.DeviceId == _selectedDeviceId && installation.Name == BrowserInstallationName);
+
+    private void OpenBrowserApplication()
+    {
+        CloseStartMenu();
+        if (FindBrowser() is not { } browser)
+        {
+            ShowSurface(NCMetaSurface.ServicePanel);
+            Request(NCMetaWorkspaceOperation.OpenNativeTools, "installer");
+            return;
+        }
+        _selectedInstallationId = browser.Id;
+        if (browser.Running) Request(NCMetaWorkspaceOperation.OpenApplication, "main");
+        else
+        {
+            // The program is installed but stopped: start it, and open its window when the next state says it runs.
+            _browserLaunchPending = true;
+            Request(NCMetaWorkspaceOperation.Start);
+        }
+    }
+
+    /// <summary>Called with every state: finishes a launch that was waiting for the browser to start.</summary>
+    private void FinishBrowserLaunch()
+    {
+        if (!_browserLaunchPending || FindBrowser() is not { Running: true } browser) return;
+        _browserLaunchPending = false;
+        _selectedInstallationId = browser.Id;
+        Request(NCMetaWorkspaceOperation.OpenApplication, "main");
     }
 
     /// <summary>A computer has a desktop and a taskbar; a server shows its service panel directly.</summary>
@@ -171,10 +204,7 @@ public sealed partial class NCMetaWorkspaceWindow
         box.AddChild(new PanelContainer { MinHeight = 2, PanelOverride = new StyleBoxFlat { BackgroundColor = Color.FromHex("#1F4A6B") } });
         box.AddChild(MenuItem("nc-meta-desktop-studio", OpenStudioApplication));
         box.AddChild(MenuItem("nc-meta-desktop-network", OpenLocalNetworkApplication));
-        var citinet = MenuItem("nc-meta-desktop-citinet", () => { });
-        citinet.Disabled = true;
-        citinet.ToolTip = Loc.GetString("nc-meta-desktop-citinet-soon");
-        box.AddChild(citinet);
+        box.AddChild(MenuItem("nc-meta-desktop-citinet", OpenBrowserApplication));
         box.AddChild(new PanelContainer { MinHeight = 2, PanelOverride = new StyleBoxFlat { BackgroundColor = Color.FromHex("#1F4A6B") } });
         box.AddChild(MenuItem("nc-meta-start-show-desktop", () => { CloseStartMenu(); ShowSurface(NCMetaSurface.Desktop); }));
         box.AddChild(MenuItem("nc-meta-start-shutdown", () => { CloseStartMenu(); Close(); }));

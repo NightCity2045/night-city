@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "id": "meta-stock-citinet-registrar",
+  "name": "CitiNet name registrar",
+  "nameRu": "Регистратор имён СитиНет",
+  "packageName": "citinet.registrar",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "citinet.registrar",
+  "files": [
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/Registrar/main.meta",
+      "sha256": "95a5799f457dbbc3a7b174ee189e7377e430399166514893561bb6764bbfb2fb"
+    }
+  ],
+  "startMode": "Manual",
+  "bindings": [],
+  "testFixture": "meta.test.json"
+}

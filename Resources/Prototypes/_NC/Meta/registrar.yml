@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# The city name registrar: a server on the city network whose message port answers to a well-known address. The registrar
+# program (meta-stock-citinet-registrar) is installed on it and bound to this port; the names it keeps live in its files.
+- type: entity
+  parent: NCMetaServer
+  id: NCMetaCitiNetRegistrar
+  name: CitiNet name registrar
+  description: A server that keeps the names of the city network. Browsers ask it where a name leads.
+  components:
+  - type: NCMetaPort
+    networkId: CITYNET
+  - type: NCMetaMessagePort
+    address: citinet-registrar
+    gatewayNetworks: [LOCAL]

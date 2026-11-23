@@ -1,0 +1,94 @@
+{
+  "version": "1.0",
+  "views": {
+    "main": {
+      "function": "citinet.browser.view",
+      "document": "ui/main.mui",
+      "stateType": "citinet.browser.BrowserState",
+      "fields": {
+        "title": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "subtitle": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "status": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "page": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "addressLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "openLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "markLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "historyHeading": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "marksHeading": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "hint": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "history": {
+          "type": "array",
+          "maxLength": 512
+        },
+        "marks": {
+          "type": "array",
+          "maxLength": 512
+        }
+      },
+      "actions": [
+        "open",
+        "mark"
+      ]
+    }
+  },
+  "actions": {
+    "open": {
+      "function": "citinet.browser.open",
+      "inputType": "citinet.browser.OpenInput",
+      "inputs": {
+        "address": {
+          "type": "string",
+          "maxLength": 192
+        }
+      },
+      "scopes": []
+    },
+    "mark": {
+      "function": "citinet.browser.mark",
+      "inputType": "citinet.browser.MarkInput",
+      "inputs": {
+        "note": {
+          "type": "string",
+          "maxLength": 32,
+          "required": false
+        }
+      },
+      "scopes": []
+    }
+  },
+  "resources": [
+    "fonts/noto-bold",
+    "fonts/mono",
+    "images/info"
+  ]
+}

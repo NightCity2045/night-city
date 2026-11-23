@@ -321,7 +321,6 @@ nc-meta-desktop-title = Desktop
 nc-meta-desktop-studio = META Studio Code
 nc-meta-desktop-network = Local network
 nc-meta-desktop-citinet = CitiNet
-nc-meta-desktop-citinet-soon = The CitiNet browser is not available on computers yet.
 nc-meta-publish-local = Publish locally
 nc-meta-local-site-published = Published for the local network only: {$address}
 nc-meta-tools-local-sites = Sites on the local network

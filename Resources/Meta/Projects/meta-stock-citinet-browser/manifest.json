@@ -1,0 +1,37 @@
+{
+  "version": "1.0",
+  "id": "meta-stock-citinet-browser",
+  "name": "CitiNet browser",
+  "nameRu": "Браузер СитиНет",
+  "packageName": "citinet.browser",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "citinet.browser",
+  "files": [
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/Browser/main.meta",
+      "sha256": "df3323329c67280e7d277439449fa901158b5e61fa26f463581eac99105cdb8b"
+    },
+    {
+      "path": "app.json",
+      "sourcePath": "Resources/Meta/Browser/app.json",
+      "sha256": "20c67be2a92948e5404bac3ec600849192df59261692a920af0c0d606754bc82"
+    },
+    {
+      "path": "ui/main.mui",
+      "sourcePath": "Resources/Meta/Browser/main.mui",
+      "sha256": "e88f10d44bdb172c49248634e4bb070258910ba0ffc8458df30a3f867c1b9ad7"
+    },
+    {
+      "path": "ui/style.mstyle",
+      "sourcePath": "Resources/Meta/Browser/style.mstyle",
+      "sha256": "74d01a4628e6e6f8f5a1c80a98d19c81c3e305e135dacae3011a72be002135bb"
+    }
+  ],
+  "startMode": "Manual",
+  "bindings": [],
+  "testFixture": "meta.test.json"
+}

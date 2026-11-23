@@ -321,7 +321,6 @@ nc-meta-desktop-title = Рабочий стол
 nc-meta-desktop-studio = META Studio Code
 nc-meta-desktop-network = Локальная сеть
 nc-meta-desktop-citinet = CitiNet
-nc-meta-desktop-citinet-soon = Браузер CitiNet на компьютерах пока недоступен.
 nc-meta-publish-local = Опубликовать локально
 nc-meta-local-site-published = Опубликовано только для локальной сети: {$address}
 nc-meta-tools-local-sites = Сайты локальной сети

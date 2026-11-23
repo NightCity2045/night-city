@@ -12,11 +12,13 @@ namespace Content.Meta.Tests.Testing;
 public sealed class MetaProjectTemplateTests
 {
     [Test]
-    public void GameResourcesDoNotShipDemonstrationProgramsOrScenes()
+    public void GameResourcesShipOnlySystemProgramsNeverDemonstrationsOrScenes()
     {
         var resources = Path.Combine(Root, "Resources");
         using var catalog = JsonDocument.Parse(File.ReadAllText(Path.Combine(resources, "Meta", "Projects", "catalog.json")));
-        Assert.That(catalog.RootElement.GetProperty("projects").GetArrayLength(), Is.Zero);
+        // System programs (the browser, later the registrar) are part of the game; demonstrations are not.
+        foreach (var project in catalog.RootElement.GetProperty("projects").EnumerateArray())
+            Assert.That(project.GetProperty("id").GetString(), Does.StartWith("meta-stock-"));
         foreach (var folder in new[] { "Examples", "Garage", "Dashboard", "Smoke" })
             Assert.That(Directory.Exists(Path.Combine(resources, "Meta", folder)), Is.False, folder);
         Assert.That(File.Exists(Path.Combine(resources, "Prototypes", "_NC", "Meta", "demo-scenes.yml")), Is.False);

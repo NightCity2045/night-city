@@ -1,4 +1,13 @@
 {
   "version": "1.0",
-  "projects": []
+  "projects": [
+    {
+      "id": "meta-stock-citinet-browser",
+      "manifest": "Resources/Meta/Projects/meta-stock-citinet-browser/manifest.json"
+    },
+    {
+      "id": "meta-stock-citinet-registrar",
+      "manifest": "Resources/Meta/Projects/meta-stock-citinet-registrar/manifest.json"
+    }
+  ]
 }

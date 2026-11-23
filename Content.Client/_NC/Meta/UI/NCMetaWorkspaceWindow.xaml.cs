@@ -424,6 +424,7 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
         // The desktop stays up until the player opens an application; otherwise the window follows the server's surface.
         ShowSurface(_surface == NCMetaSurface.Desktop ? NCMetaSurface.Desktop : state.Surface);
         _applying = false;
+        FinishBrowserLaunch();
         RebuildTabs();
         UpdateFileInfo();
         if (_saveRequest != Guid.Empty && state.AcknowledgedRequestId == _saveRequest)

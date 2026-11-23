@@ -1,0 +1,281 @@
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+module citinet.browser;
+import meta.app;
+import meta.system;
+import meta.text;
+import meta.net;
+import meta.citinet;
+import meta.files;
+
+// The CitiNet browser, written in META. It keeps the pages you visited and marked, and asks the computer to open an
+// address in a window of its own: a local site as DEVICECODE/view, a published site by its device code, or a city
+// name as citi://name, which the name registrar answers with a device and a view.
+
+link web: Browser = "citinet-browser";
+link port: MessagePort = "browser-port";
+link data: FileStore = "browser-data";
+
+var history: list<string> = new list<string>();
+var marks: list<string> = new list<string>();
+var current: string = "";
+var pending: string = "";
+var notice: string = "";
+
+pub struct PageRow {
+    address: string;
+    label: string;
+}
+
+pub struct BrowserState {
+    title: string;
+    subtitle: string;
+    status: string;
+    page: string;
+    addressLabel: string;
+    openLabel: string;
+    markLabel: string;
+    historyHeading: string;
+    marksHeading: string;
+    hint: string;
+    history: list<PageRow>;
+    marks: list<PageRow>;
+}
+
+pub struct OpenInput {
+    address: string;
+}
+
+pub struct MarkInput {
+    note: option<string>;
+}
+
+fn tr(ru: bool, english: string, russian: string) -> string {
+    if (ru) { return russian; }
+    return english;
+}
+
+fn describe(ru: bool, code: string) -> string {
+    if (code == "empty") { return tr(ru, "Enter an address first.", "Сначала введите адрес."); }
+    if (code == "resolving") { return tr(ru, "Asking the registrar for ", "Спрашиваю регистратора про ") + pending + "..."; }
+    if (code == "unknown") { return tr(ru, "No such name.", "Нет такого имени."); }
+    if (code == "noroute") { return tr(ru, "No route to the registrar.", "Нет связи с регистратором."); }
+    if (code == "unreachable") { return tr(ru, "No such page, or no route to it.", "Нет такой страницы или нет связи."); }
+    return code;
+}
+
+fn field(source: string, wanted: int) -> string {
+    var part: string = "";
+    var index: int = 0;
+    var seen: int = 0;
+    while (index < source.length) {
+        match (text.slice(source, index, 1)) {
+            ok(symbol) => {
+                if (symbol == "|") {
+                    if (seen == wanted) { return part; }
+                    seen = seen + 1;
+                    part = "";
+                } else {
+                    part = part + symbol;
+                }
+            }
+            err(problem) => { }
+        }
+        index = index + 1;
+    }
+    if (seen == wanted) { return part; }
+    return "";
+}
+
+// A city name is what follows citi:// when it has no slash and is short; longer forms name a device directly.
+fn cityName(address: string) -> string {
+    if (address.length <= 7 || address.length > 39) { return ""; }
+    match (text.slice(address, 0, 7)) {
+        ok(prefix) => { if (prefix != "citi://") { return ""; } }
+        err(problem) => { return ""; }
+    }
+    match (text.slice(address, 7, address.length - 7)) {
+        ok(name) => {
+            var index: int = 0;
+            while (index < name.length) {
+                match (text.slice(name, index, 1)) {
+                    ok(symbol) => { if (symbol == "/") { return ""; } }
+                    err(problem) => { return ""; }
+                }
+                index = index + 1;
+            }
+            return name;
+        }
+        err(problem) => { return ""; }
+    }
+}
+
+fn indexOf(items: list<string>, item: string) -> int {
+    var index: int = 0;
+    while (index < items.length) {
+        if (items[index] == item) { return index; }
+        index = index + 1;
+    }
+    return -1;
+}
+
+fn join(items: list<string>) -> string {
+    var joined: string = "";
+    for (let item in items) {
+        joined = joined + item + "\n";
+    }
+    return joined;
+}
+
+fn parse(source: string) -> void {
+    var line: string = "";
+    var index: int = 0;
+    while (index < source.length) {
+        match (text.slice(source, index, 1)) {
+            ok(symbol) => {
+                if (symbol == "\n") {
+                    if (line.length > 0 && marks.length < 32) { marks.push(line); }
+                    line = "";
+                } else {
+                    line = line + symbol;
+                }
+            }
+            err(problem) => { }
+        }
+        index = index + 1;
+    }
+}
+
+fn rowsNewestFirst(items: list<string>) -> list<PageRow> {
+    var rows: list<PageRow> = new list<PageRow>();
+    var index: int = items.length - 1;
+    while (index >= 0) {
+        rows.push(new PageRow(address: items[index], label: items[index]));
+        index = index - 1;
+    }
+    return rows;
+}
+
+fn remember(address: string) -> void {
+    if (history.length > 0 && history[history.length - 1] == address) { return; }
+    var kept: list<string> = new list<string>();
+    var index: int = 0;
+    if (history.length >= 16) { index = 1; }
+    while (index < history.length) {
+        kept.push(history[index]);
+        index = index + 1;
+    }
+    kept.push(address);
+    history = kept;
+}
+
+async fn save() -> void {
+    match (await data.writeTextAtomic("browser/bookmarks.txt", join(marks))) {
+        ok(done) => { }
+        err(problem) => { notice = problem.message; }
+    }
+}
+
+async fn main() -> void {
+    match (await data.readText("browser/bookmarks.txt")) {
+        ok(saved) => { parse(saved); }
+        err(problem) => { }
+    }
+}
+
+async fn visit(address: string) -> void {
+    if (address.length < 1) {
+        notice = "empty";
+        return;
+    }
+    let name: string = cityName(address);
+    if (name.length > 0) {
+        // A city name: ask the registrar; its answer arrives as a message and finishes the job.
+        pending = name;
+        notice = "resolving";
+        match (await port.send("citinet-registrar", "dns.resolve", name)) {
+            ok(receipt) => { }
+            err(problem) => {
+                pending = "";
+                notice = "noroute";
+            }
+        }
+        return;
+    }
+    match (await web.open(address)) {
+        ok(done) => {
+            current = address;
+            notice = "";
+            remember(address);
+        }
+        err(problem) => {
+            notice = "unreachable";
+        }
+    }
+}
+
+async watch port.messageReceived(message) {
+    if (message.topic != "dns.answer") { return; }
+    let name: string = field(message.payload, 1);
+    if (pending.length < 1 || name != pending) { return; }
+    pending = "";
+    if (field(message.payload, 0) != "ok") {
+        notice = "unknown";
+        return;
+    }
+    let target: string = field(message.payload, 2) + "/" + field(message.payload, 3);
+    match (await web.open(target)) {
+        ok(done) => {
+            current = "citi://" + name;
+            notice = "";
+            remember(current);
+        }
+        err(problem) => {
+            notice = "unreachable";
+        }
+    }
+}
+
+pub fn view(context: app.AppContext) -> BrowserState {
+    let ru: bool = context.locale == "ru-RU";
+    var status: string = tr(ru, "Type an address and press Open.", "Введите адрес и нажмите «Открыть».");
+    if (current.length > 0) { status = tr(ru, "Last opened: ", "Последняя страница: ") + current; }
+    if (notice.length > 0) { status = describe(ru, notice); }
+    var markLabel: string = tr(ru, "Bookmark this page", "В закладки");
+    if (indexOf(marks, current) >= 0) { markLabel = tr(ru, "Remove bookmark", "Убрать из закладок"); }
+    return new BrowserState(
+        title: tr(ru, "CitiNet", "СитиНет"),
+        subtitle: tr(ru, "The city network browser", "Браузер городской сети"),
+        status: status,
+        page: current,
+        addressLabel: tr(ru, "Address", "Адрес"),
+        openLabel: tr(ru, "Open", "Открыть"),
+        markLabel: markLabel,
+        historyHeading: tr(ru, "Recent pages", "Недавние страницы"),
+        marksHeading: tr(ru, "Bookmarks", "Закладки"),
+        hint: tr(ru, "Local site: CODE/view. City page: citi://name", "Локальный сайт: КОД/вид. Городская страница: citi://имя"),
+        history: rowsNewestFirst(history),
+        marks: rowsNewestFirst(marks));
+}
+
+pub async fn open(context: app.AppContext, input: OpenInput) -> result<void> {
+    await visit(input.address);
+    return ok(());
+}
+
+pub async fn mark(context: app.AppContext, input: MarkInput) -> result<void> {
+    if (current.length < 1) { return ok(()); }
+    let position: int = indexOf(marks, current);
+    if (position < 0) {
+        if (marks.length < 32) { marks.push(current); }
+    } else {
+        var kept: list<string> = new list<string>();
+        var index: int = 0;
+        while (index < marks.length) {
+            if (index != position) { kept.push(marks[index]); }
+            index = index + 1;
+        }
+        marks = kept;
+    }
+    await save();
+    return ok(());
+}

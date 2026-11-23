@@ -1,0 +1,29 @@
+{
+  "version": "1.0",
+  "tokens": {
+    "neon": "#00F0FF",
+    "pink": "#FF2A6D",
+    "gold": "#F5D300",
+    "mint": "#05FFA1",
+    "ink": "#070D17",
+    "panel": "#0E1A2B",
+    "line": "#1F4A6B",
+    "dim": "#7FA3BF"
+  },
+  "rules": [
+    { "selector": "#root", "properties": { "background": "$ink" } },
+    { "selector": ".page", "properties": { "background": "$ink", "padding": "6" } },
+    { "selector": ".hero", "properties": { "gradient": "#1A0B2E,#0B2A44", "borderColor": "$pink", "borderWidth": "2", "cornerRadius": "6", "padding": "10" } },
+    { "selector": ".title", "properties": { "color": "$neon", "fontSize": "26", "font": "fonts/noto-bold" } },
+    { "selector": ".subtitle", "properties": { "color": "$dim", "fontSize": "14" } },
+    { "selector": ".status", "properties": { "color": "$mint", "fontSize": "13", "font": "fonts/mono" } },
+    { "selector": ".card", "properties": { "background": "$panel", "borderColor": "$line", "borderWidth": "1", "cornerRadius": "4", "padding": "10" } },
+    { "selector": ".label", "properties": { "color": "$dim", "fontSize": "12", "font": "fonts/mono" } },
+    { "selector": ".heading", "properties": { "color": "$gold", "fontSize": "18", "font": "fonts/noto-bold" } },
+    { "selector": ".hint", "properties": { "color": "$dim", "fontSize": "12" } },
+    { "selector": "#openButton", "properties": { "background": "$neon", "color": "$ink", "cornerRadius": "4" } },
+    { "selector": "#openButton", "state": "hover", "properties": { "background": "$mint" } },
+    { "selector": "#markButton", "properties": { "background": "$mint", "color": "$ink", "cornerRadius": "4" } },
+    { "selector": "#markButton", "state": "hover", "properties": { "background": "$neon" } }
+  ]
+}

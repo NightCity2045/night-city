@@ -130,6 +130,59 @@ public sealed partial class NCMetaCitiNetSystem : EntitySystem
 
     private bool Connected(EntityUid host) => _marketplace.HasCitiNetRoute(host);
 
+    /// <summary>
+    /// Opens a site in a window of its own on a computer: a local site by its device code and view, or a CitiNet address
+    /// by domain or device. This is what the browser program asks for; the program never sees the other program.
+    /// </summary>
+    public async Task<bool> TryOpenFromTerminalAsync(EntityUid terminal, EntityUid user, string address)
+    {
+        address = address.Trim();
+        if (address.Length is 0 or > 192) return false;
+        try
+        {
+            if (!address.StartsWith("citi://", StringComparison.OrdinalIgnoreCase))
+            {
+                var split = address.Split('/', 2);
+                if (split.Length != 2 || !NCMetaDeviceIds.TryNormalize(split[0], out var code) || !NCMetaDeviceIds.TryToGuid(code, out var id)) return false;
+                var published = await ReadPublicationAsync(id);
+                return await Main(() =>
+                {
+                    if (published is { Local: true, Active: true }) { Cache(id, published); return TryOpenLocal(terminal, user, address); }
+                    // Not a local site: a site published on the city network by its host's device code.
+                    return OpenGlobal(terminal, user, new MuiCitiNetAddress(id, split[1]), null, published);
+                });
+            }
+            if (!MuiCitiNetAddress.TryParse(address, out var parsed)) return false;
+            var lease = parsed!.Domain is null ? null : await _hosting.ResolveDomainAsync(parsed.Domain);
+            var publication = parsed.Domain is null ? await ReadPublicationAsync(parsed.HostDeviceId) : null;
+            return await Main(() => OpenGlobal(terminal, user, parsed, lease, publication));
+        }
+        catch (Exception exception)
+        {
+            Log.Error($"META browser navigation failed: {exception}");
+            return false;
+        }
+    }
+
+    private bool OpenGlobal(EntityUid terminal, EntityUid user, MuiCitiNetAddress address, NCMetaHostingLease? lease, Publication? publication)
+    {
+        if (!EnsureEpoch() || !_devices.CanManage(terminal, user) || !Connected(terminal)) return false;
+        if (lease is not null && (address.View is null || address.View == lease.View) && _hosting.CanUseLease(lease.Id, lease.Revision) &&
+            _devices.TryResolve(lease.HostDeviceId, out var target) && Connected(target.Entity) &&
+            _applications.TryRestorePublishedView(target.Entity, lease.Provider, lease.PackageDigest, lease.View) &&
+            _applications.TryGetRegistration(target.Entity, lease.PackageDigest, out var leased))
+            return _applications.TryOpen(terminal, user, target.Entity, lease.View, NCMetaAppPresentation.Website, NCMetaUiKey.Application,
+                () => Connected(terminal) && Connected(target.Entity) && _hosting.CanUseLease(lease.Id, lease.Revision), out _,
+                lease.Units > 0 ? lease.Id : Guid.Empty, lease.MaxSessions, leased.RuntimeGeneration);
+        if (publication is not null && !publication.Local && (address.View is null || address.View == publication.View) &&
+            Restore(address.HostDeviceId, publication) && IsCurrent(address.HostDeviceId, publication) &&
+            _devices.TryResolve(publication.HostId, out var device) &&
+            _applications.TryGetRegistration(device.Entity, publication.PackageDigest, out var published))
+            return _applications.TryOpen(terminal, user, device.Entity, publication.View, NCMetaAppPresentation.Website, NCMetaUiKey.Application,
+                () => Connected(terminal) && IsCurrent(address.HostDeviceId, publication), out _, runtimeGeneration: published.RuntimeGeneration);
+        return false;
+    }
+
     /// <summary>The first reason a site cannot be published, in plain terms, for the player.</summary>
     private string PublishFailure(EntityUid host, EntityUid user, bool local, Guid generation, string view)
     {

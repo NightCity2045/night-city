@@ -1,0 +1,189 @@
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+module citinet.registrar;
+import meta.system;
+import meta.text;
+import meta.net;
+import meta.files;
+
+// The CitiNet name registrar, written in META. A site owner asks for a name that points at a host and a view; a browser
+// asks what a name points at. Requests and answers are plain messages:
+//   dns.register  name|device|view   ->  dns.registered  ok|name  /  taken|name  /  invalid|name
+//   dns.resolve   name               ->  dns.answer      ok|name|device|view  /  none|name
+// The first to register a name owns it; only the same sender may point it somewhere else.
+
+link port: MessagePort = "registrar-port";
+link data: FileStore = "registrar-data";
+
+var names: list<string> = new list<string>();
+var devices: list<string> = new list<string>();
+var views: list<string> = new list<string>();
+var owners: list<string> = new list<string>();
+
+fn field(source: string, wanted: int) -> string {
+    var current: string = "";
+    var index: int = 0;
+    var seen: int = 0;
+    while (index < source.length) {
+        match (text.slice(source, index, 1)) {
+            ok(symbol) => {
+                if (symbol == "|") {
+                    if (seen == wanted) { return current; }
+                    seen = seen + 1;
+                    current = "";
+                } else {
+                    current = current + symbol;
+                }
+            }
+            err(problem) => { }
+        }
+        index = index + 1;
+    }
+    if (seen == wanted) { return current; }
+    return "";
+}
+
+fn indexOf(name: string) -> int {
+    var index: int = 0;
+    while (index < names.length) {
+        if (names[index] == name) { return index; }
+        index = index + 1;
+    }
+    return -1;
+}
+
+fn nameSymbol(symbol: string) -> bool {
+    let alphabet: string = "abcdefghijklmnopqrstuvwxyz0123456789-";
+    var index: int = 0;
+    while (index < alphabet.length) {
+        match (text.slice(alphabet, index, 1)) {
+            ok(candidate) => { if (candidate == symbol) { return true; } }
+            err(problem) => { }
+        }
+        index = index + 1;
+    }
+    return false;
+}
+
+fn validName(name: string) -> bool {
+    if (name.length < 3 || name.length > 32) { return false; }
+    var index: int = 0;
+    while (index < name.length) {
+        match (text.slice(name, index, 1)) {
+            ok(symbol) => { if (!nameSymbol(symbol)) { return false; } }
+            err(problem) => { return false; }
+        }
+        index = index + 1;
+    }
+    return true;
+}
+
+fn validTarget(device: string, view: string) -> bool {
+    if (device.length != 6) { return false; }
+    if (view.length < 1 || view.length > 32) { return false; }
+    return validName(view) || view == "main";
+}
+
+fn serialize() -> string {
+    var joined: string = "";
+    var index: int = 0;
+    while (index < names.length) {
+        joined = joined + names[index] + "|" + devices[index] + "|" + views[index] + "|" + owners[index] + "\n";
+        index = index + 1;
+    }
+    return joined;
+}
+
+fn parse(source: string) -> void {
+    var line: string = "";
+    var index: int = 0;
+    while (index < source.length) {
+        match (text.slice(source, index, 1)) {
+            ok(symbol) => {
+                if (symbol == "\n") {
+                    if (line.length > 0 && names.length < 256) {
+                        names.push(field(line, 0));
+                        devices.push(field(line, 1));
+                        views.push(field(line, 2));
+                        owners.push(field(line, 3));
+                    }
+                    line = "";
+                } else {
+                    line = line + symbol;
+                }
+            }
+            err(problem) => { }
+        }
+        index = index + 1;
+    }
+}
+
+async fn save() -> void {
+    match (await data.writeTextAtomic("registry/names.txt", serialize())) {
+        ok(done) => { }
+        err(problem) => { system.log(problem.message); }
+    }
+}
+
+async fn main() -> void {
+    match (await data.readText("registry/names.txt")) {
+        ok(saved) => { parse(saved); }
+        err(problem) => { }
+    }
+}
+
+async fn reply(to: string, topic: string, payload: string) -> void {
+    match (await port.send(to, topic, payload)) {
+        ok(receipt) => { }
+        err(problem) => { system.log(problem.message); }
+    }
+}
+
+async fn resolve(sender: string, name: string) -> void {
+    let position: int = indexOf(name);
+    if (position < 0) {
+        await reply(sender, "dns.answer", "none|" + name);
+        return;
+    }
+    await reply(sender, "dns.answer", "ok|" + name + "|" + devices[position] + "|" + views[position]);
+}
+
+async fn register(sender: string, payload: string) -> void {
+    let name: string = field(payload, 0);
+    let device: string = field(payload, 1);
+    let view: string = field(payload, 2);
+    if (!validName(name) || !validTarget(device, view)) {
+        await reply(sender, "dns.registered", "invalid|" + name);
+        return;
+    }
+    let position: int = indexOf(name);
+    if (position >= 0 && owners[position] != sender) {
+        await reply(sender, "dns.registered", "taken|" + name);
+        return;
+    }
+    if (position >= 0) {
+        devices[position] = device;
+        views[position] = view;
+    } else {
+        if (names.length >= 256) {
+            await reply(sender, "dns.registered", "invalid|" + name);
+            return;
+        }
+        names.push(name);
+        devices.push(device);
+        views.push(view);
+        owners.push(sender);
+    }
+    await save();
+    await reply(sender, "dns.registered", "ok|" + name);
+}
+
+async watch port.messageReceived(message) {
+    if (message.topic == "dns.resolve") {
+        await resolve(message.replyTo, message.payload);
+        return;
+    }
+    if (message.topic == "dns.register") {
+        await register(message.replyTo, message.payload);
+        return;
+    }
+}
