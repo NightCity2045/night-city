@@ -37,4 +37,21 @@ internal static class NCMetaNativeActorHarness
     {
         return server.WaitAssertion(() => Assert.That(server.System<NCCityActorRuntimeIndexSystem>().TryBind(actor, body), Is.True));
     }
+
+    /// <summary>
+    /// The owner of a test device is the player's character, operating through a plain MobHuman attached to the test
+    /// session, as in the real game. Only one body per test can be the player's.
+    /// </summary>
+    public static async Task<string> OwnByPlayer(RobustIntegrationTest.ServerIntegrationInstance server,
+        Robust.Shared.Player.ICommonSession session, EntityUid body)
+    {
+        var preferences = server.ResolveDependency<Content.Server.Preferences.Managers.IServerPreferencesManager>();
+        Content.Shared._NC.Identity.NCCharacterId character = default;
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(preferences.TryGetSelectedNCCharacterId(session.UserId, out character), Is.True);
+            server.PlayerMan.SetAttachedEntity(session, body);
+        });
+        return NCPartyRef.ForCharacter(character).ToString();
+    }
 }

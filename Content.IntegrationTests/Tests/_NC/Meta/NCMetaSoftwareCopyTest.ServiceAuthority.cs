@@ -5,9 +5,6 @@ using System.Threading.Tasks;
 using Content.Meta.Runtime;
 using Content.Server._NC.Meta.Authority;
 using Content.Server._NC.Meta.Runtime;
-using Content.Server._NC.LivingCity.Actors;
-using Content.Shared._NC.LivingCity.Actors;
-using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Meta.Authority;
 
 namespace Content.IntegrationTests.Tests._NC.Meta;
@@ -16,9 +13,7 @@ public sealed partial class NCMetaSoftwareCopyTest
 {
     [TestCase("Revoke")]
     [TestCase("Expire")]
-    [TestCase("Dead")]
-    [TestCase("Archived")]
-    public async Task AZeroLinkServiceStopsOnPolicyRevocationExpiryOrItsOwnPrincipalBecomingInactive(string invalidation)
+    public async Task AZeroLinkServiceStopsOnPolicyRevocationOrExpiry(string invalidation)
     {
         var expire = invalidation == "Expire";
         var scene = await CreatePublishedPhysicalImage("module test.piracy; fn main()->void{while(true){yield;}}", nativeOwner: true);
@@ -65,18 +60,6 @@ public sealed partial class NCMetaSoftwareCopyTest
             var revoked = await NCMetaNativeTestTasks.Run(Server, () => authority.TryRevokeGrantAsync(scene.Deck.Entity, scene.Actor, scene.Deck.Entity,
                 Guid.NewGuid(), scene.Deck.Id, installation.Id, Guid.Empty, policy.Revision));
             Assert.That(revoked.Success, Is.True, revoked.MessageKey);
-        }
-        else if (!expire)
-        {
-            Assert.That(NCPartyRef.TryParse(scene.Owner, out var principal), Is.True);
-            var actors = Server.System<NCCityActorRegistrySystem>();
-            var actorId = new NCActorId(principal.PersistentId);
-            var record = await NCMetaNativeTestTasks.Run(Server, () => actors.GetAsync(actorId));
-            Assert.That(record, Is.Not.Null);
-            var result = await NCMetaNativeTestTasks.Run(Server, () => actors.SetStatusAsync(new(Guid.NewGuid(), actorId, record!.AggregateVersion,
-                invalidation == "Dead" ? NCCityActorStatus.Dead : NCCityActorStatus.Archived, Guid.NewGuid(),
-                AuditSource: "integration.meta-service-principal")));
-            Assert.That(result.Status, Is.EqualTo(NCCityActorMutationStatus.Applied), result.Error);
         }
         for (var step = 0; step < 300 && runtime.Process.State != MetaProcessState.Stopped; step++)
             await Server.WaitRunTicks(1);

@@ -30,7 +30,6 @@ namespace Content.IntegrationTests.Tests._NC.Meta;
 [TestOf(typeof(NCMetaNetrunSystem))]
 public sealed partial class NCMetaNativeNetworkTest : GameTest
 {
-    public override PoolSettings PoolSettings => new() { Connected = false };
     [SidedDependency(Side.Server)] private NCMetaDemoSceneSystem _scenes = default!;
     [SidedDependency(Side.Server)] private NCMetaDeviceRegistrySystem _devices = default!;
     [SidedDependency(Side.Server)] private NCMetaNetworkSystem _network = default!;
@@ -59,12 +58,7 @@ public sealed partial class NCMetaNativeNetworkTest : GameTest
     private void MoveTo(EntityUid actor, EntityUid target) => Server.System<SharedTransformSystem>().SetCoordinates(actor,
         SComp<TransformComponent>(target).Coordinates.Offset(new Vector2(0, -0.35f)));
 
-    private async Task<string> CreateOwner(EntityUid body, string name)
-    {
-        var actor = new NCActorId(Guid.NewGuid());
-        await NCMetaNativeActorHarness.RestoreBinding(Server, actor, body);
-        return NCPartyRef.ForActor(actor).ToString();
-    }
+    private Task<string> CreateOwner(EntityUid body, string name) => NCMetaNativeActorHarness.OwnByPlayer(Server, ServerSession!, body);
 
     private async Task Claim(EntityUid endpoint, EntityUid actor, string owner)
     {

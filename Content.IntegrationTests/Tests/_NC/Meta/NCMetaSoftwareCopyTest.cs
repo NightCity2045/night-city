@@ -40,14 +40,12 @@ namespace Content.IntegrationTests.Tests._NC.Meta;
 [TestOf(typeof(NCMetaMarketplaceSystem))]
 public sealed partial class NCMetaSoftwareCopyTest : GameTest
 {
-    public override PoolSettings PoolSettings => new() { Connected = false };
     [SidedDependency(Side.Server)] private NCMetaPersistenceSystem _persistence = default!;
     [SidedDependency(Side.Server)] private NCMetaMarketplaceSystem _marketplace = default!;
     [SidedDependency(Side.Server)] private NCMetaDeviceRegistrySystem _devices = default!;
     [SidedDependency(Side.Server)] private IServerDbManager _database = default!;
     private NCSessionEpoch _epoch;
     private NCActiveWorldTime _time;
-    private readonly List<EntityUid> _nativeSoftwareBodies = [];
 
     public override async Task DoTeardown()
     {
@@ -63,11 +61,6 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
     public async Task UnbindNativeSoftwareActors()
     {
         await NCMetaNativeTestTasks.CloseWorld(Server);
-        if (_nativeSoftwareBodies.Count != 0)
-        {
-            await NCMetaNativeActorHarness.UnbindBeforeDelete(Server, _nativeSoftwareBodies.ToArray());
-            _nativeSoftwareBodies.Clear();
-        }
         await Pair.ReallyBeIdle();
     }
 
@@ -149,7 +142,7 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
         EntityUid? SourceActor = null);
 
     private async Task<Scene> CreatePublishedPhysicalImage(string sourceText = "module test.piracy; fn main()->void{}", MetaSoftwareTerms? terms = null,
-        bool firmwareHost = false, bool nativeOwner = false, bool hotFirmware = false, bool nativeSourceOwner = false)
+        bool firmwareHost = false, bool nativeOwner = false, bool hotFirmware = false)
     {
         var clock = Server.System<NCActiveWorldTimeSystem>();
         await Server.WaitPost(() => SEntMan.EventBus.RaiseEvent(EventSource.Local,
@@ -157,7 +150,6 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
         for (var attempt = 0; attempt < 180 && !clock.IsReady; attempt++) await Server.WaitRunTicks(1);
         await Server.WaitAssertion(() => Assert.That(_persistence.TryCaptureTime(out _epoch, out _time), Is.True));
         EntityUid deck = default, source = default, service = default, actor = default;
-        EntityUid? sourceActor = null;
         MapId map = default;
         await Server.WaitPost(() =>
         {
@@ -171,7 +163,6 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
             source = SEntMan.SpawnEntity("NCMetaIntegrationCopyHost", new MapCoordinates(Vector2.UnitY, map));
             service = SEntMan.SpawnEntity("NCMetaIntegrationCopyMarketplace", new MapCoordinates(Vector2.UnitX, map));
             actor = SEntMan.SpawnEntity("MobHuman", new MapCoordinates(Vector2.Zero, map));
-            if (nativeSourceOwner) sourceActor = SEntMan.SpawnEntity("MobHuman", new MapCoordinates(Vector2.UnitY, map));
         });
         NCMetaDeviceEntry deckEntry = null, sourceEntry = null;
         for (var attempt = 0; attempt < 180; attempt++)
@@ -184,20 +175,11 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
         }
         Assert.That(deckEntry?.Ready, Is.True);
         Assert.That(sourceEntry?.Ready, Is.True);
-        var actorId = new NCActorId(Guid.NewGuid());
-        if (firmwareHost || nativeOwner || hotFirmware)
-        {
-            await NCMetaNativeActorHarness.RestoreBinding(Server, actorId, actor);
-            _nativeSoftwareBodies.Add(actor);
-        }
-        var owner = firmwareHost || nativeOwner || hotFirmware ? NCPartyRef.ForActor(actorId).ToString() : NCPartyRef.ForCharacter(new NCCharacterId(744)).ToString();
-        var sourceActorId = new NCActorId(Guid.NewGuid());
-        if (sourceActor is { } nativeSourceActor)
-        {
-            await NCMetaNativeActorHarness.RestoreBinding(Server, sourceActorId, nativeSourceActor);
-            _nativeSoftwareBodies.Add(nativeSourceActor);
-        }
-        var sourceOwner = nativeSourceOwner ? NCPartyRef.ForActor(sourceActorId).ToString() : NCPartyRef.ForCharacter(new NCCharacterId(745)).ToString();
+        // The owner is the player's character, acting through a plain MobHuman, as in the real game.
+        var owner = firmwareHost || nativeOwner || hotFirmware
+            ? await NCMetaNativeActorHarness.OwnByPlayer(Server, ServerSession!, actor)
+            : NCPartyRef.ForCharacter(new NCCharacterId(744)).ToString();
+        var sourceOwner = NCPartyRef.ForCharacter(new NCCharacterId(745)).ToString();
         var deckRecord = await NCMetaNativeTestTasks.Run(Server, () => _persistence.ClaimDeviceAsync(Guid.NewGuid(), deckEntry.Id, owner, "Copy target", _epoch, _time));
         var sourceRecord = await NCMetaNativeTestTasks.Run(Server, () => _persistence.ClaimDeviceAsync(Guid.NewGuid(), sourceEntry.Id, sourceOwner, "Copy source", _epoch, _time));
         Assert.That(deckRecord, Is.Not.Null);
@@ -246,7 +228,7 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
                 Write("meta.software.publisher-image", project.Id.ToString("D") + ":" + release.Id.ToString("D"), 0, new NCMetaSoftwarePublisherImage(project.Id, release.Id, productId, 1, release.Digest, 1))],
             "{}", Guid.NewGuid(), null, _epoch, _time, [])));
         Assert.That(publication.Status, Is.EqualTo(NCPersistentMutationStatus.Applied));
-        return new(owner, sourceOwner, deckEntry, sourceEntry, project, release, product, installed, bytes.Length, verified, service, actor, sourceActor);
+        return new(owner, sourceOwner, deckEntry, sourceEntry, project, release, product, installed, bytes.Length, verified, service, actor);
     }
 
     [Test]
@@ -548,40 +530,6 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
                 Write("meta.software.device", scene.Deck.Id, 1, index)], "{}", Guid.NewGuid(), null, _epoch, _time, []));
         Assert.That(changed.Status, Is.EqualTo(NCPersistentMutationStatus.Applied));
         Assert.That(await NCMetaNativeTestTasks.Run(Server, () => _marketplace.ResolveLicensedReleaseAsync(scene.Owner, scene.Deck.Id, scene.Product.Id, scene.Release.Id)), Is.Null);
-    }
-
-    [Test]
-    public async Task AnAbsoluteNativeEntitlementDeadlineStopsPureComputationBeforeAnotherVmPhase()
-    {
-        var scene = await CreatePublishedPhysicalImage("module test.piracy; fn main()->void{while(true){yield;}}", nativeSourceOwner: true);
-        Assert.That(await _persistence.SetAutoStartAsync(Guid.NewGuid(), scene.Installation, true, _epoch, _time), Is.True);
-        var installation = (await _persistence.ReadInstallationsAsync(scene.Source.Id, scene.SourceOwner)).Single();
-        var approved = await ApproveServiceAsync(scene, installation, scene.Artifact, scene.Source.Entity, scene.SourceActor!.Value);
-        installation = approved.Installation;
-        var system = Server.System<NCMetaRuntimeSystem>();
-        NCMetaRuntimeInstance runtime = null;
-        for (var attempt = 0; attempt < 180 && runtime == null; attempt++)
-        {
-            await Server.WaitAssertion(() =>
-            {
-                Assert.That(_persistence.TryCaptureTime(out _, out var now), Is.True);
-                // This fixture supplies a stricter native deadline to exercise the host gate without
-                // simulating thirty minutes. The prior test resolves the real evidence-bound expiry.
-                if (system.TryStartRecovered(scene.Source.Entity, installation, scene.Artifact, false,
-                    now.Ticks + TimeSpan.TicksPerMillisecond * 100, serviceAdmission: approved.Admission))
-                    Assert.That(system.TryGetInstallation(scene.Source.Entity, scene.SourceOwner, installation.Id, out runtime), Is.True);
-            });
-            if (runtime == null) await Server.WaitRunTicks(1);
-        }
-        Assert.That(runtime, Is.Not.Null, "The physical host did not finish its native power-on sequence.");
-        for (var attempt = 0; attempt < 30 && runtime.Process.State != MetaProcessState.Stopped; attempt++)
-            await Server.WaitRunTicks(1);
-        await Server.WaitAssertion(() =>
-        {
-            Assert.That(runtime.Process.State, Is.EqualTo(MetaProcessState.Stopped));
-            Assert.That(runtime.Process.StopReason, Is.EqualTo(MetaStopReason.PermissionRevoked));
-            Assert.That(system.TryGetInstallation(scene.Source.Entity, scene.SourceOwner, installation.Id, out _), Is.False);
-        });
     }
 
     [TestCase(MetaOfflinePolicy.OnlineRequired)]

@@ -48,7 +48,6 @@ namespace Content.IntegrationTests.Tests._NC.Meta;
 [TestOf(typeof(NCMetaClinicalSystem))]
 public sealed partial class NCMetaLaboratoryClinicalTest : GameTest
 {
-    public override PoolSettings PoolSettings => new() { Connected = false };
     [SidedDependency(Side.Server)] private NCMetaDemoSceneSystem _scenes = default!;
     [SidedDependency(Side.Server)] private NCMetaDeviceRegistrySystem _devices = default!;
     [SidedDependency(Side.Server)] private NCMetaRuntimeSystem _runtime = default!;
@@ -60,7 +59,7 @@ public sealed partial class NCMetaLaboratoryClinicalTest : GameTest
     [SidedDependency(Side.Server)] private SharedTransformSystem _transforms = default!;
     [SidedDependency(Side.Server)] private IServerDbManager _database = default!;
 
-    private sealed record Scene(NCMetaDemoSceneInstance Physical, string Owner, NCActorId ActorId, EntityUid? ClinicalHost = null)
+    private sealed record Scene(NCMetaDemoSceneInstance Physical, string Owner, EntityUid? ClinicalHost = null)
     {
         public EntityUid Actor => Physical.Operator;
         public EntityUid this[string key] => key == "host" && ClinicalHost is { } clinical ? clinical : Physical.Objects[key];
@@ -121,31 +120,8 @@ public sealed partial class NCMetaLaboratoryClinicalTest : GameTest
         await Until(() => _devices.TryGetEntry(uid, out var entry) && entry.Owner == scene.Owner, "Native ownership claim did not commit.");
     }
 
-    private async Task RestoreActorBinding(Scene scene)
-    {
-        var actors = Server.System<NCCityActorRegistrySystem>();
-        var domains = Server.System<NCCityActorDomainRegistrySystem>();
-        Assert.That(await Durable(() => actors.GetAsync(scene.ActorId)), Is.Not.Null);
-        var health = await Durable(() => domains.GetHealthAsync(scene.ActorId));
-        var inventory = await Durable(() => domains.GetInventoryAsync(scene.ActorId));
-        Assert.That(health, Is.Not.Null); Assert.That(inventory, Is.Not.Null);
-        var physicalization = Server.System<NCEconomicPhysicalizationSystem>();
-        var plan = await Durable(() => physicalization.BuildActorInventoryPlanAsync(scene.ActorId, inventory!.Snapshot));
-        Assert.That(plan.IsSuccess, Is.True, plan.Error);
-        await Server.WaitAssertion(() =>
-        {
-            // The fixture keeps its physical body across selected-world tests. Restore the same native inventory
-            // authority and economic lease that NCPhysicalActorLifecycleSystem initializes for a spawned resident.
-            var adapter = SEntMan.EnsureComponent<NCCityActorInventoryAdapterComponent>(scene.Actor);
-            adapter.AuthorityVersion = inventory!.Snapshot.SourceAuthorityVersion;
-            adapter.EquippedLoadoutId = inventory.Snapshot.Summary.EquippedLoadoutId;
-            Assert.That(physicalization.TryMaterialize(scene.Actor, plan.Plan!, out var error), Is.True, error);
-            Assert.That(Server.System<NCCityActorRuntimeIndexSystem>().TryBind(scene.ActorId, scene.Actor), Is.True);
-            Assert.That(Server.System<NCActiveWorldTimeSystem>().TryGetCurrentTime(out _, out var now), Is.True);
-            Assert.That(domains.TryCaptureMaterialized(scene.ActorId, scene.Actor, health!.AggregateVersion,
-                inventory.AggregateVersion, now, out _, out error), Is.True, error);
-        });
-    }
+    /// <summary>The operator is the player's body; after a new world epoch it is attached again.</summary>
+    private Task RestoreActorBinding(Scene scene) => NCMetaNativeActorHarness.OwnByPlayer(Server, ServerSession!, scene.Actor);
 
     private async Task<Scene> CreateScene(bool clinicalHost = false)
     {
@@ -154,14 +130,12 @@ public sealed partial class NCMetaLaboratoryClinicalTest : GameTest
         await Until(() => Server.System<NCActiveWorldTimeSystem>().IsReady, "Active-world clock did not start.");
         NCMetaDemoSceneInstance physical = null!;
         EntityUid? clinical = null;
-        var actorId = new NCActorId(Guid.NewGuid()); HumanoidCharacterProfile profile = null!;
         await Server.WaitAssertion(() =>
         {
             Assert.That(_scenes.TryCreate("NCMetaBedsideLabScene", out physical), Is.True);
             // Give the real APC network headroom for the grinder's native 5 W -> 750 W load step.
             // Power-loss tests still disconnect the actual receiver and retain every native interlock.
             SSpawnAtPosition("APCHyperCapacity", new EntityCoordinates(physical.Grid, new Vector2(-3.5f, -4.5f)));
-            profile = HumanoidCharacterProfile.Random();
             ChargePortable(physical.Objects["bedside"]);
             if (clinicalHost)
             {
@@ -174,8 +148,7 @@ public sealed partial class NCMetaLaboratoryClinicalTest : GameTest
                 Assert.That(network.TryConnectCable(cable, physical.Operator, physical.Objects["host"]), Is.True);
             }
         });
-        var scene = new Scene(physical, NCPartyRef.ForActor(actorId).ToString(), actorId, clinical);
-        await RestoreActorBinding(scene);
+        var scene = new Scene(physical, await NCMetaNativeActorHarness.OwnByPlayer(Server, ServerSession!, physical.Operator), clinical);
         foreach (var uid in physical.Objects.Where(value => value.Key is "host" or "bedside" or "scanner" or "grinder" or "chemMaster").Select(value => value.Value)
                      .Concat(clinical is { } sourceHost ? new[] { sourceHost } : []).Distinct()) await Claim(scene, uid);
         return scene;
