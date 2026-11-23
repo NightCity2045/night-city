@@ -254,6 +254,9 @@ public sealed partial class NCMetaWorkspaceSystem : EntitySystem
                 case NCMetaWorkspaceOperation.SetMaintenance:
                     await OnMainAsync(() => { SetMaintenanceFromPanel(context, request); return true; });
                     break;
+                case NCMetaWorkspaceOperation.OpenSystemApplication:
+                    await OpenSystemApplicationAsync(context, device, request, state);
+                    break;
                 case NCMetaWorkspaceOperation.PrepareStockApplication:
                     if (await PrepareStockApplicationAsync(context, device, request, state) is { } stockProject)
                     {
@@ -380,8 +383,13 @@ public sealed partial class NCMetaWorkspaceSystem : EntitySystem
             state.ProjectRevision = project.Revision;
             state.Files = project.Files.Select(file => new NCMetaFileSummary(file.Id, file.Path, file.Revision,
                 file.Bytes, file.Digest, true)).ToList();
+            // System programs of the computer's own OS are not projects or installations the player manages.
+            var systemPackages = SystemApplications.Values.Select(value => value.Package).ToHashSet(StringComparer.Ordinal);
+            var systemProjects = (await _persistence.ReadInstallationsAsync(context.DeviceId, context.Owner))
+                .Where(value => systemPackages.Contains(value.PackageIdentity)).Select(value => value.ProjectId).ToHashSet();
             foreach (var id in device.Projects)
             {
+                if (systemProjects.Contains(id)) continue;
                 if (await _persistence.ReadProjectAsync(id, context.Owner) is { } listed)
                     state.Projects.Add(new NCMetaProjectSummary(id, listed.Name, listed.Revision));
             }
@@ -418,6 +426,7 @@ public sealed partial class NCMetaWorkspaceSystem : EntitySystem
             for (var installedIndex = 0; installedIndex < installed.Length; installedIndex++)
             {
                 var installation = installed[installedIndex];
+                if (systemPackages.Contains(installation.PackageIdentity)) continue;
                 state.Installations.Add(new(installation.Id, installation.Active.Id, responseDevice,
                     installation.ProjectId == project.Id && project.Name.Length > 0 ? project.Name : ShortPackageName(installation.PackageIdentity),
                     installation.SlotKind, installation.AutoStart, runningNow[installedIndex]));

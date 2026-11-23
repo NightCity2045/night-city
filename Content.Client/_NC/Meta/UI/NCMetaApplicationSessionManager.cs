@@ -17,6 +17,8 @@ public sealed class NCMetaApplicationSessionManager : IDisposable
     private bool _disposed;
     public event Action<BoundUserInterfaceMessage>? Requested;
     public event Action<string>? WebsiteNotice;
+    /// <summary>Raised when the last session is gone, so the owner of the connection can let go of it.</summary>
+    public event Action? Emptied;
     public int SessionCount => _sessions.Count;
 
     public NCMetaApplicationSessionManager(Func<NCMetaApplicationView, bool>? presentWebsite = null)
@@ -39,32 +41,39 @@ public sealed class NCMetaApplicationSessionManager : IDisposable
             if (!state.FullSnapshot || _sessions.Count >= 4)
                 return false;
             var sessionId = state.SessionId;
+            NCMetaApplicationView? created = null;
             if (state.Website)
             {
-                if (_presentWebsite == null) return false;
                 CloseWebsite();
-                view = new NCMetaApplicationView();
-                if (!_presentWebsite(view))
+                created = new NCMetaApplicationView();
+                // A browser window shows the page inside itself; without one a page gets a window of its own.
+                var hosted = _presentWebsite != null ? _presentWebsite(created) : TryHostInWindows(created);
+                if (!hosted)
                 {
-                    view.Dispose();
-                    return false;
+                    created.Dispose();
+                    created = null;
+                    if (_presentWebsite != null) return false;
                 }
-                _websiteSession = sessionId;
+                else _websiteSession = sessionId;
             }
-            else
+            if (created == null)
             {
                 var window = new NCMetaApplicationWindow();
-                view = window.ApplicationView;
+                created = window.ApplicationView;
                 window.OnClose += () =>
                 {
                     _windows.Remove(sessionId);
                     if (_sessions.Remove(sessionId))
                         Requested?.Invoke(new NCMetaAppCloseMessage(sessionId));
+                    // The page shown inside a browser window goes with it.
+                    CloseWebsite();
                     window.Dispose();
+                    if (_sessions.Count == 0) Emptied?.Invoke();
                 };
                 _windows.Add(sessionId, window);
                 window.OpenCentered();
             }
+            view = created;
             view.Requested += message => Requested?.Invoke(message);
             _sessions.Add(sessionId, view);
         }
@@ -93,6 +102,17 @@ public sealed class NCMetaApplicationSessionManager : IDisposable
             view.Parent?.RemoveChild(view);
             view.Dispose();
         }
+    }
+
+    private bool TryHostInWindows(NCMetaApplicationView page)
+    {
+        foreach (var window in _windows.Values)
+        {
+            if (window.SiteHost is not { Disposed: false, ChildCount: 0 } host) continue;
+            host.AddChild(page);
+            return true;
+        }
+        return false;
     }
 
     public void CloseWebsite()

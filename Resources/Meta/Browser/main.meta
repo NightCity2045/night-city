@@ -22,6 +22,7 @@ var marks: list<string> = new list<string>();
 var current: string = "";
 var pending: string = "";
 var notice: string = "";
+var sites: list<string> = new list<string>();
 var offerName: string = "";
 var offerDevice: string = "";
 var offerView: string = "";
@@ -45,6 +46,8 @@ pub struct BrowserState {
     historyHeading: string;
     marksHeading: string;
     hint: string;
+    sitesHeading: string;
+    sites: list<PageRow>;
     registerHeading: string;
     nameLabel: string;
     deviceLabel: string;
@@ -82,6 +85,8 @@ fn describe(ru: bool, code: string) -> string {
     if (code == "unknown") { return tr(ru, "No such name.", "Нет такого имени."); }
     if (code == "noroute") { return tr(ru, "No route to the registrar.", "Нет связи с регистратором."); }
     if (code == "unreachable") { return tr(ru, "No such page, or no route to it.", "Нет такой страницы или нет связи."); }
+    if (code == "searching") { return tr(ru, "Searching the city network...", "Ищу по городской сети..."); }
+    if (code == "nothing") { return tr(ru, "No sites found.", "Ничего не найдено."); }
     if (code == "quoting") { return tr(ru, "Asking the registrar for a price...", "Спрашиваю у регистратора цену..."); }
     if (code == "offer") { return tr(ru, "The registrar quotes a price. Confirm to pay and register.", "Регистратор назвал цену. Подтвердите, чтобы оплатить и зарегистрировать."); }
     if (code == "taken") { return tr(ru, "That name is already taken.", "Это имя уже занято."); }
@@ -137,6 +142,48 @@ fn cityName(address: string) -> string {
         }
         err(problem) => { return ""; }
     }
+}
+
+fn hasSlash(value: string) -> bool {
+    var index: int = 0;
+    while (index < value.length) {
+        match (text.slice(value, index, 1)) {
+            ok(symbol) => { if (symbol == "/") { return true; } }
+            err(problem) => { return false; }
+        }
+        index = index + 1;
+    }
+    return false;
+}
+
+fn splitNames(source: string) -> list<string> {
+    var parts: list<string> = new list<string>();
+    var part: string = "";
+    var index: int = 0;
+    while (index < source.length && parts.length < 20) {
+        match (text.slice(source, index, 1)) {
+            ok(symbol) => {
+                if (symbol == ",") {
+                    if (part.length > 0) { parts.push(part); }
+                    part = "";
+                } else {
+                    part = part + symbol;
+                }
+            }
+            err(problem) => { }
+        }
+        index = index + 1;
+    }
+    if (part.length > 0 && parts.length < 20) { parts.push(part); }
+    return parts;
+}
+
+fn siteRows() -> list<PageRow> {
+    var rows: list<PageRow> = new list<PageRow>();
+    for (let name in sites) {
+        rows.push(new PageRow(address: "citi://" + name, label: name));
+    }
+    return rows;
 }
 
 fn indexOf(items: list<string>, item: string) -> int {
@@ -205,11 +252,20 @@ async fn save() -> void {
     }
 }
 
+// Asks the registrar for the sites whose names contain the text; the answer is a message that fills the list.
+async fn ask(query: string) -> void {
+    match (await port.send("citinet-registrar", "dns.search", query)) {
+        ok(receipt) => { }
+        err(problem) => { }
+    }
+}
+
 async fn main() -> void {
     match (await data.readText("browser/bookmarks.txt")) {
         ok(saved) => { parse(saved); }
         err(problem) => { }
     }
+    await ask("");
 }
 
 async fn quote(name: string, device: string, view: string) -> void {
@@ -225,8 +281,15 @@ async fn quote(name: string, device: string, view: string) -> void {
 }
 
 async fn visit(address: string) -> void {
+    // The one bar both searches and opens: an address opens, anything else is looked up among the sites; empty refreshes the list.
     if (address.length < 1) {
-        notice = "empty";
+        notice = "searching";
+        await ask("");
+        return;
+    }
+    if (!hasSlash(address)) {
+        notice = "searching";
+        await ask(address);
         return;
     }
     let name: string = cityName(address);
@@ -256,6 +319,12 @@ async fn visit(address: string) -> void {
 }
 
 async watch port.messageReceived(message) {
+    if (message.topic == "dns.found") {
+        sites = splitNames(field(message.payload, 1));
+        if (sites.length == 0) { notice = "nothing"; }
+        else if (notice == "searching") { notice = ""; }
+        return;
+    }
     if (message.topic == "dns.price") {
         if (field(message.payload, 1) != offerName) { return; }
         if (field(message.payload, 0) != "ok") {
@@ -317,7 +386,9 @@ pub fn view(context: app.AppContext) -> BrowserState {
         markLabel: markLabel,
         historyHeading: tr(ru, "Recent pages", "Недавние страницы"),
         marksHeading: tr(ru, "Bookmarks", "Закладки"),
-        hint: tr(ru, "Local site: CODE/view. City page: citi://name", "Локальный сайт: КОД/вид. Городская страница: citi://имя"),
+        hint: tr(ru, "Type a name to search the city, or an address: CODE/view, citi://name", "Введите имя для поиска или адрес: КОД/вид, citi://имя"),
+        sitesHeading: tr(ru, "Sites on the network", "Сайты сети"),
+        sites: siteRows(),
         registerHeading: tr(ru, "Register a city name", "Зарегистрировать имя"),
         nameLabel: tr(ru, "Name", "Имя"),
         deviceLabel: tr(ru, "Host device code", "Код устройства-хоста"),

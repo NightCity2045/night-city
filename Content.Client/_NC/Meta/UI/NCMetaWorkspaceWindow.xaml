@@ -418,7 +418,7 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                             <PanelContainer Name="ToolsConnections" StyleClasses="ncMetaCard" Visible="False">
                                 <BoxContainer Orientation="Vertical" SeparationOverride="6">
                                     <Label Text="{Loc 'nc-meta-tools-step-connections'}" StyleClasses="ncMetaHeading" />
-                                    <ItemList Name="ToolsLinks" SetHeight="84" StyleClasses="ncMetaList" />
+                                    <ItemList Name="ToolsLinks" SetHeight="132" StyleClasses="ncMetaList" />
                                     <OptionButton Name="ToolsLinkDevice" />
                                     <CheckBox Name="ToolsBindingConsent" Text="{Loc 'nc-meta-tools-binding-consent'}" />
                                     <Button Name="ToolsInstall" Text="{Loc 'nc-meta-install'}" StyleClasses="ncMetaAction" />

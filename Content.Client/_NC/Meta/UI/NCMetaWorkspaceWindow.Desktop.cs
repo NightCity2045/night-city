@@ -96,39 +96,11 @@ public sealed partial class NCMetaWorkspaceWindow
         Request(NCMetaWorkspaceOperation.OpenNativeTools, "network");
     }
 
-    /// <summary>The stock browser is a META program: the icon starts it if it is installed and offers it in the installer if not.</summary>
-    private const string BrowserInstallationName = "CitiNet browser";
-    private bool _browserLaunchPending;
-
-    private NCMetaInstallationSummary? FindBrowser() => _state.Installations.Take(64)
-        .FirstOrDefault(installation => installation.DeviceId == _selectedDeviceId && installation.Name == BrowserInstallationName);
-
+    /// <summary>The browser is a system program of this computer: the server installs and starts it when needed.</summary>
     private void OpenBrowserApplication()
     {
         CloseStartMenu();
-        if (FindBrowser() is not { } browser)
-        {
-            ShowSurface(NCMetaSurface.ServicePanel);
-            Request(NCMetaWorkspaceOperation.OpenNativeTools, "installer");
-            return;
-        }
-        _selectedInstallationId = browser.Id;
-        if (browser.Running) Request(NCMetaWorkspaceOperation.OpenApplication, "main");
-        else
-        {
-            // The program is installed but stopped: start it, and open its window when the next state says it runs.
-            _browserLaunchPending = true;
-            Request(NCMetaWorkspaceOperation.Start);
-        }
-    }
-
-    /// <summary>Called with every state: finishes a launch that was waiting for the browser to start.</summary>
-    private void FinishBrowserLaunch()
-    {
-        if (!_browserLaunchPending || FindBrowser() is not { Running: true } browser) return;
-        _browserLaunchPending = false;
-        _selectedInstallationId = browser.Id;
-        Request(NCMetaWorkspaceOperation.OpenApplication, "main");
+        Request(NCMetaWorkspaceOperation.OpenSystemApplication, "meta-stock-citinet-browser");
     }
 
     /// <summary>A computer has a desktop and a taskbar; a server shows its service panel directly.</summary>

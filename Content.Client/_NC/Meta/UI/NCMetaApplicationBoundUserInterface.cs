@@ -7,9 +7,13 @@ using Robust.Client.UserInterface;
 
 namespace Content.Client._NC.Meta.UI;
 
+/// <summary>
+/// The windows of programs that run on a computer. A program gets a window of its own; a page of a website that a browser
+/// program opened is shown inside that browser's window.
+/// </summary>
 public sealed class NCMetaApplicationBoundUserInterface : BoundUserInterface
 {
-    private NCMetaApplicationWindow? _window;
+    private NCMetaApplicationSessionManager? _sessions;
 
     public NCMetaApplicationBoundUserInterface(EntityUid owner, Enum key) : base(owner, key)
     {
@@ -18,8 +22,9 @@ public sealed class NCMetaApplicationBoundUserInterface : BoundUserInterface
     protected override void Open()
     {
         base.Open();
-        _window = this.CreateWindow<NCMetaApplicationWindow>();
-        _window.Requested += SendMessage;
+        _sessions = new NCMetaApplicationSessionManager();
+        _sessions.Requested += SendMessage;
+        _sessions.Emptied += Close;
         // The first private update may precede replication of the open BUI subscription.
         SendMessage(new NCMetaAppResyncMessage(Guid.Empty, -1));
     }
@@ -28,17 +33,15 @@ public sealed class NCMetaApplicationBoundUserInterface : BoundUserInterface
     {
         base.ReceiveMessage(message);
         if (message is NCMetaAppUpdateMessage update)
-        {
-            _window?.ApplyState(update.State);
-        }
+            _sessions?.TryApplyState(update.State);
         else if (message is NCMetaAppActionResultMessage result)
-            _window?.ApplyResult(result);
+            _sessions?.ApplyResult(result);
     }
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing && _window?.SessionId is { } session && session != Guid.Empty)
-            SendMessage(new NCMetaAppCloseMessage(session));
+        if (disposing) _sessions?.Dispose();
+        _sessions = null;
         base.Dispose(disposing);
     }
 }

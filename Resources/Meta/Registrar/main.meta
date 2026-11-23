@@ -11,6 +11,7 @@ import meta.economy;
 //   dns.quote     name                     ->  dns.price       ok|name|price|device  /  taken|name  /  invalid|name
 //   dns.register  name|device|view|receipt ->  dns.registered  ok|name  /  taken|name  /  invalid|name  /  unpaid|name
 //   dns.resolve   name                     ->  dns.answer      ok|name|device|view  /  none|name
+//   dns.search   text (empty = all)        ->  dns.found       ok|name,name,...  (up to 20 names that contain the text)
 // A new name is paid for first: the buyer pays the registrar's owner through the wallet with the memo citi:name and
 // sends the receipt, which the registrar checks and keeps so it can never be used twice. The first to register a name
 // owns it; only the same sender may point it somewhere else, and that costs nothing.
@@ -189,6 +190,35 @@ async fn resolve(sender: string, name: string) -> void {
     await reply(sender, "dns.answer", "ok|" + name + "|" + devices[position] + "|" + views[position]);
 }
 
+fn contains(name: string, query: string) -> bool {
+    if (query.length == 0) { return true; }
+    if (query.length > name.length) { return false; }
+    var start: int = 0;
+    while (start + query.length <= name.length) {
+        match (text.slice(name, start, query.length)) {
+            ok(part) => { if (part == query) { return true; } }
+            err(problem) => { }
+        }
+        start = start + 1;
+    }
+    return false;
+}
+
+async fn search(sender: string, query: string) -> void {
+    var found: string = "";
+    var count: int = 0;
+    var index: int = 0;
+    while (index < names.length && count < 20) {
+        if (contains(names[index], query)) {
+            if (count > 0) { found = found + ","; }
+            found = found + names[index];
+            count = count + 1;
+        }
+        index = index + 1;
+    }
+    await reply(sender, "dns.found", "ok|" + found);
+}
+
 async fn quote(sender: string, name: string) -> void {
     if (!validName(name)) {
         await reply(sender, "dns.price", "invalid|" + name);
@@ -269,6 +299,10 @@ async fn register(sender: string, payload: string) -> void {
 async watch port.messageReceived(message) {
     if (message.topic == "dns.resolve") {
         await resolve(message.replyTo, message.payload);
+        return;
+    }
+    if (message.topic == "dns.search") {
+        await search(message.replyTo, message.payload);
         return;
     }
     if (message.topic == "dns.quote") {

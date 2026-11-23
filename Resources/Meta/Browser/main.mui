@@ -26,43 +26,56 @@
       <Button id="markButton" action="mark" text="{bind markLabel}"/>
     </Form>
 
-    <Panel id="marksCard" class="card">
-      <Column id="marksBody" gap="6">
-        <Text id="marksHeading" text="{bind marksHeading}" class="heading"/>
-        <Table id="marks" items="{bind marks}" columns="label" rowAction="open" rowKey="address" rowField="address"/>
-      </Column>
-    </Panel>
+    <Site id="page"/>
 
-    <Panel id="registerCard" class="card">
-      <Column id="registerBody" gap="6">
-        <Text id="registerHeading" text="{bind registerHeading}" class="heading"/>
-        <Form id="registerForm" action="register">
-          <Column id="registerFields" gap="4">
-            <Text id="nameLabel" text="{bind nameLabel}" class="label"/>
-            <Input id="regName" field="name" maxLength="32"/>
-            <Text id="deviceLabel" text="{bind deviceLabel}" class="label"/>
-            <Input id="regDevice" field="device" maxLength="6"/>
-            <Text id="viewLabel" text="{bind viewLabel}" class="label"/>
-            <Input id="regView" field="view" maxLength="32"/>
-            <Button id="registerButton" action="register" text="{bind registerLabel}"/>
+    <Scroll id="more" height="200">
+      <Column id="moreBody" gap="10">
+        <Panel id="sitesCard" class="card">
+          <Column id="sitesBody" gap="6">
+            <Text id="sitesHeading" text="{bind sitesHeading}" class="heading"/>
+            <Table id="sites" items="{bind sites}" columns="label" rowAction="open" rowKey="address" rowField="address"/>
           </Column>
-        </Form>
-        <Panel id="offerCard" class="card" visible="{bind offerVisible}">
-          <Form id="confirmForm" action="confirm">
-            <Column id="offerBody" gap="4">
-              <Text id="offerText" text="{bind offerText}" class="heading"/>
-              <Button id="confirmButton" action="confirm" text="{bind confirmLabel}"/>
+        </Panel>
+
+      <Panel id="marksCard" class="card">
+        <Column id="marksBody" gap="6">
+          <Text id="marksHeading" text="{bind marksHeading}" class="heading"/>
+          <Table id="marks" items="{bind marks}" columns="label" rowAction="open" rowKey="address" rowField="address"/>
+        </Column>
+      </Panel>
+
+      <Panel id="registerCard" class="card">
+        <Column id="registerBody" gap="6">
+          <Text id="registerHeading" text="{bind registerHeading}" class="heading"/>
+          <Form id="registerForm" action="register">
+            <Column id="registerFields" gap="4">
+              <Text id="nameLabel" text="{bind nameLabel}" class="label"/>
+              <Input id="regName" field="name" maxLength="32"/>
+              <Text id="deviceLabel" text="{bind deviceLabel}" class="label"/>
+              <Input id="regDevice" field="device" maxLength="6"/>
+              <Text id="viewLabel" text="{bind viewLabel}" class="label"/>
+              <Input id="regView" field="view" maxLength="32"/>
+              <Button id="registerButton" action="register" text="{bind registerLabel}"/>
             </Column>
           </Form>
-        </Panel>
-      </Column>
-    </Panel>
+          <Panel id="offerCard" class="card" visible="{bind offerVisible}">
+            <Form id="confirmForm" action="confirm">
+              <Column id="offerBody" gap="4">
+                <Text id="offerText" text="{bind offerText}" class="heading"/>
+                <Button id="confirmButton" action="confirm" text="{bind confirmLabel}"/>
+              </Column>
+            </Form>
+          </Panel>
+        </Column>
+      </Panel>
 
-    <Panel id="historyCard" class="card">
-      <Column id="historyBody" gap="6">
-        <Text id="historyHeading" text="{bind historyHeading}" class="heading"/>
-        <Table id="history" items="{bind history}" columns="label" rowAction="open" rowKey="address" rowField="address"/>
+      <Panel id="historyCard" class="card">
+        <Column id="historyBody" gap="6">
+          <Text id="historyHeading" text="{bind historyHeading}" class="heading"/>
+          <Table id="history" items="{bind history}" columns="label" rowAction="open" rowKey="address" rowField="address"/>
+        </Column>
+      </Panel>
       </Column>
-    </Panel>
+    </Scroll>
   </Column>
 </Page>

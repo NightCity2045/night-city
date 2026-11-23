@@ -9,7 +9,7 @@ public enum NCMetaMuiControlKind : byte
 {
     Window, Page, Row, Column, Grid, Panel, Text, Header, Button, Form, Input, NumberInput,
     Select, Option, Toggle, Tabs, Tab, Scroll, Dialog, List, Table, Validation, Image,
-    Chart, Map, Schematic, Component,
+    Chart, Map, Schematic, Component, Site,
 }
 
 [Serializable, NetSerializable]

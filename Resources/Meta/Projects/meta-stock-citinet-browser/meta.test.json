@@ -6,12 +6,22 @@
       "value": "",
       "pending": true,
       "completeAfterSlices": 2
+    },
+    {
+      "member": "meta.net.MessagePort.send",
+      "value": {
+        "messageId": "fixture-1",
+        "accepted": true
+      },
+      "pending": false,
+      "completeAfterSlices": 1
     }
   ],
   "events": [],
   "expectedLogs": [],
   "expectedCommands": [
-    "readText(browser/bookmarks.txt)"
+    "readText(browser/bookmarks.txt)",
+    "send(citinet-registrar,dns.search,)"
   ],
   "epoch": 1,
   "nowMs": 1000,

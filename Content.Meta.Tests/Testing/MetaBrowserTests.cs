@@ -120,11 +120,12 @@ public sealed class MetaBrowserTests
     }
 
     [Test]
-    public void AnEmptyAddressIsRefusedWithAMessageAndOpensNothing()
+    public void ABrandNewBrowserHasASitesListAndOneBarForSearchAndAddresses()
     {
-        var site = Boot();
-        Act(site, "open", "{\"address\":\"\"}");
-        Assert.That(View(site).GetProperty("status").GetString(), Is.EqualTo("Enter an address first."));
+        var state = View(Boot());
+        Assert.That(state.GetProperty("sites").GetArrayLength(), Is.Zero);
+        Assert.That(state.GetProperty("sitesHeading").GetString(), Is.EqualTo("Sites on the network"));
+        Assert.That(state.GetProperty("hint").GetString(), Does.Contain("search"));
     }
 
     [Test]

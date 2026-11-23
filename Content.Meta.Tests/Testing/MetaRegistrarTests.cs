@@ -78,6 +78,10 @@ public sealed class MetaRegistrarTests
         Run("dns.register", "Demo|K7Q4MD|main|r1", "", ["send(peer-a,dns.registered,invalid|Demo)"]);
 
     [Test]
+    public void AnEmptyRegistryListsNoSites() =>
+        Run("dns.search", "", "", ["send(peer-a,dns.found,ok|)"]);
+
+    [Test]
     public void AnUnknownNameResolvesToNothing() =>
         Run("dns.resolve", "ghost", "", ["send(peer-a,dns.answer,none|ghost)"]);
 }

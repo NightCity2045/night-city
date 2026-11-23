@@ -13,6 +13,7 @@ namespace Content.Client._NC.Meta.UI;
 public sealed partial class NCMetaApplicationWindow : FancyWindow
 {
     public Guid SessionId => ApplicationView.SessionId;
+    public Robust.Client.UserInterface.Controls.BoxContainer? SiteHost => ApplicationView.SiteHost;
     public event Action<BoundUserInterfaceMessage>? Requested;
 
     public NCMetaApplicationWindow()

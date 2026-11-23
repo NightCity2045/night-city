@@ -174,7 +174,10 @@ public sealed partial class NCMetaWorkspaceWindow
                 var code = link.Slot.Replace("-", "").Trim().ToUpperInvariant();
                 var device = code.Length == 6 ? _state.Devices.Take(64).FirstOrDefault(row => row.DeviceId == code &&
                     row.Interfaces?.Contains(link.Capability) == true) : null;
-                if (device != null) _toolsBindings[link.Slot] = device.DeviceId;
+                if (device != null) { _toolsBindings[link.Slot] = device.DeviceId; continue; }
+                // Otherwise the device the player works on, when it offers what the link asks for: nobody types its code.
+                var self = _state.Devices.Take(64).FirstOrDefault(row => row.DeviceId == _selectedDeviceId);
+                if (self?.Interfaces?.Contains(link.Capability) == true) _toolsBindings[link.Slot] = self.DeviceId;
             }
         }
         var selectedStock = ToolsStock.SelectedId;

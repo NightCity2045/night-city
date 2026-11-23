@@ -33,6 +33,8 @@ public enum MuiControlKind : byte
     Window, Page, Row, Column, Grid, Panel, Text, Header, Button, Form, Input, NumberInput,
     Select, Option, Toggle, Tabs, Tab, Scroll, Dialog, List, Table, Validation, Image,
     Chart, Map, Schematic, Component,
+    /// <summary>The window of a browser: where the page of a website that was opened from this program is shown.</summary>
+    Site,
 }
 
 public sealed record MuiField(MuiValueKind Kind, bool Required = true, int MaxLength = MuiLimits.StringLength,

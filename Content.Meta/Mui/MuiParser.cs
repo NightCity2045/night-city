@@ -31,6 +31,7 @@ public static class MuiParser
         [MuiControlKind.Chart] = ["items", "min", "max"], [MuiControlKind.Map] = ["items"],
         [MuiControlKind.Schematic] = ["items"],
         [MuiControlKind.Component] = ["resource"],
+        [MuiControlKind.Site] = [],
     };
     private static readonly HashSet<string> Bindable = ["text", "title", "value", "visible", "enabled", "items", "tooltip", "page"];
     private static readonly HashSet<string> Numeric = ["width", "height", "minWidth", "maxWidth", "minHeight", "maxHeight", "margin", "gap", "columns", "maxLength", "min", "max", "step", "page", "pageSize"];

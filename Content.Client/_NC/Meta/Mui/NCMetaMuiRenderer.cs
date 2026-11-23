@@ -46,6 +46,8 @@ public sealed partial class NCMetaMuiRenderer : BoxContainer
     private float _animationAccumulator;
     public event Action<string, string>? ActionRequested;
     public event Action? ResyncRequested;
+    /// <summary>The place a browser program reserved for pages (the Site element), if the document has one.</summary>
+    public BoxContainer? SiteHost { get; private set; }
     public long Revision => _state.Revision;
     public Guid SessionId => _state.SessionId;
     public int NativeControlCount => Count(this) - 1;
@@ -128,6 +130,12 @@ public sealed partial class NCMetaMuiRenderer : BoxContainer
             _ => new BoxContainer { Orientation = LayoutOrientation.Vertical },
         };
         control.HorizontalExpand = true;
+        if (node.Kind == MuiControlKind.Site && control is BoxContainer siteBox)
+        {
+            siteBox.VerticalExpand = true;
+            siteBox.MinHeight = 280;
+            SiteHost ??= siteBox;
+        }
         control.Name = node.Id;
         _nodes.Add(node.Id, (node, control));
         _interactive[control] = (control.HasKeyboardFocus(), control is BaseButton b ? b.DrawMode : null);

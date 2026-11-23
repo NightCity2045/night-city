@@ -37,6 +37,7 @@ public enum NCMetaWorkspaceOperation : byte
     SetMaintenance,
     PublishLocalSite, OpenLocalSite,
     HackChip,
+    OpenSystemApplication,
 }
 
 [Serializable, NetSerializable]

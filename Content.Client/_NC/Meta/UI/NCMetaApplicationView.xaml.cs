@@ -16,6 +16,8 @@ public sealed partial class NCMetaApplicationView : BoxContainer
 {
     private NCMetaMuiRenderer? _renderer;
     public Guid SessionId => _renderer?.SessionId ?? Guid.Empty;
+    /// <summary>Where this program shows the pages it opens, when it is a browser.</summary>
+    public BoxContainer? SiteHost => _renderer?.SiteHost;
     public event Action<BoundUserInterfaceMessage>? Requested;
     public event Action<string>? TitleChanged;
 

@@ -46,6 +46,10 @@
           "type": "string",
           "maxLength": 256
         },
+        "sitesHeading": {
+          "type": "string",
+          "maxLength": 256
+        },
         "registerHeading": {
           "type": "string",
           "maxLength": 256
@@ -78,6 +82,10 @@
           "type": "boolean"
         },
         "history": {
+          "type": "array",
+          "maxLength": 512
+        },
+        "sites": {
           "type": "array",
           "maxLength": 512
         },
