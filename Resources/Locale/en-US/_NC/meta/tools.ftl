@@ -16,7 +16,6 @@ nc-meta-tools-power = Applied load: {$watts} W
 nc-meta-tools-temperature = Temperature: {$kelvin} K
 nc-meta-tools-temperature-unavailable = Temperature sensor unavailable
 nc-meta-tools-wear = Wear: {$wear}% (build quality {$reliability}%); crashes: {$failures}
-nc-meta-tools-ice = ICE rating: {$rating}
 nc-meta-tools-no-hosts = No owned, physically reachable compatible host is available.
 nc-meta-tools-recovery-help = Select the exact installation. Stop it before restoring the previous verified image; confirm new permissions and connections. Private state is retained or migrated only by the approved state policy.
 nc-meta-tools-diagnostics-help = Measurements and command receipts describe actual equipment. An accepted command may still be pending; inspect physical state before retrying an uncertain operation.

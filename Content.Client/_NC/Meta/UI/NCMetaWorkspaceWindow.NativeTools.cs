@@ -226,8 +226,6 @@ public sealed partial class NCMetaWorkspaceWindow
                 Loc.GetString("nc-meta-tools-temperature-unavailable"), selectable: false);
             if (row.Reliability < 1000)
                 ToolsMeasurements.AddItem(Loc.GetString("nc-meta-tools-wear", ("wear", row.WearPermille / 10), ("reliability", row.Reliability / 10), ("failures", row.Failures)), selectable: false);
-            if (row.IceRating >= 0)
-                ToolsMeasurements.AddItem(Loc.GetString("nc-meta-tools-ice", ("rating", row.IceRating)), selectable: false);
         }
         ToolsNetworkList.Clear();
         foreach (var device in tools.Network ?? [])

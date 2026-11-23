@@ -9,7 +9,7 @@ public sealed record NCMetaHardwareSummary(string DeviceId, string Name, string 
     string PowerKey, string HealthKey, bool Powered, bool Maintenance, int Processes, int MaximumProcesses,
     long ReservedMemoryBytes, long MemoryBytes, long WindowGas, long GasPerWindow, int ThrottlePermille,
     float LoadFactor, float AppliedWatts, float? TemperatureKelvin, int LinkReserve = 0, int LinkCapacity = 0,
-    int Reliability = 1000, int WearPermille = 0, int Failures = 0, int IceRating = -1);
+    int Reliability = 1000, int WearPermille = 0, int Failures = 0);
 
 /// <summary>Native modes reuse the ordinary installer, license, consent and recovery operations.</summary>
 [Serializable, NetSerializable]
@@ -27,7 +27,8 @@ public sealed record NCMetaConnectedDevice(string DeviceId, string Name, int Cos
 
 /// <summary>The chip sitting in the device's slot: open chips can be read by anyone, closed ones only by their owner.</summary>
 [Serializable, NetSerializable]
-public sealed record NCMetaChipSummary(string DeviceId, string Name, bool Open, bool Owned);
+public sealed record NCMetaChipSummary(string DeviceId, string Name, bool Open, bool Owned, bool CanHack = false,
+    bool Cracked = false, int Attempts = 0, string LastIntruder = "");
 
 /// <summary>The item slot a device offers for a META program chip.</summary>
 public static class NCMetaChipSlot

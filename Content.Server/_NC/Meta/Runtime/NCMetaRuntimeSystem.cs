@@ -235,6 +235,11 @@ public sealed partial class NCMetaRuntimeSystem : EntitySystem
         runtime = instances.First(); return true;
     }
 
+    /// <summary>Whether a program that asked for the scope is running on the host for the owner.</summary>
+    public bool HasRunningScope(EntityUid host, string owner, string scope) =>
+        _hosts.TryGetValue(host, out var instances) &&
+        instances.Any(instance => instance.Owner == owner && IsCurrent(instance) && instance.Artifact.Manifest.RequiredScopes.Contains(scope));
+
     public int GetProcessCount(EntityUid host) => _hosts.TryGetValue(host, out var instances) ? instances.Count : 0;
     public long GetReservedMemoryBytes(EntityUid host) => _devices.TryGetEntry(host, out var device) &&
         _scheduler.TryGetDeviceUsage(device.Id, out var usage) ? usage.ReservedMemoryBytes : 0;

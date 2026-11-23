@@ -293,6 +293,9 @@ public sealed partial class NCMetaWorkspaceSystem : EntitySystem
                     device = await _persistence.ReadDeviceAsync(context.DeviceId) ?? device;
                     projectId = device.ActiveProject;
                     break;
+                case NCMetaWorkspaceOperation.HackChip:
+                    state.Notice = await OnMainAsync(() => Loc.GetString(IsCurrent(context) ? _chipHack.TryStart(context.Terminal, context.User) : "nc-meta-error-access"));
+                    break;
                 case NCMetaWorkspaceOperation.OpenLocalSite:
                     state.Notice = await OnMainAsync(() => IsCurrent(context) && _citiNet.TryOpenLocal(context.Terminal, context.User, request.Source)
                         ? "" : Loc.GetString("nc-meta-error-access"));

@@ -12,6 +12,13 @@
     allowClaim: true
   - type: NCMetaStorage
     capacityBytes: 33554432
+  # A laptop can run netrun helpers and try to break into a closed chip, with a weaker tool than a deck.
+  - type: NCMetaCyberdeck
+    toolProfile: NCMetaNetLaptopTool
+  - type: UserInterface
+    interfaces:
+      enum.NCMetaNetUiKey.Console:
+        type: NCMetaNetBoundUserInterface
   - type: Item
     size: Large
   - type: Sprite

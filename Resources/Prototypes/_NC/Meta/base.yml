@@ -52,11 +52,6 @@
   # A server warms with its load; the hardware profile says how much and how fast it cools.
   - type: Temperature
     specificHeat: 500
-  # Every server is a node of the city network; its ICE comes from its grade (overridden below).
-  - type: NCMetaNetNode
-    architectureId: citinet
-    kind: Data
-    defense: NCMetaNetServerNode
   - type: ActivatableUIRequiresPower
   - type: ActivatableUI
     key: enum.NCMetaUiKey.Workspace
@@ -145,6 +140,3 @@
   id: NCMetaServer
   name: META application server
   description: A physical host for META applications and CitiNet services.
-  components:
-  - type: NCMetaNetNode
-    defense: NCMetaNetServerRack

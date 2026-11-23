@@ -212,36 +212,11 @@
     receiveFrequency: 1945
     transmitFrequency: 1945
 
-# ICE of the servers: the better the grade, the harder the intrusion and the harsher the black ICE.
-- type: ncMetaNetDefense
-  id: NCMetaNetServerNode
-  rating: 2
-  traceOnSuccess: 1
-  traceOnFailure: 3
-  iceThreshold: 6
-  blackIceThreshold: 9
-  blackIceDamage:
-    types:
-      Shock: 3
-
-- type: ncMetaNetDefense
-  id: NCMetaNetServerRack
-  rating: 4
-  traceOnSuccess: 1
-  traceOnFailure: 4
-  iceThreshold: 5
-  blackIceThreshold: 8
-  blackIceDamage:
-    types:
-      Shock: 6
-
-- type: ncMetaNetDefense
-  id: NCMetaNetMainframe
-  rating: 6
-  traceOnSuccess: 2
-  traceOnFailure: 5
-  iceThreshold: 4
-  blackIceThreshold: 7
-  blackIceDamage:
-    types:
-      Shock: 9
+# A laptop works through a closed chip slower than a deck; a running helper program speeds either up.
+- type: ncMetaNetTool
+  id: NCMetaNetLaptopTool
+  rating: 1
+  durationMilliseconds: 2500
+  cooldownMilliseconds: 1000
+  cost: 1
+  budget: 10

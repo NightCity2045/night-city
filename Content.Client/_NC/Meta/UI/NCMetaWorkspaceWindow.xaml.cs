@@ -154,6 +154,7 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
             Requested?.Invoke(new(NCMetaWorkspaceOperation.ExportMedia, Guid.NewGuid(), deviceId: slotChip, projectId: _state.ProjectId,
                 payload: new NCMetaChipPayload(name, ChipDescription.Text.Trim(), ChipOpen.Pressed)));
         };
+        HackMedia.OnPressed += _ => Request(NCMetaWorkspaceOperation.HackChip);
         ImportMedia.OnPressed += _ =>
         {
             if (_state.Chip is { } chip)
@@ -723,10 +724,15 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
         ExportMedia.Disabled = device is null;
         ExportMedia.Text = Loc.GetString(_state.Chip is { Owned: true } ? "nc-meta-export-to-chip" : "nc-meta-export-media");
         ChipInSlot.Visible = ImportMedia.Visible = _state.Chip != null;
+        if (_state.Chip == null) HackMedia.Visible = false;
         if (_state.Chip is { } slotted)
         {
-            ChipInSlot.Text = Loc.GetString(slotted.Open ? "nc-meta-chip-in-slot-open" : "nc-meta-chip-in-slot-closed", ("name", slotted.Name));
-            ImportMedia.Disabled = !slotted.Open && !slotted.Owned;
+            var kind = slotted.Cracked ? "nc-meta-chip-in-slot-cracked" :
+                slotted.Open ? "nc-meta-chip-in-slot-open" : "nc-meta-chip-in-slot-closed";
+            ChipInSlot.Text = Loc.GetString(kind, ("name", slotted.Name)) + (slotted.Owned && slotted.Attempts > 0
+                ? " " + Loc.GetString("nc-meta-chip-intrusions", ("count", slotted.Attempts), ("last", slotted.LastIntruder)) : "");
+            ImportMedia.Disabled = !slotted.Open && !slotted.Owned && !slotted.Cracked;
+            HackMedia.Visible = slotted.CanHack;
         }
         Rollback.Disabled = device is null || SelectedInstallation is null;
         OpenApplication.Disabled = device is null || SelectedInstallation is null || ApplicationViews.ItemCount == 0;

@@ -2,7 +2,6 @@
 using Content.Server._NC.Meta.Runtime;
 using Content.Server._NC.Meta.Persistence;
 using Content.Shared._NC.Meta;
-using Content.Shared._NC.Meta.Network;
 using Content.Shared._NC.Meta.UI;
 using Content.Shared.Containers.ItemSlots;
 using Content.Shared.UserInterface;
@@ -167,8 +166,7 @@ public sealed partial class NCMetaWorkspaceSystem
                 _runtime.GetProcessCount(entry.Entity), profile.MaxProcesses, _runtime.GetReservedMemoryBytes(entry.Entity),
                 profile.MemoryBytes, usage?.WindowGas ?? 0, profile.GasPerWindow, physical?.ThrottlePermille ?? 0,
                 physical?.LoadFactor ?? 0, physical?.AppliedWatts ?? 0, physical?.TemperatureKelvin, linkReserve, linkCapacity,
-                profile.Reliability, physical == null ? 0 : (int) Math.Clamp(physical.WearSeconds / 36f, 0, 1000), physical?.Failures ?? 0,
-                TryComp<NCMetaNetNodeComponent>(entry.Entity, out var netNode) && _hardwareProfiles.TryIndex(netNode.Defense, out var ice) ? ice.Rating : -1));
+                profile.Reliability, physical == null ? 0 : (int) Math.Clamp(physical.WearSeconds / 36f, 0, 1000), physical?.Failures ?? 0));
         }
         var chipId = ""; var chipName = "";
         if (_chipSlots.TryGetSlot(context.Terminal, NCMetaChipSlot.Id, out var slot) && slot.Item is { } chip &&

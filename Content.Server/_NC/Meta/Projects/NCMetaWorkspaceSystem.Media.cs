@@ -14,6 +14,10 @@ public sealed partial class NCMetaRemovableMediaComponent : Component
     [DataField] public int CapacityBytes = 2 * 1024 * 1024;
     /// <summary>The author's choice: an open chip can be copied by anyone who holds it, a closed one only by its owner.</summary>
     [DataField] public bool Open;
+    /// <summary>How long a closed chip resists: breaking in takes this many times longer. Set by the author later.</summary>
+    [DataField] public int Strength = 3;
+    public int Attempts;
+    public string LastIntruder = "";
 }
 
 public sealed partial class NCMetaWorkspaceSystem
@@ -21,6 +25,7 @@ public sealed partial class NCMetaWorkspaceSystem
     private sealed record MediaPackage(string DeviceId, string Name, NCMetaProjectFile[] Files,
         NCMetaRelease[] Releases, long Revision);
     [Dependency] private SharedInteractionSystem _mediaInteraction = default!;
+    [Dependency] private Content.Server._NC.Meta.Network.NCMetaChipHackSystem _chipHack = default!;
 
     [Dependency] private MetaDataSystem _chipMeta = default!;
     [Dependency] private Content.Shared.Hands.EntitySystems.SharedHandsSystem _chipHands = default!;
@@ -66,8 +71,9 @@ public sealed partial class NCMetaWorkspaceSystem
 
     /// <summary>The owner may do anything with a chip; anyone may read an open one but only the owner may write to it.</summary>
     private bool MediaAccess(Context context, EntityUid media, NCMetaWorkspaceOperation operation) =>
-        _devices.CanManage(media, context.User) ||
-        operation == NCMetaWorkspaceOperation.ImportMedia && TryComp<NCMetaRemovableMediaComponent>(media, out var component) && component.Open;
+        TryComp<NCMetaRemovableMediaComponent>(media, out var component) &&
+        (_devices.CanManage(media, context.User) ||
+         operation == NCMetaWorkspaceOperation.ImportMedia && (component.Open || _chipHack.IsCracked(media, context.User)));
 
     /// <summary>The chip in the terminal's slot, shown to the player so code can be copied to or from it.</summary>
     private NCMetaChipSummary? ReadChip(Context context)
@@ -75,7 +81,9 @@ public sealed partial class NCMetaWorkspaceSystem
         if (!_chipSlots.TryGetSlot(context.Terminal, NCMetaChipSlot.Id, out var slot) || slot.Item is not { } chip ||
             !_devices.TryGetEntry(chip, out var entry) || !TryComp<NCMetaRemovableMediaComponent>(chip, out var media)) return null;
         var owned = _devices.CanManage(chip, context.User, requireRange: false);
-        return owned || media.Open ? new(entry.Id, Name(chip), media.Open, owned) : new(entry.Id, Name(chip), false, false);
+        var cracked = _chipHack.IsCracked(chip, context.User);
+        return new(entry.Id, Name(chip), media.Open, owned, CanHack: !owned && !media.Open && !cracked && _chipHack.CanAttempt(context.Terminal),
+            Cracked: cracked, Attempts: owned ? media.Attempts : 0, LastIntruder: owned ? media.LastIntruder : "");
     }
 
     private async Task<NCMetaMutationOutcome> TransferMediaAsync(Context context, NCMetaDeviceRecord device,

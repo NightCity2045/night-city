@@ -36,6 +36,7 @@ public enum NCMetaWorkspaceOperation : byte
     ReadLanguageSymbols,
     SetMaintenance,
     PublishLocalSite, OpenLocalSite,
+    HackChip,
 }
 
 [Serializable, NetSerializable]
