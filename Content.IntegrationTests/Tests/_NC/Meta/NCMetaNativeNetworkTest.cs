@@ -74,6 +74,23 @@ public sealed partial class NCMetaNativeNetworkTest : GameTest
     private void MoveTo(EntityUid actor, EntityUid target) => Server.System<SharedTransformSystem>().SetCoordinates(actor,
         SComp<TransformComponent>(target).Coordinates.Offset(new Vector2(0, -0.35f)));
 
+    private Content.Shared.Preferences.HumanoidCharacterProfile? _defenderProfile, _attackerProfile;
+
+    /// <summary>
+    /// Scenes of two sides need two parties, and the test session is one player. The player has two characters instead:
+    /// selecting a character slot makes the body attached to the session act as that character, so the defender and the
+    /// attacker take turns, each acting only while their character is the selected one.
+    /// </summary>
+    private async Task<string> BecomeAsync(int slot, Content.Shared.Preferences.HumanoidCharacterProfile profile, EntityUid body)
+    {
+        var preferences = Server.ResolveDependency<Content.Server.Preferences.Managers.IServerPreferencesManager>();
+        await NCMetaNativeTestTasks.Run(Server, async () => { await preferences.SetProfile(ServerSession!.UserId, slot, profile); return true; });
+        return await NCMetaNativeActorHarness.OwnByPlayer(Server, ServerSession!, body);
+    }
+
+    private Task<string> ActAsDefender(Scene scene) => BecomeAsync(0, _defenderProfile!, scene.NetworkActor);
+    private Task<string> ActAsAttacker(Scene scene) => BecomeAsync(1, _attackerProfile!, scene.Actor);
+
     private Task<string> CreateOwner(EntityUid body, string name) => NCMetaNativeActorHarness.OwnByPlayer(Server, ServerSession!, body);
 
     private async Task Claim(EntityUid endpoint, EntityUid actor, string owner)
@@ -106,13 +123,32 @@ public sealed partial class NCMetaNativeNetworkTest : GameTest
             var coordinates = SComp<TransformComponent>(deck).Coordinates;
             SEntMan.DeleteEntity(deck); deck = SEntMan.SpawnEntity("NCMetaNeuralCyberdeck", coordinates);
         });
-        var owner = await CreateOwner(actor, "Native network operator");
-        var networkOwner = foreignNetwork ? await CreateOwner(networkActor, "Native network owner") : owner;
-        foreach (var (key, endpoint) in physical.Objects)
+        string owner, networkOwner;
+        if (foreignNetwork)
         {
-            if ((!net && key is "deck" or "firewall" or "archive" or "door") || (neural && key == "deck")) continue;
-            if (key == "deck") await Claim(endpoint, actor, owner);
-            else await Claim(endpoint, networkActor, networkOwner);
+            // The base belongs to the defender and the deck to the attacker, who are two different characters.
+            var preferences = Server.ResolveDependency<Content.Server.Preferences.Managers.IServerPreferencesManager>();
+            _defenderProfile = (Content.Shared.Preferences.HumanoidCharacterProfile) preferences.GetPreferences(ServerSession!.UserId).Characters[0];
+            await Server.WaitPost(() => _attackerProfile = Content.Shared.Preferences.HumanoidCharacterProfile.DefaultWithSpecies());
+            networkOwner = await BecomeAsync(0, _defenderProfile, networkActor);
+            foreach (var (key, endpoint) in physical.Objects)
+            {
+                if ((!net && key is "deck" or "firewall" or "archive" or "door") || key == "deck") continue;
+                await Claim(endpoint, networkActor, networkOwner);
+            }
+            owner = await BecomeAsync(1, _attackerProfile, actor);
+            await Claim(deck, actor, owner);
+        }
+        else
+        {
+            owner = await CreateOwner(actor, "Native network operator");
+            networkOwner = owner;
+            foreach (var (key, endpoint) in physical.Objects)
+            {
+                if ((!net && key is "deck" or "firewall" or "archive" or "door") || (neural && key == "deck")) continue;
+                if (key == "deck") await Claim(endpoint, actor, owner);
+                else await Claim(endpoint, networkActor, networkOwner);
+            }
         }
         if (neural) await Claim(deck, actor, owner);
         await Server.WaitPost(() => Observer.Clear());

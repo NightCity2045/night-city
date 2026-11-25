@@ -162,6 +162,8 @@ public sealed class NCMetaSystemBrowserTest : GameTest
                 await Server.WaitPost(() => pending = workspace.GetPendingOffer(entry.Id));
                 if (pending == null) await Pair.RunTicksSync(1);
             }
+            // A site may offer only so often, counted in real time, so the next try waits for the limit to refill.
+            if (pending == null) await Task.Delay(1200);
         }
         Assert.That(pending, Is.Not.Null, "The browser never received the offer.");
         Assert.That(pending!.Value.Name, Is.EqualTo("Free tool"));
