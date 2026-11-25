@@ -24,7 +24,7 @@
     shoes: ClothingShoesColorBlack
     head: ClothingHeadHatMilitechCap
     eyes: ClothingEyesGlasses
-    id: SciencePDA
+    id: NCAgent
   storage:
     back:
     - NetProbeCartridge

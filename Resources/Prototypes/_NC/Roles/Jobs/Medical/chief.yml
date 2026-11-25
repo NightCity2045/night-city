@@ -27,7 +27,7 @@
     eyes: ClothingEyesHudMedical
     mask: ClothingMaskSterile
     gloves: ClothingHandsGlovesNitrile
-    id: CMOPDA
+    id: NCAgent
     belt: ClothingBeltMedicalFilled
     outerClothing: ClothingOuterCoatLabCmo
   storage:

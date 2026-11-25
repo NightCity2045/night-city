@@ -26,6 +26,6 @@
     head: ClothingHeadHatBiotechCap
     eyes: ClothingEyesGlasses
     gloves: ClothingHandsGlovesBiotechnica
-    id: RnDPDA
+    id: NCAgent
     armor: ClothingOuterArmorBiotechBulletproof
     outerClothing: ClothingOuterCoatBiotechnicaMedtechAdvanced

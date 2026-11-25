@@ -25,7 +25,7 @@
     head: ClothingHeadHatBiotechCap
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesBiotechnica
-    id: WardenPDA
+    id: NCAgent
     belt: ClothingBeltSecurity
     armor: ClothingOuterArmorBiotechBulletproof
   storage:

@@ -26,7 +26,7 @@
     eyes: ClothingEyesHudMedical
     mask: ClothingMaskBiotechnicaMedtech
     gloves: ClothingHandsGlovesBiotechnica
-    id: MedicalPDA
+    id: NCAgent
     belt: ClothingBeltMedicalFilled
     outerClothing: ClothingOuterCoatBiotechnicaMedtech
   storage:

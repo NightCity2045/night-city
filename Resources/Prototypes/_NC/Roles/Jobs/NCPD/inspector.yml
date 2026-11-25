@@ -25,7 +25,7 @@
     head: ClothingHeadHatFedoraBrown
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesForensic
-    id: NCPDInspectorPDA
+    id: NCAgent
     belt: ClothingBeltSecurity
     armor: ClothingOuterVestDetective
   storage:
@@ -47,40 +47,3 @@
     sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
     state: ncpd_inspector
   jobName: job-name-ncpd-inspector
-
-- type: entity
-  parent: IDCardStandard
-  id: NCPDInspectorIDCard
-  name: NCPD inspector ID
-  components:
-  - type: Sprite
-    layers:
-    - state: default
-    - state: stripe_top
-      color: "#4777C8"
-    - state: stripe_bottom
-      color: "#2F5C9E"
-    - sprite: _NC/Interface/Misc/job_icons.rsi
-      offset: -0.09375, 0.0625
-      state: ncpd_inspector
-  - type: PresetIdCard
-    job: NCPDInspector
-
-- type: entity
-  parent: BaseSecurityPDA
-  id: NCPDInspectorPDA
-  name: NCPD inspector PDA
-  description: A rugged department terminal tied to its owner's persistent position.
-  components:
-  - type: Pda
-    id: NCPDInspectorIDCard
-  - type: Appearance
-    appearanceDataInit:
-      enum.PdaVisuals.PdaType:
-        !type:String
-        pda-detective
-  - type: PdaBorderColor
-    borderColor: "#4777C8"
-    accentVColor: "#2F5C9E"
-  - type: Icon
-    state: pda-detective

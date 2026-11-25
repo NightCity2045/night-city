@@ -25,7 +25,7 @@
     eyes: ClothingEyesHudMedical
     mask: ClothingMaskSterile
     gloves: ClothingHandsGlovesNitrile
-    id: ParamedicPDA
+    id: NCAgent
     belt: ClothingBeltMedicalFilled
     armor: ClothingOuterArmorMilitechBulletproof
   storage:

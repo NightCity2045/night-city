@@ -23,7 +23,7 @@
     back: ClothingBackpackSecurity
     shoes: ClothingShoesBootsJack
     eyes: ClothingEyesGlassesSecurity
-    id: SecurityPDA
+    id: NCAgent
     belt: ClothingBeltSecurity
     armor: ClothingOuterArmorMilitechBulletproof
   storage:

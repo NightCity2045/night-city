@@ -23,7 +23,7 @@
     shoes: ClothingShoesBootsWork
     eyes: ClothingEyesGlassesMeson
     gloves: ClothingHandsGlovesColorYellow
-    id: MedicalPDA
+    id: NCAgent
     belt: ClothingBeltUtilityEngineering
     outerClothing: ClothingOuterCoatLab
   storage:

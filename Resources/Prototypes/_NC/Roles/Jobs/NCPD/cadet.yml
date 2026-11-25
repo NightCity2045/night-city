@@ -22,7 +22,7 @@
     back: ClothingBackpackSecurity
     shoes: ClothingShoesBootsJack
     eyes: ClothingEyesGlassesSecurity
-    id: NCPDCadetPDA
+    id: NCAgent
     belt: ClothingBeltSecurity
     armor: ClothingOuterArmorBasicSlim
     pocket2: BookSecurity
@@ -40,39 +40,3 @@
     sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
     state: ncpd_policer
   jobName: job-name-ncpd-cadet
-
-- type: entity
-  parent: IDCardStandard
-  id: NCPDCadetIDCard
-  name: NCPD cadet ID
-  components:
-  - type: Sprite
-    layers:
-    - state: default
-    - state: stripe_top
-      color: "#4777C8"
-    - state: stripe_bottom
-      color: "#2F5C9E"
-    - sprite: _NC/Interface/Misc/job_icons.rsi
-      offset: -0.09375, 0.0625
-      state: ncpd_policer
-  - type: PresetIdCard
-    job: NCPDCadet
-
-- type: entity
-  parent: BaseSecurityPDA
-  id: NCPDCadetPDA
-  name: NCPD cadet PDA
-  description: A rugged department terminal tied to its owner's persistent position.
-  components:
-  - type: Pda
-    id: NCPDCadetIDCard
-  - type: Appearance
-    appearanceDataInit:
-      enum.PdaVisuals.PdaType:
-        !type:String
-        pda-security
-  - type: PdaBorderColor
-    borderColor: "#4777C8"
-  - type: Icon
-    state: pda-security

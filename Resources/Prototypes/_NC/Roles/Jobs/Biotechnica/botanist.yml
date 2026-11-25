@@ -26,7 +26,7 @@
     eyes: ClothingEyesGogglesBiotechnicaBotany
     mask: ClothingMaskBiotechnicaBotany
     gloves: ClothingHandsGlovesBiotechnica
-    id: BotanistPDA
+    id: NCAgent
     belt: ClothingBeltBiotechnicaBotany
     outerClothing: ClothingOuterApronBiotechnicaBotany
   storage:

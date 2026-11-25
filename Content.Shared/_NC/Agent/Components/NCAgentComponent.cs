@@ -7,20 +7,8 @@ using Robust.Shared.GameStates;
 namespace Content.Shared._NC.Agent.Components;
 
 /// <summary>
-/// Marks a vanilla PDA as the Night City Agent while keeping all PDA and ID-card mechanics intact.
+/// Marks a PDA as the Night City Agent while keeping all PDA and ID-card mechanics intact. The names of the Agent and of its
+/// VIN card live in their prototypes (<c>NCAgent</c>, <c>NCVinCard</c>) and their localization, not in code.
 /// </summary>
 [RegisterComponent, NetworkedComponent]
-public sealed partial class NCAgentComponent : Component
-{
-    /// <summary>
-    /// Display name applied to the PDA entity.
-    /// </summary>
-    [DataField]
-    public LocId AgentName = "nc-agent-name";
-
-    /// <summary>
-    /// Display name applied to an ordinary ID card while it is inserted into the Agent.
-    /// </summary>
-    [DataField]
-    public LocId VinCardName = "nc-agent-vin-card-name";
-}
+public sealed partial class NCAgentComponent : Component;

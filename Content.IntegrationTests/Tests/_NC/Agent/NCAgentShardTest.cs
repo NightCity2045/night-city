@@ -32,7 +32,7 @@ public sealed class NCAgentShardTest : GameTest
 
         await server.WaitPost(() =>
         {
-            agent = server.EntMan.SpawnEntity("PassengerPDA", map.GridCoords);
+            agent = server.EntMan.SpawnEntity("NCAgent", map.GridCoords);
             shard = server.EntMan.SpawnEntity("WantedListCartridge", map.GridCoords);
         });
         await pair.RunTicksSync(1);
@@ -75,7 +75,7 @@ public sealed class NCAgentShardTest : GameTest
 
         await server.WaitPost(() =>
         {
-            agent = server.EntMan.SpawnEntity("PassengerPDA", map.GridCoords);
+            agent = server.EntMan.SpawnEntity("NCAgent", map.GridCoords);
             shard = server.EntMan.SpawnEntity("AstroNavCartridge", map.GridCoords);
         });
         await pair.RunTicksSync(1);
@@ -120,7 +120,7 @@ public sealed class NCAgentShardTest : GameTest
 
         await server.WaitPost(() =>
         {
-            agent = server.EntMan.SpawnEntity("PassengerPDA", map.GridCoords);
+            agent = server.EntMan.SpawnEntity("NCAgent", map.GridCoords);
             patient = server.EntMan.SpawnEntity("MobHuman", map.GridCoords);
         });
         await pair.RunTicksSync(1);

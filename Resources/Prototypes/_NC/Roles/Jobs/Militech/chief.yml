@@ -26,7 +26,7 @@
     head: ClothingHeadHatMilitechCap
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesCombat
-    id: HoSPDA
+    id: NCAgent
     belt: ClothingBeltSecurity
     armor: ClothingOuterArmorMilitechBulletproof
     outerClothing: ClothingOuterCoatHoSTrench

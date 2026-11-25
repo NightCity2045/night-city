@@ -24,7 +24,7 @@
     shoes: ClothingShoesBootsJack
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesCombat
-    id: SecurityPDA
+    id: NCAgent
     belt: ClothingBeltSecurity
     outerClothing: ClothingOuterHardsuitTraumaArmored
   storage:

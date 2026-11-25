@@ -25,7 +25,7 @@
     head: ClothingHeadHatMilitechCap
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesCombat
-    id: WardenPDA
+    id: NCAgent
     belt: ClothingBeltSecurity
     armor: ClothingOuterArmorMilitechBulletproof
   storage:

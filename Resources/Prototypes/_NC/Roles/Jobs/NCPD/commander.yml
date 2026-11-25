@@ -25,7 +25,7 @@
     head: ClothingHeadHatWarden
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesCombat
-    id: NCPDCommanderPDA
+    id: NCAgent
     belt: ClothingBeltSecurity
     armor: ClothingOuterArmorBulletproof
   storage:
@@ -44,40 +44,3 @@
     sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
     state: ncpd_policer_commander
   jobName: job-name-ncpd-commander
-
-- type: entity
-  parent: IDCardStandard
-  id: NCPDCommanderIDCard
-  name: NCPD precinct commander ID
-  components:
-  - type: Sprite
-    layers:
-    - state: default
-    - state: stripe_top
-      color: "#4777C8"
-    - state: stripe_bottom
-      color: "#2F5C9E"
-    - sprite: _NC/Interface/Misc/job_icons.rsi
-      offset: -0.09375, 0.0625
-      state: ncpd_policer_commander
-  - type: PresetIdCard
-    job: NCPDCommander
-
-- type: entity
-  parent: BaseSecurityPDA
-  id: NCPDCommanderPDA
-  name: NCPD precinct commander PDA
-  description: A rugged department terminal tied to its owner's persistent position.
-  components:
-  - type: Pda
-    id: NCPDCommanderIDCard
-  - type: Appearance
-    appearanceDataInit:
-      enum.PdaVisuals.PdaType:
-        !type:String
-        pda-warden
-  - type: PdaBorderColor
-    borderColor: "#4777C8"
-    accentVColor: "#2F5C9E"
-  - type: Icon
-    state: pda-warden

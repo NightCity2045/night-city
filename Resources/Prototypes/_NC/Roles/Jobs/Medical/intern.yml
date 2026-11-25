@@ -24,7 +24,7 @@
     eyes: ClothingEyesHudMedical
     mask: ClothingMaskSterile
     gloves: ClothingHandsGlovesLatex
-    id: MedicalInternPDA
+    id: NCAgent
     belt: ClothingBeltMedicalFilled
     outerClothing: ClothingOuterCoatLab
     pocket2: BookMedicalReferenceBook

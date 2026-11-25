@@ -23,7 +23,7 @@
     back: ClothingBackpackCargo
     shoes: ClothingShoesBootsWork
     head: ClothingHeadHatMilitechCap
-    id: QuartermasterPDA
+    id: NCAgent
     belt: BoxFolderClipboardThreePapers
     pocket1: AppraisalTool
     outerClothing: ClothingOuterWinterQM

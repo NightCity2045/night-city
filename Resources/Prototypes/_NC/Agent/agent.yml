@@ -48,3 +48,30 @@
   pinMaximumAttempts: 5
   pinLockoutDuration: 30s
   pinUnlockSessionDuration: 5m
+
+# The one Agent of the city: a resident's personal device with its own VIN card in the card slot. The job gives the card its
+# name, job title, icon and access when a person is spawned into a job, so no job needs a device or a card of its own.
+- type: entity
+  parent: IDCardStandard
+  id: NCVinCard
+  name: VIN card
+  description: The personal identification card of a Night City resident.
+  components:
+  - type: Sprite
+    layers:
+    - state: default
+  # The card builds its own name from these, so it is a VIN card with or without an owner, not an "ID card".
+  - type: IdCard
+    nameLocId: nc-vin-card-name
+    fullNameLocId: nc-vin-card-full-name
+
+- type: entity
+  parent: BasePDA
+  id: NCAgent
+  name: Agent
+  description: The personal communicator and organizer of a Night City resident.
+  components:
+  - type: Pda
+    id: NCVinCard
+  - type: PdaBorderColor
+    borderColor: "#717059"
