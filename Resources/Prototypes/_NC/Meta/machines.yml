@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 
 - type: entity
-  parent: Autolathe
+  parent: [ Autolathe, NCMetaHackableBase ]
   id: NCMetaFabricator
   suffix: META production controller
   components:
@@ -26,7 +26,7 @@
         type: NCMetaWorkspaceBoundUserInterface
 
 - type: entity
-  parent: KitchenReagentGrinder
+  parent: [ KitchenReagentGrinder, NCMetaHackableBase ]
   id: NCMetaLaboratoryGrinder
   suffix: META batch controller
   components:
@@ -51,7 +51,7 @@
         type: NCMetaWorkspaceBoundUserInterface
 
 - type: entity
-  parent: ChemMaster
+  parent: [ ChemMaster, NCMetaHackableBase ]
   id: NCMetaLaboratoryChemMaster
   suffix: META packaging controller
   components:

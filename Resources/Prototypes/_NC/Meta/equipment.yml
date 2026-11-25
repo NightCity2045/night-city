@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 
 - type: entity
-  parent: [BaseHandheldComputer, PowerCellSlotMediumItem]
+  parent: [ BaseHandheldComputer, PowerCellSlotMediumItem, NCMetaHackableBase ]
   id: NCMetaServiceTablet
   name: META service tablet
   description: A battery powered host for ready applications, native installation tools and device diagnostics.

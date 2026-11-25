@@ -20,7 +20,7 @@
   interfaces: [meta.medical.MedicalMonitor, meta.medical.DosingController, meta.medical.ProcedureController, meta.files.FileStore]
 
 - type: entity
-  parent: NCToyotaSupra1996
+  parent: [ NCToyotaSupra1996, NCMetaHackableBase ]
   id: NCMetaSupraEcu
   suffix: META ECU
   components:
@@ -62,7 +62,7 @@
     allowDisable: true
 
 - type: entity
-  parent: [MobSiliconBase, PowerCellSlotMediumItem]
+  parent: [ MobSiliconBase, PowerCellSlotMediumItem, NCMetaHackableBase ]
   id: NCMetaPatrolDrone
   name: META route drone
   description: A physical programmable robot. Its mission map contains only waypoints explicitly commissioned with a service tool.
@@ -93,7 +93,7 @@
         type: NCMetaApplicationBoundUserInterface
 
 - type: entity
-  parent: ConveyorBelt
+  parent: [ ConveyorBelt, NCMetaHackableBase ]
   id: NCMetaConveyor
   suffix: META controller and load cell
   components:
@@ -156,7 +156,7 @@
         type: NCMetaWorkspaceBoundUserInterface
 
 - type: entity
-  parent: BaseHandheldComputer
+  parent: [ BaseHandheldComputer, NCMetaHackableBase ]
   id: NCMetaClinicalController
   name: META bedside controller
   description: A patient-bound diagnostic and dosing controller. It uses a real refillable reservoir and the practitioner's native surgical tools.

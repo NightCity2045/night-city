@@ -1,5 +1,21 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 
+# Anything with a META board has a way in: a message port for the network, and a slot for a chip with a program on it.
+# A device that is not wired to a network is protected and reprogrammed through its chip. Implants are the exception:
+# META configures how an implant works, so they carry neither.
+- type: entity
+  abstract: true
+  id: NCMetaHackableBase
+  components:
+  - type: NCMetaMessagePort
+  - type: ItemSlots
+    slots:
+      nc_meta_chip:
+        name: nc-meta-chip-slot
+        whitelist:
+          tags:
+          - NCMetaChip
+
 - type: entity
   abstract: true
   parent: BaseComputer
