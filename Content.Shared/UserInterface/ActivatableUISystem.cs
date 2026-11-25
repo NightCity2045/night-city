@@ -180,7 +180,7 @@ public sealed partial class ActivatableUISystem : EntitySystem
         SetCurrentSingleUser(uid, null, component);
     }
 
-    private bool InteractUI(EntityUid user, EntityUid uiEntity, ActivatableUIComponent aui)
+    public bool InteractUI(EntityUid user, EntityUid uiEntity, ActivatableUIComponent aui) // NC: the META gate repeats an attempt once its program agrees
     {
         if (aui.Key == null || !_uiSystem.HasUi(uiEntity, aui.Key))
             return false;

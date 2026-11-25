@@ -1,0 +1,80 @@
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+module security.gate;
+import meta.system;
+import meta.text;
+import meta.files;
+import meta.devices;
+
+// A gate for a console, a terminal, a vending machine or a handheld: it keeps a ledger of who tried to use the device
+// and lets in only the people on its list. An empty list means everybody is let in, so installing it changes nothing
+// until the owner writes names into data/allowed.txt. This is only an example to read and rewrite: what it decides
+// (whom to let in, what to write down) is this code. The game asks it before the interface opens and turns the person
+// away if it does not answer in time.
+
+link gate: Gate = "gate";
+link data: FileStore = "gate-ledger";
+
+var allowed: list<string> = new list<string>();
+var seen: list<string> = new list<string>();
+
+fn indexOf(items: list<string>, name: string) -> int {
+    var index: int = 0;
+    while (index < items.length) {
+        if (items[index] == name) { return index; }
+        index = index + 1;
+    }
+    return -1;
+}
+
+fn parseNames(source: string) -> void {
+    var line: string = "";
+    var index: int = 0;
+    while (index < source.length) {
+        match (text.slice(source, index, 1)) {
+            ok(symbol) => {
+                if (symbol == "\n") {
+                    if (line.length > 0 && allowed.length < 64) { allowed.push(line); }
+                    line = "";
+                } else {
+                    line = line + symbol;
+                }
+            }
+            err(problem) => { }
+        }
+        index = index + 1;
+    }
+}
+
+fn joinSeen() -> string {
+    var joined: string = "";
+    for (let name in seen) {
+        joined = joined + name + "\n";
+    }
+    return joined;
+}
+
+async fn main() -> void {
+    match (await data.readText("gate/allowed.txt")) {
+        ok(saved) => { parseNames(saved); }
+        err(problem) => { }
+    }
+}
+
+async fn remember(name: string) -> void {
+    if (indexOf(seen, name) >= 0 || seen.length >= 64) { return; }
+    seen.push(name);
+    match (await data.writeTextAtomic("gate/seen.txt", joinSeen())) {
+        ok(done) => { }
+        err(problem) => { system.log(problem.message); }
+    }
+}
+
+async watch gate.useRequested(request) {
+    let name: string = request.subject.name;
+    await remember(name);
+    let admitted: bool = allowed.length == 0 || indexOf(allowed, name) >= 0;
+    match (await gate.answer(request.requestId, admitted)) {
+        ok(done) => { }
+        err(problem) => { system.log(problem.message); }
+    }
+}

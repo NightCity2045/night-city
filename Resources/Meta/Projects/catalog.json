@@ -12,6 +12,10 @@
     {
       "id": "meta-stock-guard",
       "manifest": "Resources/Meta/Projects/meta-stock-guard/manifest.json"
+    },
+    {
+      "id": "meta-stock-gate",
+      "manifest": "Resources/Meta/Projects/meta-stock-gate/manifest.json"
     }
   ]
 }

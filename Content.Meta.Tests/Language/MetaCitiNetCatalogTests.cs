@@ -63,4 +63,14 @@ public sealed class MetaCitiNetCatalogTests
         var locate = MetaApiCatalog.Default.Members.Single(member => member.QualifiedName == "meta.security.Trace.locate");
         Assert.That(locate.Scope, Is.EqualTo("security.trace"));
     }
+
+    [Test]
+    public void TheCatalogBeforeTheGateStaysTrustedAndLacksIt()
+    {
+        var old = MetaApiCatalog.ResolveTrustedCatalog(MetaApiCatalog.PreGateCatalogHash);
+        Assert.That(old.Hash, Is.EqualTo(MetaApiCatalog.PreGateCatalogHash));
+        Assert.That(old.Members.Any(member => member.Owner == "meta.devices.Gate"), Is.False);
+        var answer = MetaApiCatalog.Default.Members.Single(member => member.QualifiedName == "meta.devices.Gate.answer");
+        Assert.That(answer.Scope, Is.EqualTo("gate.answer"));
+    }
 }

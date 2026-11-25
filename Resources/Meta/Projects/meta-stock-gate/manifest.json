@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "id": "meta-stock-gate",
+  "name": "Device gate",
+  "nameRu": "Ворота устройства",
+  "packageName": "security.gate",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "security.gate",
+  "files": [
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/Gate/main.meta",
+      "sha256": "8d476ea41ce9f73b782502283f7817561d6b350bbf808e33fd149de5cfb37d20"
+    }
+  ],
+  "startMode": "Manual",
+  "bindings": [],
+  "testFixture": "meta.test.json"
+}

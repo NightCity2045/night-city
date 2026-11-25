@@ -2,7 +2,7 @@
 
 - type: entity
   id: VendingMachine
-  parent: [ BaseMachinePowered, BaseMachineDestructible ]
+  parent: [ BaseMachinePowered, BaseMachineDestructible, NCMetaGatedDeviceBase ] # NC: every vending machine carries a META board
   name: vending machine
   description: Just add capitalism!
   abstract: true

@@ -16,6 +16,21 @@
           tags:
           - NCMetaChip
 
+# A device with a screen or a menu (a console, a terminal, a vending machine): it carries a META board, so its program can
+# decide who may open its interface. With no program installed it works as it always did. It is on no network until its owner
+# joins it to one, so a map full of them does not crowd the networks of players.
+- type: entity
+  abstract: true
+  parent: NCMetaHackableBase
+  id: NCMetaGatedDeviceBase
+  components:
+  - type: NCMetaHost
+    profile: NCMetaEmbedded
+    allowClaim: true
+  - type: NCMetaPort
+  - type: NCMetaStorage
+  - type: NCMetaGate
+
 - type: entity
   abstract: true
   parent: BaseComputer

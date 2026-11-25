@@ -157,6 +157,8 @@ fn scopeName(ru: bool, scope: string) -> string {
     if (scope == "economy.receive") { return tr(ru, "Check payments made to the owner of this device", "Проверять платежи владельцу этого устройства"); }
     if (scope == "files.read") { return tr(ru, "Read the files of this device", "Читать файлы этого устройства"); }
     if (scope == "files.write") { return tr(ru, "Write and change the files of this device", "Записывать и менять файлы этого устройства"); }
+    if (scope == "gate.answer") { return tr(ru, "Decide who may use this device", "Решать, кто может пользоваться этим устройством"); }
+    if (scope == "gate.observe") { return tr(ru, "Know who tries to use this device", "Знать, кто пытается пользоваться этим устройством"); }
     if (scope == "implant.eye.control") { return tr(ru, "Control a cybernetic eye", "Управлять киберглазом"); }
     if (scope == "implant.eye.observe") { return tr(ru, "Follow what a cybernetic eye sees", "Следить за тем, что видит киберглаз"); }
     if (scope == "implant.eye.read") { return tr(ru, "Read the state of a cybernetic eye", "Читать состояние киберглаза"); }

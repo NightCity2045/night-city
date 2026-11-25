@@ -1,5 +1,5 @@
 - type: entity
-  parent: BaseStructureComputer
+  parent: [ BaseStructureComputer, NCMetaGatedDeviceBase ] # NC: every console carries a META board
   id: BaseComputer
   name: computer
   placement:

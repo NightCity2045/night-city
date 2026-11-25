@@ -155,6 +155,12 @@ public sealed partial class MetaApiCatalog
         Capability("meta.security", "Trace");
         Dto("meta.security", "TraceResult", "device:string", "place:string", "owner:string");
         Method("meta.security.Trace", "locate", "result<meta.security.TraceResult>", "security.trace", true, "string");
+        // The gate of a device with a screen or a menu: before a person's interface opens, the device asks its own program.
+        // The program answers yes or no, or says nothing and the person is turned away. With no program, nothing changes.
+        Capability("meta.devices", "Gate");
+        Dto("meta.devices", "UseRequest", "requestId:string", "subject:meta.access.Subject", "stamp:" + S + "SampleStamp");
+        Event("meta.devices.Gate", "useRequested", "meta.devices.UseRequest", "gate.observe", "Ordered", 16);
+        Method("meta.devices.Gate", "answer", "result<void>", "gate.answer", true, "string", "bool");
         Method("meta.files.FileStore", "readText", "result<string>", "files.read", true, "string");
         Method("meta.files.FileStore", "writeTextAtomic", "result<void>", "files.write", true, "string", "string");
         Capability("meta.net", "MessagePort");

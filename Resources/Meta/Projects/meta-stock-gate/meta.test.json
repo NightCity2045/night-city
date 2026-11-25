@@ -1,0 +1,55 @@
+{
+  "rootModule": "security.gate",
+  "responses": [
+    {
+      "member": "meta.files.FileStore.readText",
+      "value": "",
+      "pending": true,
+      "completeAfterSlices": 2
+    },
+    {
+      "member": "meta.files.FileStore.writeTextAtomic",
+      "value": null,
+      "pending": true,
+      "completeAfterSlices": 2
+    },
+    {
+      "member": "meta.devices.Gate.answer",
+      "value": null,
+      "pending": false,
+      "completeAfterSlices": 1
+    }
+  ],
+  "events": [
+    {
+      "slot": "gate",
+      "event": "useRequested",
+      "arguments": [
+        {
+          "requestId": "r1",
+          "subject": {
+            "name": "Ann",
+            "key": "character:1"
+          },
+          "stamp": {
+            "epoch": 1,
+            "sequence": 1,
+            "tick": 60
+          }
+        }
+      ],
+      "sequence": 1,
+      "nowMs": 1000,
+      "tick": 60
+    }
+  ],
+  "expectedLogs": [],
+  "expectedCommands": [
+    "readText(gate/allowed.txt)",
+    "writeTextAtomic(gate/seen.txt,Ann\n)",
+    "answer(r1,true)"
+  ],
+  "epoch": 1,
+  "nowMs": 1000,
+  "tick": 60
+}
