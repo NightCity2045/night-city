@@ -59,6 +59,9 @@ public sealed partial class NCMetaNetworkSystem : EntitySystem, INCMetaDeviceAda
     private readonly HashSet<EntityUid> _physicalPorts = [];
     private readonly Dictionary<EntityUid, HashSet<EntityUid>> _cablesByPort = [];
     private readonly Dictionary<Guid, Envelope> _envelopes = [];
+    // Who recently reached a device: receiver -> sender -> time. A defender may answer only a device that did contact it.
+    private readonly Dictionary<EntityUid, Dictionary<EntityUid, long>> _contacts = [];
+    private const int MaximumContactsPerPort = 32;
     private readonly PriorityQueue<Guid, long> _deliveries = new();
     private readonly PriorityQueue<Guid, long> _expirations = new();
     private readonly Dictionary<string, MetaRateLimit> _ownerRates = new(StringComparer.Ordinal);
@@ -165,7 +168,8 @@ public sealed partial class NCMetaNetworkSystem : EntitySystem, INCMetaDeviceAda
         if (_addresses.TryGetValue(ent.Comp.Address, out var current) && current == ent.Owner) _addresses.Remove(ent.Comp.Address);
         foreach (var envelope in _envelopes.Values.Where(value => value.Sender == ent.Owner || value.Receiver == ent.Owner).ToArray()) Drop(envelope.Id);
         UnresolveCables(ent.Owner);
-        _states.Remove(ent.Owner); _cablesByPort.Remove(ent.Owner);
+        _states.Remove(ent.Owner); _cablesByPort.Remove(ent.Owner); _contacts.Remove(ent.Owner);
+        foreach (var senders in _contacts.Values) senders.Remove(ent.Owner);
         if (TryComp<NCMetaPortComponent>(ent.Owner, out var physical) && _segments.TryGetValue(physical.NetworkId, out var segment)) { segment.Remove(ent.Owner); if (segment.Count == 0) _segments.Remove(physical.NetworkId); }
     }
     private void OnExamined(Entity<NCMetaMessagePortComponent> ent, ref ExaminedEvent args)
@@ -344,6 +348,7 @@ public sealed partial class NCMetaNetworkSystem : EntitySystem, INCMetaDeviceAda
         if (!args.Data.TryGetValue<string>("nc-meta-envelope", out var text) || !Guid.TryParseExact(text, "D", out var id) || !_envelopes.TryGetValue(id, out var envelope) || envelope.Receiver != ent.Owner || envelope.Sender != args.Sender) return;
         if (!Current(envelope)) { Drop(id); return; }
         MetaMetrics.Record(_runtime.Metrics, MetaMetric.NativeDeliveredBytes, envelope.Bytes, _runtime.MetricTick);
+        RecordContact(envelope.Receiver, envelope.Sender);
         var accepted = _runtime.TryPublishEvent(ent.Owner, "meta.net.MessagePort.messageReceived", process =>
         {
             if (_subscribed.Add(process)) process.EventContextReleased += ReleaseContext;
@@ -352,6 +357,18 @@ public sealed partial class NCMetaNetworkSystem : EntitySystem, INCMetaDeviceAda
         if (_chains.TryGetValue(envelope.Context, out var chain)) chain.References += accepted;
         Drop(id);
     }
+    public bool TryGetPort(string address, out EntityUid port) => _addresses.TryGetValue(address, out port);
+    private void RecordContact(EntityUid receiver, EntityUid sender)
+    {
+        if (!_contacts.TryGetValue(receiver, out var senders)) _contacts[receiver] = senders = [];
+        senders[sender] = _now;
+        if (senders.Count <= MaximumContactsPerPort) return;
+        var oldest = senders.MinBy(pair => pair.Value).Key;
+        senders.Remove(oldest);
+    }
+    /// <summary>True when <paramref name="sender"/> delivered a message to <paramref name="receiver"/> within the window.</summary>
+    public bool HasRecentContact(EntityUid receiver, EntityUid sender, long windowMilliseconds) =>
+        _contacts.TryGetValue(receiver, out var senders) && senders.TryGetValue(sender, out var at) && _now - at <= windowMilliseconds;
     private void ReleaseContext(ulong id)
     {
         if (_chains.TryGetValue(id, out var chain) && --chain.References <= 0) _chains.Remove(id);

@@ -33,4 +33,14 @@ public sealed class MetaCitiNetCatalogTests
         var pay = MetaApiCatalog.Default.Members.Single(member => member.QualifiedName == "meta.economy.Wallet.pay");
         Assert.That(pay.Scope, Is.EqualTo("economy.pay"));
     }
+
+    [Test]
+    public void TheCatalogBeforeTheCountermeasureStaysTrustedAndLacksIt()
+    {
+        var old = MetaApiCatalog.ResolveTrustedCatalog(MetaApiCatalog.PreCountermeasureCatalogHash);
+        Assert.That(old.Hash, Is.EqualTo(MetaApiCatalog.PreCountermeasureCatalogHash));
+        Assert.That(old.Members.Any(member => member.Owner == "meta.security.Countermeasure"), Is.False);
+        var surge = MetaApiCatalog.Default.Members.Single(member => member.QualifiedName == "meta.security.Countermeasure.surge");
+        Assert.That(surge.Scope, Is.EqualTo("security.countermeasure"));
+    }
 }

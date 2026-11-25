@@ -139,6 +139,10 @@ public sealed partial class MetaApiCatalog
         Method("meta.economy.Wallet", "pay", "result<meta.economy.PaymentReceipt>", "economy.pay", true, "string", "int", "string");
         Method("meta.economy.Wallet", "received", "result<meta.economy.PaymentReceipt>", "economy.receive", true, "string");
         Method("meta.economy.Wallet", "selfDevice", "result<string>", "economy.receive", false);
+        // A defender program may answer a device that keeps hammering its host: the strike lands only on a device that
+        // recently sent that host a message, and only as hardware damage; it never reaches the person at the keyboard.
+        Capability("meta.security", "Countermeasure");
+        Method("meta.security.Countermeasure", "surge", "result<void>", "security.countermeasure", true, "string", "int");
         Method("meta.files.FileStore", "readText", "result<string>", "files.read", true, "string");
         Method("meta.files.FileStore", "writeTextAtomic", "result<void>", "files.write", true, "string", "string");
         Capability("meta.net", "MessagePort");
