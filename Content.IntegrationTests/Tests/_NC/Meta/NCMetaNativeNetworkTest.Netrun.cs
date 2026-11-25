@@ -165,7 +165,7 @@ public sealed partial class NCMetaNativeNetworkTest
             await Connect(scene);
             await Action(scene, NCMetaNetOperation.Scan);
             await Action(scene, NCMetaNetOperation.Probe, "data");
-            await Server.WaitRunTicks(200);
+            await Pair.RunTicksSync(200);
             await Server.WaitAssertion(() =>
             {
                 Assert.That(_net.TryGetState(scene.Deck, scene.Actor, out var state), Is.True);
@@ -175,7 +175,7 @@ public sealed partial class NCMetaNativeNetworkTest
                 else if (transition == "Generation") Assert.That(_devices.TryInvalidate(scene.Physical.Objects["data"]), Is.True);
                 else Server.System<SharedBatterySystem>().SetCharge(scene.Physical.PowerSupply, 0);
             });
-            await Server.WaitRunTicks(360);
+            await Pair.RunTicksSync(360);
             var suffix = Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes("meta-demo:data")))[..24];
             Assert.That(await _persistence.ReadTextAsync(NCMetaPersistenceSystem.StableGuid("volume:" + deckId), scene.Owner,
                 "net-copies/" + suffix + ".txt"), Is.Null);

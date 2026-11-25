@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -43,6 +44,21 @@ public sealed partial class NCMetaNativeNetworkTest : GameTest
     private NCMetaNativeNetworkProgramHarness Programs => new(Server);
     private NCMetaNativePacketObserverSystem Observer => Server.System<NCMetaNativePacketObserverSystem>();
 
+    // The engine warns when a replicated config message reaches the client a few ticks late, which the slow startup of the
+    // city prototypes makes common. These tests exercise the server, so the client log fails them on errors only; the
+    // server log stays as strict as everywhere else.
+    private Robust.Shared.Log.LogLevel? _clientFailureLevel;
+
+    [SetUp]
+    public void AllowClientWarnings()
+    {
+        _clientFailureLevel = Pair.ClientLogHandler.FailureLevel;
+        Pair.ClientLogHandler.FailureLevel = Robust.Shared.Log.LogLevel.Error;
+    }
+
+    [TearDown]
+    public void RestoreClientFailureLevel() => Pair.ClientLogHandler.FailureLevel = _clientFailureLevel;
+
     private async Task Until(Func<bool> condition, int maximumTicks = 600, string reason = "Native condition did not complete.")
     {
         var ready = false;
@@ -50,7 +66,7 @@ public sealed partial class NCMetaNativeNetworkTest : GameTest
         {
             await Server.WaitPost(() => ready = condition());
             if (ready) return;
-            await Server.WaitRunTicks(1);
+            await Pair.RunTicksSync(1);
         }
         Assert.Fail(reason);
     }

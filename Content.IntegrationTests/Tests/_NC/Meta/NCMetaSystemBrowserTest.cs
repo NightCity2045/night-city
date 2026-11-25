@@ -26,6 +26,21 @@ namespace Content.IntegrationTests.Tests._NC.Meta;
 [NonParallelizable]
 public sealed class NCMetaSystemBrowserTest : GameTest
 {
+    // The engine warns when a replicated config message reaches the client a few ticks late, which the slow startup of the
+    // city prototypes makes common. These tests exercise the server, so the client log fails them on errors only; the
+    // server log stays as strict as everywhere else.
+    private Robust.Shared.Log.LogLevel? _clientFailureLevel;
+
+    [SetUp]
+    public void AllowClientWarnings()
+    {
+        _clientFailureLevel = Pair.ClientLogHandler.FailureLevel;
+        Pair.ClientLogHandler.FailureLevel = Robust.Shared.Log.LogLevel.Error;
+    }
+
+    [TearDown]
+    public void RestoreClientFailureLevel() => Pair.ClientLogHandler.FailureLevel = _clientFailureLevel;
+
     [TearDown]
     public Task CloseWorld() => NCMetaNativeTestTasks.CloseWorld(Server);
 
@@ -55,14 +70,14 @@ public sealed class NCMetaSystemBrowserTest : GameTest
             SEntMan.EventBus.RaiseEvent(EventSource.Local, new GameRunLevelChangedEvent(GameRunLevel.PreRoundLobby, GameRunLevel.InRound));
         });
         var clock = Server.System<NCActiveWorldTimeSystem>();
-        for (var step = 0; step < 180 && !clock.IsReady; step++) await Server.WaitRunTicks(1);
+        for (var step = 0; step < 180 && !clock.IsReady; step++) await Pair.RunTicksSync(1);
         NCMetaDeviceEntry entry = null!;
         for (var step = 0; step < 180; step++)
         {
             var ready = false;
             await Server.WaitPost(() => ready = devices.TryGetEntry(laptop, out entry) && entry.Ready);
             if (ready) break;
-            await Server.WaitRunTicks(1);
+            await Pair.RunTicksSync(1);
         }
         Assert.That(entry?.Ready, Is.True);
         Content.Shared._NC.Persistence.Time.NCSessionEpoch epoch = default;
@@ -80,7 +95,7 @@ public sealed class NCMetaSystemBrowserTest : GameTest
         var request = new NCMetaWorkspaceRequestMessage(NCMetaWorkspaceOperation.OpenSystemApplication, Guid.NewGuid(),
             source: "meta-stock-citinet-browser") { Actor = user, UiKey = NCMetaUiKey.Workspace };
         await Server.WaitPost(() => SEntMan.EventBus.RaiseLocalEvent(laptop, request));
-        for (var step = 0; step < 900 && workspace.LastNotice == null; step++) await Server.WaitRunTicks(1);
+        for (var step = 0; step < 900 && workspace.LastNotice == null; step++) await Pair.RunTicksSync(1);
 
         return (laptop, user, entry, owner, mapId);
     }
@@ -123,7 +138,7 @@ public sealed class NCMetaSystemBrowserTest : GameTest
             var ready = false;
             await Server.WaitPost(() => ready = devices.TryGetEntry(site, out siteEntry) && siteEntry.Ready);
             if (ready) break;
-            await Server.WaitRunTicks(1);
+            await Pair.RunTicksSync(1);
         }
         Assert.That(siteEntry?.Ready, Is.True);
         Content.Shared._NC.Persistence.Time.NCSessionEpoch epoch = default;
@@ -145,7 +160,7 @@ public sealed class NCMetaSystemBrowserTest : GameTest
             for (var step = 0; step < 90 && pending == null; step++)
             {
                 await Server.WaitPost(() => pending = workspace.GetPendingOffer(entry.Id));
-                if (pending == null) await Server.WaitRunTicks(1);
+                if (pending == null) await Pair.RunTicksSync(1);
             }
         }
         Assert.That(pending, Is.Not.Null, "The browser never received the offer.");
@@ -172,7 +187,7 @@ public sealed class NCMetaSystemBrowserTest : GameTest
         for (var step = 0; step < 600 && !logs.Contains("hello"); step++)
         {
             await Server.WaitPost(() => logs = runtime.GetLogs(laptop, user, program.Id));
-            if (!logs.Contains("hello")) await Server.WaitRunTicks(1);
+            if (!logs.Contains("hello")) await Pair.RunTicksSync(1);
         }
         Assert.That(logs, Does.Contain("hello"), "The accepted program never ran. Last server notice: " + workspace.LastNotice);
         await Server.WaitPost(() => Assert.That(workspace.GetPendingOffer(entry.Id), Is.Null));
