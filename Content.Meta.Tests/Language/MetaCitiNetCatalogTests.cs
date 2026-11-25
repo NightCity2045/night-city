@@ -43,4 +43,14 @@ public sealed class MetaCitiNetCatalogTests
         var surge = MetaApiCatalog.Default.Members.Single(member => member.QualifiedName == "meta.security.Countermeasure.surge");
         Assert.That(surge.Scope, Is.EqualTo("security.countermeasure"));
     }
+
+    [Test]
+    public void TheCatalogBeforeProgramOffersStaysTrustedAndLacksThem()
+    {
+        var old = MetaApiCatalog.ResolveTrustedCatalog(MetaApiCatalog.PreOfferCatalogHash);
+        Assert.That(old.Hash, Is.EqualTo(MetaApiCatalog.PreOfferCatalogHash));
+        Assert.That(old.Members.Any(member => member.QualifiedName == "meta.citinet.Gateway.offer"), Is.False);
+        var accept = MetaApiCatalog.Default.Members.Single(member => member.QualifiedName == "meta.citinet.Browser.accept");
+        Assert.That(accept.Scope, Is.EqualTo("citinet.install"));
+    }
 }

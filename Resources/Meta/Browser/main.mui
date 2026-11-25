@@ -20,6 +20,18 @@
       </Form>
     </Row>
 
+    <Panel id="program" class="offer" visible="{bind programVisible}">
+      <Row id="programRow" gap="8">
+        <Text id="programText" text="{bind programText}" class="section"/>
+        <Form id="installForm" action="install">
+          <Button id="installButton" action="install" text="{bind installLabel}" class="go"/>
+        </Form>
+        <Form id="declineForm" action="decline">
+          <Button id="declineButton" action="decline" text="{bind declineLabel}" class="tool"/>
+        </Form>
+      </Row>
+    </Panel>
+
     <Panel id="start" class="start" visible="{bind startVisible}">
       <Column id="startBody" gap="10">
         <Text id="logo" text="CITINET" class="logo"/>

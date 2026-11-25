@@ -30,7 +30,7 @@ public sealed partial class NCMetaWorkspaceSystem : EntitySystem
 {
     private sealed record Context(EntityUid Terminal, EntityUid User, string DeviceId, string Owner,
         ulong DeviceEpoch, ulong AuthorityEpoch, NCSessionEpoch Epoch, NCActiveWorldTime Time,
-        string Actor, NCMetaManagementProof Management);
+        string Actor, NCMetaManagementProof Management, bool ApplicationOrigin = false);
     private sealed class Upload(Guid id, Guid fileId, long revision, string path, int total, string digest, TimeSpan expires)
     {
         public readonly Guid Id = id;
@@ -626,7 +626,7 @@ public sealed partial class NCMetaWorkspaceSystem : EntitySystem
         _devices.TryGetEntry(context.Terminal, out var entry) && entry.Id == context.DeviceId &&
         entry.DeviceEpoch == context.DeviceEpoch &&
         entry.AuthorityEpoch == context.AuthorityEpoch && (allowUnclaimed || entry.Owner == context.Owner) &&
-        _ui.IsUiOpen(context.Terminal, NCMetaUiKey.Workspace, context.User) &&
+        _ui.IsUiOpen(context.Terminal, context.ApplicationOrigin ? NCMetaUiKey.Application : NCMetaUiKey.Workspace, context.User) &&
         (_devices.CanManage(context.Terminal, context.User) || allowUnclaimed && _devices.CanClaim(context.Terminal, context.User)) &&
         _persistence.TryCaptureTime(out var epoch, out _) && epoch == context.Epoch;
 

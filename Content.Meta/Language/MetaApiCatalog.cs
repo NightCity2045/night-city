@@ -132,6 +132,13 @@ public sealed partial class MetaApiCatalog
         Capability("meta.citinet", "Browser"); Capability("meta.citinet", "Gateway");
         Method("meta.citinet.Browser", "open", "result<void>", "citinet.browse", true, "string");
         Method("meta.citinet.Gateway", "visitorDevice", "result<string>", "citinet.visitor", false, "meta.app.SessionRef");
+        // A site may offer a visitor a program from its own device. The visitor decides in the browser, which lists what the
+        // program asks for; only then is it installed through the ordinary install path, on the visitor's own device.
+        Dto("meta.citinet", "ProgramOffer", "id:string", "name:string", "site:string", "scopes:string");
+        Method("meta.citinet.Gateway", "offer", "result<void>", "citinet.offer", true, "meta.app.SessionRef", "string", "string");
+        Event("meta.citinet.Browser", "offerReceived", "meta.citinet.ProgramOffer", "citinet.browse");
+        Method("meta.citinet.Browser", "accept", "result<void>", "citinet.install", true, "string");
+        Method("meta.citinet.Browser", "decline", "result<void>", "citinet.browse", true, "string");
         // Money moves only through the ledger: a person pays from their own account when they press a button, and the
         // owner of the receiving device checks a receipt before giving anything for it.
         Capability("meta.economy", "Wallet");

@@ -30,6 +30,11 @@ var offerView: string = "";
 var offerPayee: string = "";
 var offerPrice: int = 0;
 var offerReady: bool = false;
+var programId: string = "";
+var programName: string = "";
+var programSite: string = "";
+var programScopes: string = "";
+var programReady: bool = false;
 
 pub struct PageRow {
     address: string;
@@ -61,6 +66,10 @@ pub struct BrowserState {
     viewLabel: string;
     registerLabel: string;
     offerVisible: bool;
+    programVisible: bool;
+    programText: string;
+    installLabel: string;
+    declineLabel: string;
     offerText: string;
     confirmLabel: string;
     history: list<PageRow>;
@@ -101,6 +110,10 @@ fn describe(ru: bool, code: string) -> string {
     if (code == "nofunds") { return tr(ru, "The payment did not go through.", "Платёж не прошёл."); }
     if (code == "paid") { return tr(ru, "Paid. Waiting for the registrar...", "Оплачено. Жду регистратора..."); }
     if (code == "registered") { return tr(ru, "Done: the name is registered.", "Готово: имя зарегистрировано."); }
+    if (code == "installing") { return tr(ru, "Installing the program...", "Устанавливаю программу..."); }
+    if (code == "installed") { return tr(ru, "The program is installed on this computer.", "Программа установлена на этом компьютере."); }
+    if (code == "installfail") { return tr(ru, "The program could not be installed.", "Программу не удалось установить."); }
+    if (code == "declined") { return tr(ru, "You turned the program down.", "Вы отказались от программы."); }
     if (code == "unpaid") { return tr(ru, "The registrar did not accept the payment.", "Регистратор не принял оплату."); }
     return code;
 }
@@ -325,6 +338,16 @@ async fn visit(address: string) -> void {
     }
 }
 
+// A site offers a program. The game itself raises this, with what the program really asks for, so a page cannot
+// make an offer look harmless: read the list of permissions before agreeing.
+async watch web.offerReceived(offer) {
+    programId = offer.id;
+    programName = offer.name;
+    programSite = offer.site;
+    programScopes = offer.scopes;
+    programReady = true;
+}
+
 async watch port.messageReceived(message) {
     linked = true;
     if (message.topic == "dns.found") {
@@ -409,6 +432,11 @@ pub fn view(context: app.AppContext) -> BrowserState {
         viewLabel: tr(ru, "Site view", "Вид сайта"),
         registerLabel: tr(ru, "Get a price", "Узнать цену"),
         offerVisible: offerReady,
+        programVisible: programReady,
+        programText: tr(ru, "The site ", "Сайт ") + programSite + tr(ru, " offers the program ", " предлагает программу ") + programName +
+            tr(ru, ". It asks for: ", ". Требуются права: ") + programScopes,
+        installLabel: tr(ru, "Install", "Установить"),
+        declineLabel: tr(ru, "Decline", "Отказаться"),
         offerText: tr(ru, "Register ", "Зарегистрировать ") + offerName + tr(ru, " for ", " за ") + text.fromInt(offerPrice),
         confirmLabel: tr(ru, "Pay and register", "Оплатить и зарегистрировать"),
         history: rowsNewestFirst(history),
@@ -455,6 +483,29 @@ pub async fn confirm(context: app.AppContext, input: MarkInput) -> result<void> 
             }
         }
         err(problem) => { notice = "nofunds"; }
+    }
+    return ok(());
+}
+
+// Only a person pressing the button agrees; the game installs the offered program the ordinary way on this computer.
+pub async fn install(context: app.AppContext, input: MarkInput) -> result<void> {
+    if (!programReady) { return ok(()); }
+    programReady = false;
+    notice = "installing";
+    match (await web.accept(programId)) {
+        ok(done) => { notice = "installed"; }
+        err(problem) => { notice = "installfail"; }
+    }
+    return ok(());
+}
+
+pub async fn decline(context: app.AppContext, input: MarkInput) -> result<void> {
+    if (!programReady) { return ok(()); }
+    programReady = false;
+    notice = "declined";
+    match (await web.decline(programId)) {
+        ok(done) => { }
+        err(problem) => { }
     }
     return ok(());
 }

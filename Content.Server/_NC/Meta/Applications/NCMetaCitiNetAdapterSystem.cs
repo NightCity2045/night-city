@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 using Content.Meta.Runtime;
+using Content.Server._NC.Meta.Projects;
 using Content.Server._NC.Meta.Runtime;
 using Content.Shared._NC.Meta;
 
@@ -14,8 +15,10 @@ public sealed class NCMetaCitiNetAdapterSystem : EntitySystem, INCMetaDeviceAdap
     [Dependency] private NCMetaRuntimeSystem _runtime = default!;
     [Dependency] private NCMetaApplicationSystem _applications = default!;
     [Dependency] private NCMetaCitiNetSystem _citiNet = default!;
+    [Dependency] private NCMetaWorkspaceSystem _workspace = default!;
 
-    public IEnumerable<string> Members => ["meta.citinet.Browser.open", "meta.citinet.Gateway.visitorDevice"];
+    public IEnumerable<string> Members => ["meta.citinet.Browser.open", "meta.citinet.Gateway.visitorDevice", "meta.citinet.Gateway.offer",
+        "meta.citinet.Browser.accept", "meta.citinet.Browser.decline"];
 
     public bool CanBind(EntityUid device, string capability) => capability switch
     {
@@ -46,6 +49,26 @@ public sealed class NCMetaCitiNetAdapterSystem : EntitySystem, INCMetaDeviceAdap
         var type = process.GetImport(invocation.Request.ImportId).ReturnType!.Value;
         // A button press carries its user; a page opened because an answer arrived goes to the one user who has the browser open.
         EntityUid actor;
+        if (invocation.Member.Name == "offer")
+        {
+            // A site offers a program to whoever is browsing it; the visitor's browser asks them before anything happens.
+            if (!_applications.TryGetVisitorDevice(invocation.Runtime, invocation.Request.Arguments[0], out var visitor))
+                return MetaHostResult.Completed(process.CreateErrorResult(type, "NotFound"));
+            return MetaHostResult.Completed(_workspace.TryOfferProgram(invocation.Device, visitor,
+                process.GetString(invocation.Request.Arguments[1]), process.GetString(invocation.Request.Arguments[2]))
+                ? process.CreateResult(type, MetaValue.Unit) : process.CreateErrorResult(type, "RateLimited"));
+        }
+        if (invocation.Member.Name is "accept" or "decline")
+        {
+            // Only a person pressing a button can agree; a program cannot answer for them.
+            if (invocation.Actor is not { } person) return MetaHostResult.Completed(process.CreateErrorResult(type, "AccessDenied"));
+            var offerId = process.GetString(invocation.Request.Arguments[0]);
+            if (invocation.Member.Name == "decline")
+                return MetaHostResult.Completed(_workspace.TryDeclineOffer(invocation.Device, person, offerId)
+                    ? process.CreateResult(type, MetaValue.Unit) : process.CreateErrorResult(type, "NotFound"));
+            _ = AcceptAsync(invocation, person, offerId, type);
+            return MetaHostResult.Awaiting(invocation.OperationId);
+        }
         if (invocation.Member.Name != "open") return MetaHostResult.Completed(process.CreateErrorResult(type, "AccessDenied"));
         if (invocation.Actor is { } pressed) actor = pressed;
         else if (!_applications.TryGetSessionUser(invocation.Runtime, out actor))
@@ -60,5 +83,14 @@ public sealed class NCMetaCitiNetAdapterSystem : EntitySystem, INCMetaDeviceAdap
         var opened = await _citiNet.TryOpenFromTerminalAsync(invocation.Device, actor, address);
         _runtime.TryComplete(invocation.Runtime, invocation.OperationId, process => opened
             ? process.CreateResult(type, MetaValue.Unit) : process.CreateErrorResult(type, "NotFound"));
+    }
+
+    private async Task AcceptAsync(NCMetaDeviceInvocation invocation, EntityUid person, string offerId, int type)
+    {
+        string? problem;
+        try { problem = await _workspace.AcceptOfferAsync(invocation.Device, person, offerId); }
+        catch (Exception exception) { Log.Error($"META program offer acceptance failed: {exception}"); problem = "IoFailure"; }
+        _runtime.TryComplete(invocation.Runtime, invocation.OperationId, process => problem == null
+            ? process.CreateResult(type, MetaValue.Unit) : process.CreateErrorResult(type, problem));
     }
 }

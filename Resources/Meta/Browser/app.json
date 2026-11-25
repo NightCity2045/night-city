@@ -113,6 +113,21 @@
         "marks": {
           "type": "array",
           "maxLength": 512
+        },
+        "programText": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "installLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "declineLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "programVisible": {
+          "type": "boolean"
         }
       },
       "actions": [
@@ -121,7 +136,9 @@
         "register",
         "confirm",
         "home",
-        "back"
+        "back",
+        "install",
+        "decline"
       ]
     }
   },
@@ -194,6 +211,30 @@
     },
     "mark": {
       "function": "citinet.browser.mark",
+      "inputType": "citinet.browser.MarkInput",
+      "inputs": {
+        "note": {
+          "type": "string",
+          "maxLength": 32,
+          "required": false
+        }
+      },
+      "scopes": []
+    },
+    "install": {
+      "function": "citinet.browser.install",
+      "inputType": "citinet.browser.MarkInput",
+      "inputs": {
+        "note": {
+          "type": "string",
+          "maxLength": 32,
+          "required": false
+        }
+      },
+      "scopes": []
+    },
+    "decline": {
+      "function": "citinet.browser.decline",
       "inputType": "citinet.browser.MarkInput",
       "inputs": {
         "note": {
