@@ -7,11 +7,8 @@ using Content.Server._NC.LivingCity.Identity;
 using Content.Server._NC.Meta.Devices;
 using Content.Server._NC.Meta.Persistence;
 using Content.Server._NC.Meta.Runtime;
-using Content.Server._NC.Medical.Cyberware;
 using Content.Shared._NC.Meta;
 using Content.Shared._NC.Meta.Network;
-using Content.Shared._NC.Medical.Cyberware;
-using Content.Shared.Damage.Systems;
 using Content.Shared.Doors.Components;
 using Content.Shared.Doors.Systems;
 using Content.Shared.Interaction;
@@ -56,10 +53,7 @@ public sealed partial class NCMetaNetrunSystem : EntitySystem, INCMetaDeviceAdap
         public Pending? Pending;
         public string Status = "nc-meta-net-attached";
         public string Preview = string.Empty;
-        public bool Ice;
-        public bool BlackIce;
-        public long LastThreat;
-        public NCMetaNetDefenseProfilePrototype? Threat;
+        public long LastUpkeep;
     }
     private sealed record Pending(Guid Id, NCMetaNetOperation Operation, string Node, ulong NodeGeneration,
         long Due, NCMetaRuntimeInstance? Runtime, long OperationId, int ReturnType, int IoState = 0, bool AuditReserved = false);
@@ -76,8 +70,6 @@ public sealed partial class NCMetaNetrunSystem : EntitySystem, INCMetaDeviceAdap
     [Dependency] private SharedUserInterfaceSystem _ui = default!;
     [Dependency] private SharedInteractionSystem _interaction = default!;
     [Dependency] private SharedDoorSystem _doors = default!;
-    [Dependency] private DamageableSystem _damage = default!;
-    [Dependency] private NCCyberwareSystem _cyberware = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private NCEntityPartyResolverSystem _parties = default!;
     [Dependency] private PowerCellSystem _cells = default!;
@@ -93,7 +85,7 @@ public sealed partial class NCMetaNetrunSystem : EntitySystem, INCMetaDeviceAdap
     private readonly Dictionary<string, long> _actorCooldowns = new(StringComparer.Ordinal);
     private readonly Dictionary<string, long> _cooldowns = new(StringComparer.Ordinal);
     private readonly PriorityQueue<(Guid Session, Guid Action), long> _actions = new();
-    private readonly PriorityQueue<Guid, long> _threats = new();
+    private readonly PriorityQueue<Guid, long> _upkeep = new();
     private readonly MetaRateLimit _requests = new(128, 64);
     private readonly ConcurrentQueue<Action> _completed = new();
     private ulong _nextReference;
@@ -209,7 +201,7 @@ public sealed partial class NCMetaNetrunSystem : EntitySystem, INCMetaDeviceAdap
             session.ReferenceProcesses.Remove(runtime.Generation);
             foreach (var reference in refs.Values) { _references.Remove(reference.Token); runtime.Process.TryReleaseOpaque(reference.Value); }
         }
-        // The physical session and native ICE survive the loss or pause of helper software.
+        // The physical session survives the loss or pause of helper software.
     }
     private void OnDeckInteract(Entity<NCMetaCyberdeckComponent> ent, ref AfterInteractEvent args)
     {
@@ -244,9 +236,9 @@ public sealed partial class NCMetaNetrunSystem : EntitySystem, INCMetaDeviceAdap
         if (!TryGetPolicy(accessDevice, point, out var policy)) return TryQueueConnection(deck, actor, accessDevice, management, accessManagement);
         if (_deckSessions.TryGetValue(deck, out var old) && _sessions.TryGetValue(old, out var existing)) Disconnect(existing, "nc-meta-net-disconnected");
         if (_sessions.Count >= 64 || !_parties.TryResolve(actor, out var actorParty)) return false;
-        var session = new Session { Id = Guid.NewGuid(), Deck = deck, Actor = actor, AccessPoint = accessPoint, Architecture = point.ArchitectureId, Owner = deckDevice.Owner, ActorPrincipal = actorParty.ToString(), DeckManagement = management, AccessManagement = accessManagement, DeckId = deckDevice.Id, DeckEpoch = deckDevice.DeviceEpoch, DeckAuthority = deckDevice.AuthorityEpoch, AccessEpoch = accessDevice.DeviceEpoch, AccessAuthority = accessDevice.AuthorityEpoch, LastThreat = _now, Security = policy };
+        var session = new Session { Id = Guid.NewGuid(), Deck = deck, Actor = actor, AccessPoint = accessPoint, Architecture = point.ArchitectureId, Owner = deckDevice.Owner, ActorPrincipal = actorParty.ToString(), DeckManagement = management, AccessManagement = accessManagement, DeckId = deckDevice.Id, DeckEpoch = deckDevice.DeviceEpoch, DeckAuthority = deckDevice.AuthorityEpoch, AccessEpoch = accessDevice.DeviceEpoch, AccessAuthority = accessDevice.AuthorityEpoch, LastUpkeep = _now, Security = policy };
         foreach (var entry in point.EntryNodes) if (_nodes.ContainsKey((session.Architecture, entry))) session.Known.Add(entry);
-        _sessions.Add(session.Id, session); _deckSessions.Add(deck, session.Id); _threats.Enqueue(session.Id, _now + 1000);
+        _sessions.Add(session.Id, session); _deckSessions.Add(deck, session.Id); _upkeep.Enqueue(session.Id, _now + 1000);
         Publish(deck, actor);
         Log.Info($"NET session {session.Id} attached by {ToPrettyString(actor)} through {accessDevice.Id}.");
         return true;
@@ -301,7 +293,6 @@ public sealed partial class NCMetaNetrunSystem : EntitySystem, INCMetaDeviceAdap
         if (session.Pending != null || _actorActions.ContainsKey(session.ActorPrincipal) ||
             _actorCooldowns.GetValueOrDefault(session.ActorPrincipal) > _now || _cooldowns.GetValueOrDefault(session.DeckId) > _now) return false;
         if (operation == NCMetaNetOperation.Scan && !session.Observe.TryConsume(_now)) { error = "RateLimited"; return false; }
-        if (session.Ice && operation != NCMetaNetOperation.Defend) { error = "Interlock"; return false; }
         var tool = _prototypes.Index(deck.ToolProfile);
         NodeEntry? node = null;
         if (operation != NCMetaNetOperation.Scan && !TryNode(session, nodeId, out node!)) { error = "NotFound"; return false; }
@@ -341,7 +332,7 @@ public sealed partial class NCMetaNetrunSystem : EntitySystem, INCMetaDeviceAdap
         if (_hasEpoch && _epoch != epoch)
         {
             foreach (var session in _sessions.Values.ToArray()) Disconnect(session, "nc-meta-net-disconnected");
-            _actions.Clear(); _threats.Clear(); _budgets.Clear(); _actorBudgets.Clear(); _deckBudgets.Clear();
+            _actions.Clear(); _upkeep.Clear(); _budgets.Clear(); _actorBudgets.Clear(); _deckBudgets.Clear();
             _actorCooldowns.Clear(); _cooldowns.Clear();
             _connecting.Clear(); _connectionTimeouts.Clear();
         }
@@ -355,31 +346,17 @@ public sealed partial class NCMetaNetrunSystem : EntitySystem, INCMetaDeviceAdap
             var work = _actions.Dequeue();
             if (_sessions.TryGetValue(work.Session, out var session) && session.Pending is { } pending && pending.Id == work.Action && pending.Due <= _now) Finish(session, pending);
         }
-        for (var count = 0; count < 32 && _threats.TryPeek(out _, out var due) && due <= _now; count++)
+        // A connection costs the deck power while it lasts, and ends when the body, the deck or the access point is gone.
+        for (var count = 0; count < 32 && _upkeep.TryPeek(out _, out var due) && due <= _now; count++)
         {
-            var id = _threats.Dequeue();
+            var id = _upkeep.Dequeue();
             if (!_sessions.TryGetValue(id, out var session)) continue;
             if (!Current(session)) { Disconnect(session, "nc-meta-net-connection-lost"); continue; }
-            var powerCost = Math.Clamp((_now - session.LastThreat) * 0.005f, 0, 100000);
-            session.LastThreat = _now;
+            var powerCost = Math.Clamp((_now - session.LastUpkeep) * 0.005f, 0, 100000);
+            session.LastUpkeep = _now;
             if (HasComp<PowerCellSlotComponent>(session.Deck) && powerCost > 0 && !_cells.TryUseCharge(session.Deck, powerCost)) { Disconnect(session, "nc-meta-net-connection-lost"); continue; }
-            if (session.Ice && session.Threat is { } threat)
-            {
-                session.Trace = Math.Min(100, session.Trace + 1);
-                session.BlackIce = session.Trace >= threat.BlackIceThreshold;
-                if (session.BlackIce) _damage.TryChangeDamage(session.Deck, threat.BlackIceDamage, origin: session.AccessPoint);
-                if (session.BlackIce && TryComp<NCMetaCyberdeckComponent>(session.Deck, out var deck) && deck.NeuralInterface && HasNeuralConnection(session.Actor))
-                    _damage.TryChangeDamage(session.Actor, threat.BlackIceDamage, origin: session.AccessPoint);
-                session.Status = session.BlackIce ? "nc-meta-net-black-ice" : "nc-meta-net-ice"; session.Revision++; Publish(session.Deck, session.Actor);
-            }
-            _threats.Enqueue(id, _now + Math.Clamp(session.Threat?.ThreatIntervalMilliseconds ?? 1000, 250, 5000));
+            _upkeep.Enqueue(id, _now + 1000);
         }
-    }
-    private bool HasNeuralConnection(EntityUid actor)
-    {
-        foreach (var uid in _cyberware.GetInstalledModuleEntities(actor, 64))
-            if (TryComp<NCCyberwareComponent>(uid, out var module) && module.Operational && module.PowerGranted && module.NeuralState is NCCyberwareNeuralState.Linked or NCCyberwareNeuralState.Degraded) return true;
-        return false;
     }
     private void Finish(Session session, Pending pending)
     {
@@ -400,7 +377,6 @@ public sealed partial class NCMetaNetrunSystem : EntitySystem, INCMetaDeviceAdap
         if (!resolution.Admitted) { CompleteError(session, pending, "Incompatible"); return; }
         var success = resolution.Success;
         session.Trace = resolution.Trace;
-        session.Threat = defense; session.Ice |= resolution.Ice; session.BlackIce |= resolution.BlackIce;
         if (success)
         {
             session.Probed.Add(pending.Node);
@@ -413,7 +389,7 @@ public sealed partial class NCMetaNetrunSystem : EntitySystem, INCMetaDeviceAdap
         if (success && pending.Operation == NCMetaNetOperation.Defend && _devices.CanManage(session.AccessPoint, session.Actor, requireRange: false))
         {
             foreach (var other in _sessions.Values.Where(value => value.Architecture == session.Architecture && value.Id != session.Id).ToArray()) Disconnect(other, "nc-meta-net-defended");
-            session.Trace = 0; session.Ice = session.BlackIce = false;
+            session.Trace = 0;
         }
         if (success && pending.Operation == NCMetaNetOperation.Read)
         {

@@ -8,6 +8,10 @@
     {
       "id": "meta-stock-citinet-registrar",
       "manifest": "Resources/Meta/Projects/meta-stock-citinet-registrar/manifest.json"
+    },
+    {
+      "id": "meta-stock-guard",
+      "manifest": "Resources/Meta/Projects/meta-stock-guard/manifest.json"
     }
   ]
 }

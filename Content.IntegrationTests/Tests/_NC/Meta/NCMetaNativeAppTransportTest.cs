@@ -244,7 +244,7 @@ public sealed class NCMetaNativeAppTransportTest : GameTest
                 SEntMan.EventBus.RaiseEvent(EventSource.Local,
                     new GameRunLevelChangedEvent(GameRunLevel.PreRoundLobby, GameRunLevel.InRound));
                 Assert.That(scenes.TryCreate("NCMetaNetScene", out scene), Is.True);
-                foreach (var key in new[] { "deck", "door", "firewall", "blackIce" }) SEntMan.DeleteEntity(scene.Objects[key]);
+                foreach (var key in new[] { "deck", "door", "firewall", "archive" }) SEntMan.DeleteEntity(scene.Objects[key]);
                 mind = Server.System<SharedMindSystem>().CreateMind(ServerSession.UserId);
                 Server.System<SharedMindSystem>().TransferTo(mind, scene.Operator);
                 Assert.That(ServerSession.AttachedEntity, Is.EqualTo(scene.Operator));

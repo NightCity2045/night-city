@@ -106,8 +106,8 @@ internal static class NCMetaTestScenePrototypes
           - key: firewall
             prototype: NCMetaDemoNetFirewall
             offset: 0, 2
-          - key: blackIce
-            prototype: NCMetaDemoNetBlackIce
+          - key: archive
+            prototype: NCMetaDemoNetArchive
             offset: 2, 2
           - key: door
             prototype: NCMetaDemoNetworkDoor
@@ -120,7 +120,7 @@ internal static class NCMetaTestScenePrototypes
           - from: host
             to: firewall
           - from: data
-            to: blackIce
+            to: archive
           - from: control
             to: door
         
@@ -274,7 +274,7 @@ internal static class NCMetaTestScenePrototypes
             label: nc-meta-net-entry-node
             kind: Defense
             defense: NCMetaNetUnprotected
-            neighbors: [data, control, firewall, black-ice]
+            neighbors: [data, control, firewall, archive]
         
         
         - type: entity
@@ -325,16 +325,16 @@ internal static class NCMetaTestScenePrototypes
         
         - type: entity
           parent: NCMetaDemoNetFirewall
-          id: NCMetaDemoNetBlackIce
-          name: local NET Black ICE
+          id: NCMetaDemoNetArchive
+          name: local NET archive
           suffix: training
-          description: A dangerous native defense. Its threat timer continues while META software is paused or stopped.
+          description: A protected node that stays hidden until a scan reaches it.
           components:
           - type: NCMetaNetNode
             architectureId: meta-demo
-            nodeId: black-ice
-            label: nc-meta-net-black-ice-node
+            nodeId: archive
+            label: nc-meta-net-archive-node
             kind: Defense
-            defense: NCMetaNetBlackIce
+            defense: NCMetaNetSecured
         """;
 }

@@ -81,7 +81,7 @@ public sealed partial class NCMetaNativeNetworkTest : GameTest
         EntityUid networkActor = actor;
         if (!net) await Server.WaitPost(() =>
         {
-            foreach (var key in new[] { "deck", "firewall", "blackIce", "door" }) SEntMan.DeleteEntity(physical.Objects[key]);
+            foreach (var key in new[] { "deck", "firewall", "archive", "door" }) SEntMan.DeleteEntity(physical.Objects[key]);
         });
         if (foreignNetwork) await Server.WaitPost(() =>
             networkActor = SEntMan.SpawnEntity("MobHuman", SComp<TransformComponent>(actor).Coordinates));
@@ -94,7 +94,7 @@ public sealed partial class NCMetaNativeNetworkTest : GameTest
         var networkOwner = foreignNetwork ? await CreateOwner(networkActor, "Native network owner") : owner;
         foreach (var (key, endpoint) in physical.Objects)
         {
-            if ((!net && key is "deck" or "firewall" or "blackIce" or "door") || (neural && key == "deck")) continue;
+            if ((!net && key is "deck" or "firewall" or "archive" or "door") || (neural && key == "deck")) continue;
             if (key == "deck") await Claim(endpoint, actor, owner);
             else await Claim(endpoint, networkActor, networkOwner);
         }

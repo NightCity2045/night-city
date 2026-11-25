@@ -31,10 +31,10 @@ public sealed partial class NCMetaNativeNetworkTest
                 Assert.That(_net.TryExecuteAction(scene.Deck, scene.Actor, NCMetaNetOperation.Probe,
                     attached.SessionId, attached.Revision - 1, "entry"), Is.False);
                 Assert.That(_net.TryExecuteAction(scene.Deck, scene.Actor, NCMetaNetOperation.Probe,
-                    attached.SessionId, attached.Revision, "black-ice"), Is.False, "A hidden node name is not a discovery capability.");
+                    attached.SessionId, attached.Revision, "archive"), Is.False, "A hidden node name is not a discovery capability.");
             });
             var scanned = await Action(scene, NCMetaNetOperation.Scan);
-            Assert.That(scanned.Nodes.Select(node => node.Id), Is.EquivalentTo(new[] { "entry", "data", "control", "firewall", "black-ice" }));
+            Assert.That(scanned.Nodes.Select(node => node.Id), Is.EquivalentTo(new[] { "entry", "data", "control", "firewall", "archive" }));
             Assert.That(scanned.Nodes.All(node => !node.Probed && !node.Accessible), Is.True);
             await Server.WaitAssertion(() =>
             {

@@ -95,10 +95,6 @@ public sealed partial class NCMetaNetDefenseProfilePrototype : IPrototype
     [DataField] public int Rating;
     [DataField] public int TraceOnSuccess = 1;
     [DataField] public int TraceOnFailure = 3;
-    [DataField] public int IceThreshold = 6;
-    [DataField] public int BlackIceThreshold = 9;
-    [DataField] public int ThreatIntervalMilliseconds = 1000;
-    [DataField] public DamageSpecifier BlackIceDamage = new();
 }
 
 [Serializable, NetSerializable]

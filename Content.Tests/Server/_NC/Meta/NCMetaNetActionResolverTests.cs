@@ -15,23 +15,21 @@ public sealed class NCMetaNetActionResolverTests
         var tool = new NCMetaNetToolProfilePrototype { Rating = 2 };
         var defense = new NCMetaNetDefenseProfilePrototype { Rating = 2, TraceOnSuccess = 1, TraceOnFailure = 3 };
         var passed = NCMetaNetActionResolver.Resolve(tool, defense, NCMetaNetNodeKind.Control, 0);
-        Assert.That(passed, Is.EqualTo(new NCMetaNetResolution(true, true, 1, false, false)));
+        Assert.That(passed, Is.EqualTo(new NCMetaNetResolution(true, true, 1)));
         defense.Rating = 3;
         var lost = NCMetaNetActionResolver.Resolve(tool, defense, NCMetaNetNodeKind.Control, 0);
-        Assert.That(lost, Is.EqualTo(new NCMetaNetResolution(true, false, 3, false, false)));
+        Assert.That(lost, Is.EqualTo(new NCMetaNetResolution(true, false, 3)));
     }
 
     [Test]
-    public void RepeatedNativeAttemptsCrossIceAndBlackIceThresholdsAndTraceIsBounded()
+    public void RepeatedFailuresRaiseTraceAndTraceIsBounded()
     {
         var tool = new NCMetaNetToolProfilePrototype { Rating = 1 };
-        var defense = new NCMetaNetDefenseProfilePrototype { Rating = 3, TraceOnFailure = 3, IceThreshold = 6, BlackIceThreshold = 9 };
+        var defense = new NCMetaNetDefenseProfilePrototype { Rating = 3, TraceOnFailure = 3 };
         var first = NCMetaNetActionResolver.Resolve(tool, defense, NCMetaNetNodeKind.Defense, 0);
         var second = NCMetaNetActionResolver.Resolve(tool, defense, NCMetaNetNodeKind.Defense, first.Trace);
-        var third = NCMetaNetActionResolver.Resolve(tool, defense, NCMetaNetNodeKind.Defense, second.Trace);
-        Assert.That(first.Ice, Is.False);
-        Assert.That(second.Ice, Is.True); Assert.That(second.BlackIce, Is.False);
-        Assert.That(third.BlackIce, Is.True);
+        Assert.That(first.Trace, Is.EqualTo(3));
+        Assert.That(second.Trace, Is.EqualTo(6));
         Assert.That(NCMetaNetActionResolver.Resolve(tool, defense, NCMetaNetNodeKind.Defense, 99).Trace, Is.EqualTo(100));
     }
 

@@ -42,34 +42,12 @@
   rating: 0
   traceOnSuccess: 1
   traceOnFailure: 3
-  iceThreshold: 6
-  blackIceThreshold: 9
-  blackIceDamage:
-    types:
-      Shock: 2
 
 - type: ncMetaNetDefense
   id: NCMetaNetSecured
   rating: 3
   traceOnSuccess: 1
   traceOnFailure: 3
-  iceThreshold: 6
-  blackIceThreshold: 9
-  blackIceDamage:
-    types:
-      Shock: 5
-
-- type: ncMetaNetDefense
-  id: NCMetaNetBlackIce
-  rating: 1
-  traceOnSuccess: 1
-  traceOnFailure: 3
-  iceThreshold: 3
-  blackIceThreshold: 4
-  threatIntervalMilliseconds: 1000
-  blackIceDamage:
-    types:
-      Shock: 10
 
 - type: entity
   parent: NCMetaTerminalBase
@@ -154,7 +132,7 @@
   id: NCMetaNeuralCyberdeck
   name: META cyberdeck
   suffix: neural interface
-  description: A local NET deck with a neural interface. Black ICE can harm its operator when an operational powered neural implant is connected.
+  description: A local NET deck with a neural interface. Reserved for jacking in through a neural implant.
   components:
   - type: NCMetaCyberdeck
     neuralInterface: true

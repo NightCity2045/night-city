@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "id": "meta-stock-guard",
+  "name": "Host guard",
+  "nameRu": "Страж хоста",
+  "packageName": "security.guard",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "security.guard",
+  "files": [
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/Guard/main.meta",
+      "sha256": "74b50699bf64ffc4e56beb7a59fa1336fe2c82accd5a7eeaff6cf35ab17f9954"
+    }
+  ],
+  "startMode": "Manual",
+  "bindings": [],
+  "testFixture": "meta.test.json"
+}

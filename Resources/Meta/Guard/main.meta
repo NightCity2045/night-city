@@ -1,0 +1,44 @@
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+module security.guard;
+import meta.system;
+import meta.net;
+import meta.security;
+
+// A guard for a host: it counts the messages each sender sends it and, when one sender keeps hammering it, answers
+// that sender's device with a surge. Players call such programs "ICE" or "black ICE"; this one is only an example to read
+// and rewrite. What it decides (how many tries, how hard, whom) is this code; the game only allows a strike at a device
+// that really did message this host a moment ago, and the strike harms that device's hardware, never its user.
+
+link port: MessagePort = "guard-port";
+link guard: Countermeasure = "guard-surge";
+
+var senders: list<string> = new list<string>();
+var tries: list<int> = new list<int>();
+
+fn indexOf(sender: string) -> int {
+    var index: int = 0;
+    while (index < senders.length) {
+        if (senders[index] == sender) { return index; }
+        index = index + 1;
+    }
+    return -1;
+}
+
+// Three messages from one sender are too many; the strength of the answer grows with the count, up to the limit.
+async watch port.messageReceived(message) {
+    var position: int = indexOf(message.replyTo);
+    if (position < 0) {
+        if (senders.length >= 32) { return; }
+        senders.push(message.replyTo);
+        tries.push(0);
+        position = senders.length - 1;
+    }
+    tries[position] = tries[position] + 1;
+    if (tries[position] < 3) { return; }
+    var power: int = tries[position] - 1;
+    if (power > 6) { power = 6; }
+    match (await guard.surge(message.replyTo, power)) {
+        ok(done) => { system.log("surge|" + message.replyTo); }
+        err(problem) => { system.log(problem.message); }
+    }
+}
