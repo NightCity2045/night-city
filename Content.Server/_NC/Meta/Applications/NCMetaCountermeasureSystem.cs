@@ -51,14 +51,14 @@ public sealed class NCMetaCountermeasureSystem : EntitySystem, INCMetaDeviceAdap
     public MetaValue Read(NCMetaDeviceInvocation invocation)
     {
         var process = invocation.Runtime.Process;
-        return process.CreateErrorResult(process.GetImport(invocation.Request.ImportId).ReturnType!.Value, "Unsupported");
+        return process.CreateErrorResult(process.GetImport(invocation.Request.ImportId).ReturnType!.Value, "Unsupported", "Unsupported");
     }
 
     public MetaHostResult Commit(NCMetaDeviceInvocation invocation)
     {
         var process = invocation.Runtime.Process;
         var type = process.GetImport(invocation.Request.ImportId).ReturnType!.Value;
-        MetaHostResult Fail(string code) => MetaHostResult.Completed(process.CreateErrorResult(type, code));
+        MetaHostResult Fail(string code) => MetaHostResult.Completed(process.CreateErrorResult(type, code, code));
         var address = process.GetString(invocation.Request.Arguments[0]);
         var power = invocation.Request.Arguments[1].AsInt();
         if (power < 1 || power > MaximumPower) return Fail("InvalidArgument");

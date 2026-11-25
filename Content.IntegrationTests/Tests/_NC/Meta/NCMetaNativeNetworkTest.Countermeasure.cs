@@ -69,4 +69,54 @@ public sealed partial class NCMetaNativeNetworkTest
         }
         finally { await Destroy(scene); }
     }
+
+    // A tracer written by a player: whoever messages it gets traced, and what came of it goes into its log.
+    private const string Tracer = """
+        module native.tracer;
+        import meta.system; import meta.net; import meta.security;
+        link port:net.MessagePort="port";
+        link finder:security.Trace="finder";
+        async watch port.messageReceived(message){
+            match(await finder.locate(message.replyTo)){ok(found)=>{system.log("traced|"+found.device+"|"+found.owner);} err(error)=>{system.log("trace|"+error.message);}}
+        }
+        """;
+
+    [TestCase(false)]
+    [TestCase(true)]
+    public async Task ATraceFindsTheDeviceThatMessagedAndIsLostIfItLeavesTheNetworkMeanwhile(bool leaves)
+    {
+        var scene = await CreateScene();
+        try
+        {
+            var data = scene.Physical.Objects["data"];
+            var host = scene.Physical.Objects["host"];
+            await Server.WaitPost(() => MoveTo(scene.NetworkActor, data));
+            var tracer = await Programs.InstallAndStartAsync(data, scene.NetworkActor, "native.tracer", "native.tracer", Tracer,
+                new Dictionary<string, EntityUid> { ["port"] = data, ["finder"] = data });
+            string destination = "", hostId = "";
+            await Server.WaitPost(() =>
+            {
+                destination = Address(data);
+                hostId = _devices.TryGetEntry(host, out var entry) ? entry.Id : "";
+            });
+            Assert.That(hostId, Is.Not.Empty);
+            await Program(scene, "host", Send(destination, "x"));
+            if (leaves)
+            {
+                // The trace takes seconds; the device that is being traced goes dark before it ends.
+                await Until(() => Server.System<Content.Server._NC.Meta.Applications.NCMetaTraceSystem>().IsTracing(data),
+                    reason: "The trace never started.");
+                await Server.WaitPost(() => SEntMan.DeleteEntity(host));
+            }
+            await Until(() => Logs(scene, "data", tracer.Installation.Id).Any(line => line.StartsWith("trace", System.StringComparison.Ordinal)),
+                maximumTicks: 1200, reason: "The tracer never reported: " + string.Join(";", Logs(scene, "data", tracer.Installation.Id)));
+            await Server.WaitAssertion(() =>
+            {
+                var line = Logs(scene, "data", tracer.Installation.Id).Single(value => value.StartsWith("trace", System.StringComparison.Ordinal));
+                if (leaves) Assert.That(line, Is.EqualTo("trace|DeviceDestroyed"));
+                else Assert.That(line, Does.StartWith("traced|" + hostId + "|"));
+            });
+        }
+        finally { await Destroy(scene); }
+    }
 }

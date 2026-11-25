@@ -2,18 +2,25 @@
 module security.guard;
 import meta.system;
 import meta.net;
+import meta.text;
+import meta.files;
 import meta.security;
 
-// A guard for a host: it counts the messages each sender sends it and, when one sender keeps hammering it, answers
-// that sender's device with a surge. Players call such programs "ICE" or "black ICE"; this one is only an example to read
-// and rewrite. What it decides (how many tries, how hard, whom) is this code; the game only allows a strike at a device
-// that really did message this host a moment ago, and the strike harms that device's hardware, never its user.
+// A guard for a host: it keeps a ledger of who messages it and how often, and when one sender keeps hammering it, it answers
+// that sender's device with a surge and then traces it, writing down where it was and whose. Players call such programs
+// "ICE" or "black ICE"; this one is only an example to read and rewrite. What it decides (how many tries, how hard, whom)
+// is this code; the game only allows a strike at a device that really did message this host a moment ago, and a trace
+// takes time and fails if the device goes off the network.
 
 link port: MessagePort = "guard-port";
 link guard: Countermeasure = "guard-surge";
+link finder: Trace = "guard-trace";
+link data: FileStore = "guard-ledger";
 
 var senders: list<string> = new list<string>();
 var tries: list<int> = new list<int>();
+var places: list<string> = new list<string>();
+var owners: list<string> = new list<string>();
 
 fn indexOf(sender: string) -> int {
     var index: int = 0;
@@ -24,6 +31,24 @@ fn indexOf(sender: string) -> int {
     return -1;
 }
 
+// One line per sender: who, how many messages, and, once traced, where and whose.
+fn serialize() -> string {
+    var joined: string = "";
+    var index: int = 0;
+    while (index < senders.length) {
+        joined = joined + senders[index] + "|" + text.fromInt(tries[index]) + "|" + places[index] + "|" + owners[index] + "\n";
+        index = index + 1;
+    }
+    return joined;
+}
+
+async fn save() -> void {
+    match (await data.writeTextAtomic("guard/ledger.txt", serialize())) {
+        ok(done) => { }
+        err(problem) => { system.log(problem.message); }
+    }
+}
+
 // Three messages from one sender are too many; the strength of the answer grows with the count, up to the limit.
 async watch port.messageReceived(message) {
     var position: int = indexOf(message.replyTo);
@@ -31,6 +56,8 @@ async watch port.messageReceived(message) {
         if (senders.length >= 32) { return; }
         senders.push(message.replyTo);
         tries.push(0);
+        places.push("");
+        owners.push("");
         position = senders.length - 1;
     }
     tries[position] = tries[position] + 1;
@@ -41,4 +68,13 @@ async watch port.messageReceived(message) {
         ok(done) => { system.log("surge|" + message.replyTo); }
         err(problem) => { system.log(problem.message); }
     }
+    match (await finder.locate(message.replyTo)) {
+        ok(found) => {
+            places[position] = found.place;
+            owners[position] = found.owner;
+            system.log("traced|" + found.device + "|" + found.place + "|" + found.owner);
+        }
+        err(problem) => { system.log("trace|" + problem.message); }
+    }
+    await save();
 }

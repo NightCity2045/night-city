@@ -18,7 +18,7 @@
   storageBytes: 4194304
   maxProcesses: 1
   cpuWeight: 2
-  interfaces: [meta.net.MessagePort, meta.files.FileStore, meta.security.Countermeasure]
+  interfaces: [meta.net.MessagePort, meta.files.FileStore, meta.security.Countermeasure, meta.security.Trace]
 
 - type: ncMetaNetTool
   id: NCMetaNetProbe

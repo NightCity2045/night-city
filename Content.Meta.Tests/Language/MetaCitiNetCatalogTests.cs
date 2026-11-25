@@ -53,4 +53,14 @@ public sealed class MetaCitiNetCatalogTests
         var accept = MetaApiCatalog.Default.Members.Single(member => member.QualifiedName == "meta.citinet.Browser.accept");
         Assert.That(accept.Scope, Is.EqualTo("citinet.install"));
     }
+
+    [Test]
+    public void TheCatalogBeforeTheTraceStaysTrustedAndLacksIt()
+    {
+        var old = MetaApiCatalog.ResolveTrustedCatalog(MetaApiCatalog.PreTraceCatalogHash);
+        Assert.That(old.Hash, Is.EqualTo(MetaApiCatalog.PreTraceCatalogHash));
+        Assert.That(old.Members.Any(member => member.Owner == "meta.security.Trace"), Is.False);
+        var locate = MetaApiCatalog.Default.Members.Single(member => member.QualifiedName == "meta.security.Trace.locate");
+        Assert.That(locate.Scope, Is.EqualTo("security.trace"));
+    }
 }

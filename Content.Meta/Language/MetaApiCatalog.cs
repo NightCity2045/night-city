@@ -150,6 +150,11 @@ public sealed partial class MetaApiCatalog
         // recently sent that host a message, and only as hardware damage; it never reaches the person at the keyboard.
         Capability("meta.security", "Countermeasure");
         Method("meta.security.Countermeasure", "surge", "result<void>", "security.countermeasure", true, "string", "int");
+        // Finding where a device is takes time and a live route: the program names a device by its address or its code and,
+        // some seconds later, learns the place and the owner, unless the device went off the network meanwhile.
+        Capability("meta.security", "Trace");
+        Dto("meta.security", "TraceResult", "device:string", "place:string", "owner:string");
+        Method("meta.security.Trace", "locate", "result<meta.security.TraceResult>", "security.trace", true, "string");
         Method("meta.files.FileStore", "readText", "result<string>", "files.read", true, "string");
         Method("meta.files.FileStore", "writeTextAtomic", "result<void>", "files.write", true, "string", "string");
         Capability("meta.net", "MessagePort");

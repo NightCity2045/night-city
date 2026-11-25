@@ -28,6 +28,11 @@ public sealed class MetaGuardTests
         return MetaVerifier.Verify(compiled.Artifact!, MetaApiCatalog.Default.CreateVerificationCatalog(compiled.Module!));
     }
 
+    private const string Strike =
+        "{ \"member\": \"meta.security.Countermeasure.surge\", \"value\": null, \"pending\": false, \"completeAfterSlices\": 1 }," +
+        "{ \"member\": \"meta.security.Trace.locate\", \"value\": { \"device\": \"K7Q4MD\", \"place\": \"Docks / Pier 4\", \"owner\": \"character:7\" }, \"pending\": true, \"completeAfterSlices\": 2 }," +
+        "{ \"member\": \"meta.files.FileStore.writeTextAtomic\", \"value\": null, \"pending\": true, \"completeAfterSlices\": 2 }";
+
     private static string Event(int sequence, string sender) =>
         $$"""{ "slot": "guard-port", "event": "messageReceived", "arguments": [ { "replyTo": "{{sender}}", "topic": "probe", "payload": "x", "stamp": { "epoch": 1, "sequence": {{sequence}}, "tick": 60 } } ], "sequence": {{sequence}}, "nowMs": 1000, "tick": 60 }""";
 
@@ -36,9 +41,9 @@ public sealed class MetaGuardTests
         var fixture = $$"""
             {
               "rootModule": "security.guard",
-              "responses": [ {{(struck ? "{ \"member\": \"meta.security.Countermeasure.surge\", \"value\": null, \"pending\": false, \"completeAfterSlices\": 1 }" : "")}} ],
+              "responses": [ {{(struck ? Strike : "")}} ],
               "events": [ {{events}} ],
-              "expectedLogs": [ {{(struck ? "\"surge|peer-a\"" : "")}} ],
+              "expectedLogs": [ {{(struck ? "\"surge|peer-a\", \"traced|K7Q4MD|Docks / Pier 4|character:7\"" : "")}} ],
               "expectedCommands": [ {{commands}} ],
               "epoch": 1, "nowMs": 1000, "tick": 60
             }
@@ -52,7 +57,7 @@ public sealed class MetaGuardTests
 
     [Test]
     public void AThirdMessageFromTheSameSenderGetsASurge() =>
-        Run(Event(1, "peer-a") + "," + Event(2, "peer-a") + "," + Event(3, "peer-a"), "\"surge(peer-a,2)\"", struck: true);
+        Run(Event(1, "peer-a") + "," + Event(2, "peer-a") + "," + Event(3, "peer-a"), "\"surge(peer-a,2)\", \"locate(peer-a)\", \"writeTextAtomic(guard/ledger.txt,peer-a|3|Docks / Pier 4|character:7\\n)\"", struck: true);
 
     [Test]
     public void ThreeSendersMessagingOnceEachAreNotCountedAsOne() => Run(Event(1, "peer-a") + "," + Event(2, "peer-b") + "," + Event(3, "peer-c"), "");
