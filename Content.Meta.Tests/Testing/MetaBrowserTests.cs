@@ -147,4 +147,50 @@ public sealed class MetaBrowserTests
                 Is.EqualTo(file.GetProperty("sha256").GetString()), file.GetProperty("path").GetString());
         }
     }
+
+    [Test]
+    public void EveryPermissionOfTheCatalogHasAPlainNameInBothLanguagesInTheOfferCard()
+    {
+        var source = File.ReadAllText(Path.Combine(Folder, "main.meta"));
+        var missing = MetaApiCatalog.Default.Members.Select(member => member.Scope).Where(scope => scope.Length > 0).Distinct()
+            .Where(scope => !source.Contains("scope == \"" + scope + "\") { return tr(ru, \"", StringComparison.Ordinal)).OrderBy(scope => scope).ToArray();
+        Assert.That(missing, Is.Empty, "The browser shows these permissions raw. Add them to scopeName in the browser program: " + string.Join(", ", missing));
+    }
+
+    private static void Offer(Site site, string scopes)
+    {
+        var watches = site.Artifact.GetWatches();
+        var watch = Enumerable.Range(0, watches.Length).Single(index => site.Artifact.GetImport(watches[index].EventImportId).Name == "meta.citinet.Browser.offerReceived");
+        var offer = site.Process.CreateRecord(site.Process.GetTypeId("meta.citinet.ProgramOffer"),
+            [site.Process.CreateString("offer-1"), site.Process.CreateString("Free tool"), site.Process.CreateString("K7Q4MD"), site.Process.CreateString(scopes)]);
+        Assert.That(site.Process.TryEnqueueEvent(watch, [offer], 1), Is.True);
+        Assert.That(site.Process.TryStartNextEvent(), Is.True);
+        Drain(site.Process);
+    }
+
+    [Test]
+    public void AnOfferedProgramIsDescribedInPlainWordsNotByItsPermissionCodes()
+    {
+        var site = Boot();
+        Offer(site, "door.control,files.write,economy.pay");
+        var english = View(site).GetProperty("programText").GetString()!;
+        Assert.That(english, Does.Contain("Free tool"));
+        Assert.That(english, Does.Contain("Open, close and bolt doors").And.Contain("Write and change the files of this device")
+            .And.Contain("Pay from your account when you press a button"));
+        Assert.That(english, Does.Not.Contain("door.control"));
+        var russian = View(site, "ru-RU").GetProperty("programText").GetString()!;
+        Assert.That(russian, Does.Contain("Открывать, закрывать и запирать двери").And.Contain("Платить с вашего счёта"));
+        Assert.That(russian, Does.Not.Contain("files.write"));
+    }
+
+    [Test]
+    public void AnOfferThatAsksForNothingSaysSoAndAnUnknownPermissionIsShownAsItIs()
+    {
+        var plain = Boot();
+        Offer(plain, "");
+        Assert.That(View(plain).GetProperty("programText").GetString(), Does.Contain("nothing special"));
+        var odd = Boot();
+        Offer(odd, "door.control,future.thing");
+        Assert.That(View(odd).GetProperty("programText").GetString(), Does.Contain("future.thing"));
+    }
 }

@@ -118,6 +118,135 @@ fn describe(ru: bool, code: string) -> string {
     return code;
 }
 
+// What a permission means in plain words, in both languages. A permission the table does not know is shown as it is,
+// so a new capability can never be hidden from the person who is asked to agree to it.
+fn scopeName(ru: bool, scope: string) -> string {
+    if (scope == "alarm.control") { return tr(ru, "Sound or silence alarms", "Включать и выключать тревогу"); }
+    if (scope == "camera.motion.observe") { return tr(ru, "See motion that cameras notice", "Видеть движение, замеченное камерами"); }
+    if (scope == "citinet.browse") { return tr(ru, "Open pages in the browser", "Открывать страницы в браузере"); }
+    if (scope == "citinet.install") { return tr(ru, "Install programs you accept", "Устанавливать принятые вами программы"); }
+    if (scope == "citinet.offer") { return tr(ru, "Offer programs to visitors", "Предлагать программы посетителям"); }
+    if (scope == "citinet.visitor") { return tr(ru, "See which device a visitor browses from", "Видеть, с какого устройства заходит посетитель"); }
+    if (scope == "conveyor.control") { return tr(ru, "Start and stop conveyors", "Включать и останавливать конвейеры"); }
+    if (scope == "door.access") { return tr(ru, "Receive door access requests", "Получать запросы доступа к двери"); }
+    if (scope == "door.access.answer") { return tr(ru, "Decide who a door lets through", "Решать, кого пропускает дверь"); }
+    if (scope == "door.control") { return tr(ru, "Open, close and bolt doors", "Открывать, закрывать и запирать двери"); }
+    if (scope == "door.observe") { return tr(ru, "See the state of doors", "Видеть состояние дверей"); }
+    if (scope == "door.read") { return tr(ru, "Read door settings", "Читать настройки двери"); }
+    if (scope == "door.safety") { return tr(ru, "Change door safety settings", "Менять настройки безопасности двери"); }
+    if (scope == "doorpanel.observe") { return tr(ru, "See presses on door panels", "Видеть нажатия на панелях дверей"); }
+    if (scope == "drone.cargo.drop") { return tr(ru, "Make a drone drop its cargo", "Заставлять дрон сбрасывать груз"); }
+    if (scope == "drone.cargo.pickup") { return tr(ru, "Make a drone pick up cargo", "Заставлять дрон подбирать груз"); }
+    if (scope == "drone.cargo.read") { return tr(ru, "See what a drone carries", "Видеть, что везёт дрон"); }
+    if (scope == "drone.cargo.store") { return tr(ru, "Make a drone stow cargo", "Заставлять дрон убирать груз в отсек"); }
+    if (scope == "drone.mode.control") { return tr(ru, "Change a drone mode", "Менять режим дрона"); }
+    if (scope == "drone.navigate") { return tr(ru, "Send a drone somewhere", "Отправлять дрон в точку"); }
+    if (scope == "drone.navigation.cancel") { return tr(ru, "Cancel a drone route", "Отменять маршрут дрона"); }
+    if (scope == "drone.navigation.detail") { return tr(ru, "Read the details of a drone route", "Читать детали маршрута дрона"); }
+    if (scope == "drone.navigation.observe") { return tr(ru, "Follow a drone route", "Следить за маршрутом дрона"); }
+    if (scope == "drone.observe") { return tr(ru, "See what a drone sees", "Видеть то, что видит дрон"); }
+    if (scope == "drone.operation.cancel") { return tr(ru, "Cancel the job of a drone", "Отменять задание дрона"); }
+    if (scope == "drone.operation.observe") { return tr(ru, "Follow the job of a drone", "Следить за заданием дрона"); }
+    if (scope == "drone.operation.read") { return tr(ru, "Read the job of a drone", "Читать задание дрона"); }
+    if (scope == "drone.route.read") { return tr(ru, "Read a drone route", "Читать маршрут дрона"); }
+    if (scope == "drone.state.observe") { return tr(ru, "Follow the state of a drone", "Следить за состоянием дрона"); }
+    if (scope == "drone.state.read") { return tr(ru, "Read the state of a drone", "Читать состояние дрона"); }
+    if (scope == "drone.weapon.fire") { return tr(ru, "Fire the weapon of a drone", "Стрелять из оружия дрона"); }
+    if (scope == "drone.weapon.read") { return tr(ru, "Read the state of a drone weapon", "Читать состояние оружия дрона"); }
+    if (scope == "economy.pay") { return tr(ru, "Pay from your account when you press a button", "Платить с вашего счёта, когда вы нажимаете кнопку"); }
+    if (scope == "economy.receive") { return tr(ru, "Check payments made to the owner of this device", "Проверять платежи владельцу этого устройства"); }
+    if (scope == "files.read") { return tr(ru, "Read the files of this device", "Читать файлы этого устройства"); }
+    if (scope == "files.write") { return tr(ru, "Write and change the files of this device", "Записывать и менять файлы этого устройства"); }
+    if (scope == "implant.eye.control") { return tr(ru, "Control a cybernetic eye", "Управлять киберглазом"); }
+    if (scope == "implant.eye.observe") { return tr(ru, "Follow what a cybernetic eye sees", "Следить за тем, что видит киберглаз"); }
+    if (scope == "implant.eye.read") { return tr(ru, "Read the state of a cybernetic eye", "Читать состояние киберглаза"); }
+    if (scope == "implant.function.control") { return tr(ru, "Control a functional implant", "Управлять функциональным имплантом"); }
+    if (scope == "implant.function.observe") { return tr(ru, "Follow a functional implant", "Следить за функциональным имплантом"); }
+    if (scope == "implant.function.pulse") { return tr(ru, "Trigger a functional implant", "Запускать функциональный имплант"); }
+    if (scope == "implant.function.read") { return tr(ru, "Read the state of a functional implant", "Читать состояние функционального импланта"); }
+    if (scope == "implant.medical.flash") { return tr(ru, "Rewrite the program of a medical implant", "Перепрошивать медицинский имплант"); }
+    if (scope == "implant.medical.read") { return tr(ru, "Read a medical implant", "Читать данные медицинского импланта"); }
+    if (scope == "implant.neural.control") { return tr(ru, "Control a neural implant", "Управлять нейроимплантом"); }
+    if (scope == "implant.neural.observe") { return tr(ru, "Follow a neural implant", "Следить за нейроимплантом"); }
+    if (scope == "implant.neural.read") { return tr(ru, "Read the state of a neural implant", "Читать состояние нейроимпланта"); }
+    if (scope == "implant.optics.filter") { return tr(ru, "Change what your optics show", "Менять картинку в вашей оптике"); }
+    if (scope == "implant.optics.observe") { return tr(ru, "Follow what your optics see", "Следить за тем, что видит ваша оптика"); }
+    if (scope == "lab.cancel") { return tr(ru, "Cancel laboratory work", "Отменять работу лаборатории"); }
+    if (scope == "lab.operation.observe") { return tr(ru, "Follow laboratory work", "Следить за работой лаборатории"); }
+    if (scope == "lab.operation.read") { return tr(ru, "Read laboratory work", "Читать данные работы лаборатории"); }
+    if (scope == "lab.package") { return tr(ru, "Package laboratory products", "Фасовать продукты лаборатории"); }
+    if (scope == "lab.process") { return tr(ru, "Run laboratory processes", "Запускать процессы лаборатории"); }
+    if (scope == "machine.cancel") { return tr(ru, "Cancel the job of a machine", "Отменять задание станка"); }
+    if (scope == "machine.operation.observe") { return tr(ru, "Follow the job of a machine", "Следить за заданием станка"); }
+    if (scope == "machine.operation.read") { return tr(ru, "Read the job of a machine", "Читать задание станка"); }
+    if (scope == "machine.produce") { return tr(ru, "Make a machine produce items", "Заставлять станок производить предметы"); }
+    if (scope == "machine.recipes.read") { return tr(ru, "Read the recipes of a machine", "Читать рецепты станка"); }
+    if (scope == "medical.diagnostics.read") { return tr(ru, "Read medical diagnostics", "Читать медицинскую диагностику"); }
+    if (scope == "medical.dose") { return tr(ru, "Give doses of medicine", "Дозировать лекарства"); }
+    if (scope == "medical.operation.observe") { return tr(ru, "Follow medical procedures", "Следить за медицинскими процедурами"); }
+    if (scope == "medical.operation.read") { return tr(ru, "Read medical procedures", "Читать медицинские процедуры"); }
+    if (scope == "medical.patient.read") { return tr(ru, "Read the data of a patient", "Читать данные пациента"); }
+    if (scope == "medical.procedure") { return tr(ru, "Carry out medical procedures", "Выполнять медицинские процедуры"); }
+    if (scope == "net.receive") { return tr(ru, "Receive messages from other devices", "Получать сообщения от других устройств"); }
+    if (scope == "net.send") { return tr(ru, "Send messages to other devices", "Отправлять сообщения другим устройствам"); }
+    if (scope == "netrun.observe") { return tr(ru, "Follow a net session", "Следить за сессией в сети"); }
+    if (scope == "netrun.probe") { return tr(ru, "Probe the nodes of a network", "Прощупывать узлы сети"); }
+    if (scope == "security.countermeasure") { return tr(ru, "Strike back at devices that hammer this one", "Бить в ответ по устройствам, которые атакуют это"); }
+    if (scope == "security.trace") { return tr(ru, "Find where a device is and whose it is", "Выслеживать, где устройство и чьё оно"); }
+    if (scope == "sensor.load.observe") { return tr(ru, "Follow load sensors", "Следить за датчиками нагрузки"); }
+    if (scope == "sensor.temperature.observe") { return tr(ru, "Follow temperature sensors", "Следить за датчиками температуры"); }
+    if (scope == "vehicle.assistance.control") { return tr(ru, "Control the driver assistance of a vehicle", "Управлять помощью водителю в машине"); }
+    if (scope == "vehicle.assistance.observe") { return tr(ru, "Follow the driver assistance of a vehicle", "Следить за помощью водителю в машине"); }
+    if (scope == "vehicle.assistance.read") { return tr(ru, "Read the driver assistance of a vehicle", "Читать данные помощи водителю в машине"); }
+    if (scope == "vehicle.engine.mode") { return tr(ru, "Change the engine mode of a vehicle", "Менять режим двигателя машины"); }
+    if (scope == "vehicle.engine.observe") { return tr(ru, "Follow the engine of a vehicle", "Следить за двигателем машины"); }
+    if (scope == "vehicle.engine.read") { return tr(ru, "Read the engine of a vehicle", "Читать данные двигателя машины"); }
+    if (scope == "vehicle.security.control") { return tr(ru, "Control the lock and alarm of a vehicle", "Управлять замком и сигнализацией машины"); }
+    if (scope == "vehicle.security.observe") { return tr(ru, "Follow the lock and alarm of a vehicle", "Следить за замком и сигнализацией машины"); }
+    if (scope == "vehicle.security.read") { return tr(ru, "Read the lock and alarm of a vehicle", "Читать данные замка и сигнализации машины"); }
+    if (scope == "vehicle.telemetry.observe") { return tr(ru, "Follow the telemetry of a vehicle", "Следить за телеметрией машины"); }
+    if (scope == "vehicle.telemetry.read") { return tr(ru, "Read the telemetry of a vehicle", "Читать телеметрию машины"); }
+    if (scope == "vehicle.transmission.gear") { return tr(ru, "Change the gears of a vehicle", "Переключать передачи машины"); }
+    if (scope == "vehicle.transmission.observe") { return tr(ru, "Follow the transmission of a vehicle", "Следить за коробкой передач машины"); }
+    if (scope == "vehicle.transmission.read") { return tr(ru, "Read the transmission of a vehicle", "Читать данные коробки передач машины"); }
+    if (scope == "vehicle.transmission.strategy") { return tr(ru, "Change the shifting strategy of a vehicle", "Менять стратегию переключения передач"); }
+    return scope;
+}
+
+// The permissions the game listed for the offered program, comma separated, as one readable sentence part.
+fn scopeList(ru: bool, source: string) -> string {
+    if (source.length < 1) { return tr(ru, "nothing special", "ничего особенного"); }
+    var joined: string = "";
+    var piece: string = "";
+    var index: int = 0;
+    while (index < source.length) {
+        match (text.slice(source, index, 1)) {
+            ok(symbol) => {
+                if (symbol == ",") {
+                    if (joined.length > 0) { joined = joined + "; "; }
+                    joined = joined + scopeName(ru, piece);
+                    piece = "";
+                } else {
+                    piece = piece + symbol;
+                }
+            }
+            err(problem) => { }
+        }
+        index = index + 1;
+    }
+    if (piece.length > 0) {
+        if (joined.length > 0) { joined = joined + "; "; }
+        joined = joined + scopeName(ru, piece);
+    }
+    return joined;
+}
+
+fn offerSentence(ru: bool) -> string {
+    if (!programReady) { return ""; }
+    return tr(ru, "The site ", "Сайт ") + programSite + tr(ru, " offers the program ", " предлагает программу ") + programName +
+        tr(ru, ". It asks for: ", ". Требуются права: ") + scopeList(ru, programScopes);
+}
+
 fn field(source: string, wanted: int) -> string {
     var part: string = "";
     var index: int = 0;
@@ -433,8 +562,7 @@ pub fn view(context: app.AppContext) -> BrowserState {
         registerLabel: tr(ru, "Get a price", "Узнать цену"),
         offerVisible: offerReady,
         programVisible: programReady,
-        programText: tr(ru, "The site ", "Сайт ") + programSite + tr(ru, " offers the program ", " предлагает программу ") + programName +
-            tr(ru, ". It asks for: ", ". Требуются права: ") + programScopes,
+        programText: offerSentence(ru),
         installLabel: tr(ru, "Install", "Установить"),
         declineLabel: tr(ru, "Decline", "Отказаться"),
         offerText: tr(ru, "Register ", "Зарегистрировать ") + offerName + tr(ru, " for ", " за ") + text.fromInt(offerPrice),
