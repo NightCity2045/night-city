@@ -7,7 +7,10 @@ using System.Linq;
 using System.Numerics;
 using Content.IntegrationTests.Fixtures;
 using Content.IntegrationTests.Fixtures.Attributes;
+using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Surgery;
+using Content.Shared.Body;
+using Robust.Shared.GameObjects;
 using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._NC.Medical;
@@ -23,6 +26,7 @@ public sealed class NCFreeformSurgeryLayoutTest : GameTest
     private const float MaximumSlotOverlap = 0.05f;
 
     [SidedDependency(Side.Server)] private IPrototypeManager _prototypes = default!;
+    [SidedDependency(Side.Server)] private IComponentFactory factory = default!;
 
     public override PoolSettings PoolSettings => new()
     {
@@ -86,6 +90,28 @@ public sealed class NCFreeformSurgeryLayoutTest : GameTest
             Assert.That(eyes.MinimumDepth, Is.LessThanOrEqualTo(profile.Structures["Skull"].MinimumDepth + 0.001f),
                 "eyes must stay reachable while the skull is closed");
         });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void EyesAreOnePairedOrganAndCyberopticsReplaceBothEyes()
+    {
+        foreach (var quality in new[] { "Improvised", "Standard", "Improved", "Premium" })
+        {
+            var prototype = _prototypes.Index<EntityPrototype>($"NCCyberEyes{quality}");
+            Assert.That(prototype.TryGetComponent<OrganComponent>(out var organ, factory), Is.True);
+            Assert.That(organ!.Category?.Id, Is.EqualTo("Eyes"), "the paired implant takes the paired eye slot");
+            Assert.That(prototype.TryGetComponent<NCOrganFunctionComponent>(out var function, factory), Is.True);
+            Assert.That(function!.BaseCapacity, Is.EqualTo(1f), "a pair of cybereyes gives the full vision");
+        }
+
+        Assert.That(_prototypes.HasIndex<EntityPrototype>("NCCyberEyeLeftStandard"), Is.False);
+        Assert.That(_prototypes.HasIndex<EntityPrototype>("NCOrganHumanEyesRight"), Is.False);
+        var human = _prototypes.Index<EntityPrototype>("MobHuman");
+        Assert.That(human.TryGetComponent<InitialBodyComponent>(out var initial, factory), Is.True);
+        var organs = initial!.Organs;
+        Assert.That(organs.ContainsKey("Eyes"), Is.True);
+        Assert.That(organs.ContainsKey("EyesRight"), Is.False, "a human has one paired eye organ");
     }
 
     private static float Overlap(Vector2 positionA, Vector2 sizeA, Vector2 positionB, Vector2 sizeB)

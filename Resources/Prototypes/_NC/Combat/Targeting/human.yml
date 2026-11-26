@@ -29,7 +29,7 @@
   displayName: nc-target-zone-eyes
   externalOrganCategory: Head
   medicalRegionCategory: Eyes
-  automaticWeight: 0.5
+  automaticWeight: 1
   calledShotHitChance: 0.05
   calledShotRedirectChance: 0.28
   calledShotRedirectZones: [ NCZoneHead, NCZoneChest ]
