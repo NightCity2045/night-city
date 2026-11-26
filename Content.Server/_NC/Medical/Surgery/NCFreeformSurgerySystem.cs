@@ -1291,7 +1291,8 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
                 normalizedFunction,
                 ResolveDamageVisual(candidate, normalizedIntegrity, normalizedFunction),
                 definition.BlocksDeeperStructures,
-                true));
+                true,
+                definition.Layer));
             handle++;
         }
 

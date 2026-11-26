@@ -29,6 +29,8 @@ namespace Content.Client._NC.Medical.Surgery;
 public sealed partial class NCFreeformSurgeryFieldControl : Container
 {
     private const float CanvasPadding = 12f;
+    // Fraction of the aperture width by which each half of an opened skull is pushed outwards.
+    private const float OpenedBoneGap = 0.13f;
 
     private static readonly Color Canvas = Color.FromHex("#030B0F");
     private static readonly Color Grid = Color.FromHex("#16404458");
@@ -445,26 +447,16 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
         {
             zone = default;
             surface = default;
-            local = default;
-            structures = new List<NCFreeformSurgeryStructureSummary>();
-            if (_state == null || _visuals == null ||
-                !TryResolveOpenIncision(_state.SelectedZone, _state.Surface, out var incision) ||
-                !TryOpeningRects(incision, out _, out var aperture) || !aperture.Contains(screenPoint))
-            {
+            if (!TryGetStructureCandidates(screenPoint, out var incision, out local, out structures))
                 return false;
-            }
 
-            local = Vector2.Clamp((screenPoint - aperture.TopLeft) / aperture.Size, Vector2.Zero, Vector2.One);
-            var point = local;
-            structures = _state.Structures
-                .Where(value => value.Exposed && value.Kind != NCFreeformSurgeryStructureKind.Region &&
-                                Contains(value.Position, value.Size, point))
+            structures = structures
                 .OrderByDescending(value => value.MinimumDepth)
                 .ThenByDescending(value => value.Handle)
                 .ToList();
             zone = incision.Zone;
             surface = incision.Surface;
-            return structures.Count > 0;
+            return true;
         }
 
         private bool TryOpenStructureMenu(Vector2 contentPoint, Vector2 menuPosition, NCFreeformSurgeryAction action)
@@ -734,8 +726,12 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
             {
                 // NC: Use the co-registered full-body skeleton crop that matched the old presentation. Correct
                 // source normalization keeps ribs, skull and long bones pixel-locked to the silhouette.
+                DrawAuthoritativeStructures(handle, incision, aperture, drawOrgans: false,
+                    NCFreeformSurgeryStructureLayer.Behind);
                 DrawBodyLayerRegion(handle, _visuals.Profile.BodySkeletonSprite, aperture, Color.White);
                 DrawAuthoritativeStructures(handle, incision, aperture, drawOrgans: false);
+                DrawAuthoritativeStructures(handle, incision, aperture, drawOrgans: false,
+                    NCFreeformSurgeryStructureLayer.Front);
                 return;
             }
 
@@ -745,16 +741,21 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
                     cavityCell, aperture, Color.White);
             }
 
+            DrawAuthoritativeStructures(handle, incision, aperture, drawOrgans: true,
+                NCFreeformSurgeryStructureLayer.Behind);
             DrawAuthoritativeStructures(handle, incision, aperture, drawOrgans: true);
             if (incision.BoneCasingOpen)
                 DrawOpenedBoneLayerRegion(handle, aperture);
+            DrawAuthoritativeStructures(handle, incision, aperture, drawOrgans: true,
+                NCFreeformSurgeryStructureLayer.Front);
         }
 
         private void DrawAuthoritativeStructures(
             DrawingHandleScreen handle,
             NCFreeformSurgeryIncisionSummary incision,
             UIBox2 aperture,
-            bool drawOrgans)
+            bool drawOrgans,
+            NCFreeformSurgeryStructureLayer? overlay = null)
         {
             if (_state == null || _visuals == null || incision.Zone != _state.SelectedZone ||
                 incision.Surface != _state.Surface)
@@ -762,7 +763,11 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
 
             foreach (var structure in _state.Structures
                          .Where(value => value.Exposed && value.Kind != NCFreeformSurgeryStructureKind.Region)
-                         .Where(value => drawOrgans || value.Kind is
+                         // NC: Inside sprites keep their old pass. Behind/Front sprites are drawn in their own
+                         // passes around the skeleton crop, so the bone halves can overlap them correctly.
+                         .Where(value => value.Layer == (overlay ?? NCFreeformSurgeryStructureLayer.Inside))
+                         .Where(value => drawOrgans || value.Layer != NCFreeformSurgeryStructureLayer.Inside ||
+                                         value.Kind is
                              NCFreeformSurgeryStructureKind.Bone or
                              NCFreeformSurgeryStructureKind.Tendon or
                              NCFreeformSurgeryStructureKind.Nerve or
@@ -785,7 +790,7 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
 
                 var center = aperture.TopLeft + Vector2.Clamp(structure.Position, Vector2.Zero, Vector2.One) *
                     aperture.Size;
-                var size = Vector2.Clamp(structure.Size, new Vector2(0.04f), Vector2.One) * aperture.Size;
+                var size = EffectiveStructureSize(structure, incision.BoneCasingOpen) * aperture.Size;
                 var destination = UIBox2.FromDimensions(center - size * 0.5f, size);
                 DrawCell(handle, _visuals.AnatomyAtlas, _visuals.Profile.AnatomyAtlasGrid,
                     cell, destination, ResolveStructureTint(structure.DamageVisual));
@@ -799,7 +804,7 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
             {
                 if (hovered.Handle != _hoverHandle || !hovered.Exposed)
                     continue;
-                var size = Vector2.Clamp(hovered.Size, new Vector2(0.04f), Vector2.One) * aperture.Size;
+                var size = EffectiveStructureSize(hovered, incision.BoneCasingOpen) * aperture.Size;
                 var center = aperture.TopLeft + Vector2.Clamp(hovered.Position, Vector2.Zero, Vector2.One) *
                     aperture.Size;
                 var box = UIBox2.FromDimensions(center - size * 0.5f, size);
@@ -852,7 +857,7 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
         {
             if (_visuals == null)
                 return;
-            var gap = aperture.Width * 0.13f;
+            var gap = aperture.Width * OpenedBoneGap;
             var halfWidth = aperture.Width * 0.5f;
             var leftSource = UIBox2.FromDimensions(aperture.TopLeft, new Vector2(halfWidth, aperture.Height));
             var rightSource = UIBox2.FromDimensions(
@@ -1012,14 +1017,13 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
         private string? ResolveStructureTooltip(Vector2 screenPoint)
         {
             _hoverHandle = 0;
-            if (_state == null || !TryResolveOperativePoint(screenPoint, out var zone, out var local) ||
+            if (_state == null ||
+                !TryResolveStructureAtScreen(screenPoint, out var zone, out _, out _, out var picked) ||
                 zone != _state.SelectedZone)
             {
                 return null;
             }
 
-            var picked = PickStructureAtDepth(_state.Structures
-                .Where(structure => structure.Exposed && Contains(structure.Position, structure.Size, local)));
             _hoverHandle = picked.Handle;
             return picked.Handle > 0 ? picked.Name : null;
         }
@@ -1038,6 +1042,9 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
             return (reached.Count > 0
                     ? reached.OrderByDescending(value => value.MinimumDepth)
                     : list.OrderBy(value => value.MinimumDepth))
+                // NC: A sprite in front of the skull (the eyes in their orbits) must win the tie with the bone
+                // behind it; sprites behind the skull (ears) keep ranking below bone.
+                .ThenByDescending(value => value.Layer == NCFreeformSurgeryStructureLayer.Front)
                 .ThenByDescending(value => value.Kind == NCFreeformSurgeryStructureKind.Bone)
                 .ThenByDescending(value => value.Handle)
                 .FirstOrDefault();
@@ -1121,29 +1128,55 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
         {
             zone = default;
             surface = default;
-            local = default;
             structure = default;
-            if (_state == null || _visuals == null ||
-                !TryResolveOpenIncision(_state.SelectedZone, _state.Surface, out var incision) ||
-                !TryOpeningRects(incision, out _, out var aperture) || !aperture.Contains(screenPoint))
-            {
+            if (!TryGetStructureCandidates(screenPoint, out var incision, out local, out var candidates))
                 return false;
-            }
 
-            var operativePoint = Vector2.Clamp(
-                (screenPoint - aperture.TopLeft) / aperture.Size,
-                Vector2.Zero,
-                Vector2.One);
-            local = operativePoint;
-            structure = PickStructureAtDepth(_state.Structures
-                .Where(value => value.Exposed && value.Kind != NCFreeformSurgeryStructureKind.Region &&
-                                Contains(value.Position, value.Size, operativePoint)));
+            structure = PickStructureAtDepth(candidates);
             if (structure.Handle <= 0)
                 return false;
 
             zone = incision.Zone;
             surface = incision.Surface;
             return true;
+        }
+
+        /// <summary>
+        /// NC: Every exposed structure under the cursor. Overlay sprites (eyes in the orbits, ears beside the
+        /// skull) extend past the aperture, so the reach is wider than the aperture itself.
+        /// </summary>
+        private bool TryGetStructureCandidates(
+            Vector2 screenPoint,
+            out NCFreeformSurgeryIncisionSummary incision,
+            out Vector2 local,
+            out List<NCFreeformSurgeryStructureSummary> candidates)
+        {
+            local = default;
+            candidates = new List<NCFreeformSurgeryStructureSummary>();
+            incision = default;
+            if (_state == null || _visuals == null ||
+                !TryResolveOpenIncision(_state.SelectedZone, _state.Surface, out incision) ||
+                !TryOpeningRects(incision, out _, out var aperture))
+            {
+                return false;
+            }
+
+            var reach = new UIBox2(
+                aperture.Left - aperture.Width,
+                aperture.Top,
+                aperture.Right + aperture.Width,
+                aperture.Bottom);
+            if (!reach.Contains(screenPoint))
+                return false;
+
+            var raw = (screenPoint - aperture.TopLeft) / aperture.Size;
+            local = Vector2.Clamp(raw, Vector2.Zero, Vector2.One);
+            var casingOpen = incision.BoneCasingOpen;
+            candidates = _state.Structures
+                .Where(value => value.Exposed && value.Kind != NCFreeformSurgeryStructureKind.Region &&
+                                Contains(value.Position, EffectiveStructureSize(value, casingOpen), raw))
+                .ToList();
+            return candidates.Count > 0;
         }
 
         private bool TryResolveIncisionAtScreen(
@@ -1390,6 +1423,23 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
         private float BallisticMarkerRadius => MathF.Max(
             (_visuals?.Profile.BallisticMarkerRadius ?? 1.8f) * CanvasScale,
             3f);
+
+        /// <summary>
+        /// NC: Overlay sprites are authored for the opened skull, where each half is pushed outwards by
+        /// <see cref="OpenedBoneGap"/>. While the casing is closed the halves are together, so the same sprite is
+        /// narrowed by the two gaps to keep sitting in the orbits and beside the skull.
+        /// </summary>
+        private static Vector2 EffectiveStructureSize(NCFreeformSurgeryStructureSummary structure, bool casingOpen)
+        {
+            var size = structure.Size;
+            if (structure.Layer != NCFreeformSurgeryStructureLayer.Inside)
+            {
+                if (!casingOpen)
+                    size.X = MathF.Max(0.1f, size.X - OpenedBoneGap * 2f);
+                return Vector2.Clamp(size, new Vector2(0.04f), new Vector2(2.4f, 1f));
+            }
+            return Vector2.Clamp(size, new Vector2(0.04f), Vector2.One);
+        }
 
         private static bool Contains(Vector2 center, Vector2 size, Vector2 point)
         {

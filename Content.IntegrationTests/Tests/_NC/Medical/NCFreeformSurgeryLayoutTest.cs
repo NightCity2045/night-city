@@ -70,6 +70,24 @@ public sealed class NCFreeformSurgeryLayoutTest : GameTest
         }
     }
 
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void EyesAndEarsAreDisclosedInTheHeadWindowAsOverlays()
+    {
+        var profile = _prototypes.Index<NCFreeformSurgeryProfilePrototype>("NCHumanFreeformSurgery");
+        var eyes = profile.Structures["Eyes"];
+        var ears = profile.Structures["Ears"];
+        Assert.Multiple(() =>
+        {
+            Assert.That(eyes.Zones.Select(zone => zone.Id), Does.Contain("NCZoneHead"));
+            Assert.That(eyes.Layer, Is.EqualTo(NCFreeformSurgeryStructureLayer.Front), "eyes sit in the orbits");
+            Assert.That(ears.Layer, Is.EqualTo(NCFreeformSurgeryStructureLayer.Behind), "ears stick out behind the skull");
+            Assert.That(ears.Size.X, Is.GreaterThan(profile.Structures["Skull"].Size.X), "ears must protrude past the skull");
+            Assert.That(eyes.MinimumDepth, Is.LessThanOrEqualTo(profile.Structures["Skull"].MinimumDepth + 0.001f),
+                "eyes must stay reachable while the skull is closed");
+        });
+    }
+
     private static float Overlap(Vector2 positionA, Vector2 sizeA, Vector2 positionB, Vector2 sizeB)
     {
         var x = MathF.Min(positionA.X + sizeA.X / 2, positionB.X + sizeB.X / 2) -

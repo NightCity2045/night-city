@@ -279,7 +279,17 @@ public readonly record struct NCFreeformSurgeryStructureSummary(
     float Function,
     NCFreeformSurgeryDamageVisualStage DamageVisual,
     bool ProtectiveCasing,
-    bool Exposed);
+    bool Exposed,
+    NCFreeformSurgeryStructureLayer Layer = NCFreeformSurgeryStructureLayer.Inside);
+
+/// <summary>Draw layer of a structure sprite relative to the skeleton crop of its opened zone.</summary>
+[Serializable, NetSerializable]
+public enum NCFreeformSurgeryStructureLayer : byte
+{
+    Inside,
+    Behind,
+    Front,
+}
 
 /// <summary>
 /// Private server-sanitized view of a live surgical session. The patient's network identity is included only so

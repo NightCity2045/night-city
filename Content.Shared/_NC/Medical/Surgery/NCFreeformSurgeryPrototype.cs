@@ -272,6 +272,13 @@ public sealed partial class NCFreeformSurgeryStructureDefinition
     /// </summary>
     [DataField]
     public bool DetachableBySeparation;
+
+    /// <summary>
+    /// Where the sprite sits relative to the skeleton crop of an opened zone. Eyes ride in front of the skull
+    /// halves and ears stick out behind them, so neither is hidden by the bone that physically contains it.
+    /// </summary>
+    [DataField]
+    public NCFreeformSurgeryStructureLayer Layer = NCFreeformSurgeryStructureLayer.Inside;
 }
 
 /// <summary>

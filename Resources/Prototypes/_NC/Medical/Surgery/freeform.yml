@@ -98,10 +98,10 @@
     VertebralColumn: { position: "0.5, 0.5", size: "0.18, 0.76", minimumDepth: 0.74, visual: LongBone, zones: [ NCZoneChest ], detachableBySeparation: true }
     Skull: { position: "0.5, 0.5", size: "0.8, 0.8", minimumDepth: 0.42, visual: Skull, zones: [ NCZoneHead ], blocksDeeperStructures: true, detachableBySeparation: true }
     Brain: { position: "0.5, 0.4", size: "0.56, 0.46", minimumDepth: 0.74, visual: Brain, zones: [ NCZoneHead ], detachableBySeparation: true }
-    Eyes: { position: "0.5, 0.46", size: "0.56, 0.4", minimumDepth: 0.44, visual: Eyes, zones: [ NCZoneEyes ], detachableBySeparation: true }
+    Eyes: { position: "0.5, 0.62", size: "0.95, 0.30", minimumDepth: 0.42, visual: Eyes, zones: [ NCZoneHead, NCZoneEyes ], detachableBySeparation: true, layer: Front }
     EyesRight: { position: "0.5, 0.46", size: "0.56, 0.4", minimumDepth: 0.44, visual: Eyes, zones: [ NCZoneEyesRight ], detachableBySeparation: true }
     Tongue: { position: "0.5, 0.55", size: "0.5, 0.34", minimumDepth: 0.38, visual: Tongue, zones: [ NCZoneMouth ], detachableBySeparation: true }
-    Ears: { position: "0.5, 0.74", size: "0.9, 0.26", minimumDepth: 0.42, visual: Ears, zones: [ NCZoneHead ], detachableBySeparation: true }
+    Ears: { position: "0.5, 0.6", size: "1.9, 0.42", minimumDepth: 0.42, visual: Ears, zones: [ NCZoneHead ], detachableBySeparation: true, layer: Behind }
     RibCage: { position: "0.5, 0.5", size: "0.82, 0.78", minimumDepth: 0.46, visual: RibCage, zones: [ NCZoneChest ], blocksDeeperStructures: true, detachableBySeparation: true }
     Lungs: { position: "0.5, 0.34", size: "0.8, 0.42", minimumDepth: 0.7, visual: Lungs, zones: [ NCZoneChest ], detachableBySeparation: true }
     Heart: { position: "0.52, 0.66", size: "0.3, 0.32", minimumDepth: 0.76, visual: Heart, zones: [ NCZoneChest ], detachableBySeparation: true }
