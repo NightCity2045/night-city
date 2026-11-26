@@ -163,3 +163,5 @@ nc-medical-freeform-surgery-verb = Open surgical field
 nc-medical-freeform-surgery-empty-hand = empty active hand
 nc-medical-freeform-surgery-extracted-organ-placed = No hand is free; the extracted organ was placed beside the patient.
 nc-medical-freeform-surgery-extracted-foreign-body-placed = No hand is free; the extracted foreign body was placed beside the patient.
+
+nc-surgery-structure-menu-header = Target structure:

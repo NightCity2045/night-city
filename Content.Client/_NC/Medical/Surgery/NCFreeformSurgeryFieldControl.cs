@@ -33,6 +33,7 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
     private static readonly Color Canvas = Color.FromHex("#030B0F");
     private static readonly Color Grid = Color.FromHex("#16404458");
     private static readonly Color Border = Color.FromHex("#36D7C8C0");
+    private static readonly Color HoverOutline = Color.FromHex("#FFE66DDD");
 
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IResourceCache _resources = default!;
@@ -232,6 +233,7 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
         private bool _awaitingInteractionResult;
         private ProtoId<NCTargetZonePrototype> _pendingZone;
         private NCWoundSurface _pendingSurface;
+        private int _hoverHandle;
         private Vector2? _pendingPosition;
         private NCFreeformSurgeryAction? _pendingAction;
 
@@ -352,6 +354,15 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
 
             if (args.Function == EngineKeyFunctions.UseSecondary)
             {
+                // NC: RMB keeps attaching clamps and retractors. With any other tool it lists every exposed
+                // structure under the cursor so an overlapped organ can be targeted explicitly.
+                if (action != null && !ResolveSelectedAttachable() && !hitWound &&
+                    TryOpenStructureMenu(pointer, args.PointerLocation.Position, action.Value))
+                {
+                    args.Handle();
+                    return;
+                }
+
                 AttachRequested?.Invoke(zone, surface, local);
                 args.Handle();
                 return;
@@ -366,6 +377,26 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
                 args.Handle();
                 return;
             }
+            SubmitInteraction(
+                zone,
+                surface,
+                woundId,
+                hitStructure ? screenStructure : null,
+                local,
+                action.Value,
+                hitIncision);
+            args.Handle();
+        }
+
+        private void SubmitInteraction(
+            ProtoId<NCTargetZonePrototype> zone,
+            NCWoundSurface surface,
+            Guid? woundId,
+            NCFreeformSurgeryStructureSummary? structure,
+            Vector2 local,
+            NCFreeformSurgeryAction action,
+            bool hitIncision)
+        {
             if (!TryGetZone(zone, out var projection))
                 return;
             // NC: The server authors the static cut geometry. Cutting actions still transmit the real cursor
@@ -384,16 +415,116 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
                 zone,
                 surface,
                 woundId,
-                hitStructure ? screenStructure.Handle : null,
-                hitStructure ? screenStructure.MinimumDepth : 0f,
+                structure?.Handle,
+                structure?.MinimumDepth ?? 0f,
                 contact);
-            args.Handle();
+        }
+
+        private bool ResolveSelectedAttachable()
+        {
+            if (_state == null)
+                return false;
+            foreach (var capability in _state.Capabilities)
+            {
+                if (capability.Selected)
+                    return capability.Attachable;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// NC: Every exposed structure under the cursor, deepest first. Unlike the left click, which follows the
+        /// depth slider, this lets the surgeon choose an organ that a larger neighbour overlaps.
+        /// </summary>
+        private bool TryResolveStructuresAtScreen(
+            Vector2 screenPoint,
+            out ProtoId<NCTargetZonePrototype> zone,
+            out NCWoundSurface surface,
+            out Vector2 local,
+            out List<NCFreeformSurgeryStructureSummary> structures)
+        {
+            zone = default;
+            surface = default;
+            local = default;
+            structures = new List<NCFreeformSurgeryStructureSummary>();
+            if (_state == null || _visuals == null ||
+                !TryResolveOpenIncision(_state.SelectedZone, _state.Surface, out var incision) ||
+                !TryOpeningRects(incision, out _, out var aperture) || !aperture.Contains(screenPoint))
+            {
+                return false;
+            }
+
+            local = Vector2.Clamp((screenPoint - aperture.TopLeft) / aperture.Size, Vector2.Zero, Vector2.One);
+            var point = local;
+            structures = _state.Structures
+                .Where(value => value.Exposed && value.Kind != NCFreeformSurgeryStructureKind.Region &&
+                                Contains(value.Position, value.Size, point))
+                .OrderByDescending(value => value.MinimumDepth)
+                .ThenByDescending(value => value.Handle)
+                .ToList();
+            zone = incision.Zone;
+            surface = incision.Surface;
+            return structures.Count > 0;
+        }
+
+        private bool TryOpenStructureMenu(Vector2 contentPoint, Vector2 menuPosition, NCFreeformSurgeryAction action)
+        {
+            if (!TryResolveStructuresAtScreen(contentPoint, out var zone, out var surface, out var local,
+                    out var structures) ||
+                structures.Count == 0)
+            {
+                return false;
+            }
+
+            var popup = new Popup();
+            var list = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 2 };
+            list.AddChild(new Label { Text = Loc.GetString("nc-surgery-structure-menu-header") });
+            foreach (var structure in structures)
+            {
+                var chosen = structure;
+                var button = new Button
+                {
+                    Text = chosen.Name,
+                    HorizontalExpand = true,
+                    TextAlign = Label.AlignMode.Left,
+                };
+                button.OnPressed += _ =>
+                {
+                    popup.Close();
+                    if (!_awaitingInteractionResult)
+                        SubmitInteraction(zone, surface, null, chosen, local, action, false);
+                };
+                list.AddChild(button);
+            }
+            popup.AddChild(new PanelContainer
+            {
+                PanelOverride = new StyleBoxFlat
+                {
+                    BackgroundColor = Color.FromHex("#061519F0"),
+                    BorderColor = Border,
+                    BorderThickness = new Thickness(1f),
+                    ContentMarginLeftOverride = 6f,
+                    ContentMarginRightOverride = 6f,
+                    ContentMarginTopOverride = 4f,
+                    ContentMarginBottomOverride = 4f,
+                },
+                Children = { list },
+            });
+            UserInterfaceManager.ModalRoot.AddChild(popup);
+            popup.Open(UIBox2.FromDimensions(menuPosition, Vector2.One));
+            return true;
         }
 
         protected override void MouseMove(GUIMouseMoveEventArgs args)
         {
             base.MouseMove(args);
             ToolTip = ResolveStructureTooltip(ViewToContent(args.RelativePixelPosition));
+        }
+
+        protected override void MouseExited()
+        {
+            base.MouseExited();
+            _hoverHandle = 0;
         }
 
         protected override void MouseWheel(GUIMouseWheelEventArgs args)
@@ -660,6 +791,21 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
                     cell, destination, ResolveStructureTint(structure.DamageVisual));
                 DrawStructureDamage(handle, structure, aperture);
             }
+
+            // NC: The structure a left click would currently target is outlined, so overlapped organs are readable.
+            if (_hoverHandle <= 0)
+                return;
+            foreach (var hovered in _state.Structures)
+            {
+                if (hovered.Handle != _hoverHandle || !hovered.Exposed)
+                    continue;
+                var size = Vector2.Clamp(hovered.Size, new Vector2(0.04f), Vector2.One) * aperture.Size;
+                var center = aperture.TopLeft + Vector2.Clamp(hovered.Position, Vector2.Zero, Vector2.One) *
+                    aperture.Size;
+                var box = UIBox2.FromDimensions(center - size * 0.5f, size);
+                handle.DrawRect(box, HoverOutline, false);
+                handle.DrawRect(new UIBox2(box.TopLeft + Vector2.One, box.BottomRight - Vector2.One), HoverOutline, false);
+            }
         }
 
         private void DrawStructureDamage(
@@ -865,6 +1011,7 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
 
         private string? ResolveStructureTooltip(Vector2 screenPoint)
         {
+            _hoverHandle = 0;
             if (_state == null || !TryResolveOperativePoint(screenPoint, out var zone, out var local) ||
                 zone != _state.SelectedZone)
             {
@@ -873,6 +1020,7 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
 
             var picked = PickStructureAtDepth(_state.Structures
                 .Where(structure => structure.Exposed && Contains(structure.Position, structure.Size, local)));
+            _hoverHandle = picked.Handle;
             return picked.Handle > 0 ? picked.Name : null;
         }
 

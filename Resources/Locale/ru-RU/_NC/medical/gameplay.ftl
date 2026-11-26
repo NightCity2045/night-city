@@ -163,3 +163,5 @@ nc-medical-freeform-surgery-verb = Открыть хирургическое п�
 nc-medical-freeform-surgery-empty-hand = активная рука пуста
 nc-medical-freeform-surgery-extracted-organ-placed = Нет свободной руки; извлечённый орган оставлен рядом с пациентом.
 nc-medical-freeform-surgery-extracted-foreign-body-placed = Нет свободной руки; извлечённое инородное тело оставлено рядом с пациентом.
+
+nc-surgery-structure-menu-header = Выбрать структуру:
