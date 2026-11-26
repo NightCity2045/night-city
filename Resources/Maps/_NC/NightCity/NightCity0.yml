@@ -5,7 +5,7 @@ meta:
   forkId: EchoCyber
   forkVersion: 9834d7d198ecf296a2092e3b069ebf862b24409d
   time: 11/22/2026 08:05:40
-  entityCount: 14709
+  entityCount: 14744
 maps:
 - 1
 grids:
@@ -48278,6 +48278,251 @@ entities:
     - type: Transform
       parent: 1
       pos: -6.5,38.5
+- proto: SpawnPointCaptain
+  entities:
+  - uid: 14729
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointHeadOfPersonnel
+  entities:
+  - uid: 14730
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointHeadOfSecurity
+  entities:
+  - uid: 14731
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointChiefMedicalOfficer
+  entities:
+  - uid: 14732
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointChiefEngineer
+  entities:
+  - uid: 14733
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointResearchDirector
+  entities:
+  - uid: 14734
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointQuartermaster
+  entities:
+  - uid: 14735
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointBartender
+  entities:
+  - uid: 14736
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointBotanist
+  entities:
+  - uid: 14737
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointChef
+  entities:
+  - uid: 14738
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointJanitor
+  entities:
+  - uid: 14739
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointChaplain
+  entities:
+  - uid: 14740
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointLibrarian
+  entities:
+  - uid: 14741
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointReporter
+  entities:
+  - uid: 14742
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointServiceWorker
+  entities:
+  - uid: 14743
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointAtmos
+  entities:
+  - uid: 14744
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointStationEngineer
+  entities:
+  - uid: 14745
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointTechnicalAssistant
+  entities:
+  - uid: 14746
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointChemist
+  entities:
+  - uid: 14747
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointMedicalDoctor
+  entities:
+  - uid: 14748
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointParamedic
+  entities:
+  - uid: 14749
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointMedicalIntern
+  entities:
+  - uid: 14750
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointPsychologist
+  entities:
+  - uid: 14751
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointScientist
+  entities:
+  - uid: 14752
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointResearchAssistant
+  entities:
+  - uid: 14753
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointWarden
+  entities:
+  - uid: 14754
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointSecurityOfficer
+  entities:
+  - uid: 14755
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointDetective
+  entities:
+  - uid: 14756
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointSecurityCadet
+  entities:
+  - uid: 14757
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointLawyer
+  entities:
+  - uid: 14758
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointSalvageSpecialist
+  entities:
+  - uid: 14759
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointCargoTechnician
+  entities:
+  - uid: 14760
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointClown
+  entities:
+  - uid: 14761
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointMime
+  entities:
+  - uid: 14762
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointMusician
+  entities:
+  - uid: 14763
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
 - proto: SpawnPointPassenger
   entities:
   - uid: 11223
