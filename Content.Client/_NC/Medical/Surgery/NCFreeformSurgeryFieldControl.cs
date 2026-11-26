@@ -1038,6 +1038,14 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
             IEnumerable<NCFreeformSurgeryStructureSummary> candidates)
         {
             var list = candidates.ToList();
+            // NC: While installing an implant the click is aimed at an implant bay. Bays sit over larger organs and
+            // overlay sprites, so they take priority whatever the depth slider currently reaches.
+            if (ResolveSelectedAction() == NCFreeformSurgeryAction.Cyberware)
+            {
+                var bays = list.Where(value => value.Kind == NCFreeformSurgeryStructureKind.Cyberware).ToList();
+                if (bays.Count > 0)
+                    list = bays;
+            }
             var reached = list.Where(value => value.MinimumDepth <= _predictedDepth + 0.001f).ToList();
             return (reached.Count > 0
                     ? reached.OrderByDescending(value => value.MinimumDepth)

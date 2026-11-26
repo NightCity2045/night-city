@@ -306,7 +306,12 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         }
 
         var pending = new NCFreeformSurgeryDoAfterEvent(request, capability);
-        if (request.StructureHandle is { } handle && session.StructureHandles.TryGetValue(handle, out var structure))
+        // NC: Installing a staged implant targets the host bay, never whichever organ the click happens to
+        // overlap. The staged graft already pins the action, so no structure is expected to be re-resolved.
+        var stagedInstall = definition.Action == NCFreeformSurgeryAction.Cyberware &&
+                            HasStagedInternalCyberware(surgeon, session);
+        if (!stagedInstall && request.StructureHandle is { } handle &&
+            session.StructureHandles.TryGetValue(handle, out var structure))
             pending.ExpectedStructure = GetNetEntity(structure);
         if (definition.Action is NCFreeformSurgeryAction.Cyberware or NCFreeformSurgeryAction.Transplant &&
             TryComp<NCSurgeryGameplaySelectionComponent>(surgeon, out var selection) &&
@@ -482,10 +487,13 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         var stagedCyberware = definition.Action == NCFreeformSurgeryAction.Cyberware &&
                               HasStagedInternalCyberware(surgeon, session);
         var structure = session.Depth >= definition.MinimumDepth
-            ? request.StructureHandle is { } structureHandle &&
-              !stagedCyberware
-                ? ResolveStructureHandleAt(session, profile, site, contact, session.Depth, structureHandle)
-                : ResolveStructureAt(surgeon, session, profile, site, contact, session.Depth, true)
+            ? stagedCyberware
+                // NC: The staged bay is the one install target. A deeper organ that merely overlaps the bay
+                // (the brain behind a neural slot) must not steal the click and fail the install as stale.
+                ? ResolveStagedInstallTarget(surgeon, session, profile, site, contact, session.Depth)
+                : request.StructureHandle is { } structureHandle
+                    ? ResolveStructureHandleAt(session, profile, site, contact, session.Depth, structureHandle)
+                    : ResolveStructureAt(surgeon, session, profile, site, contact, session.Depth, true)
             : null;
         if (request.StructureHandle != null &&
             !stagedCyberware &&
@@ -1483,6 +1491,21 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             handle++;
         }
         return result.ToArray();
+    }
+
+    private EntityUid? ResolveStagedInstallTarget(
+        EntityUid surgeon,
+        NCFreeformSurgerySessionComponent session,
+        NCFreeformSurgeryProfilePrototype profile,
+        NCSurgicalSiteComponent site,
+        Vector2 point,
+        float depth)
+    {
+        return TryResolveStagedCyberwareTarget(surgeon, session, profile, out var staged, out _) &&
+               depth >= staged.MinimumDepth && Contains(staged, point) &&
+               IsExposed(site, session, staged, profile.MinimumOpenRetraction)
+            ? session.Region
+            : null;
     }
 
     private EntityUid? ResolveStructureAt(

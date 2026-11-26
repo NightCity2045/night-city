@@ -545,7 +545,7 @@ public sealed class NCSurgerySystemTest : GameTest
         Assert.Multiple(() =>
         {
             Assert.That(blocked.Accepted, Is.False);
-            Assert.That(blocked.Failure, Is.EqualTo(NCFreeformSurgeryFailure.SurgicalAccessClosed));
+            Assert.That(blocked.Failure, Is.EqualTo(NCFreeformSurgeryFailure.SurgicalAccessTooShallow));
             Assert.That(SComp<NCCyberwareComponent>(implant).InstalledSlot, Is.Null);
         });
 
@@ -557,6 +557,8 @@ public sealed class NCSurgerySystemTest : GameTest
             Surface = NCWoundSurface.Front,
             Polyline = [new Vector2(0.35f, 0.5f), new Vector2(0.65f, 0.5f)],
             Depth = 0.8f,
+            EdgeSeparation = 0.3f,
+            BoneCasingOpen = true,
         });
 
         var result = _freeformEffects.ApplyStroke(new NCFreeformSurgeryEffectContext(
