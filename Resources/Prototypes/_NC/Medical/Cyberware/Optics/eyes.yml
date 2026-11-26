@@ -2,21 +2,21 @@
 
 - type: entity
   parent: NCOrganHumanCyberEyes
-  id: NCCyberEyeLeftStandard
+  id: NCCyberEyesStandard
   suffix: Standard
   components:
   - type: Sprite
     sprite: _NC/Objects/Cyberware/optics.rsi
-    state: eye_left
+    state: eye_pair
   - type: Item
     sprite: _NC/Objects/Cyberware/optics.rsi
   - type: Organ
     category: Eyes
   - type: NCOrganFunction
     functionType: Vision
-    baseCapacity: 0.5
+    baseCapacity: 1
   - type: NCCyberware
-    profile: NCCyberEyeLeftProfile
+    profile: NCCyberEyesProfile
     factoryPrepared: true
     quality: NCCyberwareQualityStandard
     qualityParts:
@@ -25,19 +25,18 @@
       NCOpticNeuralSlot: NCOpticNeuralStandard
       NCOpticPowerSlot: NCOpticPowerStandard
   - type: NCCyberEye
-    right: false
   - type: NCMetaOptics
     supportsLowLight: true
   - type: VisualOrgan
     layer: enum.HumanoidVisualLayers.Eyes
     data:
       sprite: _NC/Objects/Cyberware/optics.rsi
-      state: worn_left
+      state: worn_pair
       color: '#44E6DA'
 
 - type: entity
-  parent: NCCyberEyeLeftStandard
-  id: NCCyberEyeLeftStandardEmpty
+  parent: NCCyberEyesStandard
+  id: NCCyberEyesStandardEmpty
   suffix: Standard empty frame
   components:
   - type: NCCyberware
@@ -47,21 +46,21 @@
 
 - type: entity
   parent: NCOrganHumanCyberEyes
-  id: NCCyberEyeLeftImprovised
+  id: NCCyberEyesImprovised
   suffix: Improvised
   components:
   - type: Sprite
     sprite: _NC/Objects/Cyberware/optics.rsi
-    state: eye_left
+    state: eye_pair
   - type: Item
     sprite: _NC/Objects/Cyberware/optics.rsi
   - type: Organ
     category: Eyes
   - type: NCOrganFunction
     functionType: Vision
-    baseCapacity: 0.5
+    baseCapacity: 1
   - type: NCCyberware
-    profile: NCCyberEyeLeftProfile
+    profile: NCCyberEyesProfile
     factoryPrepared: true
     quality: NCCyberwareQualityImprovised
     qualityParts:
@@ -70,19 +69,18 @@
       NCOpticNeuralSlot: NCOpticNeuralImprovised
       NCOpticPowerSlot: NCOpticPowerImprovised
   - type: NCCyberEye
-    right: false
   - type: NCMetaOptics
     supportsLowLight: true
   - type: VisualOrgan
     layer: enum.HumanoidVisualLayers.Eyes
     data:
       sprite: _NC/Objects/Cyberware/optics.rsi
-      state: worn_left
+      state: worn_pair
       color: '#44E6DA'
 
 - type: entity
-  parent: NCCyberEyeLeftImprovised
-  id: NCCyberEyeLeftImprovisedEmpty
+  parent: NCCyberEyesImprovised
+  id: NCCyberEyesImprovisedEmpty
   suffix: Improvised empty frame
   components:
   - type: NCCyberware
@@ -92,21 +90,21 @@
 
 - type: entity
   parent: NCOrganHumanCyberEyes
-  id: NCCyberEyeLeftImproved
+  id: NCCyberEyesImproved
   suffix: Improved
   components:
   - type: Sprite
     sprite: _NC/Objects/Cyberware/optics.rsi
-    state: eye_left
+    state: eye_pair
   - type: Item
     sprite: _NC/Objects/Cyberware/optics.rsi
   - type: Organ
     category: Eyes
   - type: NCOrganFunction
     functionType: Vision
-    baseCapacity: 0.5
+    baseCapacity: 1
   - type: NCCyberware
-    profile: NCCyberEyeLeftProfile
+    profile: NCCyberEyesProfile
     factoryPrepared: true
     quality: NCCyberwareQualityImproved
     qualityParts:
@@ -115,19 +113,18 @@
       NCOpticNeuralSlot: NCOpticNeuralImproved
       NCOpticPowerSlot: NCOpticPowerImproved
   - type: NCCyberEye
-    right: false
   - type: NCMetaOptics
     supportsLowLight: true
   - type: VisualOrgan
     layer: enum.HumanoidVisualLayers.Eyes
     data:
       sprite: _NC/Objects/Cyberware/optics.rsi
-      state: worn_left
+      state: worn_pair
       color: '#44E6DA'
 
 - type: entity
-  parent: NCCyberEyeLeftImproved
-  id: NCCyberEyeLeftImprovedEmpty
+  parent: NCCyberEyesImproved
+  id: NCCyberEyesImprovedEmpty
   suffix: Improved empty frame
   components:
   - type: NCCyberware
@@ -137,21 +134,21 @@
 
 - type: entity
   parent: NCOrganHumanCyberEyes
-  id: NCCyberEyeLeftPremium
+  id: NCCyberEyesPremium
   suffix: Premium
   components:
   - type: Sprite
     sprite: _NC/Objects/Cyberware/optics.rsi
-    state: eye_left
+    state: eye_pair
   - type: Item
     sprite: _NC/Objects/Cyberware/optics.rsi
   - type: Organ
     category: Eyes
   - type: NCOrganFunction
     functionType: Vision
-    baseCapacity: 0.5
+    baseCapacity: 1
   - type: NCCyberware
-    profile: NCCyberEyeLeftProfile
+    profile: NCCyberEyesProfile
     factoryPrepared: true
     quality: NCCyberwareQualityPremium
     qualityParts:
@@ -160,199 +157,18 @@
       NCOpticNeuralSlot: NCOpticNeuralPremium
       NCOpticPowerSlot: NCOpticPowerPremium
   - type: NCCyberEye
-    right: false
   - type: NCMetaOptics
     supportsLowLight: true
   - type: VisualOrgan
     layer: enum.HumanoidVisualLayers.Eyes
     data:
       sprite: _NC/Objects/Cyberware/optics.rsi
-      state: worn_left
+      state: worn_pair
       color: '#44E6DA'
 
 - type: entity
-  parent: NCCyberEyeLeftPremium
-  id: NCCyberEyeLeftPremiumEmpty
-  suffix: Premium empty frame
-  components:
-  - type: NCCyberware
-    factoryPrepared: false
-  - type: NCCyberwareAssembly
-    initialized: true
-
-- type: entity
-  parent: NCOrganHumanCyberEyes
-  id: NCCyberEyeRightStandard
-  suffix: Standard
-  components:
-  - type: Sprite
-    sprite: _NC/Objects/Cyberware/optics.rsi
-    state: eye_right
-  - type: Item
-    sprite: _NC/Objects/Cyberware/optics.rsi
-  - type: Organ
-    category: EyesRight
-  - type: NCOrganFunction
-    functionType: Vision
-    baseCapacity: 0.5
-  - type: NCCyberware
-    profile: NCCyberEyeRightProfile
-    factoryPrepared: true
-    quality: NCCyberwareQualityStandard
-    qualityParts:
-      NCOpticControllerSlot: NCOpticControllerBasicStandard
-      NCOpticMatrixSlot: NCOpticMatrixStandard
-      NCOpticNeuralSlot: NCOpticNeuralStandard
-      NCOpticPowerSlot: NCOpticPowerStandard
-  - type: NCCyberEye
-    right: true
-  - type: NCMetaOptics
-    supportsLowLight: true
-  - type: VisualOrgan
-    layer: enum.HumanoidVisualLayers.EyesRight
-    data:
-      sprite: _NC/Objects/Cyberware/optics.rsi
-      state: worn_right
-      color: '#44E6DA'
-
-- type: entity
-  parent: NCCyberEyeRightStandard
-  id: NCCyberEyeRightStandardEmpty
-  suffix: Standard empty frame
-  components:
-  - type: NCCyberware
-    factoryPrepared: false
-  - type: NCCyberwareAssembly
-    initialized: true
-
-- type: entity
-  parent: NCOrganHumanCyberEyes
-  id: NCCyberEyeRightImprovised
-  suffix: Improvised
-  components:
-  - type: Sprite
-    sprite: _NC/Objects/Cyberware/optics.rsi
-    state: eye_right
-  - type: Item
-    sprite: _NC/Objects/Cyberware/optics.rsi
-  - type: Organ
-    category: EyesRight
-  - type: NCOrganFunction
-    functionType: Vision
-    baseCapacity: 0.5
-  - type: NCCyberware
-    profile: NCCyberEyeRightProfile
-    factoryPrepared: true
-    quality: NCCyberwareQualityImprovised
-    qualityParts:
-      NCOpticControllerSlot: NCOpticControllerBasicImprovised
-      NCOpticMatrixSlot: NCOpticMatrixImprovised
-      NCOpticNeuralSlot: NCOpticNeuralImprovised
-      NCOpticPowerSlot: NCOpticPowerImprovised
-  - type: NCCyberEye
-    right: true
-  - type: NCMetaOptics
-    supportsLowLight: true
-  - type: VisualOrgan
-    layer: enum.HumanoidVisualLayers.EyesRight
-    data:
-      sprite: _NC/Objects/Cyberware/optics.rsi
-      state: worn_right
-      color: '#44E6DA'
-
-- type: entity
-  parent: NCCyberEyeRightImprovised
-  id: NCCyberEyeRightImprovisedEmpty
-  suffix: Improvised empty frame
-  components:
-  - type: NCCyberware
-    factoryPrepared: false
-  - type: NCCyberwareAssembly
-    initialized: true
-
-- type: entity
-  parent: NCOrganHumanCyberEyes
-  id: NCCyberEyeRightImproved
-  suffix: Improved
-  components:
-  - type: Sprite
-    sprite: _NC/Objects/Cyberware/optics.rsi
-    state: eye_right
-  - type: Item
-    sprite: _NC/Objects/Cyberware/optics.rsi
-  - type: Organ
-    category: EyesRight
-  - type: NCOrganFunction
-    functionType: Vision
-    baseCapacity: 0.5
-  - type: NCCyberware
-    profile: NCCyberEyeRightProfile
-    factoryPrepared: true
-    quality: NCCyberwareQualityImproved
-    qualityParts:
-      NCOpticControllerSlot: NCOpticControllerBasicImproved
-      NCOpticMatrixSlot: NCOpticMatrixImproved
-      NCOpticNeuralSlot: NCOpticNeuralImproved
-      NCOpticPowerSlot: NCOpticPowerImproved
-  - type: NCCyberEye
-    right: true
-  - type: NCMetaOptics
-    supportsLowLight: true
-  - type: VisualOrgan
-    layer: enum.HumanoidVisualLayers.EyesRight
-    data:
-      sprite: _NC/Objects/Cyberware/optics.rsi
-      state: worn_right
-      color: '#44E6DA'
-
-- type: entity
-  parent: NCCyberEyeRightImproved
-  id: NCCyberEyeRightImprovedEmpty
-  suffix: Improved empty frame
-  components:
-  - type: NCCyberware
-    factoryPrepared: false
-  - type: NCCyberwareAssembly
-    initialized: true
-
-- type: entity
-  parent: NCOrganHumanCyberEyes
-  id: NCCyberEyeRightPremium
-  suffix: Premium
-  components:
-  - type: Sprite
-    sprite: _NC/Objects/Cyberware/optics.rsi
-    state: eye_right
-  - type: Item
-    sprite: _NC/Objects/Cyberware/optics.rsi
-  - type: Organ
-    category: EyesRight
-  - type: NCOrganFunction
-    functionType: Vision
-    baseCapacity: 0.5
-  - type: NCCyberware
-    profile: NCCyberEyeRightProfile
-    factoryPrepared: true
-    quality: NCCyberwareQualityPremium
-    qualityParts:
-      NCOpticControllerSlot: NCOpticControllerBasicPremium
-      NCOpticMatrixSlot: NCOpticMatrixPremium
-      NCOpticNeuralSlot: NCOpticNeuralPremium
-      NCOpticPowerSlot: NCOpticPowerPremium
-  - type: NCCyberEye
-    right: true
-  - type: NCMetaOptics
-    supportsLowLight: true
-  - type: VisualOrgan
-    layer: enum.HumanoidVisualLayers.EyesRight
-    data:
-      sprite: _NC/Objects/Cyberware/optics.rsi
-      state: worn_right
-      color: '#44E6DA'
-
-- type: entity
-  parent: NCCyberEyeRightPremium
-  id: NCCyberEyeRightPremiumEmpty
+  parent: NCCyberEyesPremium
+  id: NCCyberEyesPremiumEmpty
   suffix: Premium empty frame
   components:
   - type: NCCyberware

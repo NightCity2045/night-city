@@ -22,7 +22,6 @@ public sealed partial class NCOpticModuleComponent : Component
 [RegisterComponent]
 public sealed partial class NCCyberEyeComponent : Component
 {
-    [DataField] public bool Right;
     [DataField] public float MaximumZoom = 2;
     public NCOpticMode RequestedMode;
     public NCOpticMode ActiveMode;

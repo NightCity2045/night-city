@@ -96,7 +96,6 @@
   targetZones:
   - NCZoneHead
   - NCZoneEyes
-  - NCZoneEyesRight
   - NCZoneMouth
   - NCZoneChest
   - NCZoneAbdomen

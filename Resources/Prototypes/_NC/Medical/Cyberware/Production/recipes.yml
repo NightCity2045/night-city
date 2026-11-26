@@ -425,14 +425,10 @@
   - NCProduceNCOpticCosmeticImprovised
   - NCProduceNCOpticCosmeticImproved
   - NCProduceNCOpticCosmeticPremium
-  - NCProduceNCCyberEyeLeftStandardEmpty
-  - NCProduceNCCyberEyeLeftImprovisedEmpty
-  - NCProduceNCCyberEyeLeftImprovedEmpty
-  - NCProduceNCCyberEyeLeftPremiumEmpty
-  - NCProduceNCCyberEyeRightStandardEmpty
-  - NCProduceNCCyberEyeRightImprovisedEmpty
-  - NCProduceNCCyberEyeRightImprovedEmpty
-  - NCProduceNCCyberEyeRightPremiumEmpty
+  - NCProduceNCCyberEyesStandardEmpty
+  - NCProduceNCCyberEyesImprovisedEmpty
+  - NCProduceNCCyberEyesImprovedEmpty
+  - NCProduceNCCyberEyesPremiumEmpty
   - NCProduceNCMedicalControllerBasicQualityImprovised
   - NCProduceNCMedicalControllerBasicQualityImproved
   - NCProduceNCMedicalControllerBasicQualityPremium

@@ -34,8 +34,7 @@
   bodyCanvasSize: "128, 192"
   bodyZones:
     NCZoneHead: { position: "50, 0", size: "28, 30", openingSize: "25, 25", incisionDirection: "0, 1", incisionLength: 0.3 }
-    NCZoneEyes: { position: "55, 10", size: "8, 6", openingSize: "10, 12", incisionDirection: "1, 0", incisionLength: 0.22 }
-    NCZoneEyesRight: { position: "65, 10", size: "8, 6", openingSize: "10, 12", incisionDirection: "1, 0", incisionLength: 0.22 }
+    NCZoneEyes: { position: "55, 10", size: "18, 6", openingSize: "20, 12", incisionDirection: "1, 0", incisionLength: 0.22 }
     NCZoneMouth: { position: "57, 18", size: "14, 7", openingSize: "18, 12", incisionDirection: "1, 0", incisionLength: 0.22 }
     NCZoneChest: { position: "42, 29", size: "44, 35", openingSize: "42, 34", incisionDirection: "0, 1", incisionLength: 0.42 }
     NCZoneAbdomen: { position: "47, 62", size: "34, 28", openingSize: "32, 27", incisionDirection: "0, 1", incisionLength: 0.38 }
@@ -99,7 +98,6 @@
     Skull: { position: "0.5, 0.5", size: "0.8, 0.8", minimumDepth: 0.42, visual: Skull, zones: [ NCZoneHead ], blocksDeeperStructures: true, detachableBySeparation: true }
     Brain: { position: "0.5, 0.4", size: "0.56, 0.46", minimumDepth: 0.74, visual: Brain, zones: [ NCZoneHead ], detachableBySeparation: true }
     Eyes: { position: "0.5, 0.62", size: "0.95, 0.30", minimumDepth: 0.42, visual: Eyes, zones: [ NCZoneHead, NCZoneEyes ], detachableBySeparation: true, layer: Front }
-    EyesRight: { position: "0.5, 0.46", size: "0.56, 0.4", minimumDepth: 0.44, visual: Eyes, zones: [ NCZoneEyesRight ], detachableBySeparation: true }
     Tongue: { position: "0.5, 0.55", size: "0.5, 0.34", minimumDepth: 0.38, visual: Tongue, zones: [ NCZoneMouth ], detachableBySeparation: true }
     Ears: { position: "0.5, 0.6", size: "1.9, 0.42", minimumDepth: 0.42, visual: Ears, zones: [ NCZoneHead ], detachableBySeparation: true, layer: Behind }
     RibCage: { position: "0.5, 0.5", size: "0.82, 0.78", minimumDepth: 0.46, visual: RibCage, zones: [ NCZoneChest ], blocksDeeperStructures: true, detachableBySeparation: true }

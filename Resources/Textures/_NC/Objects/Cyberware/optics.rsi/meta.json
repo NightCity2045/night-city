@@ -56,6 +56,13 @@
         {
             "name": "worn_right",
             "directions": 4
+        },
+        {
+            "name": "eye_pair"
+        },
+        {
+            "name": "worn_pair",
+            "directions": 4
         }
     ]
 }

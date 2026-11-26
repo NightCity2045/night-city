@@ -445,14 +445,8 @@
   - type: NCOrganIntegrity
   - type: NCOrganFunction
     functionType: Vision
-    baseCapacity: 0.5
+    baseCapacity: 1
   - type: NCSurgicalSite
-
-  - type: VisualOrgan
-    layer: enum.HumanoidVisualLayers.Eyes
-    data:
-      sprite: _NC/Objects/Cyberware/optics.rsi
-      state: worn_left
 
 - type: entity
   id: NCOrganHumanTongue

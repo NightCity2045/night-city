@@ -51,7 +51,8 @@ public static class NCMedicalSnapshotVersions
     public const ushort CyberOptics = 20;
     public const ushort NeuralModules = 21;
     public const ushort ModularArms = 22;
-    public const ushort Current = ModularArms;
+    public const ushort PairedOptics = 23;
+    public const ushort Current = PairedOptics;
 }
 
 /// <summary>

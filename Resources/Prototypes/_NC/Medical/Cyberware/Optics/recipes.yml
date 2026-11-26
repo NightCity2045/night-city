@@ -664,8 +664,8 @@
     Silver: 100
 
 - type: latheRecipe
-  id: NCProduceNCCyberEyeLeftStandardEmpty
-  result: NCCyberEyeLeftStandardEmpty
+  id: NCProduceNCCyberEyesStandardEmpty
+  result: NCCyberEyesStandardEmpty
   completetime: 12
   applyMaterialDiscount: false
   categories:
@@ -676,8 +676,8 @@
     Plastic: 200
 
 - type: latheRecipe
-  id: NCProduceNCCyberEyeLeftImprovisedEmpty
-  result: NCCyberEyeLeftImprovisedEmpty
+  id: NCProduceNCCyberEyesImprovisedEmpty
+  result: NCCyberEyesImprovisedEmpty
   completetime: 12
   applyMaterialDiscount: false
   categories:
@@ -688,8 +688,8 @@
     Plastic: 200
 
 - type: latheRecipe
-  id: NCProduceNCCyberEyeLeftImprovedEmpty
-  result: NCCyberEyeLeftImprovedEmpty
+  id: NCProduceNCCyberEyesImprovedEmpty
+  result: NCCyberEyesImprovedEmpty
   completetime: 12
   applyMaterialDiscount: false
   categories:
@@ -700,56 +700,8 @@
     Plastic: 200
 
 - type: latheRecipe
-  id: NCProduceNCCyberEyeLeftPremiumEmpty
-  result: NCCyberEyeLeftPremiumEmpty
-  completetime: 12
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 800
-    Glass: 400
-    Plastic: 200
-
-- type: latheRecipe
-  id: NCProduceNCCyberEyeRightStandardEmpty
-  result: NCCyberEyeRightStandardEmpty
-  completetime: 12
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 200
-    Plastic: 200
-
-- type: latheRecipe
-  id: NCProduceNCCyberEyeRightImprovisedEmpty
-  result: NCCyberEyeRightImprovisedEmpty
-  completetime: 12
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 200
-    Glass: 100
-    Plastic: 200
-
-- type: latheRecipe
-  id: NCProduceNCCyberEyeRightImprovedEmpty
-  result: NCCyberEyeRightImprovedEmpty
-  completetime: 12
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 600
-    Glass: 300
-    Plastic: 200
-
-- type: latheRecipe
-  id: NCProduceNCCyberEyeRightPremiumEmpty
-  result: NCCyberEyeRightPremiumEmpty
+  id: NCProduceNCCyberEyesPremiumEmpty
+  result: NCCyberEyesPremiumEmpty
   completetime: 12
   applyMaterialDiscount: false
   categories:

@@ -441,7 +441,7 @@
     layer: enum.HumanoidVisualLayers.Eyes
     data:
       sprite: _NC/Objects/Cyberware/optics.rsi
-      state: worn_left
+      state: worn_pair
       color: "#75DCEB"
   - type: Sprite
     sprite: _NC/Objects/Cyberware/implants.rsi
@@ -455,7 +455,7 @@
     armorLocations: [ Face ]
   - type: NCOrganFunction
     functionType: Vision
-    baseCapacity: 0.5
+    baseCapacity: 1
   - type: NCNerve
     cyberprostheticInterface: true
   - type: NCCyberware

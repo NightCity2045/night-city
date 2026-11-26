@@ -144,7 +144,6 @@
   compatibleTargetCategories:
   - Brain
   - Eyes
-  - EyesRight
   - Tongue
   - Ears
   - Appendix
@@ -508,7 +507,7 @@
   description: Repairs one damaged biological eye structure.
   compatibleBodyProfiles: [ Human ]
   requiredAuthorizations: [ NCSurgeryAuthorizationOrgan ]
-  compatibleTargetCategories: [ Eyes, EyesRight ]
+  compatibleTargetCategories: [ Eyes ]
   targetRequirements: Integrity, Function
   targetState:
     maximumIntegrityRatio: 0.95
@@ -595,7 +594,7 @@
   description: Removes the selected biological eye structure as a live detached graft.
   compatibleBodyProfiles: [ Human ]
   requiredAuthorizations: [ NCSurgeryAuthorizationOrgan ]
-  compatibleTargetCategories: [ Eyes, EyesRight ]
+  compatibleTargetCategories: [ Eyes ]
   targetRequirements: Integrity
   facility:
     required: true
@@ -686,7 +685,7 @@
   compatibleTargetCategories: [ Head ]
   targetRequirements: Integrity
   requiresGraft: true
-  compatibleGraftCategories: [ Eyes, EyesRight ]
+  compatibleGraftCategories: [ Eyes ]
   compatibleGraftMaterials: [ Organic, Hybrid, Mechanical ]
   facility:
     required: true

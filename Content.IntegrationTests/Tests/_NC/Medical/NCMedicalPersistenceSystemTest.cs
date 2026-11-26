@@ -257,6 +257,66 @@ public sealed class NCMedicalPersistenceSystemTest : GameTest
 
     [Test]
     [RunOnSide(Side.Server)]
+    public void SplitEyeSnapshotsMergeBackIntoOnePair()
+    {
+        var source = SSpawn(HumanMob);
+        var snapshot = _persistence.SerializeMedicalState(source)!;
+        Assert.That(snapshot.Organs.Keys, Does.Not.Contain("EyesRight"), "a human has one paired eye organ");
+
+        // A version-22 save: two half-capacity eyes, the right one badly damaged.
+        snapshot.Version = NCMedicalSnapshotVersions.ModularArms;
+        snapshot.Organs["Eyes"].Function!.BaseCapacity = 0.5f;
+        snapshot.Organs["Eyes"].Function!.CurrentCapacity = 0.5f;
+        snapshot.Organs["EyesRight"] = new NCOrganMedicalStateSnapshot
+        {
+            EntityPrototype = "NCOrganHumanEyesRight",
+            StableOrganId = Guid.NewGuid(),
+            Function = new NCOrganFunctionStateSnapshot
+            {
+                FunctionType = snapshot.Organs["Eyes"].Function!.FunctionType,
+                BaseCapacity = 0.5f,
+                CurrentCapacity = 0.1f,
+            },
+        };
+
+        var target = SSpawn(HumanMob);
+        Assert.That(_persistence.RestoreMedicalState(target, snapshot), Is.True);
+        var restored = _persistence.SerializeMedicalState(target)!;
+        Assert.Multiple(() =>
+        {
+            Assert.That(restored.Organs.Keys, Does.Contain("Eyes"));
+            Assert.That(restored.Organs.Keys, Does.Not.Contain("EyesRight"));
+            Assert.That(restored.MissingOrganCategories, Is.Empty);
+            Assert.That(restored.Organs["Eyes"].Function!.BaseCapacity, Is.EqualTo(1f).Within(0.001f));
+            // Both eyes are one organ again, so the worse side decides: 0.1 / 0.5 = 20% of the pair.
+            Assert.That(restored.Organs["Eyes"].Function!.CurrentCapacity, Is.EqualTo(0.2f).Within(0.001f));
+        });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void SplitEyeSnapshotWithBothEyesMissingStaysMissing()
+    {
+        var source = SSpawn(HumanMob);
+        var snapshot = _persistence.SerializeMedicalState(source)!;
+        snapshot.Version = NCMedicalSnapshotVersions.ModularArms;
+        snapshot.Organs.Remove("Eyes");
+        snapshot.MissingOrganCategories.Add("Eyes");
+        snapshot.MissingOrganCategories.Add("EyesRight");
+
+        var target = SSpawn(HumanMob);
+        Assert.That(_persistence.RestoreMedicalState(target, snapshot), Is.True);
+        var restored = _persistence.SerializeMedicalState(target)!;
+        Assert.Multiple(() =>
+        {
+            Assert.That(restored.MissingOrganCategories.Select(category => category.Id), Does.Contain("Eyes"));
+            Assert.That(restored.MissingOrganCategories.Select(category => category.Id), Does.Not.Contain("EyesRight"));
+            Assert.That(restored.Organs.Keys, Does.Not.Contain("Eyes"));
+        });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
     public void InvalidUnknownAndOversizedSnapshotsDoNotPartiallyMutateTarget()
     {
         var body = SSpawn(HumanMob);

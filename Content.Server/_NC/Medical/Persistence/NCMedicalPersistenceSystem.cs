@@ -309,6 +309,8 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
             case NCMedicalSnapshotVersions.NeuralFoundations:
             case NCMedicalSnapshotVersions.MedicalControllers:
             case NCMedicalSnapshotVersions.CyberOptics:
+            case NCMedicalSnapshotVersions.NeuralModules:
+            case NCMedicalSnapshotVersions.ModularArms:
             case NCMedicalSnapshotVersions.Current:
                 migrated = CloneSnapshot(snapshot);
                 migrated.Version = NCMedicalSnapshotVersions.Current;
