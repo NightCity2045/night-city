@@ -5,7 +5,7 @@ meta:
   forkId: EchoCyber
   forkVersion: 9834d7d198ecf296a2092e3b069ebf862b24409d
   time: 11/22/2026 08:05:41
-  entityCount: 2424
+  entityCount: 2415
 maps:
 - 1
 grids:
@@ -3682,53 +3682,6 @@ entities:
       parent: 2287
       pos: 0.5,4.5
     - type: NCCityLocation
-- proto: NCComputerNCPDBudget
-  entities:
-  - uid: 2219
-    components:
-    - type: Transform
-      parent: 1
-      pos: 10.5,15.5
-    - type: NCCityLocation
-    - type: ApcPowerReceiver
-      needsPower: False
-    - type: ContainerContainer
-      containers:
-        board: !type:Container
-          ents: []
-          showEnts: False
-          occludes: True
-        nc_organization_budget_cash_slot: !type:ContainerSlot
-          ent: null
-          showEnts: False
-          occludes: True
-    - type: ItemSlots
-    - type: AlwaysPoweredReceiverState
-      needsPower: True
-- proto: NCComputerNCPDPersonnel
-  entities:
-  - uid: 79
-    components:
-    - type: Transform
-      parent: 1
-      rot: 1.5707963267948966 rad
-      pos: 4.5,14.5
-    - type: NCCityLocation
-    - type: ApcPowerReceiver
-      needsPower: False
-    - type: AlwaysPoweredReceiverState
-      needsPower: True
-  - uid: 2251
-    components:
-    - type: Transform
-      parent: 1
-      rot: 1.5707963267948966 rad
-      pos: 14.5,12.5
-    - type: NCCityLocation
-    - type: ApcPowerReceiver
-      needsPower: False
-    - type: AlwaysPoweredReceiverState
-      needsPower: True
 - proto: NCComputerPoliceRecords
   entities:
   - uid: 2117
@@ -4445,38 +4398,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 37.5,22.5
-- proto: NCTraumaResponseCartridge
-  entities:
-  - uid: 1875
-    components:
-    - type: Transform
-      parent: 1
-      pos: 129.3372,14.79136
-  - uid: 1893
-    components:
-    - type: Transform
-      parent: 1
-      pos: 127.60283,14.681985
-  - uid: 2024
-    components:
-    - type: Transform
-      parent: 1
-      pos: 128.74345,14.494485
-  - uid: 2028
-    components:
-    - type: Transform
-      parent: 1
-      pos: 128.38408,14.69761
-  - uid: 2033
-    components:
-    - type: Transform
-      parent: 1
-      pos: 128.0872,14.41636
-  - uid: 2035
-    components:
-    - type: Transform
-      parent: 1
-      pos: 129.05595,14.400735
 - proto: NCTraumaTeamCombatMedicBag
   entities:
   - uid: 2019

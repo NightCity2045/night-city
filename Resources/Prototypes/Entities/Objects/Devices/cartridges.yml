@@ -11,43 +11,24 @@
 - type: entity
   parent: BasePDACartridge
   id: NotekeeperCartridge
-  # NC start - Physical Agent shard presentation.
-  name: NOTES shard
-  description: A local encrypted notebook program for an Agent.
-  # NC end
+  name: notekeeper cartridge
+  description: A program for keeping notes.
   components:
   - type: Sprite
     state: cart-y
   - type: UIFragment
-    # NC - Render through the Agent-native NOTES interface.
-    ui: !type:NCAgentNotesUi
+    ui: !type:NotekeeperUi
   - type: Cartridge
     programName: notekeeper-program-name
     icon:
       sprite:  Objects/Misc/books.rsi
       state: book_icon
-  # NC start - Structured notes replace the vanilla string-only storage.
-  - type: NCAgentNotes
-    maximumNotes: 64
-    maximumNoteLength: 512
-  # NC end
-  # NC start - Agent SHARDS metadata.
-  - type: NCAgentShard
-    displayName: NOTES
-    description: Local encrypted notes stored on this Agent.
-    size: 2
-    category: Personal
-    permissions:
-    - LocalStorage
-  # NC end
 
 - type: entity
   parent: BasePDACartridge
   id: NanoTaskCartridge
-  # NC start - Physical Agent shard presentation.
-  name: TASKBOARD shard
-  description: A local workflow board for an Agent.
-  # NC end
+  name: NanoTask cartridge
+  description: A program for keeping track of tasks.
   components:
   - type: Sprite
     state: cart-nav
@@ -57,118 +38,65 @@
       sprite: Interface/Misc/program_icons.rsi
       state: nano_task
   - type: UIFragment
-    # NC - Preserve NanoTask storage and relay while using the Agent-native TASKBOARD interface.
-    ui: !type:NCAgentTaskboardUi
+    ui: !type:NanoTaskUi
   - type: NanoTaskCartridge
-  # NC start - Agent SHARDS metadata.
-  - type: NCAgentShard
-    displayName: TASKBOARD
-    description: Device-local task tracking and lightweight job planning.
-    size: 2
-    category: Personal
-    permissions:
-    - LocalStorage
-  # NC end
 
 - type: entity
   parent: BasePDACartridge
   id: NewsReaderCartridge
-  # NC start - Physical Agent shard presentation.
-  name: NEWSWIRE shard
-  description: A public CityNet news feed for an Agent.
-  # NC end
+  name: news cartridge
+  description: A program for reading news.
   components:
   - type: Sprite
     state: cart-y
   - type: UIFragment
-    # NC - Keep the vanilla news service while using the Agent-native NEWSWIRE reader.
-    ui: !type:NCAgentNewswireUi
+    ui: !type:NewsReaderUi
   - type: Cartridge
     programName: news-read-program-name
     icon:
       sprite: Interface/Misc/program_icons.rsi
       state: news_read
   - type: NewsReaderCartridge
-  # NC start - Agent SHARDS metadata.
-  - type: NCAgentShard
-    displayName: NEWSWIRE
-    description: Receives public news feeds from the active network.
-    size: 3
-    category: Network
-    permissions:
-    - NetworkRead
-  # NC end
 
 - type: entity
   parent: BasePDACartridge
   id: CrewManifestCartridge
-  # NC start - Physical Agent shard presentation.
-  name: DIRECTORY shard
-  description: A public organization registry for an Agent.
-  # NC end
+  name: crew manifest cartridge
+  description: A program for listing your fellow crewmembers.
   components:
     - type: Sprite
       state: cart-y
     - type: UIFragment
-      # NC - Keep the vanilla manifest service while using the Agent-native DIRECTORY reader.
-      ui: !type:NCAgentDirectoryUi
+      ui: !type:CrewManifestUi
     - type: Cartridge
       programName: crew-manifest-program-name
       icon:
         sprite: Interface/Misc/program_icons.rsi
         state: crew_manifest
     - type: CrewManifestCartridge
-    # NC - Persistent public Night City personnel source.
-    - type: NCAgentDirectory
-      resultLimit: 100
-    # NC start - Agent SHARDS metadata.
-    - type: NCAgentShard
-      displayName: DIRECTORY
-      description: Reads the public personnel directory exposed by the current station service.
-      size: 3
-      category: Network
-      permissions:
-      - NetworkRead
-      - VinRead
-    # NC end
 
 - type: entity
   parent: BasePDACartridge
   id: NetProbeCartridge
-  # NC start - Physical Agent shard presentation.
-  name: SCANNER shard
-  description: A network inspection program for an Agent.
-  # NC end
+  name: NetProbe cartridge
+  description: A program for getting the address and frequency of network devices.
   components:
     - type: Sprite
       state: cart-y
     - type: UIFragment
-      # NC - Render through the Agent-native SCANNER interface.
-      ui: !type:NCAgentScannerUi
+      ui: !type:NetProbeUi
     - type: Cartridge
       programName: net-probe-program-name
       icon:
         sprite: Structures/Machines/server.rsi
         state: server
     - type: NetProbeCartridge
-    # NC start - NetProbe is presented as the first physical Agent scanner shard.
-    - type: NCAgentShard
-      displayName: SCANNER
-      description: Inspects nearby network devices and exposed service addresses.
-      size: 4
-      category: Network
-      permissions:
-      - NetworkRead
-      - LocationRead
-    # NC end
 
 - type: entity
   parent: BasePDACartridge
   id: LogProbeCartridge
-  # NC start - Physical Agent shard presentation.
-  name: LOGPROBE shard
-  description: An access-device audit program for an Agent.
-  # NC end
+  name: LogProbe cartridge
+  description: A program for getting access logs from devices.
   components:
     - type: Sprite
       state: cart-log
@@ -176,8 +104,7 @@
       sprite: Objects/Devices/cartridge.rsi
       state: cart-log
     - type: UIFragment
-      # NC - Keep vanilla scanning and printing behind the Agent-native LOGPROBE display.
-      ui: !type:NCAgentLogProbeUi
+      ui: !type:LogProbeUi
     - type: Cartridge
       programName: log-probe-program-name
       icon:
@@ -187,29 +114,12 @@
     - type: GuideHelp
       guides:
       - Forensics
-    # NC start - Agent SHARDS metadata.
-    - type: NCAgentShard
-      displayName: LOGPROBE
-      description: Extracts exposed access logs from compatible devices.
-      size: 4
-      category: Security
-      accessLabel: NCPD/TECH
-      requiredAccess:
-      - NCPD_Patrol
-      - Militech_Tech
-      - Biotech_Tech
-      permissions:
-      - NetworkRead
-      - DeviceControl
-    # NC end
 
 - type: entity
   parent: BasePDACartridge
   id: WantedListCartridge
-  # NC start - Physical Agent shard presentation.
-  name: WATCHLIST shard
-  description: An NCPD wanted-record reader for an Agent.
-  # NC end
+  name: wanted list cartridge
+  description: A program to get a list of wanted persons.
   components:
   - type: Sprite
     state: cart-sec
@@ -217,40 +127,21 @@
     sprite: Objects/Devices/cartridge.rsi
     state: cart-sec
   - type: UIFragment
-    # NC - Keep the vanilla criminal-record query behind the Agent-native WATCHLIST display.
-    ui: !type:NCAgentWatchlistUi
+    ui: !type:WantedListUi
   - type: Cartridge
     programName: wanted-list-program-name
     icon:
       sprite: Objects/Misc/books.rsi
       state: icon_magnifier
   - type: WantedListCartridge
-  # NC - Persistent read-only NCPD watchlist source.
-  - type: NCAgentWatchlist
-    resultLimit: 100
   - type: StealTarget
     stealGroup: WantedListCartridge
-  # NC start - Agent SHARDS metadata.
-  - type: NCAgentShard
-    displayName: WATCHLIST
-    description: Queries public and authorized wanted-person records.
-    size: 5
-    category: Security
-    accessLabel: NCPD
-    requiredAccess:
-    - NCPD_Patrol
-    permissions:
-    - NetworkRead
-    - VinRead
-  # NC end
 
 - type: entity
   parent: BasePDACartridge
   id: MedTekCartridge
-  # NC start - Physical Agent shard presentation.
-  name: MEDTEK shard
-  description: A field diagnostic program with device-local scan history.
-  # NC end
+  name: MedTek cartridge
+  description: A program that provides medical diagnostic tools.
   components:
     - type: Sprite
       state: cart-med
@@ -263,29 +154,12 @@
         sprite: Objects/Specific/Medical/healthanalyzer.rsi
         state: icon
     - type: MedTekCartridge
-    # NC start - Agent-native MEDTEK history page; vanilla analyzer remains the live scan UI.
-    - type: UIFragment
-      ui: !type:NCAgentMedTekUi
-    - type: NCAgentMedTek
-      maximumHistory: 12
-    # NC end
-    # NC start - Agent SHARDS metadata.
-    - type: NCAgentShard
-      displayName: MEDTEK
-      description: Interfaces with supported medical diagnostic equipment.
-      size: 4
-      category: Medical
-      permissions:
-      - DeviceControl
-    # NC end
 
 - type: entity
   parent: BasePDACartridge
   id: AstroNavCartridge
-  # NC start - Physical Agent shard presentation.
-  name: NAVIGATOR shard
-  description: A city-grid navigator with local waypoint storage.
-  # NC end
+  name: AstroNav cartridge
+  description: A program for navigation that provides GPS coordinates.
   components:
     - type: Sprite
       state: cart-nav
@@ -298,19 +172,3 @@
         sprite: Objects/Devices/gps.rsi
         state: icon
     - type: AstroNavCartridge
-    # NC start - Agent-native NAVIGATOR UI and physical waypoint storage.
-    - type: UIFragment
-      ui: !type:NCAgentNavigatorUi
-    - type: NCAgentNavigator
-      maximumWaypoints: 24
-      maximumLabelLength: 30
-    # NC end
-    # NC start - Agent SHARDS metadata.
-    - type: NCAgentShard
-      displayName: NAVIGATOR
-      description: Reads local navigation coordinates from the Agent hardware.
-      size: 2
-      category: Utility
-      permissions:
-      - LocationRead
-    # NC end

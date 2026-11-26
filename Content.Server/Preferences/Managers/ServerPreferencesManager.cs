@@ -60,8 +60,6 @@ namespace Content.Server.Preferences.Managers
             _netManager.RegisterNetMessage<MsgUpdateCharacter>(HandleUpdateCharacterMessage);
             _netManager.RegisterNetMessage<MsgDeleteCharacter>(HandleDeleteCharacterMessage);
             _netManager.RegisterNetMessage<MsgUpdateConstructionFavorites>(HandleUpdateConstructionFavoritesMessage);
-            // NC - Persistent employment is projected separately from editable character preferences.
-            InitializeNCEmploymentNetworking();
             _sawmill = _log.GetSawmill("prefs");
         }
 
@@ -179,7 +177,6 @@ namespace Content.Server.Preferences.Managers
                 loadouts[role.RoleName] = loadout;
             }
 
-            // NC start - Department preference is part of this character, not the account.
             return new HumanoidCharacterProfile(
                 profile.CharacterName,
                 profile.FlavorText,
@@ -200,8 +197,7 @@ namespace Content.Server.Preferences.Managers
                 antags.ToHashSet(),
                 traits.ToHashSet(),
                 loadouts
-            ).WithNCDepartmentPreference(profile.NCDepartmentPreference);
-            // NC end
+            );
         }
 
         private async void HandleSelectCharacterMessage(MsgSelectCharacter message)
@@ -234,11 +230,6 @@ namespace Content.Server.Preferences.Managers
             if (ShouldStorePrefs(message.MsgChannel.AuthType))
             {
                 await _db.SaveSelectedCharacterIndexAsync(message.MsgChannel.UserId, message.SelectedCharacterIndex);
-                // NC - Resolve a saved initial department when this character is selected for the first time.
-                await CreateNCEntryEmploymentIfNeeded(
-                    userId,
-                    index,
-                    prefsData.Prefs.SelectedCharacter.NCDepartmentPreference);
             }
         }
 
@@ -270,10 +261,6 @@ namespace Content.Server.Preferences.Managers
             var curPrefs = prefsData.Prefs!;
             var session = _playerManager.GetSessionById(userId);
 
-            // NC - Only an explicit department change may reactivate terminated employment.
-            var ncDepartmentChanged = curPrefs.Characters.TryGetValue(slot, out var previousProfile) &&
-                                      previousProfile.NCDepartmentPreference != profile.NCDepartmentPreference;
-
             // NC start - Never trust a client-supplied species; player characters use human anatomy only.
             profile = NCHumanProfileRules.Normalize(profile);
             // NC end
@@ -291,12 +278,6 @@ namespace Content.Server.Preferences.Managers
                 await _db.SaveCharacterSlotAsync(userId, profile, slot);
                 // NC - New character slots receive their stable Profile.Id only after saving.
                 await RefreshNCCharacterData(userId);
-                // NC - A saved new choice may create first employment or rehire a resigned character.
-                await CreateNCEntryEmploymentIfNeeded(
-                    userId,
-                    slot,
-                    profile.NCDepartmentPreference,
-                    ncDepartmentChanged);
             }
         }
 
@@ -441,14 +422,9 @@ namespace Content.Server.Preferences.Managers
                 async Task LoadPrefs()
                 {
                     var prefs = await GetOrCreatePreferencesAsync(session.UserId, cancel);
-                    // NC - Cache stable character IDs and server-owned employment before lobby setup completes.
+                    // NC - Cache stable character IDs before lobby setup completes.
                     CacheNCCharacterData(session.UserId, prefs);
                     prefsData.Prefs = ConvertPreferences(prefs);
-                    // NC - Apply a previously saved department choice that predates entry-job assignment.
-                    await CreateNCEntryEmploymentIfNeeded(
-                        session.UserId,
-                        prefsData.Prefs.SelectedCharacterIndex,
-                        prefsData.Prefs.SelectedCharacter.NCDepartmentPreference);
                 }
             }
         }
@@ -471,15 +447,13 @@ namespace Content.Server.Preferences.Managers
                 MaxCharacterSlots = MaxCharacterSlots
             };
             _netManager.ServerSendMessage(msg, session.Channel);
-            // NC - Send authoritative positions after the editable character profiles.
-            SendNCEmploymentSnapshot(session.UserId);
         }
 
         public void OnClientDisconnected(ICommonSession session)
         {
             _cachedPlayerPrefs.Remove(session.UserId);
             // NC - Character records are reloaded on the next authenticated connection.
-            _ncCharacterData.Remove(session.UserId);
+            _ncCharacterIds.Remove(session.UserId);
         }
 
         public bool HavePreferencesLoaded(ICommonSession session)

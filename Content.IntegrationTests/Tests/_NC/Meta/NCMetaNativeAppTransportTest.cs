@@ -8,7 +8,6 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Content.Client._NC.Meta.Mui;
 using Content.Client._NC.Meta.UI;
-using Content.Client._NC.Agent;
 using Content.IntegrationTests.Fixtures;
 using Content.Meta.Language;
 using Content.Meta.Mui;
@@ -88,23 +87,6 @@ public sealed class NCMetaNativeAppTransportTest : GameTest
             Assert.That(host.ChildCount, Is.Zero);
             Assert.That(input.Disposed, Is.True);
             Assert.That(requests.OfType<NCMetaAppCloseMessage>().Single().SessionId, Is.EqualTo(sessionId));
-        });
-    }
-
-    [Test]
-    public async Task AgentIgnoresLoaderUpdatesAfterItsWindowHasBeenDisposed()
-    {
-        await Client.WaitAssertion(() =>
-        {
-            var owner = CEntMan.SpawnEntity(null, MapCoordinates.Nullspace);
-            using var menu = new NCAgentMenu();
-            using var ui = new NCAgentBoundUserInterface(owner, PdaUiKey.Key);
-            var type = typeof(NCAgentBoundUserInterface);
-            type.GetField("_menu", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(ui, menu);
-            menu.Dispose();
-            Assert.DoesNotThrow(() => type.GetMethod("UpdateState", BindingFlags.Instance | BindingFlags.NonPublic)!
-                .Invoke(ui, [new CartridgeLoaderUiState([], null)]));
-            CEntMan.DeleteEntity(owner);
         });
     }
 

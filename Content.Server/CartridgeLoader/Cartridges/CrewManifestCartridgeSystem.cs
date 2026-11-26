@@ -6,9 +6,6 @@ using Content.Shared.CCVar;
 using Content.Shared.CrewManifest;
 using Robust.Shared.Configuration;
 using Robust.Shared.Prototypes;
-// NC - Agent DIRECTORY uses persistent Night City personnel data.
-using Content.Shared._NC.Agent.Shards;
-using Content.Shared._NC.Agent.Shards.Directory;
 
 namespace Content.Server.CartridgeLoader.Cartridges;
 
@@ -60,10 +57,6 @@ public sealed partial class CrewManifestCartridgeSystem : EntitySystem
         if (!Resolve(uid, ref component))
             return;
 
-        // NC - The Agent-specific system owns DIRECTORY state; ordinary PDA cartridges remain vanilla.
-        if (HasComp<NCAgentDirectoryComponent>(uid))
-            return;
-
         var owningStation = _stationSystem.GetOwningStation(uid);
 
         if (owningStation is null)
@@ -83,10 +76,7 @@ public sealed partial class CrewManifestCartridgeSystem : EntitySystem
 
     private void OnInstallationAttempt(ref ProgramInstallationAttempt args)
     {
-        // NC - DIRECTORY reads a separate public Night City registry and is not governed by the station manifest CVar.
-        if (args.Prototype == CartridgePrototypeName &&
-            !_unsecureViewersAllowed &&
-            !HasComp<NCAgentShardStorageComponent>(args.LoaderUid))
+        if (args.Prototype == CartridgePrototypeName && !_unsecureViewersAllowed)
             args.Cancelled = true;
     }
 
@@ -94,21 +84,14 @@ public sealed partial class CrewManifestCartridgeSystem : EntitySystem
     {
         _unsecureViewersAllowed = unsecureViewersAllowed;
 
-        // NC start - DIRECTORY is a physical Agent shard and must never be silently installed on every loader.
-        // The CVar still controls whether installed shards may query the public manifest.
         if (_unsecureViewersAllowed)
             return;
 
         var allCartridgeLoaders = AllEntityQuery<CartridgeLoaderComponent>();
         while (allCartridgeLoaders.MoveNext(out var loaderUid, out var comp))
         {
-            // NC - Never remove a physical DIRECTORY shard from an Agent because the station CVar changed.
-            if (HasComp<NCAgentShardStorageComponent>(loaderUid))
-                continue;
-
             if (_cartridgeLoader.TryGetProgram<CrewManifestCartridgeComponent>((loaderUid, comp)) is { } program)
                 _cartridgeLoader.UninstallProgram((loaderUid, comp), program);
         }
-        // NC end
     }
 }

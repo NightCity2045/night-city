@@ -19,8 +19,6 @@ using Robust.Shared.Audio.Systems;
 using Robust.Shared.Containers;
 using Robust.Shared.Timing;
 using Content.Server.Body.Systems;
-// NC - Agent MEDTEK records completed vanilla analyzer scans in its physical shard.
-using Content.Shared._NC.Agent.Shards.MedTek;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Diagnostics.Detail;
 
@@ -122,9 +120,7 @@ public sealed partial class HealthAnalyzerSystem : EntitySystem
             OpenUserInterface(args.User, uid);
         // NC end
         BeginAnalyzingEntity(uid, args.Target.Value);
-        // NC start - Notify optional Agent MEDTEK storage without coupling vanilla analyzer logic to cartridges.
-        var ncScan = new NCAgentMedicalScanCompletedEvent(args.User, args.Target.Value);
-        RaiseLocalEvent(uid.Owner, ref ncScan);
+        // NC start - Notify the NC diagnostics history of a completed vanilla analyzer scan.
         var ncDiagnosticScan = new NCHealthAnalyzerScanCompletedEvent(args.User, args.Target.Value);
         RaiseLocalEvent(uid.Owner, ref ncDiagnosticScan);
         // NC end

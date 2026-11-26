@@ -249,6 +249,11 @@ binds:
 - function: OpenGuidebook
   type: State
   key: NumpadNum0
+# NC-Edit-Start: city map window.
+- function: NCOpenCityMap
+  type: State
+  key: M
+# NC-Edit-End
 - function: OpenAHelp
   type: State
   key: F1

@@ -1,0 +1,11 @@
+<controls:FancyWindow xmlns="https://spacestation14.io"
+                      xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+                      xmlns:map="clr-namespace:Content.Client._NC.City.Map"
+                      Title="{Loc 'nc-city-map-title'}"
+                      MinSize="520 420"
+                      SetSize="820 640">
+    <BoxContainer Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True" Margin="4">
+        <Label Name="StatusLabel" Text="{Loc 'nc-city-map-loading'}" />
+        <map:NCCityMapControl Name="MapControl" HorizontalExpand="True" VerticalExpand="True" />
+    </BoxContainer>
+</controls:FancyWindow>

@@ -263,11 +263,6 @@ public sealed partial class NCMetaWorkspaceSystem
                 (int) Math.Clamp((quote.ExpiresAtTicks - context.Time.Ticks) / TimeSpan.TicksPerSecond, 0, 300), offered.Terms,
                 false, compatibility, quote.SlotKind);
         }
-        if (NCPartyRef.TryParse(context.Owner, out var actor) && actor.TryGetCharacter(out var character))
-            foreach (var contact in await _contactDatabase.GetNCMetaAgentRecipientsAsync(
-                         new Content.Shared._NC.Identity.NCCharacterId(character.Value), selection.ContactsQuery, 16))
-                projection.Contacts.Add(new(NCPartyRef.ForCharacter(new Content.Shared._NC.Identity.NCCharacterId(contact.CharacterId.Value)).ToString(),
-                    contact.Alias, contact.Address, contact.IsContact));
         foreach (var listing in await _marketplace.ReadResaleOffersAsync(context.Terminal, context.User, selection.Owner, selection.ResaleOffset))
             projection.Resales.Add(await UiResale(listing.Offer, listing.Product.Name, listing.Terms, true, context.Time.Ticks));
         projection.ResaleHasNext = selection.ResaleOffset < 120 &&

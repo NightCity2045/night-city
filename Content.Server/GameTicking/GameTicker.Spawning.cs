@@ -387,10 +387,6 @@ namespace Content.Server.GameTicking
             if (!_userDb.IsLoadComplete(player))
                 return;
 
-            // NC start - The client cannot select or forge a concrete position during late join.
-            jobId = ResolveNCJoinJob(player).Id;
-            // NC end
-
             SpawnPlayer(player, station, jobId, silent: silent);
         }
 

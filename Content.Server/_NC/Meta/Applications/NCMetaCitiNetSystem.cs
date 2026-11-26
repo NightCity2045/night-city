@@ -9,12 +9,10 @@ using System.Threading.Tasks;
 using Content.Meta.Hosting;
 using Content.Meta.Mui;
 using Content.Server.Database;
-using Content.Server._NC.Agent;
 using Content.Server._NC.Meta.Devices;
 using Content.Server._NC.Meta.Persistence;
 using Content.Server._NC.Meta.Authority;
 using Content.Server._NC.Meta.Commerce;
-using Content.Shared._NC.Agent.Components;
 using Content.Shared._NC.Meta;
 using Content.Shared._NC.Meta.UI;
 using Content.Shared.PDA;
@@ -40,7 +38,6 @@ public sealed partial class NCMetaCitiNetSystem : EntitySystem
     [Dependency] private NCMetaMarketplaceSystem _marketplace = default!;
     [Dependency] private IServerDbManager _database = default!;
     [Dependency] private ITaskManager _tasks = default!;
-    [Dependency] private NCAgentSystem _agents = default!;
     [Dependency] private SharedUserInterfaceSystem _ui = default!;
     [Dependency] private IGameTiming _timing = default!;
     private readonly Dictionary<Guid, Publication> _sites = [];
@@ -50,7 +47,6 @@ public sealed partial class NCMetaCitiNetSystem : EntitySystem
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<NCAgentComponent, NCMetaBrowserNavigateMessage>(OnNavigate);
         SubscribeLocalEvent<NCMetaBrowserUiLifecycleComponent, BoundUIClosedEvent>(OnClosed);
         SubscribeLocalEvent<NCMetaBrowserUiLifecycleComponent, ComponentShutdown>(OnShutdown);
     }
@@ -159,67 +155,6 @@ public sealed partial class NCMetaCitiNetSystem : EntitySystem
         catch (JsonException) { return null; }
     }
 
-    private void OnNavigate(Entity<NCAgentComponent> ent, ref NCMetaBrowserNavigateMessage args)
-    {
-        if (!EnsureEpoch() || args.RequestId == Guid.Empty || args.Address.Length > 192 || !_agents.CanUseMetaCitiNet(ent.Owner, args.Actor))
-            return;
-        EnsureComp<NCMetaBrowserUiLifecycleComponent>(ent.Owner);
-        var now = _timing.CurTime;
-        if (!_navigation.TryGetValue(ent.Owner, out var navigation) || navigation.Expires < now)
-        {
-            if (_navigation.Count >= 1024 && !_navigation.ContainsKey(ent.Owner))
-                return;
-            navigation = (new MetaRateLimit(4, 2), Guid.Empty, now + TimeSpan.FromMinutes(5));
-        }
-        if (navigation.LastRequest == args.RequestId || !navigation.Rate.TryConsume((long) now.TotalMilliseconds))
-            return;
-        _navigation[ent.Owner] = (navigation.Rate, args.RequestId, now + TimeSpan.FromMinutes(5));
-        if (!MuiCitiNetAddress.TryParse(args.Address, out var address))
-        { Unavailable(ent.Owner, args.Actor); return; }
-        _ = NavigateAsync(ent.Owner, args.Actor, args.RequestId, address!, _epoch);
-    }
-
-    private async Task NavigateAsync(EntityUid agent, EntityUid user, Guid requestId, MuiCitiNetAddress address, NCSessionEpoch expectedEpoch)
-    {
-        try
-        {
-            var lease = address.Domain is null ? null : await _hosting.ResolveDomainAsync(address.Domain);
-            var publication = address.Domain is null ? await ReadPublicationAsync(address.HostDeviceId) : null;
-            await Main(() =>
-            {
-                if (!EnsureEpoch() || _epoch != expectedEpoch || !_navigation.TryGetValue(agent, out var navigation) ||
-                    navigation.LastRequest != requestId || !_agents.CanUseMetaCitiNet(agent, user))
-                    return false;
-                bool opened;
-                if (lease is not null && (address.View is null || address.View == lease.View) && _hosting.CanUseLease(lease.Id, lease.Revision) &&
-                    _devices.TryResolve(lease.HostDeviceId, out var target) && Connected(target.Entity) &&
-                    _applications.TryRestorePublishedView(target.Entity, lease.Provider, lease.PackageDigest, lease.View) &&
-                    _applications.TryGetRegistration(target.Entity, lease.PackageDigest, out var leasedApplication))
-                    opened = _applications.TryOpen(agent, user, target.Entity, lease.View, NCMetaAppPresentation.Website, PdaUiKey.Key,
-                        () => _agents.CanUseMetaCitiNet(agent, user) && Connected(target.Entity) && _hosting.CanUseLease(lease.Id, lease.Revision),
-                        out _, lease.Units > 0 ? lease.Id : Guid.Empty, lease.MaxSessions, leasedApplication.RuntimeGeneration);
-                else if (publication is not null && (address.View is null || address.View == publication.View) && Restore(address.HostDeviceId, publication) &&
-                    IsCurrent(address.HostDeviceId, publication) && _devices.TryResolve(publication.HostId, out var device) &&
-                    _applications.TryGetRegistration(device.Entity, publication.PackageDigest, out var publishedApplication))
-                    opened = _applications.TryOpen(agent, user, device.Entity, publication.View, NCMetaAppPresentation.Website, PdaUiKey.Key,
-                        () => _agents.CanUseMetaCitiNet(agent, user) && IsCurrent(address.HostDeviceId, publication), out _,
-                        runtimeGeneration: publishedApplication.RuntimeGeneration);
-                else
-                    opened = false;
-                if (!opened)
-                    Unavailable(agent, user);
-                return opened;
-            });
-        }
-        catch (Exception exception)
-        {
-            Log.Error($"META CitiNet navigation failed: {exception}");
-            await Main(() => { if (_agents.CanUseMetaCitiNet(agent, user)) Unavailable(agent, user); return false; });
-        }
-    }
-
-    private void Unavailable(EntityUid agent, EntityUid user) =>
-        _ui.ServerSendUiMessage(agent, PdaUiKey.Key, new NCMetaBrowserResultMessage(Loc.GetString("nc-meta-site-unavailable")), user);
     private Task<T> Main<T>(Func<T> action)
     {
         var result = new TaskCompletionSource<T>();

@@ -1,6 +1,5 @@
 using Content.Shared.Construction.Prototypes;
 using Content.Shared.Preferences;
-using Content.Shared.Roles; // NC - Persistent employment display.
 using Robust.Shared.Prototypes;
 
 namespace Content.Client.Lobby
@@ -8,8 +7,6 @@ namespace Content.Client.Lobby
     public interface IClientPreferencesManager
     {
         event Action OnServerDataLoaded;
-        // NC start - Server-owned employment shown by the character picker.
-        event Action OnNCEmploymentUpdated;
 
         bool ServerDataLoaded => Settings != null;
 
@@ -23,9 +20,5 @@ namespace Content.Client.Lobby
         void DeleteCharacter(HumanoidCharacterProfile profile);
         void DeleteCharacter(int slot);
         void UpdateConstructionFavorites(List<ProtoId<ConstructionPrototype>> favorites);
-        bool TryGetNCEmployment(int slot, out ProtoId<JobPrototype> job);
-        bool TryGetNCEmploymentRecord(int slot, out ProtoId<JobPrototype>? job);
-        void ResignSelectedNCEmployment();
-        // NC end
     }
 }

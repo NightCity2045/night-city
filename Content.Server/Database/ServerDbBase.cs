@@ -222,9 +222,6 @@ namespace Content.Server.Database
             profile.EyeColor = appearance.EyeColor.ToHex();
             profile.SkinColor = appearance.SkinColor.ToHex();
             profile.SpawnPriority = (int) humanoid.SpawnPriority;
-            // NC start - Persist the character's initial department separately from vanilla job priorities.
-            profile.NCDepartmentPreference = humanoid.NCDepartmentPreference?.Id;
-            // NC end
             profile.OrganMarkings = JsonSerializer.SerializeToDocument(dataNode.ToJsonNode());
 
             // support for downgrades - at some point this should be removed

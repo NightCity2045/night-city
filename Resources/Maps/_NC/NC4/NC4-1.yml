@@ -5,7 +5,7 @@ meta:
   forkId: EchoCyber
   forkVersion: 563c9eb8025bea660287a2666b38234d281ec1bb
   time: 11/18/2026 20:45:01
-  entityCount: 1277
+  entityCount: 1275
 maps:
 - 1
 grids:
@@ -2300,41 +2300,6 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 12.5,20.5
-    - type: NCCityLocation
-    - type: ApcPowerReceiver
-      needsPower: False
-    - type: AlwaysPoweredReceiverState
-      needsPower: True
-- proto: NCComputerMilitechBudget
-  entities:
-  - uid: 322
-    components:
-    - type: Transform
-      parent: 1
-      pos: -108.5,124.5
-    - type: NCCityLocation
-    - type: ApcPowerReceiver
-      needsPower: False
-    - type: ContainerContainer
-      containers:
-        board: !type:Container
-          ents: []
-          showEnts: False
-          occludes: True
-        nc_organization_budget_cash_slot: !type:ContainerSlot
-          ent: null
-          showEnts: False
-          occludes: True
-    - type: ItemSlots
-    - type: AlwaysPoweredReceiverState
-      needsPower: True
-- proto: NCComputerMilitechPersonnel
-  entities:
-  - uid: 321
-    components:
-    - type: Transform
-      parent: 1
-      pos: -109.5,124.5
     - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False

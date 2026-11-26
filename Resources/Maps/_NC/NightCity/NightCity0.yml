@@ -5,7 +5,7 @@ meta:
   forkId: EchoCyber
   forkVersion: 9834d7d198ecf296a2092e3b069ebf862b24409d
   time: 11/22/2026 08:05:40
-  entityCount: 14728
+  entityCount: 14726
 maps:
 - 1
 grids:
@@ -13942,43 +13942,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 31.5,39.5
-    - type: NCCityLocation
-    - type: ApcPowerReceiver
-      needsPower: False
-    - type: AlwaysPoweredReceiverState
-      needsPower: True
-- proto: NCComputerMedicalBudget
-  entities:
-  - uid: 11967
-    components:
-    - type: Transform
-      parent: 1
-      rot: 3.141592653589793 rad
-      pos: 103.5,18.5
-    - type: NCCityLocation
-    - type: ApcPowerReceiver
-      needsPower: False
-    - type: ContainerContainer
-      containers:
-        board: !type:Container
-          ents: []
-          showEnts: False
-          occludes: True
-        nc_organization_budget_cash_slot: !type:ContainerSlot
-          ent: null
-          showEnts: False
-          occludes: True
-    - type: ItemSlots
-    - type: AlwaysPoweredReceiverState
-      needsPower: True
-- proto: NCComputerMedicalPersonnel
-  entities:
-  - uid: 12146
-    components:
-    - type: Transform
-      parent: 1
-      rot: 3.141592653589793 rad
-      pos: 104.5,18.5
     - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False

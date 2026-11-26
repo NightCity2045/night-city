@@ -5,7 +5,7 @@ meta:
   forkId: EchoCyber
   forkVersion: 563c9eb8025bea660287a2666b38234d281ec1bb
   time: 11/18/2026 20:45:02
-  entityCount: 1082
+  entityCount: 1080
 maps:
 - 1
 grids:
@@ -1164,42 +1164,6 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: -9.568791,-31.258783
-- proto: NCComputerBiotechnicaBudget
-  entities:
-  - uid: 87
-    components:
-    - type: Transform
-      parent: 1
-      rot: 3.141592653589793 rad
-      pos: 123.5,188.5
-    - type: NCCityLocation
-    - type: ApcPowerReceiver
-      needsPower: False
-    - type: ContainerContainer
-      containers:
-        board: !type:Container
-          ents: []
-          showEnts: False
-          occludes: True
-        nc_organization_budget_cash_slot: !type:ContainerSlot
-          ent: null
-          showEnts: False
-          occludes: True
-    - type: ItemSlots
-    - type: AlwaysPoweredReceiverState
-      needsPower: True
-- proto: NCComputerBiotechnicaPersonnel
-  entities:
-  - uid: 75
-    components:
-    - type: Transform
-      parent: 1
-      pos: 123.5,191.5
-    - type: NCCityLocation
-    - type: ApcPowerReceiver
-      needsPower: False
-    - type: AlwaysPoweredReceiverState
-      needsPower: True
 - proto: NCPoweredlightElectricYellow
   entities:
   - uid: 898
