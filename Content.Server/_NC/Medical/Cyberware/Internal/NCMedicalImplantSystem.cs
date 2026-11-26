@@ -72,14 +72,13 @@ public sealed partial class NCMedicalImplantSystem : EntitySystem
             if (!module.Injector)
             {
                 if (_timing.CurTime < module.NextSample) continue;
-                var quality = _cyberware.MedicalPartQuality(uid, "NCMedicalSensorSlot");
-                module.NextSample = _timing.CurTime + TimeSpan.FromSeconds(2 / quality.Performance);
+                module.NextSample = _timing.CurTime + TimeSpan.FromSeconds(2);
                 if (!TryComp<NCPhysiologyComponent>(body, out var physiology) ||
                     !TryComp<NCCirculationComponent>(body, out var circulation)) { module.HasSample = false; continue; }
-                module.Oxygen = NCMedicalImplantMath.Quantize(physiology.Oxygenation * 100, quality.MeasurementStep);
-                module.Perfusion = NCMedicalImplantMath.Quantize(circulation.Perfusion * 100, quality.MeasurementStep);
-                module.Pain = NCMedicalImplantMath.Quantize(physiology.TotalPain, quality.MeasurementStep);
-                module.Blood = NCMedicalImplantMath.Quantize(circulation.BloodVolume, quality.MeasurementStep);
+                module.Oxygen = NCMedicalImplantMath.Quantize(physiology.Oxygenation * 100, NCMedicalImplantMath.MeasurementStep);
+                module.Perfusion = NCMedicalImplantMath.Quantize(circulation.Perfusion * 100, NCMedicalImplantMath.MeasurementStep);
+                module.Pain = NCMedicalImplantMath.Quantize(physiology.TotalPain, NCMedicalImplantMath.MeasurementStep);
+                module.Blood = NCMedicalImplantMath.Quantize(circulation.BloodVolume, NCMedicalImplantMath.MeasurementStep);
                 module.SampledAt = _timing.CurTime;
                 module.HasSample = true;
                 if ((module.Oxygen < 80 || module.Perfusion < 70) && _timing.CurTime >= module.NextAlarm)
@@ -119,11 +118,10 @@ public sealed partial class NCMedicalImplantSystem : EntitySystem
         var state = medical.State;
         if (!NCMedicalImplantMath.Valid(state) || automatic &&
             (!state.Automatic || !TryGetReading(body, out var reading) || !Triggered(state, reading))) return false;
-        // Low-grade pumps have coarser metering. The actual amount, not the requested amount, consumes the budget.
-        var quality = _cyberware.MedicalPartQuality(uid, "NCMedicalPumpSlot");
-        var dose = NCMedicalImplantMath.MeteredDose(state.Dose, quality.MeasurementStep);
+        // The pump meters in steps. The actual amount, not the requested amount, consumes the budget.
+        var dose = NCMedicalImplantMath.MeteredDose(state.Dose, NCMedicalImplantMath.MeasurementStep);
         if (!NCMedicalImplantMath.CanDose(dose, state.Delivered, state.Limit, state.CooldownSeconds, state.Cartridge.Volume.Float())) return false;
-        if (!_cyberware.TryBeginAbilityLoad(uid, 1 / quality.Performance)) return false;
+        if (!_cyberware.TryBeginAbilityLoad(uid, 1)) return false;
         _cyberware.TrySetLoad(uid, 0);
         var injection = state.Cartridge.SplitSolution(FixedPoint2.New(dose));
         if (!_blood.TryAddToBloodstream((body, blood), injection))
@@ -211,7 +209,7 @@ public sealed partial class NCMedicalImplantSystem : EntitySystem
     private void Changed(EntityUid body) => _medical.TryMarkDirty(body, NCMedicalDirtyDomains.Persistence | NCMedicalDirtyDomains.Diagnostics);
 
     public string Settings(EntityUid uid, NCMedicalImplantComponent module) => Loc.GetString("nc-medical-implant-settings-text",
-        ("dose", NCMedicalImplantMath.MeteredDose(module.State.Dose, _cyberware.MedicalPartQuality(uid, "NCMedicalPumpSlot").MeasurementStep)), ("requested", module.State.Dose), ("interval", module.State.IntervalSeconds), ("limit", module.State.Limit),
+        ("dose", NCMedicalImplantMath.MeteredDose(module.State.Dose, NCMedicalImplantMath.MeasurementStep)), ("requested", module.State.Dose), ("interval", module.State.IntervalSeconds), ("limit", module.State.Limit),
         ("delivered", module.State.Delivered), ("remaining", module.State.Cartridge.Volume),
         ("cooldown", MathF.Ceiling(module.State.CooldownSeconds)),
         ("automatic", Loc.GetString(module.State.Automatic ? "nc-medical-implant-on" : "nc-medical-implant-off")),
@@ -227,16 +225,10 @@ public sealed partial class NCMedicalImplantSystem : EntitySystem
     {
         if (_implantBiotech.ExamineLine(ent) is { } biotechLine) // NC
             args.PushMarkup(biotechLine);
-
-        args.PushMarkup(Loc.GetString("nc-cyberware-frame-quality", ("quality", Loc.GetString(_prototypes.Index(ent.Comp.Quality).Name))));
-        if (_cyberware.GetAssemblyQuality(ent) is { } grade)
-            args.PushMarkup(Loc.GetString("nc-medical-part-quality", ("quality", Loc.GetString(_prototypes.Index(grade).Name))));
     }
 
     private void OnPartExamined(Entity<NCCyberwarePartComponent> ent, ref ExaminedEvent args)
     {
-        var quality = _prototypes.Index(_prototypes.Index(ent.Comp.Profile).Quality);
-        args.PushMarkup(Loc.GetString("nc-medical-part-quality", ("quality", Loc.GetString(quality.Name))));
         if (TryComp<NCMedicalControllerComponent>(ent, out var controller))
             args.PushMarkup(Loc.GetString("nc-medical-controller-firmware", ("firmware", controller.Firmware is { } firmware
                 ? Loc.GetString(_prototypes.Index(firmware).Name) : Loc.GetString("nc-medical-firmware-blank"))));

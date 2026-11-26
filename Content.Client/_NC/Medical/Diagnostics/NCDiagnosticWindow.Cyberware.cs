@@ -112,8 +112,6 @@ public sealed partial class NCDiagnosticWindow
         if (module.HostIndex is { } host && _snapshot is { } snapshot && host >= 0 && host < snapshot.Cyberware.Count)
             details += "\n" + Loc.GetString("nc-cyberware-map-installed-in", ("host", CyberwareName(snapshot.Cyberware[host].Profile)));
         details += NeuralDependencyDetails(module);
-        if (module.Quality is { } qualityId && _prototypes.TryIndex(qualityId, out var quality))
-            details += "\n" + Loc.GetString("nc-medical-part-quality", ("quality", Loc.GetString(quality.Name)));
         if (module.Medical is { } medical)
         {
             details += "\n" + Loc.GetString(medical.ControllerReady ? "nc-medical-controller-ready" : "nc-medical-controller-unready");
@@ -198,8 +196,6 @@ public sealed partial class NCDiagnosticWindow
             else
                 frame.AddChild(new Label { Text = "—", FontColorOverride = part.Optional ? MutedColor : CriticalColor });
             tile.AddChild(frame);
-            if (part.Quality is { } partQuality && _prototypes.TryIndex(partQuality, out var grade))
-                tile.AddChild(new Label { Text = Loc.GetString(grade.Name), FontColorOverride = MutedColor });
             if (part.Firmware is { } firmware && _prototypes.TryIndex(firmware, out var program))
                 tile.AddChild(new Label { Text = Loc.GetString(program.Name), FontColorOverride = MutedColor });
             tile.AddChild(new Label { Text = name, FontColorOverride = MutedColor });

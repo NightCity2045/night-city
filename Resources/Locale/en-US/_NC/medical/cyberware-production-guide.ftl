@@ -2,24 +2,20 @@ nc-guide-cyber-production-1 = [bold]Cyberware manufacturing[/bold]
 
 nc-guide-cyber-production-2 = [bold]Production equipment[/bold]
 
-nc-guide-cyber-production-3 = Use the existing ore processor, autolathe, circuit imprinter, biofabricator, medical techfab and exosuit fabricator. Print their existing circuit boards on the circuit imprinter, then use normal machine construction. Construct the cyberware service bench through the construction menu: 12 steel sheets, 4 glass sheets, 6 cable and a screwdriver. Fit a charged standard power cell.
+nc-guide-cyber-production-3 = Every implant part is printed on the implant fabricator. Its board is printed on the circuit imprinter and assembly needs 4 micro manipulators. The ore processor supplies the metals. The cyberware bench is built from the construction menu: 12 steel sheets, 4 glass sheets, 6 cable and a screwdriver. Fit a charged standard battery.
 
-nc-guide-cyber-production-4 = On the current Night City maps, metal processing is on level 0; autolathe and electronics are on level -3; chemistry and medical fabrication are on level +2; hydroponics is on level +1. Biogeneration, biofabrication and exosuit fabrication can be built from their existing boards. The cyberware bench can be constructed locally.
+nc-guide-cyber-production-4 = Every part has the same quality. The implant fabricator and the cyberware bench can be built where you need them.
 
 nc-guide-cyber-production-5 = [bold]Muscle and bone reinforcement[/bold]
 
-nc-guide-cyber-production-6 = 1. Grow plants and process them in a biogenerator to obtain biomass.
-    2. Fabricate a synthetic muscle cassette from 100 biomass in a biofabricator.
-    3. Mix 5 oil, 10 carbon and 5 silicon; heat to 350 K to produce reinforcing fiber.
-    4. Mix 5 oil, 10 phosphorus and 10 silicon; heat to 420 K to produce bone composite.
-    5. Use the construction menu to combine one cassette, one fiber spool, one composite cartridge, 2 plastic sheets and 2 cloth into an unprepared reinforcement kit.
-    6. Mount the kit on the cyberware bench. Insert a charged cell and use one sterile preparation pack from the medical techfab on the bench. Stay at the bench until the preparation finishes.
+nc-guide-cyber-production-6 = 1. Print the muscle and bone reinforcement kit on the implant fabricator from steel, plastic and cloth.
+    2. Place the kit on a cyberware bench with a charged battery. Use a sterile preparation wrap from the implant fabricator on the bench and wait for it to finish.
 
 nc-guide-cyber-production-7 = [bold]Linear frames[/bold]
 
-nc-guide-cyber-production-8 = Print an empty Sigma or Beta frame in the exosuit fabricator. Print anchors in an autolathe and controllers, sensor interfaces and power junctions in a circuit imprinter.
+nc-guide-cyber-production-8 = Print the empty Sigma or Beta frame, anchors, controllers, sensor interfaces and power junctions on the implant fabricator.
 
-nc-guide-cyber-production-9 = Build a standard actuator from 2 micro-manipulators, 4 steel and 4 cable with a screwdriver. Beta needs a heavy actuator built from 5 micro-manipulators, 10 steel and 6 high-voltage cable.
+nc-guide-cyber-production-9 = The normal actuator and the heavy Beta actuator are printed on the implant fabricator too.
 
 nc-guide-cyber-production-10 = Mount the empty frame on the cyberware bench. Fit the actuator, controller, sensor interface, anchor kit and power junction. Beta uses its own heavy actuator and reinforced-anchor slots. Normal Sigma parts cannot fill these slots.
 

@@ -5,15 +5,6 @@ using Robust.Shared.Serialization;
 
 namespace Content.Shared._NC.Medical.Cyberware.Internal;
 
-[Prototype("ncCyberwareQuality")]
-public sealed partial class NCCyberwareQualityPrototype : IPrototype
-{
-    [IdDataField] public string ID { get; private set; } = default!;
-    [DataField(required: true)] public LocId Name;
-    [DataField] public float Performance = 1;
-    [DataField] public float MeasurementStep = 1;
-}
-
 [RegisterComponent]
 public sealed partial class NCMedicalControllerComponent : Component
 {
@@ -79,6 +70,9 @@ public static class NCMedicalImplantMath
         float.IsFinite(dose) && dose > 0 && float.IsFinite(delivered) && delivered >= 0 &&
         float.IsFinite(limit) && delivered + dose <= limit && float.IsFinite(cooldown) && cooldown == 0 &&
         float.IsFinite(available) && available >= dose;
+
+    /// <summary>How finely medical implants measure and meter.</summary>
+    public const float MeasurementStep = 1;
 
     public static float MeteredDose(float requested, float step) => Math.Clamp(Quantize(requested, step / 4), .1f, 5f);
 

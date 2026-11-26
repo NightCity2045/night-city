@@ -49,29 +49,3 @@
   components:
   - type: NCCyberware
     factoryPrepared: false
-
-- type: Tag
-  id: NCDermalMesh
-
-- type: entity
-  parent: BaseItem
-  id: NCDermalMesh
-  components:
-  - type: Sprite
-    sprite: _NC/Objects/Cyberware/dermal.rsi
-    state: mesh
-  - type: Tag
-    tags: [ NCDermalMesh ]
-
-- type: Tag
-  id: NCDermalPlates
-
-- type: entity
-  parent: BaseItem
-  id: NCDermalPlates
-  components:
-  - type: Sprite
-    sprite: _NC/Objects/Cyberware/dermal.rsi
-    state: plates
-  - type: Tag
-    tags: [ NCDermalPlates ]

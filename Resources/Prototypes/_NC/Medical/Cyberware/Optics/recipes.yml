@@ -25,84 +25,6 @@
     Plastic: 100
 
 - type: latheRecipe
-  id: NCProduceNCOpticControllerImprovised
-  result: NCOpticControllerImprovised
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticControllerBasicImprovised
-  result: NCOpticControllerBasicImprovised
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticControllerImproved
-  result: NCOpticControllerImproved
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticControllerBasicImproved
-  result: NCOpticControllerBasicImproved
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticControllerPremium
-  result: NCOpticControllerPremium
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticControllerBasicPremium
-  result: NCOpticControllerBasicPremium
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100
-
-- type: latheRecipe
   id: NCProduceNCOpticMatrixStandard
   result: NCOpticMatrixStandard
   completetime: 8
@@ -113,45 +35,6 @@
     Steel: 200
     Glass: 200
     Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticMatrixImprovised
-  result: NCOpticMatrixImprovised
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticMatrixImproved
-  result: NCOpticMatrixImproved
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticMatrixPremium
-  result: NCOpticMatrixPremium
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100
 
 - type: latheRecipe
   id: NCProduceNCOpticNeuralStandard
@@ -166,45 +49,6 @@
     Plastic: 100
 
 - type: latheRecipe
-  id: NCProduceNCOpticNeuralImprovised
-  result: NCOpticNeuralImprovised
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticNeuralImproved
-  result: NCOpticNeuralImproved
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticNeuralPremium
-  result: NCOpticNeuralPremium
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100
-
-- type: latheRecipe
   id: NCProduceNCOpticPowerStandard
   result: NCOpticPowerStandard
   completetime: 8
@@ -215,45 +59,6 @@
     Steel: 200
     Glass: 200
     Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticPowerImprovised
-  result: NCOpticPowerImprovised
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticPowerImproved
-  result: NCOpticPowerImproved
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticPowerPremium
-  result: NCOpticPowerPremium
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100
 
 - type: latheRecipe
   id: NCProduceNCOpticLowLightStandard
@@ -268,45 +73,6 @@
     Plastic: 100
 
 - type: latheRecipe
-  id: NCProduceNCOpticLowLightImprovised
-  result: NCOpticLowLightImprovised
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticLowLightImproved
-  result: NCOpticLowLightImproved
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticLowLightPremium
-  result: NCOpticLowLightPremium
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100
-
-- type: latheRecipe
   id: NCProduceNCOpticInfraredStandard
   result: NCOpticInfraredStandard
   completetime: 8
@@ -317,45 +83,6 @@
     Steel: 200
     Glass: 200
     Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticInfraredImprovised
-  result: NCOpticInfraredImprovised
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticInfraredImproved
-  result: NCOpticInfraredImproved
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticInfraredPremium
-  result: NCOpticInfraredPremium
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100
 
 - type: latheRecipe
   id: NCProduceNCOpticTelescopeStandard
@@ -370,45 +97,6 @@
     Plastic: 100
 
 - type: latheRecipe
-  id: NCProduceNCOpticTelescopeImprovised
-  result: NCOpticTelescopeImprovised
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticTelescopeImproved
-  result: NCOpticTelescopeImproved
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticTelescopePremium
-  result: NCOpticTelescopePremium
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100
-
-- type: latheRecipe
   id: NCProduceNCOpticAntiFlashStandard
   result: NCOpticAntiFlashStandard
   completetime: 8
@@ -419,45 +107,6 @@
     Steel: 200
     Glass: 200
     Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticAntiFlashImprovised
-  result: NCOpticAntiFlashImprovised
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticAntiFlashImproved
-  result: NCOpticAntiFlashImproved
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticAntiFlashPremium
-  result: NCOpticAntiFlashPremium
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100
 
 - type: latheRecipe
   id: NCProduceNCOpticRecordingStandard
@@ -472,45 +121,6 @@
     Plastic: 100
 
 - type: latheRecipe
-  id: NCProduceNCOpticRecordingImprovised
-  result: NCOpticRecordingImprovised
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticRecordingImproved
-  result: NCOpticRecordingImproved
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticRecordingPremium
-  result: NCOpticRecordingPremium
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100
-
-- type: latheRecipe
   id: NCProduceNCOpticAugmentedRealityStandard
   result: NCOpticAugmentedRealityStandard
   completetime: 8
@@ -521,45 +131,6 @@
     Steel: 200
     Glass: 200
     Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticAugmentedRealityImprovised
-  result: NCOpticAugmentedRealityImprovised
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticAugmentedRealityImproved
-  result: NCOpticAugmentedRealityImproved
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticAugmentedRealityPremium
-  result: NCOpticAugmentedRealityPremium
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100
 
 - type: latheRecipe
   id: NCProduceNCOpticRadarStandard
@@ -574,45 +145,6 @@
     Plastic: 100
 
 - type: latheRecipe
-  id: NCProduceNCOpticRadarImprovised
-  result: NCOpticRadarImprovised
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticRadarImproved
-  result: NCOpticRadarImproved
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticRadarPremium
-  result: NCOpticRadarPremium
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100
-
-- type: latheRecipe
   id: NCProduceNCOpticCosmeticStandard
   result: NCOpticCosmeticStandard
   completetime: 8
@@ -625,45 +157,6 @@
     Plastic: 100
 
 - type: latheRecipe
-  id: NCProduceNCOpticCosmeticImprovised
-  result: NCOpticCosmeticImprovised
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticCosmeticImproved
-  result: NCOpticCosmeticImproved
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCOpticCosmeticPremium
-  result: NCOpticCosmeticPremium
-  completetime: 8
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100
-
-- type: latheRecipe
   id: NCProduceNCCyberEyesStandardEmpty
   result: NCCyberEyesStandardEmpty
   completetime: 12
@@ -673,40 +166,4 @@
   materials:
     Steel: 400
     Glass: 200
-    Plastic: 200
-
-- type: latheRecipe
-  id: NCProduceNCCyberEyesImprovisedEmpty
-  result: NCCyberEyesImprovisedEmpty
-  completetime: 12
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 200
-    Glass: 100
-    Plastic: 200
-
-- type: latheRecipe
-  id: NCProduceNCCyberEyesImprovedEmpty
-  result: NCCyberEyesImprovedEmpty
-  completetime: 12
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 600
-    Glass: 300
-    Plastic: 200
-
-- type: latheRecipe
-  id: NCProduceNCCyberEyesPremiumEmpty
-  result: NCCyberEyesPremiumEmpty
-  completetime: 12
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 800
-    Glass: 400
     Plastic: 200

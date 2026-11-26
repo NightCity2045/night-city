@@ -96,14 +96,11 @@ public sealed class NCFreeformSurgeryLayoutTest : GameTest
     [RunOnSide(Side.Server)]
     public void EyesAreOnePairedOrganAndCyberopticsReplaceBothEyes()
     {
-        foreach (var quality in new[] { "Improvised", "Standard", "Improved", "Premium" })
-        {
-            var prototype = _prototypes.Index<EntityPrototype>($"NCCyberEyes{quality}");
-            Assert.That(prototype.TryGetComponent<OrganComponent>(out var organ, factory), Is.True);
-            Assert.That(organ!.Category?.Id, Is.EqualTo("Eyes"), "the paired implant takes the paired eye slot");
-            Assert.That(prototype.TryGetComponent<NCOrganFunctionComponent>(out var function, factory), Is.True);
-            Assert.That(function!.BaseCapacity, Is.EqualTo(1f), "a pair of cybereyes gives the full vision");
-        }
+        var cyberEyes = _prototypes.Index<EntityPrototype>("NCCyberEyesStandard");
+        Assert.That(cyberEyes.TryGetComponent<OrganComponent>(out var cyberOrgan, factory), Is.True);
+        Assert.That(cyberOrgan!.Category?.Id, Is.EqualTo("Eyes"), "the paired implant takes the paired eye slot");
+        Assert.That(cyberEyes.TryGetComponent<NCOrganFunctionComponent>(out var function, factory), Is.True);
+        Assert.That(function!.BaseCapacity, Is.EqualTo(1f), "a pair of cybereyes gives the full vision");
 
         Assert.That(_prototypes.HasIndex<EntityPrototype>("NCCyberEyeLeftStandard"), Is.False);
         Assert.That(_prototypes.HasIndex<EntityPrototype>("NCOrganHumanEyesRight"), Is.False);

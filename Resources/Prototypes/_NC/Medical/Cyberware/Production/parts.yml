@@ -2,51 +2,6 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-- type: Tag
-  id: NCCyberFiber
-
-- type: Tag
-  id: NCCyberMuscle
-
-- type: Tag
-  id: NCCyberComposite
-
-- type: entity
-  parent: BaseItem
-  id: NCBiocompatibleFiber
-  components:
-  - type: Sprite
-    sprite: _NC/Objects/Cyberware/production.rsi
-    state: fiber
-  - type: Item
-    size: Small
-  - type: Tag
-    tags: [ NCCyberFiber ]
-
-- type: entity
-  parent: BaseItem
-  id: NCSyntheticMuscle
-  components:
-  - type: Sprite
-    sprite: _NC/Objects/Cyberware/production.rsi
-    state: muscle
-  - type: Item
-    size: Small
-  - type: Tag
-    tags: [ NCCyberMuscle ]
-
-- type: entity
-  parent: BaseItem
-  id: NCBoneReinforcementComposite
-  components:
-  - type: Sprite
-    sprite: _NC/Objects/Cyberware/production.rsi
-    state: composite
-  - type: Item
-    size: Small
-  - type: Tag
-    tags: [ NCCyberComposite ]
-
 - type: ncCyberwarePartSlot
   id: NCSkeletalAnchorSlot
   name: nc-cyber-production-slot-ncskeletalanchorslot
@@ -213,7 +168,6 @@
     sprite: Objects/Specific/Medical/medical.rsi
     state: gauze
   - type: NCCyberwareSterileWrap
-
 
 - type: ncCyberwarePartSlot
   id: NCSkeletalHeavyAnchorSlot

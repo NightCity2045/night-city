@@ -8,7 +8,7 @@ namespace Content.Server._NC.Medical.Cyberware.Optics;
 public sealed partial class NCCyberOpticsSystem
 {
     [Dependency] private Content.Shared._NC.Medical.Anatomy.NCMedicalBodySystem _medicalState = default!;
-    private sealed record Capture(EntityUid Eye, EntityUid Memory, EntityUid Body, Guid Token, TimeSpan Expires, float Quality);
+    private sealed record Capture(EntityUid Eye, EntityUid Memory, EntityUid Body, Guid Token, TimeSpan Expires);
     private readonly Dictionary<EntityUid, Capture> _captures = [];
     private readonly Dictionary<EntityUid, TimeSpan> _albumRates = [];
 
@@ -28,7 +28,7 @@ public sealed partial class NCCyberOpticsSystem
         if (_captures.Count >= 64 || _captures.ContainsKey(body)) return false;
         memory.NextCapture = _timing.CurTime + TimeSpan.FromSeconds(5);
         var token = Guid.NewGuid();
-        _captures[body] = new(eye, module, body, token, _timing.CurTime + TimeSpan.FromSeconds(3), FunctionQuality(eye, NCOpticMode.Recording));
+        _captures[body] = new(eye, module, body, token, _timing.CurTime + TimeSpan.FromSeconds(3));
         RaiseNetworkEvent(new NCOpticSnapshotEvent { Viewer = GetNetEntity(body), MemoryId = token }, actor.PlayerSession.Channel);
         return true;
     }
@@ -43,14 +43,6 @@ public sealed partial class NCCyberOpticsSystem
             !TryModule(pending.Eye, NCOpticMode.Recording, out var module) || module != pending.Memory ||
             !TryComp<NCOpticMemoryComponent>(module, out var memory) || memory.Photos.Count >= NCOpticMemoryComponent.Capacity) return;
         var pixels = message.Pixels.ToArray();
-        if (pending.Quality < .85f)
-        {
-            for (var y = 0; y < NCOpticMemoryComponent.Height; y += 2)
-            for (var x = 0; x < NCOpticMemoryComponent.Width; x += 2)
-            for (var row = 0; row < 2; row++)
-            for (var column = 0; column < 2; column++)
-                Array.Copy(pixels, (y * NCOpticMemoryComponent.Width + x) * 3, pixels, ((y + row) * NCOpticMemoryComponent.Width + x + column) * 3, 3);
-        }
         memory.Photos.Add(pixels);
         MarkMemoryChanged(module);
         SendAlbum(module, body, memory.Photos.Count - 1);

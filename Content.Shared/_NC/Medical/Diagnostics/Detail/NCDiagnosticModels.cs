@@ -205,7 +205,6 @@ public readonly record struct NCMedicalCyberwarePartSummary(
     ProtoId<NCCyberwarePartSlotPrototype> Slot,
     EntProtoId? EntityPrototype,
     NCDiagnosticBand Integrity,
-    ProtoId<Content.Shared._NC.Medical.Cyberware.Internal.NCCyberwareQualityPrototype>? Quality = null,
     ProtoId<NCCyberwareFirmwarePrototype>? Firmware = null,
     bool Optional = false);
 
@@ -233,8 +232,7 @@ public readonly record struct NCMedicalCyberwareSummary(
     int? HardsuitAllowancePercent = null,
     NCSkeletalSurgeryStage SkeletalSurgeryCompleted = NCSkeletalSurgeryStage.None,
     bool SkeletalLoadTestPassed = false,
-    NCMedicalImplantSummary? Medical = null,
-    ProtoId<Content.Shared._NC.Medical.Cyberware.Internal.NCCyberwareQualityPrototype>? Quality = null);
+    NCMedicalImplantSummary? Medical = null);
 
 [Serializable, NetSerializable]
 public readonly record struct NCMedicalDrugSummary(

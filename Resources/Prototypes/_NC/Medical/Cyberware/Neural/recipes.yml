@@ -26,84 +26,6 @@
     Plastic: 100
 
 - type: latheRecipe
-  id: NCProduceNCNeuralControllerImprovised
-  result: NCNeuralControllerImprovised
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralControllerBasicImprovised
-  result: NCNeuralControllerBasicImprovised
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralControllerImproved
-  result: NCNeuralControllerImproved
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralControllerBasicImproved
-  result: NCNeuralControllerBasicImproved
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralControllerPremium
-  result: NCNeuralControllerPremium
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralControllerBasicPremium
-  result: NCNeuralControllerBasicPremium
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100
-
-- type: latheRecipe
   id: NCProduceNCNeuralProcessorStandard
   result: NCNeuralProcessorStandard
   completetime: 10
@@ -114,45 +36,6 @@
     Steel: 200
     Glass: 200
     Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralProcessorImprovised
-  result: NCNeuralProcessorImprovised
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralProcessorImproved
-  result: NCNeuralProcessorImproved
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralProcessorPremium
-  result: NCNeuralProcessorPremium
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100
 
 - type: latheRecipe
   id: NCProduceNCNeuralElectrodeStandard
@@ -167,45 +50,6 @@
     Plastic: 100
 
 - type: latheRecipe
-  id: NCProduceNCNeuralElectrodeImprovised
-  result: NCNeuralElectrodeImprovised
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralElectrodeImproved
-  result: NCNeuralElectrodeImproved
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralElectrodePremium
-  result: NCNeuralElectrodePremium
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100
-
-- type: latheRecipe
   id: NCProduceNCNeuralConnectorStandard
   result: NCNeuralConnectorStandard
   completetime: 10
@@ -216,45 +60,6 @@
     Steel: 200
     Glass: 200
     Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralConnectorImprovised
-  result: NCNeuralConnectorImprovised
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralConnectorImproved
-  result: NCNeuralConnectorImproved
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralConnectorPremium
-  result: NCNeuralConnectorPremium
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100
 
 - type: latheRecipe
   id: NCProduceNCNeuralReaderStandard
@@ -269,45 +74,6 @@
     Plastic: 100
 
 - type: latheRecipe
-  id: NCProduceNCNeuralReaderImprovised
-  result: NCNeuralReaderImprovised
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralReaderImproved
-  result: NCNeuralReaderImproved
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralReaderPremium
-  result: NCNeuralReaderPremium
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100
-
-- type: latheRecipe
   id: NCProduceNCNeuralPulseStandard
   result: NCNeuralPulseStandard
   completetime: 10
@@ -318,45 +84,6 @@
     Steel: 200
     Glass: 200
     Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralPulseImprovised
-  result: NCNeuralPulseImprovised
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralPulseImproved
-  result: NCNeuralPulseImproved
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralPulsePremium
-  result: NCNeuralPulsePremium
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100
 
 - type: latheRecipe
   id: NCProduceNCNeuralCoolingStandard
@@ -371,45 +98,6 @@
     Plastic: 100
 
 - type: latheRecipe
-  id: NCProduceNCNeuralCoolingImprovised
-  result: NCNeuralCoolingImprovised
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralCoolingImproved
-  result: NCNeuralCoolingImproved
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralCoolingPremium
-  result: NCNeuralCoolingPremium
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100
-
-- type: latheRecipe
   id: NCProduceNCImplantNeuralLinkMk1Empty
   result: NCImplantNeuralLinkMk1Empty
   completetime: 10
@@ -420,45 +108,6 @@
     Steel: 200
     Glass: 200
     Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCImplantNeuralLinkMk1QualityImprovisedEmpty
-  result: NCImplantNeuralLinkMk1QualityImprovisedEmpty
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCImplantNeuralLinkMk1QualityImprovedEmpty
-  result: NCImplantNeuralLinkMk1QualityImprovedEmpty
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCImplantNeuralLinkMk1QualityPremiumEmpty
-  result: NCImplantNeuralLinkMk1QualityPremiumEmpty
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100
 
 - type: latheRecipe
   id: NCProduceNCKerenzikovImplantEmpty
@@ -473,45 +122,6 @@
     Plastic: 100
 
 - type: latheRecipe
-  id: NCProduceNCKerenzikovImplantQualityImprovisedEmpty
-  result: NCKerenzikovImplantQualityImprovisedEmpty
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCKerenzikovImplantQualityImprovedEmpty
-  result: NCKerenzikovImplantQualityImprovedEmpty
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCKerenzikovImplantQualityPremiumEmpty
-  result: NCKerenzikovImplantQualityPremiumEmpty
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100
-
-- type: latheRecipe
   id: NCProduceNCSandevistanImplantEmpty
   result: NCSandevistanImplantEmpty
   completetime: 10
@@ -522,45 +132,6 @@
     Steel: 200
     Glass: 200
     Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCSandevistanImplantQualityImprovisedEmpty
-  result: NCSandevistanImplantQualityImprovisedEmpty
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCSandevistanImplantQualityImprovedEmpty
-  result: NCSandevistanImplantQualityImprovedEmpty
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCSandevistanImplantQualityPremiumEmpty
-  result: NCSandevistanImplantQualityPremiumEmpty
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100
 
 - type: latheRecipe
   id: NCProduceNCNeuralInterfaceImplantEmpty
@@ -575,45 +146,6 @@
     Plastic: 100
 
 - type: latheRecipe
-  id: NCProduceNCNeuralInterfaceImplantQualityImprovisedEmpty
-  result: NCNeuralInterfaceImplantQualityImprovisedEmpty
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralInterfaceImplantQualityImprovedEmpty
-  result: NCNeuralInterfaceImplantQualityImprovedEmpty
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralInterfaceImplantQualityPremiumEmpty
-  result: NCNeuralInterfaceImplantQualityPremiumEmpty
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100
-
-- type: latheRecipe
   id: NCProduceNCNeuralChipSocketImplantEmpty
   result: NCNeuralChipSocketImplantEmpty
   completetime: 10
@@ -624,42 +156,3 @@
     Steel: 200
     Glass: 200
     Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralChipSocketImplantQualityImprovisedEmpty
-  result: NCNeuralChipSocketImplantQualityImprovisedEmpty
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralChipSocketImplantQualityImprovedEmpty
-  result: NCNeuralChipSocketImplantQualityImprovedEmpty
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralChipSocketImplantQualityPremiumEmpty
-  result: NCNeuralChipSocketImplantQualityPremiumEmpty
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100

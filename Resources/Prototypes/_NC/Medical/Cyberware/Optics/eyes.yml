@@ -3,7 +3,6 @@
 - type: entity
   parent: NCOrganHumanCyberEyes
   id: NCCyberEyesStandard
-  suffix: Standard
   components:
   - type: Sprite
     sprite: _NC/Objects/Cyberware/optics.rsi
@@ -18,7 +17,6 @@
   - type: NCCyberware
     profile: NCCyberEyesProfile
     factoryPrepared: true
-    quality: NCCyberwareQualityStandard
     qualityParts:
       NCOpticControllerSlot: NCOpticControllerBasicStandard
       NCOpticMatrixSlot: NCOpticMatrixStandard
@@ -38,138 +36,6 @@
   parent: NCCyberEyesStandard
   id: NCCyberEyesStandardEmpty
   suffix: Standard empty frame
-  components:
-  - type: NCCyberware
-    factoryPrepared: false
-  - type: NCCyberwareAssembly
-    initialized: true
-
-- type: entity
-  parent: NCOrganHumanCyberEyes
-  id: NCCyberEyesImprovised
-  suffix: Improvised
-  components:
-  - type: Sprite
-    sprite: _NC/Objects/Cyberware/optics.rsi
-    state: eye_pair
-  - type: Item
-    sprite: _NC/Objects/Cyberware/optics.rsi
-  - type: Organ
-    category: Eyes
-  - type: NCOrganFunction
-    functionType: Vision
-    baseCapacity: 1
-  - type: NCCyberware
-    profile: NCCyberEyesProfile
-    factoryPrepared: true
-    quality: NCCyberwareQualityImprovised
-    qualityParts:
-      NCOpticControllerSlot: NCOpticControllerBasicImprovised
-      NCOpticMatrixSlot: NCOpticMatrixImprovised
-      NCOpticNeuralSlot: NCOpticNeuralImprovised
-      NCOpticPowerSlot: NCOpticPowerImprovised
-  - type: NCCyberEye
-  - type: NCMetaOptics
-    supportsLowLight: true
-  - type: VisualOrgan
-    layer: enum.HumanoidVisualLayers.Eyes
-    data:
-      sprite: _NC/Objects/Cyberware/optics.rsi
-      state: worn_pair
-      color: '#44E6DA'
-
-- type: entity
-  parent: NCCyberEyesImprovised
-  id: NCCyberEyesImprovisedEmpty
-  suffix: Improvised empty frame
-  components:
-  - type: NCCyberware
-    factoryPrepared: false
-  - type: NCCyberwareAssembly
-    initialized: true
-
-- type: entity
-  parent: NCOrganHumanCyberEyes
-  id: NCCyberEyesImproved
-  suffix: Improved
-  components:
-  - type: Sprite
-    sprite: _NC/Objects/Cyberware/optics.rsi
-    state: eye_pair
-  - type: Item
-    sprite: _NC/Objects/Cyberware/optics.rsi
-  - type: Organ
-    category: Eyes
-  - type: NCOrganFunction
-    functionType: Vision
-    baseCapacity: 1
-  - type: NCCyberware
-    profile: NCCyberEyesProfile
-    factoryPrepared: true
-    quality: NCCyberwareQualityImproved
-    qualityParts:
-      NCOpticControllerSlot: NCOpticControllerBasicImproved
-      NCOpticMatrixSlot: NCOpticMatrixImproved
-      NCOpticNeuralSlot: NCOpticNeuralImproved
-      NCOpticPowerSlot: NCOpticPowerImproved
-  - type: NCCyberEye
-  - type: NCMetaOptics
-    supportsLowLight: true
-  - type: VisualOrgan
-    layer: enum.HumanoidVisualLayers.Eyes
-    data:
-      sprite: _NC/Objects/Cyberware/optics.rsi
-      state: worn_pair
-      color: '#44E6DA'
-
-- type: entity
-  parent: NCCyberEyesImproved
-  id: NCCyberEyesImprovedEmpty
-  suffix: Improved empty frame
-  components:
-  - type: NCCyberware
-    factoryPrepared: false
-  - type: NCCyberwareAssembly
-    initialized: true
-
-- type: entity
-  parent: NCOrganHumanCyberEyes
-  id: NCCyberEyesPremium
-  suffix: Premium
-  components:
-  - type: Sprite
-    sprite: _NC/Objects/Cyberware/optics.rsi
-    state: eye_pair
-  - type: Item
-    sprite: _NC/Objects/Cyberware/optics.rsi
-  - type: Organ
-    category: Eyes
-  - type: NCOrganFunction
-    functionType: Vision
-    baseCapacity: 1
-  - type: NCCyberware
-    profile: NCCyberEyesProfile
-    factoryPrepared: true
-    quality: NCCyberwareQualityPremium
-    qualityParts:
-      NCOpticControllerSlot: NCOpticControllerBasicPremium
-      NCOpticMatrixSlot: NCOpticMatrixPremium
-      NCOpticNeuralSlot: NCOpticNeuralPremium
-      NCOpticPowerSlot: NCOpticPowerPremium
-  - type: NCCyberEye
-  - type: NCMetaOptics
-    supportsLowLight: true
-  - type: VisualOrgan
-    layer: enum.HumanoidVisualLayers.Eyes
-    data:
-      sprite: _NC/Objects/Cyberware/optics.rsi
-      state: worn_pair
-      color: '#44E6DA'
-
-- type: entity
-  parent: NCCyberEyesPremium
-  id: NCCyberEyesPremiumEmpty
-  suffix: Premium empty frame
   components:
   - type: NCCyberware
     factoryPrepared: false

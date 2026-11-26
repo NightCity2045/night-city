@@ -112,7 +112,7 @@ public sealed partial class NCNeuralHardwareSystem : EntitySystem
             // One attempt per second, including failed rolls. Pellets cannot reroll one reaction.
             neural.NextDodge = _timing.CurTime + TimeSpan.FromSeconds(1);
             var hardware = Comp<NCCyberwareComponent>(uid);
-            var chance = NCNeuralMath.DodgeChance(_cyberware.QualityPerformance(uid), hardware.FunctionalEfficiency * hardware.CrisisEfficiency);
+            var chance = NCNeuralMath.DodgeChance(hardware.FunctionalEfficiency * hardware.CrisisEfficiency);
             var roll = new Random(unchecked((int) resolution.DeriveSeed(sequence ^ 0x4B455245))).NextDouble();
             if (roll >= chance || !_cyberware.TryBeginAbilityLoad(uid, 2)) return false;
             _cyberware.TrySetLoad(uid, 0);

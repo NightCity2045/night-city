@@ -352,6 +352,7 @@
 
 # Mechanical anatomical replacements retain the normal organ categories, so existing detachment and
 # AttachGraft surgery can install them without a parallel body graph.
+
 - type: entity
   id: NCOrganHumanCyberArmLeft
   parent: NCOrganHumanDetachableParentRegionBase
