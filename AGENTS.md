@@ -120,24 +120,20 @@ If the task touches database models, EF Core contexts, migrations, persistence s
 If the task touches NPCs, HTN, pathfinding, steering, mob AI, AI debug overlays, or NPC prototypes:
 
 - `ss14-npc-ai`
-- `ss14-standard-optimizations` for A-Life scheduling, perception, neural wake queues, or other high-frequency city simulation
+- `ss14-standard-optimizations` for high-frequency simulation or perception code
 - `ss14-transform-physics` when physical movement, city navigation, portals, maps, grids, or Z-levels are involved
 
-If the task touches Living City, physical population, residents, Actors, organizations, gangs, or Neural Cognition:
+If the task touches the world infrastructure under `_NC/LivingCity` (active world time, party identity, ledger, estates, reputation) or player housing:
 
 - `ss14-gameplay-feature`
-- `ss14-npc-ai`
-- `ss14-standard-optimizations`
 - `ss14-databases-migrations` when authoritative persistence or schema compatibility is involved
-- Read `.rules/A-life/plan.md` and the linked Physical GPT A-Life v3 specification before changing architecture. The local v2.1 GDD is historical and must not override v3.
 
-If the task touches NCPD behavior, ranks, assignments, patrols, investigations, detention, custody, or the NCPD operations console:
+If the task touches police records, the wanted/fine registries, or the NCPD records terminal:
 
 - `ss14-gameplay-feature`
-- `ss14-npc-ai` for physical officers
-- Read `.rules/NCPD/Night_City_2045_NCPD_Full_Implementation_Plan.md` before changing the NCPD architecture.
+- `ss14-databases-migrations` when records or fines are persisted
 
-If the task touches NC banking, Paydex, scarcity economy, shops, organizations, Fixers, contracts, Night Markets, property, payday, or financial UI:
+If the task touches NC banking, ATMs, cash, the pawn shop, Fixer missions, property purchase, or financial UI:
 
 - `ss14-gameplay-feature`
 - `ss14-prototypes-locale`
@@ -198,15 +194,11 @@ This repository is a large RobustToolbox/SS14-based Night City 2045 overhaul wit
 ## Night City Architecture
 
 - `city-zones.yml` and the City Zone/Connectivity systems are the semantic geography authority for districts, streets, buildings, rooms, apartments, dungeons, entrances, floors, and traversal links.
-- CityGraph and Room/Portal Graph augment physical pathfinding; they do not replace local movement or make mappers author per-NPC routes.
-- Every living persistent NPC has one physical ECS entity for the entire active-world session. Runtime materialization, dematerialization, player-relevance presence, abstract travel, and physical-actor count caps are forbidden.
-- GPT is the primary individual decision source for every Living City NPC. Requests and command batches are per ActorId; crowd or group coalescing must never make one model decision for multiple people.
-- GPT receives bounded subjective sensorium, retrieved memory, personality, commitments, and an allowed action catalog. It returns structured intentions and commands, never direct world mutations.
-- Physical actions use the same authoritative gameplay systems and constraints available to players. HTN, StateTree, and Utility may execute procedures, schedule work, prioritize queues, or provide safe reflexes, but must not become a second normal NPC brain.
-- PVS controls only what clients receive. It never changes whether an NPC physically exists on the server.
-- Semantic home, work, organization, and building-type anchors are persistent context and navigation data. They never replace the NPC body or authorize hidden outcomes.
-- The A-Life simulation advances only while the round/server world is active. Do not invent offline progression.
-- Treat `.rules/A-life/plan.md` and its linked v3 specification as the current authority. Older A-Life documents are historical only.
+- CityGraph and Room/Portal Graph augment physical pathfinding; they do not replace local movement.
+- The city map window (`NCCityMapSystem`, keybind `NCOpenCityMap`) is the player's map; it renders public zone cartography from the City Zone systems.
+- Roles are the vanilla jobs. Night City organizations, employment, personnel consoles, the Agent device and the Living City NPC simulation were removed; do not reintroduce them without an explicit request.
+- `_NC/LivingCity` now holds only world infrastructure that other features depend on: active world time, party identity, the economy ledger, cash and asset registry, housing and property, police registries, estates and death succession, and fixer reputation. Actor parties no longer resolve.
+- World state advances only while the round/server world is active. Do not invent offline progression.
 
 ## ECS Rules
 

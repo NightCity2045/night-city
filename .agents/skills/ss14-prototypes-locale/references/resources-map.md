@@ -40,7 +40,7 @@ Do not assume the FTL path from the prototype path. Search nearby locale folders
 
 ## Night City Content
 
-Current `Resources/Prototypes/_NC/` content includes `Access`, `Agent`, `Bank`, `Catalog`, `City`, `Combat`, `Dungeons`, `Entities`, `GameRules`, `Guidebook`, `Housing`, `LivingCity`, `Maps`, `Medical`, `Missions`, `Roles`, `Shaders`, `Test`, and `Tiles`.
+Current `Resources/Prototypes/_NC/` content includes `Access`, `AmbientMusic`, `Bank`, `Catalog`, `City`, `Combat`, `Entities`, `Events`, `GameRules`, `Guidebook`, `Housing`, `LivingCity` (world infrastructure data only), `Loadouts`, `Maps`, `Medical`, `Meta`, `Missions`, `Recipes`, `Shaders`, `Skills`, `Tiles`, and `Vehicle`.
 
 NC locale exists under both `Resources/Locale/en-US/_NC/` and `Resources/Locale/ru-RU/_NC/`. Search for the actual FTL key before assuming the locale path mirrors the prototype folder.
 

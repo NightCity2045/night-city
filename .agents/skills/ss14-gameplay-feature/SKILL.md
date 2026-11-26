@@ -13,7 +13,7 @@ Open the nearest real `_NC` or inherited implementation first, then use the focu
 
 ## Workflow
 
-1. Search the actual `Content.Shared/_NC/`, `Content.Server/_NC/`, `Content.Client/_NC/`, and `Resources/*/_NC/` trees for the domain before inventing a path. For architecture-heavy A-Life or NCPD work, read the matching `.rules/` document named in `AGENTS.md`.
+1. Search the actual `Content.Shared/_NC/`, `Content.Server/_NC/`, `Content.Client/_NC/`, and `Resources/*/_NC/` trees for the domain before inventing a path. Read the `Night City Architecture` section of `AGENTS.md` for what was removed and what remains.
 
 2. Open [prediction-and-cross-assembly.md](references/prediction-and-cross-assembly.md) when the feature crosses networking or UI.
 - Use it for shared vs server/client placement, prediction rules, BUIs, and dirtying networked state.
