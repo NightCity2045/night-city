@@ -44,7 +44,7 @@ public sealed class NCMetaSystemBrowserTest : GameTest
     [TearDown]
     public Task CloseWorld() => NCMetaNativeTestTasks.CloseWorld(Server);
 
-    private async Task<(EntityUid Laptop, EntityUid User, NCMetaDeviceEntry Entry, string Owner, MapId Map)> StartBrowserAsync()
+    private async Task<(EntityUid Laptop, EntityUid User, NCMetaDeviceEntry Entry, string Owner, MapId Map)> StartBrowserAsync(string source = "meta-stock-citinet-browser", string hostPrototype = "NCMetaLaptop")
     {
         var preferences = Server.ResolveDependency<IServerPreferencesManager>();
         var persistence = Server.System<NCMetaPersistenceSystem>();
@@ -65,7 +65,8 @@ public sealed class NCMetaSystemBrowserTest : GameTest
             air.AdjustMoles(Gas.Nitrogen, Atmospherics.NitrogenMolesStandard);
             Server.System<AtmosphereSystem>().SetMapAtmosphere(mapEntity, false, air);
             user = SEntMan.SpawnEntity("MobHuman", new MapCoordinates(Vector2.Zero, map));
-            laptop = SEntMan.SpawnEntity("NCMetaLaptop", new MapCoordinates(Vector2.Zero, map));
+            laptop = SEntMan.SpawnEntity(hostPrototype, new MapCoordinates(Vector2.Zero, map));
+            if (SEntMan.TryGetComponent(laptop, out Content.Server.Power.Components.ApcPowerReceiverComponent? receiver)) receiver.NeedsPower = false;
             Server.PlayerMan.SetAttachedEntity(ServerSession, user);
             SEntMan.EventBus.RaiseEvent(EventSource.Local, new GameRunLevelChangedEvent(GameRunLevel.PreRoundLobby, GameRunLevel.InRound));
         });
@@ -91,11 +92,14 @@ public sealed class NCMetaSystemBrowserTest : GameTest
             .TryOpenUi(laptop, NCMetaUiKey.Workspace, user), Is.True));
         await Server.WaitRunTicks(5);
 
-        workspace.LastNotice = null;
-        var request = new NCMetaWorkspaceRequestMessage(NCMetaWorkspaceOperation.OpenSystemApplication, Guid.NewGuid(),
-            source: "meta-stock-citinet-browser") { Actor = user, UiKey = NCMetaUiKey.Workspace };
-        await Server.WaitPost(() => SEntMan.EventBus.RaiseLocalEvent(laptop, request));
-        for (var step = 0; step < 900 && workspace.LastNotice == null; step++) await Pair.RunTicksSync(1);
+        if (source.Length > 0)
+        {
+            workspace.LastNotice = null;
+            var request = new NCMetaWorkspaceRequestMessage(NCMetaWorkspaceOperation.OpenSystemApplication, Guid.NewGuid(),
+                source: source) { Actor = user, UiKey = NCMetaUiKey.Workspace };
+            await Server.WaitPost(() => SEntMan.EventBus.RaiseLocalEvent(laptop, request));
+            for (var step = 0; step < 900 && workspace.LastNotice == null; step++) await Pair.RunTicksSync(1);
+        }
 
         return (laptop, user, entry, owner, mapId);
     }
@@ -193,5 +197,93 @@ public sealed class NCMetaSystemBrowserTest : GameTest
         }
         Assert.That(logs, Does.Contain("hello"), "The accepted program never ran. Last server notice: " + workspace.LastNotice);
         await Server.WaitPost(() => Assert.That(workspace.GetPendingOffer(entry.Id), Is.Null));
+    }
+
+    [Test]
+    public async Task AFactoryChipInTheSlotPreparesItsShippedProgramWithoutAnOwner()
+    {
+        var (laptop, user, entry, owner, map) = await StartBrowserAsync();
+        var persistence = Server.System<NCMetaPersistenceSystem>();
+        var devices = Server.System<NCMetaDeviceRegistrySystem>();
+        var workspace = Server.System<NCMetaWorkspaceSystem>();
+        EntityUid chip = default;
+        await Server.WaitPost(() =>
+        {
+            chip = SEntMan.SpawnEntity("NCMetaProgramChipForum", new MapCoordinates(Vector2.Zero, map));
+            Assert.That(Server.System<Content.Shared.Containers.ItemSlots.ItemSlotsSystem>().TryInsert(laptop, NCMetaChipSlot.Id, chip, null), Is.True);
+        });
+        NCMetaDeviceEntry chipEntry = null!;
+        for (var step = 0; step < 180; step++)
+        {
+            var ready = false;
+            await Server.WaitPost(() => ready = devices.TryGetEntry(chip, out chipEntry) && chipEntry.Ready);
+            if (ready) break;
+            await Pair.RunTicksSync(1);
+        }
+        Assert.That(chipEntry?.Ready, Is.True);
+        var before = await NCMetaNativeTestTasks.Run(Server, () => persistence.ReadDeviceAsync(entry.Id));
+        workspace.LastNotice = null;
+        var request = new NCMetaWorkspaceRequestMessage(NCMetaWorkspaceOperation.ImportMedia, Guid.NewGuid(), deviceId: chipEntry.Id)
+            { Actor = user, UiKey = NCMetaUiKey.Workspace };
+        await Server.WaitPost(() => SEntMan.EventBus.RaiseLocalEvent(laptop, request));
+        NCMetaDeviceRecord? after = null;
+        for (var step = 0; step < 900; step++)
+        {
+            after = await NCMetaNativeTestTasks.Run(Server, () => persistence.ReadDeviceAsync(entry.Id));
+            if (after?.ActiveProject != before?.ActiveProject) break;
+            await Pair.RunTicksSync(1);
+        }
+        Assert.That(after?.ActiveProject, Is.Not.EqualTo(before?.ActiveProject), "Last server notice: " + workspace.LastNotice);
+    }
+
+    [Test]
+    public async Task TheForumFromAFactoryChipInstallsAndStartsOnAHost()
+    {
+        var (laptop, user, entry, owner, map) = await StartBrowserAsync("", "NCMetaCitiNetServer");
+        var persistence = Server.System<NCMetaPersistenceSystem>();
+        var devices = Server.System<NCMetaDeviceRegistrySystem>();
+        var workspace = Server.System<NCMetaWorkspaceSystem>();
+        var runtime = Server.System<NCMetaRuntimeSystem>();
+        EntityUid chip = default;
+        await Server.WaitPost(() =>
+        {
+            chip = SEntMan.SpawnEntity("NCMetaProgramChipForum", new MapCoordinates(Vector2.Zero, map));
+            Assert.That(Server.System<Content.Shared.Containers.ItemSlots.ItemSlotsSystem>().TryInsert(laptop, NCMetaChipSlot.Id, chip, null), Is.True);
+        });
+        NCMetaDeviceEntry chipEntry = null!;
+        for (var step = 0; step < 180; step++)
+        {
+            var ready = false;
+            await Server.WaitPost(() => ready = devices.TryGetEntry(chip, out chipEntry) && chipEntry.Ready);
+            if (ready) break;
+            await Pair.RunTicksSync(1);
+        }
+        var before = await NCMetaNativeTestTasks.Run(Server, () => persistence.ReadDeviceAsync(entry.Id));
+        async Task Send(NCMetaWorkspaceRequestMessage request)
+        {
+            workspace.LastNotice = null;
+            request.Actor = user; request.UiKey = NCMetaUiKey.Workspace;
+            await Server.WaitPost(() => SEntMan.EventBus.RaiseLocalEvent(laptop, request));
+            for (var step = 0; step < 900 && workspace.LastNotice == null; step++) await Pair.RunTicksSync(1);
+        }
+        await Send(new(NCMetaWorkspaceOperation.ImportMedia, Guid.NewGuid(), deviceId: chipEntry.Id));
+        NCMetaDeviceRecord? prepared = null;
+        for (var step = 0; step < 600; step++)
+        {
+            prepared = await NCMetaNativeTestTasks.Run(Server, () => persistence.ReadDeviceAsync(entry.Id));
+            if (prepared!.ActiveProject != before!.ActiveProject) break;
+            await Pair.RunTicksSync(1);
+        }
+        Assert.That(prepared!.ActiveProject, Is.Not.EqualTo(before!.ActiveProject), "Prepare notice: " + workspace.LastNotice);
+        await Send(new(NCMetaWorkspaceOperation.Install, Guid.NewGuid(), projectId: prepared.ActiveProject, deviceId: entry.Id));
+        var installNotice = workspace.LastNotice;
+        var installed = await NCMetaNativeTestTasks.Run(Server, () => persistence.ReadInstallationsAsync(entry.Id, owner));
+        var forum = installed.FirstOrDefault(value => value.PackageIdentity == "citinet.forum");
+        Assert.That(forum, Is.Not.Null, "Install notice: " + installNotice);
+        await Send(new(NCMetaWorkspaceOperation.Start, Guid.NewGuid(), projectId: prepared.ActiveProject, deviceId: entry.Id, installationId: forum!.Id));
+        var startNotice = workspace.LastNotice;
+        var running = false;
+        await Server.WaitPost(() => running = runtime.TryGetInstallation(laptop, owner, forum.Id, out _));
+        Assert.That(running, Is.True, "Install notice: " + installNotice + " / Start notice: " + startNotice);
     }
 }

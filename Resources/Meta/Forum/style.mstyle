@@ -1,0 +1,39 @@
+{
+  "version": "1.0",
+  "tokens": {
+    "cyan": "#31E6FF",
+    "red": "#A3171E",
+    "gold": "#D9B36A",
+    "mint": "#05FFA1",
+    "pink": "#FF2A6D",
+    "ink": "#070D17",
+    "deep": "#0B1220",
+    "panel": "#0E1A2B",
+    "line": "#1F4A6B",
+    "soft": "#16314A",
+    "text": "#E8EEF8",
+    "dim": "#7FA3BF"
+  },
+  "rules": [
+    { "selector": "#root", "properties": { "background": "$deep" } },
+    { "selector": ".page", "properties": { "background": "$deep", "padding": "0" } },
+    { "selector": ".toolbar", "properties": { "background": "$panel", "borderColor": "$soft", "borderWidth": "1", "padding": "8" } },
+    { "selector": ".scheme", "properties": { "color": "$cyan", "fontSize": "13", "font": "fonts/mono" } },
+    { "selector": ".tool", "properties": { "background": "$deep", "color": "$dim", "borderColor": "$line", "borderWidth": "1", "cornerRadius": "2" } },
+    { "selector": ".tool", "state": "hover", "properties": { "background": "$soft", "color": "$text" } },
+    { "selector": ".go", "properties": { "background": "$cyan", "color": "$ink", "cornerRadius": "2" } },
+    { "selector": ".go", "state": "hover", "properties": { "background": "$mint" } },
+    { "selector": ".start", "properties": { "background": "$deep", "padding": "22" } },
+    { "selector": ".logo", "properties": { "color": "$cyan", "fontSize": "28", "font": "fonts/noto-bold" } },
+    { "selector": ".tagline", "properties": { "color": "$dim", "fontSize": "14" } },
+    { "selector": ".hint", "properties": { "color": "$dim", "fontSize": "12" } },
+    { "selector": ".section", "properties": { "color": "$gold", "fontSize": "15", "font": "fonts/noto-bold" } },
+    { "selector": ".label", "properties": { "color": "$dim", "fontSize": "12", "font": "fonts/mono" } },
+    { "selector": ".more", "properties": { "background": "$panel", "borderColor": "$soft", "borderWidth": "1", "padding": "8" } },
+    { "selector": ".offer", "properties": { "background": "$deep", "borderColor": "$line", "borderWidth": "1", "padding": "8" } },
+    { "selector": ".statusbar", "properties": { "background": "$panel", "borderColor": "$soft", "borderWidth": "1", "padding": "6" } },
+    { "selector": ".status", "properties": { "color": "$dim", "fontSize": "12" } },
+    { "selector": ".dotOn", "properties": { "color": "$mint", "fontSize": "12" } },
+    { "selector": ".dotOff", "properties": { "color": "$pink", "fontSize": "12" } }
+  ]
+}

@@ -1,0 +1,84 @@
+<Page id="root" title="{bind title}">
+  <Column id="layout" gap="8" margin="12" class="page">
+    <Column id="head" gap="2">
+      <Text id="logo" text="{bind title}" class="logo"/>
+      <Text id="subtitle" text="{bind subtitle}" class="tagline"/>
+    </Column>
+
+    <Row id="statusRow" gap="8" class="statusbar">
+      <Text id="status" text="{bind status}" class="status"/>
+    </Row>
+
+    <Panel id="listCard" class="start" visible="{bind listVisible}">
+      <Column id="listBody" gap="8">
+        <Text id="threadsHeading" text="{bind threadsHeading}" class="section"/>
+        <Table id="threads" items="{bind threads}" columns="label" rowAction="openThread" rowKey="id" rowField="thread"/>
+        <Form id="newForm" action="newThread">
+          <Column id="newBody" gap="4">
+            <Text id="newHandleLabel" text="{bind handleLabel}" class="label"/>
+            <Input id="newHandle" field="handle" maxLength="20"/>
+            <Text id="newTitleLabel" text="{bind titleLabel}" class="label"/>
+            <Input id="newTitle" field="title" maxLength="48"/>
+            <Text id="newTextLabel" text="{bind textLabel}" class="label"/>
+            <Input id="newText" field="text" maxLength="240"/>
+            <Button id="newButton" action="newThread" text="{bind newLabel}" class="go"/>
+          </Column>
+        </Form>
+      </Column>
+    </Panel>
+
+    <Panel id="threadCard" class="start" visible="{bind threadVisible}">
+      <Column id="threadBody" gap="8">
+        <Row id="threadHead" gap="8">
+          <Form id="backForm" action="back">
+            <Button id="backButton" action="back" text="{bind backLabel}" class="tool"/>
+          </Form>
+          <Text id="threadHeading" text="{bind threadHeading}" class="section"/>
+        </Row>
+        <Table id="posts" items="{bind posts}" columns="label"/>
+        <Form id="replyForm" action="reply">
+          <Column id="replyBody" gap="4">
+            <Text id="replyHandleLabel" text="{bind handleLabel}" class="label"/>
+            <Input id="replyHandle" field="handle" maxLength="20"/>
+            <Text id="replyTextLabel" text="{bind textLabel}" class="label"/>
+            <Input id="replyText" field="text" maxLength="240"/>
+            <Button id="replyButton" action="reply" text="{bind replyLabel}" class="go"/>
+          </Column>
+        </Form>
+      </Column>
+    </Panel>
+
+    <Panel id="loginCard" class="offer" visible="{bind loginVisible}">
+      <Form id="loginForm" action="login">
+        <Row id="loginRow" gap="6">
+          <Text id="passLabel" text="{bind passLabel}" class="label"/>
+          <Input id="loginPass" field="password" maxLength="32"/>
+          <Button id="loginButton" action="login" text="{bind loginLabel}" class="tool"/>
+        </Row>
+      </Form>
+    </Panel>
+
+    <Panel id="adminCard" class="offer" visible="{bind adminVisible}">
+      <Column id="adminBody" gap="6">
+        <Row id="adminHead" gap="8">
+          <Text id="adminHeading" text="{bind adminHeading}" class="section"/>
+          <Form id="logoutForm" action="logout">
+            <Button id="logoutButton" action="logout" text="{bind logoutLabel}" class="tool"/>
+          </Form>
+          <Form id="dropForm" action="removeThread">
+            <Button id="dropButton" action="removeThread" text="{bind deleteLabel}" class="tool"/>
+          </Form>
+        </Row>
+        <Text id="adminHint" text="{bind adminHint}" class="hint"/>
+        <Table id="adminPosts" items="{bind adminPosts}" columns="label" rowAction="removePost" rowKey="id" rowField="post"/>
+        <Form id="banForm" action="ban">
+          <Row id="banRow" gap="6">
+            <Text id="deviceLabel" text="{bind deviceLabel}" class="label"/>
+            <Input id="banDevice" field="device" maxLength="6"/>
+            <Button id="banButton" action="ban" text="{bind banLabel}" class="tool"/>
+          </Row>
+        </Form>
+      </Column>
+    </Panel>
+  </Column>
+</Page>

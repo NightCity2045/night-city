@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+using System.Linq;
 using System.Numerics;
 using Content.IntegrationTests.Fixtures;
 using Content.IntegrationTests.Fixtures.Attributes;
+using Content.Server._NC.Meta.Network;
 using Content.Server._NC.Meta.Projects;
 using Content.Shared._NC.Meta;
 using Content.Shared._NC.Meta.UI;
@@ -66,5 +68,25 @@ public sealed class NCMetaChipSlotTest : GameTest
         var small = SEntMan.GetComponent<NCMetaRemovableMediaComponent>(chip).CapacityBytes;
         var large = SEntMan.GetComponent<NCMetaRemovableMediaComponent>(cartridge).CapacityBytes;
         Assert.That(small, Is.LessThan(large));
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void AServerTakesSeveralChipsAndListsThemInSlotOrder()
+    {
+        Server.System<SharedMapSystem>().CreateMap(out var map);
+        var where = new MapCoordinates(Vector2.Zero, map);
+        var server = SEntMan.SpawnEntity("NCMetaServer", where);
+        var door = SEntMan.SpawnEntity("NCMetaDoor", where);
+        var first = SEntMan.SpawnEntity("NCMetaProgramChip", where);
+        var second = SEntMan.SpawnEntity("NCMetaProgramChip", where);
+        var third = SEntMan.SpawnEntity("NCMetaProgramChip", where);
+        Assert.That(_slots.TryInsert(server, "nc_meta_chip_3", third, null), Is.True);
+        Assert.That(_slots.TryInsert(server, NCMetaChipSlot.Id, first, null), Is.True);
+        Assert.That(_slots.TryInsert(server, "nc_meta_chip_2", second, null), Is.True);
+        Assert.That(NCMetaChipSlots.Chips(SEntMan.GetComponent<ItemSlotsComponent>(server)), Is.EqualTo(new[] { first, second, third }));
+        Assert.That(NCMetaChipSlots.Chips(SEntMan.GetComponent<ItemSlotsComponent>(door)), Is.Empty);
+        Assert.That(SEntMan.GetComponent<ItemSlotsComponent>(door).Slots.Keys.Where(NCMetaChipSlot.IsSlot).Count(), Is.EqualTo(1),
+            "Only the server gets more than one slot.");
     }
 }

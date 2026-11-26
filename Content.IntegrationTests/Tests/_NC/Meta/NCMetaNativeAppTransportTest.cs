@@ -125,22 +125,26 @@ public sealed class NCMetaNativeAppTransportTest : GameTest
     }
 
     [Test]
-    public async Task TheInstallerOffersTheProgramOfAChipOnlyWhileOneIsInTheSlot()
+    public async Task TheInstallerOffersTheProgramOfEveryChipInTheSlots()
     {
         await Client.WaitAssertion(() =>
         {
             using var window = new NCMetaWorkspaceWindow();
             window.OpenCentered();
             window.ApplyState(new NCMetaWorkspaceState { NativeTools = new("installer", []) });
-            var button = window.FindControl<Button>("ToolsLoadChip");
-            Assert.That(button.Visible, Is.False, "Without a chip there is nothing to load.");
+            var chips = window.FindControl<BoxContainer>("ToolsChips");
+            Assert.That(chips.Visible, Is.False, "Without a chip there is nothing to load.");
 
-            window.ApplyState(new NCMetaWorkspaceState { NativeTools = new("installer", [], "chip-device", "Door chip") });
-            Assert.That(button.Visible, Is.True);
-            Assert.That(button.Text, Does.Contain("Door chip"));
+            window.ApplyState(new NCMetaWorkspaceState { NativeTools = new("installer", [],
+                [new NCMetaInstallerChip("chip-a", "Door chip"), new NCMetaInstallerChip("chip-b", "Forum chip")]) });
+            Assert.That(chips.Visible, Is.True);
+            Assert.That(chips.Children.OfType<Button>().Select(button => button.Text).ToArray(),
+                Has.Length.EqualTo(2));
+            Assert.That(chips.Children.OfType<Button>().First().Text, Does.Contain("Door chip"));
+            Assert.That(chips.Children.OfType<Button>().Last().Text, Does.Contain("Forum chip"));
 
-            window.ApplyState(new NCMetaWorkspaceState { NativeTools = new("hardware", [], "chip-device", "Door chip") });
-            Assert.That(button.Visible, Is.False, "Loading a chip belongs to the installer view.");
+            window.ApplyState(new NCMetaWorkspaceState { NativeTools = new("hardware", [], [new NCMetaInstallerChip("chip-a", "Door chip")]) });
+            Assert.That(chips.Visible, Is.False, "Loading a chip belongs to the installer view.");
             window.Close();
         });
     }

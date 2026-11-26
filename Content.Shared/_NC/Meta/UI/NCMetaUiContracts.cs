@@ -133,7 +133,8 @@ public sealed class NCMetaWorkspaceState : BoundUserInterfaceState
     public NCMetaFirmwarePreview? Firmware;
     public Content.Shared._NC.Meta.Authority.NCMetaGrantPolicySummary? ServiceGrants;
     public NCMetaNativeToolsState? NativeTools;
-    public NCMetaChipSummary? Chip;
+    /// <summary>Every chip sitting in the device's slots, in slot order.</summary>
+    public List<NCMetaChipSummary> Chips = [];
     /// <summary>What the device shows: the editor workspace or its service panel. The desktop is a client-side shell around them.</summary>
     public NCMetaSurface Surface;
     public NCMetaLanguageSymbols? LanguageSymbols;

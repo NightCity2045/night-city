@@ -2,8 +2,10 @@
 using System.Text.Json;
 using Content.Meta.Hosting;
 using Content.Server.Database;
+using Content.Server._NC.Meta.Network;
 using Content.Server._NC.Meta.Persistence;
 using Content.Shared._NC.Meta.UI;
+using Content.Shared.Containers.ItemSlots;
 using Content.Shared.Interaction;
 
 namespace Content.Server._NC.Meta.Projects;
@@ -18,6 +20,14 @@ public sealed partial class NCMetaRemovableMediaComponent : Component
     [DataField] public int Strength = 3;
     public int Attempts;
     public string LastIntruder = "";
+}
+
+/// <summary>A chip made with a shipped program already on it: loading it prepares that program, and nobody has to own the chip.</summary>
+[RegisterComponent]
+public sealed partial class NCMetaFactoryProgramComponent : Component
+{
+    /// <summary>The id of the shipped program in the catalog.</summary>
+    [DataField] public string Template = "";
 }
 
 public sealed partial class NCMetaWorkspaceSystem
@@ -69,21 +79,35 @@ public sealed partial class NCMetaWorkspaceSystem
         return owned ? value.Id : null;
     }
 
+    /// <summary>The shipped program a factory chip in the terminal's slots carries, when the request names such a chip.</summary>
+    private string? FactoryTemplate(Context context, string chipDeviceId)
+    {
+        if (!IsCurrent(context) || !_devices.TryResolve(chipDeviceId, out var chip) || !TryComp<NCMetaFactoryProgramComponent>(chip.Entity, out var factory) ||
+            !_mediaInteraction.InRangeUnobstructed(context.Terminal, chip.Entity, range: 2)) return null;
+        TryComp<ItemSlotsComponent>(context.Terminal, out var slots);
+        return NCMetaChipSlots.Chips(slots).Contains(chip.Entity) ? factory.Template : null;
+    }
+
     /// <summary>The owner may do anything with a chip; anyone may read an open one but only the owner may write to it.</summary>
     private bool MediaAccess(Context context, EntityUid media, NCMetaWorkspaceOperation operation) =>
         TryComp<NCMetaRemovableMediaComponent>(media, out var component) &&
         (_devices.CanManage(media, context.User) ||
          operation == NCMetaWorkspaceOperation.ImportMedia && (component.Open || _chipHack.IsCracked(media, context.User)));
 
-    /// <summary>The chip in the terminal's slot, shown to the player so code can be copied to or from it.</summary>
-    private NCMetaChipSummary? ReadChip(Context context)
+    /// <summary>The chips in the terminal's slots, shown to the player so code can be copied to or from any of them.</summary>
+    private List<NCMetaChipSummary> ReadChips(Context context)
     {
-        if (!_chipSlots.TryGetSlot(context.Terminal, NCMetaChipSlot.Id, out var slot) || slot.Item is not { } chip ||
-            !_devices.TryGetEntry(chip, out var entry) || !TryComp<NCMetaRemovableMediaComponent>(chip, out var media)) return null;
-        var owned = _devices.CanManage(chip, context.User, requireRange: false);
-        var cracked = _chipHack.IsCracked(chip, context.User);
-        return new(entry.Id, Name(chip), media.Open, owned, CanHack: !owned && !media.Open && !cracked && _chipHack.CanAttempt(context.Terminal),
-            Cracked: cracked, Attempts: owned ? media.Attempts : 0, LastIntruder: owned ? media.LastIntruder : "");
+        var chips = new List<NCMetaChipSummary>();
+        TryComp<ItemSlotsComponent>(context.Terminal, out var slots);
+        foreach (var chip in NCMetaChipSlots.Chips(slots))
+        {
+            if (chips.Count >= 16 || !_devices.TryGetEntry(chip, out var entry) || !TryComp<NCMetaRemovableMediaComponent>(chip, out var media)) continue;
+            var owned = _devices.CanManage(chip, context.User, requireRange: false);
+            var cracked = _chipHack.IsCracked(chip, context.User);
+            chips.Add(new(entry.Id, Name(chip), media.Open, owned, CanHack: !owned && !media.Open && !cracked && _chipHack.CanAttempt(context.Terminal),
+                Cracked: cracked, Attempts: owned ? media.Attempts : 0, LastIntruder: owned ? media.LastIntruder : ""));
+        }
+        return chips;
     }
 
     private async Task<NCMetaMutationOutcome> TransferMediaAsync(Context context, NCMetaDeviceRecord device,

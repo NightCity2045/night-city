@@ -13,9 +13,13 @@ public sealed record NCMetaHardwareSummary(string DeviceId, string Name, string 
 
 /// <summary>Native modes reuse the ordinary installer, license, consent and recovery operations.</summary>
 [Serializable, NetSerializable]
-public sealed record NCMetaNativeToolsState(string View, List<NCMetaHardwareSummary> Hardware, string ChipDeviceId = "", string ChipName = "",
+public sealed record NCMetaNativeToolsState(string View, List<NCMetaHardwareSummary> Hardware, List<NCMetaInstallerChip>? Chips = null,
     List<NCMetaConnectedDevice>? Network = null, bool CanOpenStudio = false,
     List<NCMetaLocalSite>? LocalSites = null, string HostDeviceId = "");
+
+/// <summary>A chip in one of the device's slots whose program the installer can load.</summary>
+[Serializable, NetSerializable]
+public sealed record NCMetaInstallerChip(string DeviceId, string Name);
 
 /// <summary>A site published for the local network only. Address is what OpenLocalSite takes back.</summary>
 [Serializable, NetSerializable]
@@ -30,8 +34,10 @@ public sealed record NCMetaConnectedDevice(string DeviceId, string Name, int Cos
 public sealed record NCMetaChipSummary(string DeviceId, string Name, bool Open, bool Owned, bool CanHack = false,
     bool Cracked = false, int Attempts = 0, string LastIntruder = "");
 
-/// <summary>The item slot a device offers for a META program chip.</summary>
+/// <summary>The item slots a device offers for META program chips. The first is called Id; a server may carry more, each named Id plus a suffix.</summary>
 public static class NCMetaChipSlot
 {
     public const string Id = "nc_meta_chip";
+
+    public static bool IsSlot(string slot) => slot.StartsWith(Id, StringComparison.Ordinal);
 }

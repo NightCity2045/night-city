@@ -1,0 +1,37 @@
+{
+  "version": "1.0",
+  "id": "meta-stock-citinet-forum",
+  "name": "CitiNet forum",
+  "nameRu": "\u0424\u043e\u0440\u0443\u043c \u0421\u0438\u0442\u0438\u041d\u0435\u0442",
+  "packageName": "citinet.forum",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "citinet.forum",
+  "files": [
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/Forum/main.meta",
+      "sha256": "979970ffea75a39596040381f0752862ffea5d16ecb56bb977fc598434c2ad1c"
+    },
+    {
+      "path": "app.json",
+      "sourcePath": "Resources/Meta/Forum/app.json",
+      "sha256": "28cb861ca4d5ee108546570ecc494116726b4333011d53ea79b07c3f3946b481"
+    },
+    {
+      "path": "ui/main.mui",
+      "sourcePath": "Resources/Meta/Forum/main.mui",
+      "sha256": "364e772b2f4f8b9be61e9338b1ff75704d08437edeb9c7d3571caa2c92e01742"
+    },
+    {
+      "path": "ui/style.mstyle",
+      "sourcePath": "Resources/Meta/Forum/style.mstyle",
+      "sha256": "d9db8557458b3ee2efd7908c094b235290641145f56dd31a7397522baf398c3c"
+    }
+  ],
+  "startMode": "Manual",
+  "bindings": [],
+  "testFixture": "meta.test.json"
+}

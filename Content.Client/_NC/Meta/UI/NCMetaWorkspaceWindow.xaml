@@ -95,6 +95,7 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                 <LineEdit Name="ChipDescription" MinWidth="200" PlaceHolder="{Loc 'nc-meta-chip-description'}" />
                 <CheckBox Name="ChipOpen" Text="{Loc 'nc-meta-chip-open'}" ToolTip="{Loc 'nc-meta-chip-open-tip'}" />
                 <Button StyleClasses="ncMetaAction" Name="ExportMedia" Text="{Loc 'nc-meta-export-media'}" />
+                <OptionButton Name="ChipPick" MinWidth="140" Visible="False" />
                 <Label Name="ChipInSlot" StyleClasses="ncMetaMuted" Visible="False" />
                 <Button StyleClasses="ncMetaAction" Name="ImportMedia" Text="{Loc 'nc-meta-copy-chip'}" Visible="False" />
                 <Button StyleClasses="ncMetaAction" Name="HackMedia" Text="{Loc 'nc-meta-hack-chip'}" Visible="False" />
@@ -408,7 +409,7 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                             <PanelContainer StyleClasses="ncMetaCard">
                                 <BoxContainer Orientation="Vertical" SeparationOverride="6">
                                     <Label Text="{Loc 'nc-meta-tools-step-program'}" StyleClasses="ncMetaHeading" />
-                                    <Button Name="ToolsLoadChip" Visible="False" StyleClasses="ncMetaAction" />
+                                    <BoxContainer Name="ToolsChips" Orientation="Vertical" SeparationOverride="4" Visible="False" />
                                     <Label Name="ToolsNoProgram" Text="{Loc 'nc-meta-tools-no-program'}" StyleClasses="ncMetaMuted" />
                                     <BoxContainer Orientation="Horizontal" SeparationOverride="4">
                                         <OptionButton Name="ToolsStock" HorizontalExpand="True" />

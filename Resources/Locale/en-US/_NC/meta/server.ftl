@@ -85,3 +85,6 @@ nc-meta-error-publish-no-time = The world clock is not available right now. Try 
 nc-meta-error-publish-authority = The server ownership changed while publishing. Open the panel again.
 nc-meta-error-publish-storage = The publication could not be saved.
 nc-meta-error-app-invalid = The program cannot start: its application was not accepted. {$problem}
+
+ent-NCMetaCitiNetServer = CitiNet server
+    .desc = A server on the city network. A program installed on it can publish a site that anyone on the network can open.

@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# A server on the city network that can host a site. The stock forum (meta-stock-citinet-forum) is installed on it by its owner,
+# bound to its files and gateway, and published under a name; visitors then post from their own browsers.
+- type: entity
+  parent: NCMetaServer
+  id: NCMetaCitiNetServer
+  name: CitiNet server
+  description: A server on the city network. A program installed on it can publish a site that anyone on the network can open.
+  components:
+  - type: NCMetaPort
+    networkId: CITYNET

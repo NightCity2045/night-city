@@ -1,0 +1,19 @@
+{
+  "rootModule": "citinet.forum",
+  "responses": [
+    {
+      "member": "meta.files.FileStore.readText",
+      "value": "",
+      "pending": true,
+      "completeAfterSlices": 2
+    }
+  ],
+  "events": [],
+  "expectedLogs": [],
+  "expectedCommands": [
+    "readText(forum/data.txt)"
+  ],
+  "epoch": 1,
+  "nowMs": 1000,
+  "tick": 60
+}

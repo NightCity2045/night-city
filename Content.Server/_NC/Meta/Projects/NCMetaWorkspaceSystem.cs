@@ -292,6 +292,17 @@ public sealed partial class NCMetaWorkspaceSystem : EntitySystem
                 case NCMetaWorkspaceOperation.RevokeServiceGrant:
                     await ServiceGrantRequestAsync(context, project, request, state);
                     break;
+                case NCMetaWorkspaceOperation.ImportMedia
+                    when await OnMainAsync(() => FactoryTemplate(context, request.DeviceId)) is { } factoryTemplate: // NC
+                    // A factory chip carries a shipped program: loading it prepares that program on this device.
+                    if (await PrepareStockApplicationAsync(context, device, new(NCMetaWorkspaceOperation.PrepareStockApplication, request.RequestId,
+                            source: factoryTemplate), state) is { } factoryProject)
+                    {
+                        project = factoryProject;
+                        projectId = factoryProject.Id;
+                        device = await _persistence.ReadDeviceAsync(context.DeviceId) ?? device;
+                    }
+                    break;
                 case NCMetaWorkspaceOperation.ExportMedia:
                 case NCMetaWorkspaceOperation.ImportMedia:
                     var transferred = await TransferMediaAsync(context, device, project, request);
@@ -300,7 +311,7 @@ public sealed partial class NCMetaWorkspaceSystem : EntitySystem
                     projectId = device.ActiveProject;
                     break;
                 case NCMetaWorkspaceOperation.HackChip:
-                    state.Notice = await OnMainAsync(() => Loc.GetString(IsCurrent(context) ? _chipHack.TryStart(context.Terminal, context.User) : "nc-meta-error-access"));
+                    state.Notice = await OnMainAsync(() => Loc.GetString(IsCurrent(context) ? _chipHack.TryStart(context.Terminal, context.User, request.Source) : "nc-meta-error-access"));
                     break;
                 case NCMetaWorkspaceOperation.OpenLocalSite:
                     state.Notice = await OnMainAsync(() => IsCurrent(context) && _citiNet.TryOpenLocal(context.Terminal, context.User, request.Source)
@@ -448,10 +459,11 @@ public sealed partial class NCMetaWorkspaceSystem : EntitySystem
                 state.Devices = _devices.GetOwned(context.Owner).Take(128).Select(entry => new NCMetaDeviceSummary(
                     entry.Id, Name(entry.Entity), TryComp<NCMetaHostComponent>(entry.Entity, out var host)
                         ? host.Profile.Id : string.Empty, Loc.GetString("nc-meta-ready"), true,
-                    TryComp<NCMetaDeviceComponent>(entry.Entity, out var endpoint) ? endpoint.Interfaces.ToList() :
-                        HasComp<NCMetaStorageComponent>(entry.Entity) ? ["meta.files.FileStore"] : [])).ToList();
+                    (TryComp<NCMetaDeviceComponent>(entry.Entity, out var endpoint) ? endpoint.Interfaces.ToList() :
+                        HasComp<NCMetaStorageComponent>(entry.Entity) ? ["meta.files.FileStore"] : [])
+                    .Concat(_runtime.GetHostInterfaces(entry.Entity)).Distinct().ToList())).ToList(); // NC
                 PopulateNativeTools(context, state);
-                state.Chip = ReadChip(context);
+                state.Chips = ReadChips(context);
                 LastNotice = state.Notice;
                 _ui.ServerSendUiMessage(context.Terminal, NCMetaUiKey.Workspace,
                     new NCMetaWorkspaceUpdateMessage(state), context.User);

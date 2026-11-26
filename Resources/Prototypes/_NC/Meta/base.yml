@@ -100,6 +100,21 @@
         whitelist:
           tags:
           - NCMetaChip
+      nc_meta_chip_2:
+        name: nc-meta-chip-slot-2
+        whitelist:
+          tags:
+          - NCMetaChip
+      nc_meta_chip_3:
+        name: nc-meta-chip-slot-3
+        whitelist:
+          tags:
+          - NCMetaChip
+      nc_meta_chip_4:
+        name: nc-meta-chip-slot-4
+        whitelist:
+          tags:
+          - NCMetaChip
   - type: Transform
     noRot: false
   - type: Rotatable

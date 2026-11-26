@@ -50,13 +50,20 @@ public sealed class NCMetaChipHackSystem : EntitySystem
     /// <summary>Whether the device can try a break-in at all: a laptop or a deck with a tool profile.</summary>
     public bool CanAttempt(EntityUid terminal) => HasComp<NCMetaCyberdeckComponent>(terminal);
 
+    private bool InSlot(EntityUid terminal, EntityUid chip)
+    {
+        TryComp<ItemSlotsComponent>(terminal, out var slots);
+        return NCMetaChipSlots.Chips(slots).Contains(chip);
+    }
+
     /// <summary>Starts a break-in; the answer is the localization id of what the player sees.</summary>
-    public string TryStart(EntityUid terminal, EntityUid user)
+    public string TryStart(EntityUid terminal, EntityUid user, string chipDeviceId)
     {
         if (!_devices.CanManage(terminal, user) || !_devices.TryGetEntry(terminal, out var device) || !_devices.IsPowered(terminal)) return "nc-meta-error-access";
         if (!TryComp<NCMetaCyberdeckComponent>(terminal, out _)) return "nc-meta-hack-no-tool";
-        if (!_slots.TryGetSlot(terminal, NCMetaChipSlot.Id, out var slot) || slot.Item is not { } chip ||
-            !TryComp<NCMetaRemovableMediaComponent>(chip, out var media)) return "nc-meta-hack-no-chip";
+        if (!_devices.TryResolve(chipDeviceId, out var chipEntry) || !InSlot(terminal, chipEntry.Entity) ||
+            !TryComp<NCMetaRemovableMediaComponent>(chipEntry.Entity, out var media)) return "nc-meta-hack-no-chip";
+        var chip = chipEntry.Entity;
         if (media.Open || _devices.CanManage(chip, user, requireRange: false) || IsCracked(chip, user)) return "nc-meta-hack-not-needed";
         if (!_runtime.HasRunningScope(terminal, device.Owner, HelperScope)) return "nc-meta-hack-no-helper";
         if (_attempts.ContainsKey(terminal)) return "nc-meta-hack-busy";
@@ -110,7 +117,7 @@ public sealed class NCMetaChipHackSystem : EntitySystem
         media = default!;
         if (!Exists(attempt.Terminal) || !Exists(attempt.User) || !Exists(attempt.Chip) || !_devices.IsPowered(attempt.Terminal) ||
             !_devices.CanManage(attempt.Terminal, attempt.User) || !_devices.TryGetEntry(attempt.Terminal, out var device) ||
-            !_slots.TryGetSlot(attempt.Terminal, NCMetaChipSlot.Id, out var slot) || slot.Item != attempt.Chip ||
+            !InSlot(attempt.Terminal, attempt.Chip) ||
             !_runtime.HasRunningScope(attempt.Terminal, device.Owner, HelperScope) ||
             !TryComp<NCMetaRemovableMediaComponent>(attempt.Chip, out var found) || found.Open) return false;
         media = found;

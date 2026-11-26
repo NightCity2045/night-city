@@ -16,6 +16,10 @@
     {
       "id": "meta-stock-gate",
       "manifest": "Resources/Meta/Projects/meta-stock-gate/manifest.json"
+    },
+    {
+      "id": "meta-stock-citinet-forum",
+      "manifest": "Resources/Meta/Projects/meta-stock-citinet-forum/manifest.json"
     }
   ]
 }

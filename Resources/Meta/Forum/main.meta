@@ -1,0 +1,588 @@
+module citinet.forum;
+import meta.app;
+import meta.system;
+import meta.text;
+import meta.files;
+import meta.citinet;
+
+// A plain forum for a site on CitiNet: threads and replies under a handle anyone types. Posts are kept in one file on the
+// server, so they survive a restart. Handles are free and mean nothing; what the server really knows about a poster is the
+// code of the device they browse from, which only the moderator sees. The moderator signs in with the password below, can
+// delete posts and threads, and can ban a device code. Change the password before you publish the site: this is your forum.
+
+link data: FileStore = "forum-data";
+link net: Gateway = "forum-gateway";
+
+var adminPassword: string = "change-me";
+var maxThreads: int = 20;
+var maxPosts: int = 200;
+var maxPostsInThread: int = 60;
+var maxBanned: int = 64;
+var maxSessions: int = 32;
+
+var nextId: int = 1;
+var threadIds: list<int> = new list<int>();
+var threadTitles: list<string> = new list<string>();
+var threadAuthors: list<string> = new list<string>();
+var postIds: list<int> = new list<int>();
+var postThreads: list<int> = new list<int>();
+var postAuthors: list<string> = new list<string>();
+var postDevices: list<string> = new list<string>();
+var postTexts: list<string> = new list<string>();
+var banned: list<string> = new list<string>();
+
+// Each visitor has a slot: which thread is open for them, whether they are the moderator, and the last thing to tell them.
+var sessions: list<app.SessionRef> = new list<app.SessionRef>();
+var views: list<int> = new list<int>();
+var signed: list<bool> = new list<bool>();
+var notes: list<string> = new list<string>();
+var oldest: int = 0;
+
+pub struct Row {
+    id: string;
+    label: string;
+}
+
+pub struct ForumState {
+    title: string;
+    subtitle: string;
+    status: string;
+    listVisible: bool;
+    threadVisible: bool;
+    adminVisible: bool;
+    loginVisible: bool;
+    threadsHeading: string;
+    threadHeading: string;
+    handleLabel: string;
+    titleLabel: string;
+    textLabel: string;
+    newLabel: string;
+    replyLabel: string;
+    backLabel: string;
+    passLabel: string;
+    loginLabel: string;
+    logoutLabel: string;
+    adminHeading: string;
+    adminHint: string;
+    deleteLabel: string;
+    deviceLabel: string;
+    banLabel: string;
+    threads: list<Row>;
+    posts: list<Row>;
+    adminPosts: list<Row>;
+}
+
+pub struct ThreadInput {
+    thread: string;
+}
+
+pub struct PostInput {
+    post: string;
+}
+
+pub struct NewThreadInput {
+    handle: string;
+    title: string;
+    text: string;
+}
+
+pub struct ReplyInput {
+    handle: string;
+    text: string;
+}
+
+pub struct PasswordInput {
+    password: string;
+}
+
+pub struct DeviceInput {
+    device: string;
+}
+
+pub struct NoteInput {
+    note: option<string>;
+}
+
+fn tr(ru: bool, english: string, russian: string) -> string {
+    if (ru) { return russian; }
+    return english;
+}
+
+fn field(source: string, wanted: int) -> string {
+    var part: string = "";
+    var index: int = 0;
+    var seen: int = 0;
+    while (index < source.length) {
+        match (text.slice(source, index, 1)) {
+            ok(symbol) => {
+                if (symbol == "|") {
+                    if (seen == wanted) { return part; }
+                    seen = seen + 1;
+                    part = "";
+                } else {
+                    part = part + symbol;
+                }
+            }
+            err(problem) => { }
+        }
+        index = index + 1;
+    }
+    if (seen == wanted) { return part; }
+    return "";
+}
+
+// Text a visitor typed, made safe to keep in a line of the file and cut to its limit.
+fn clean(source: string, limit: int) -> string {
+    var kept: string = "";
+    var index: int = 0;
+    while (index < source.length && index < limit) {
+        match (text.slice(source, index, 1)) {
+            ok(symbol) => {
+                if (symbol == "|" || symbol == "\n" || symbol == "\r") { kept = kept + " "; }
+                else { kept = kept + symbol; }
+            }
+            err(problem) => { }
+        }
+        index = index + 1;
+    }
+    return kept;
+}
+
+fn indexOfInt(items: list<int>, value: int) -> int {
+    var index: int = 0;
+    while (index < items.length) {
+        if (items[index] == value) { return index; }
+        index = index + 1;
+    }
+    return -1;
+}
+
+fn indexOfText(items: list<string>, value: string) -> int {
+    var index: int = 0;
+    while (index < items.length) {
+        if (items[index] == value) { return index; }
+        index = index + 1;
+    }
+    return -1;
+}
+
+fn slotOf(session: app.SessionRef) -> int {
+    var index: int = 0;
+    while (index < sessions.length) {
+        if (app.sameSession(sessions[index], session)) { return index; }
+        index = index + 1;
+    }
+    if (sessions.length < maxSessions) {
+        sessions.push(session);
+        views.push(0);
+        signed.push(false);
+        notes.push("");
+        return sessions.length - 1;
+    }
+    // Every slot is taken: the visitor who has been here longest loses theirs.
+    let taken: int = oldest;
+    oldest = oldest + 1;
+    if (oldest >= maxSessions) { oldest = 0; }
+    sessions[taken] = session;
+    views[taken] = 0;
+    signed[taken] = false;
+    notes[taken] = "";
+    return taken;
+}
+
+fn deviceOf(context: app.AppContext) -> string {
+    match (net.visitorDevice(context.session)) {
+        ok(code) => { return code; }
+        err(problem) => { return ""; }
+    }
+}
+
+fn repliesIn(thread: int) -> int {
+    var count: int = 0;
+    var index: int = 0;
+    while (index < postThreads.length) {
+        if (postThreads[index] == thread) { count = count + 1; }
+        index = index + 1;
+    }
+    return count;
+}
+
+fn serialize() -> string {
+    var joined: string = "N|" + text.fromInt(nextId) + "\n";
+    var index: int = 0;
+    while (index < threadIds.length) {
+        joined = joined + "T|" + text.fromInt(threadIds[index]) + "|" + threadTitles[index] + "|" + threadAuthors[index] + "\n";
+        index = index + 1;
+    }
+    index = 0;
+    while (index < postIds.length) {
+        joined = joined + "P|" + text.fromInt(postIds[index]) + "|" + text.fromInt(postThreads[index]) + "|" + postAuthors[index] + "|" +
+            postDevices[index] + "|" + postTexts[index] + "\n";
+        index = index + 1;
+    }
+    for (let device in banned) {
+        joined = joined + "B|" + device + "\n";
+    }
+    return joined;
+}
+
+fn parseLine(line: string) -> void {
+    let kind: string = field(line, 0);
+    if (kind == "N") {
+        match (text.parseInt(field(line, 1))) {
+            ok(value) => { nextId = value; }
+            err(problem) => { }
+        }
+        return;
+    }
+    if (kind == "T" && threadIds.length < maxThreads) {
+        match (text.parseInt(field(line, 1))) {
+            ok(value) => {
+                threadIds.push(value);
+                threadTitles.push(field(line, 2));
+                threadAuthors.push(field(line, 3));
+            }
+            err(problem) => { }
+        }
+        return;
+    }
+    if (kind == "P" && postIds.length < maxPosts) {
+        match (text.parseInt(field(line, 1))) {
+            ok(id) => {
+                match (text.parseInt(field(line, 2))) {
+                    ok(thread) => {
+                        postIds.push(id);
+                        postThreads.push(thread);
+                        postAuthors.push(field(line, 3));
+                        postDevices.push(field(line, 4));
+                        postTexts.push(field(line, 5));
+                    }
+                    err(problem) => { }
+                }
+            }
+            err(problem) => { }
+        }
+        return;
+    }
+    if (kind == "B" && banned.length < maxBanned) { banned.push(field(line, 1)); }
+}
+
+fn parse(source: string) -> void {
+    var line: string = "";
+    var index: int = 0;
+    while (index < source.length) {
+        match (text.slice(source, index, 1)) {
+            ok(symbol) => {
+                if (symbol == "\n") {
+                    if (line.length > 0) { parseLine(line); }
+                    line = "";
+                } else {
+                    line = line + symbol;
+                }
+            }
+            err(problem) => { }
+        }
+        index = index + 1;
+    }
+}
+
+async fn save() -> void {
+    match (await data.writeTextAtomic("forum/data.txt", serialize())) {
+        ok(done) => { }
+        err(problem) => { system.log(problem.message); }
+    }
+}
+
+async fn main() -> void {
+    match (await data.readText("forum/data.txt")) {
+        ok(saved) => { parse(saved); }
+        err(problem) => { }
+    }
+}
+
+// Removes a thread and every post in it. Everyone who had it open is sent back to the list.
+fn dropThread(thread: int) -> void {
+    let position: int = indexOfInt(threadIds, thread);
+    if (position < 0) { return; }
+    var ids: list<int> = new list<int>();
+    var titles: list<string> = new list<string>();
+    var authors: list<string> = new list<string>();
+    var index: int = 0;
+    while (index < threadIds.length) {
+        if (index != position) {
+            ids.push(threadIds[index]);
+            titles.push(threadTitles[index]);
+            authors.push(threadAuthors[index]);
+        }
+        index = index + 1;
+    }
+    threadIds = ids;
+    threadTitles = titles;
+    threadAuthors = authors;
+    var postId: list<int> = new list<int>();
+    var postThread: list<int> = new list<int>();
+    var postAuthor: list<string> = new list<string>();
+    var postDevice: list<string> = new list<string>();
+    var postText: list<string> = new list<string>();
+    index = 0;
+    while (index < postIds.length) {
+        if (postThreads[index] != thread) {
+            postId.push(postIds[index]);
+            postThread.push(postThreads[index]);
+            postAuthor.push(postAuthors[index]);
+            postDevice.push(postDevices[index]);
+            postText.push(postTexts[index]);
+        }
+        index = index + 1;
+    }
+    postIds = postId;
+    postThreads = postThread;
+    postAuthors = postAuthor;
+    postDevices = postDevice;
+    postTexts = postText;
+    index = 0;
+    while (index < views.length) {
+        if (views[index] == thread) { views[index] = 0; }
+        index = index + 1;
+    }
+}
+
+fn dropPost(post: int) -> void {
+    let position: int = indexOfInt(postIds, post);
+    if (position < 0) { return; }
+    var postId: list<int> = new list<int>();
+    var postThread: list<int> = new list<int>();
+    var postAuthor: list<string> = new list<string>();
+    var postDevice: list<string> = new list<string>();
+    var postText: list<string> = new list<string>();
+    var index: int = 0;
+    while (index < postIds.length) {
+        if (index != position) {
+            postId.push(postIds[index]);
+            postThread.push(postThreads[index]);
+            postAuthor.push(postAuthors[index]);
+            postDevice.push(postDevices[index]);
+            postText.push(postTexts[index]);
+        }
+        index = index + 1;
+    }
+    postIds = postId;
+    postThreads = postThread;
+    postAuthors = postAuthor;
+    postDevices = postDevice;
+    postTexts = postText;
+}
+
+fn handleOf(raw: string) -> string {
+    let handle: string = clean(raw, 20);
+    if (handle.length < 1) { return "anonymous"; }
+    return handle;
+}
+
+fn addPost(thread: int, handle: string, device: string, body: string) -> void {
+    // When the forum is full the oldest thread, which is not the one being written to, makes room.
+    while (postIds.length >= maxPosts && threadIds.length > 1) {
+        if (threadIds[0] != thread) { dropThread(threadIds[0]); }
+        else { dropThread(threadIds[1]); }
+    }
+    postIds.push(nextId);
+    postThreads.push(thread);
+    postAuthors.push(handle);
+    postDevices.push(device);
+    postTexts.push(body);
+    nextId = nextId + 1;
+}
+
+pub fn view(context: app.AppContext) -> ForumState {
+    let ru: bool = context.locale == "ru-RU";
+    let slot: int = slotOf(context.session);
+    let open: int = views[slot];
+    let moderator: bool = signed[slot];
+    var threadRows: list<Row> = new list<Row>();
+    var index: int = threadIds.length - 1;
+    while (index >= 0) {
+        threadRows.push(new Row(id: text.fromInt(threadIds[index]),
+            label: threadTitles[index] + "  -  " + threadAuthors[index] + "  (" + text.fromInt(repliesIn(threadIds[index]) - 1) + ")"));
+        index = index - 1;
+    }
+    var postRows: list<Row> = new list<Row>();
+    var adminRows: list<Row> = new list<Row>();
+    var heading: string = "";
+    let position: int = indexOfInt(threadIds, open);
+    if (position >= 0) {
+        heading = threadTitles[position];
+        var count: int = 1;
+        index = 0;
+        while (index < postIds.length) {
+            if (postThreads[index] == open) {
+                postRows.push(new Row(id: text.fromInt(postIds[index]),
+                    label: text.fromInt(count) + ". " + postAuthors[index] + ": " + postTexts[index]));
+                if (moderator) {
+                    adminRows.push(new Row(id: text.fromInt(postIds[index]),
+                        label: text.fromInt(count) + ". " + postAuthors[index] + " [" + postDevices[index] + "]: " + postTexts[index]));
+                }
+                count = count + 1;
+            }
+            index = index + 1;
+        }
+    }
+    var status: string = tr(ru, "Pick a thread or start a new one.", "Выберите тему или начните новую.");
+    if (position >= 0) { status = tr(ru, "Write a reply below.", "Напишите ответ ниже."); }
+    if (notes[slot].length > 0) { status = notes[slot]; }
+    return new ForumState(
+        title: tr(ru, "CitiNet Forum", "Форум СитиНет"),
+        subtitle: tr(ru, "Talk about anything. Nobody checks who you are.", "Говорите о чём угодно. Никто не проверяет, кто вы."),
+        status: status,
+        listVisible: position < 0,
+        threadVisible: position >= 0,
+        adminVisible: moderator,
+        loginVisible: !moderator,
+        threadsHeading: tr(ru, "Threads (replies)", "Темы (ответы)"),
+        threadHeading: heading,
+        handleLabel: tr(ru, "Your handle", "Ваш ник"),
+        titleLabel: tr(ru, "Title", "Заголовок"),
+        textLabel: tr(ru, "Message", "Сообщение"),
+        newLabel: tr(ru, "Start the thread", "Создать тему"),
+        replyLabel: tr(ru, "Reply", "Ответить"),
+        backLabel: tr(ru, "All threads", "Все темы"),
+        passLabel: tr(ru, "Moderator password", "Пароль модератора"),
+        loginLabel: tr(ru, "Sign in", "Войти"),
+        logoutLabel: tr(ru, "Sign out", "Выйти"),
+        adminHeading: tr(ru, "Moderator", "Модератор"),
+        adminHint: tr(ru, "Click a post to delete it. The code in brackets is the poster's device.", "Нажмите на сообщение, чтобы удалить его. В скобках код устройства автора."),
+        deleteLabel: tr(ru, "Delete this thread", "Удалить тему"),
+        deviceLabel: tr(ru, "Device code to ban", "Код устройства для бана"),
+        banLabel: tr(ru, "Ban", "Забанить"),
+        threads: threadRows,
+        posts: postRows,
+        adminPosts: adminRows);
+}
+
+pub async fn openThread(context: app.AppContext, input: ThreadInput) -> result<void> {
+    let slot: int = slotOf(context.session);
+    notes[slot] = "";
+    match (text.parseInt(input.thread)) {
+        ok(id) => {
+            if (indexOfInt(threadIds, id) >= 0) { views[slot] = id; }
+        }
+        err(problem) => { }
+    }
+    return ok(());
+}
+
+pub async fn back(context: app.AppContext, input: NoteInput) -> result<void> {
+    let slot: int = slotOf(context.session);
+    views[slot] = 0;
+    notes[slot] = "";
+    return ok(());
+}
+
+pub async fn newThread(context: app.AppContext, input: NewThreadInput) -> result<void> {
+    let ru: bool = context.locale == "ru-RU";
+    let slot: int = slotOf(context.session);
+    let device: string = deviceOf(context);
+    let title: string = clean(input.title, 48);
+    let body: string = clean(input.text, 240);
+    if (indexOfText(banned, device) >= 0 && device.length > 0) {
+        notes[slot] = tr(ru, "You are banned from this forum.", "Вам закрыт доступ к этому форуму.");
+        return ok(());
+    }
+    if (title.length < 3 || body.length < 1) {
+        notes[slot] = tr(ru, "A thread needs a title of at least 3 letters and a message.", "Нужны заголовок от 3 букв и сообщение.");
+        return ok(());
+    }
+    while (threadIds.length >= maxThreads) { dropThread(threadIds[0]); }
+    let thread: int = nextId;
+    nextId = nextId + 1;
+    threadIds.push(thread);
+    threadTitles.push(title);
+    let handle: string = handleOf(input.handle);
+    threadAuthors.push(handle);
+    addPost(thread, handle, device, body);
+    views[slot] = thread;
+    notes[slot] = "";
+    await save();
+    return ok(());
+}
+
+pub async fn reply(context: app.AppContext, input: ReplyInput) -> result<void> {
+    let ru: bool = context.locale == "ru-RU";
+    let slot: int = slotOf(context.session);
+    let device: string = deviceOf(context);
+    let thread: int = views[slot];
+    let body: string = clean(input.text, 240);
+    if (indexOfInt(threadIds, thread) < 0) { return ok(()); }
+    if (indexOfText(banned, device) >= 0 && device.length > 0) {
+        notes[slot] = tr(ru, "You are banned from this forum.", "Вам закрыт доступ к этому форуму.");
+        return ok(());
+    }
+    if (body.length < 1) {
+        notes[slot] = tr(ru, "Write something first.", "Сначала напишите сообщение.");
+        return ok(());
+    }
+    if (repliesIn(thread) >= maxPostsInThread) {
+        notes[slot] = tr(ru, "This thread is full.", "Тема заполнена.");
+        return ok(());
+    }
+    addPost(thread, handleOf(input.handle), device, body);
+    notes[slot] = "";
+    await save();
+    return ok(());
+}
+
+pub async fn login(context: app.AppContext, input: PasswordInput) -> result<void> {
+    let ru: bool = context.locale == "ru-RU";
+    let slot: int = slotOf(context.session);
+    if (input.password == adminPassword) {
+        signed[slot] = true;
+        notes[slot] = "";
+    } else {
+        notes[slot] = tr(ru, "Wrong password.", "Неверный пароль.");
+    }
+    return ok(());
+}
+
+pub async fn logout(context: app.AppContext, input: NoteInput) -> result<void> {
+    let slot: int = slotOf(context.session);
+    signed[slot] = false;
+    notes[slot] = "";
+    return ok(());
+}
+
+pub async fn removePost(context: app.AppContext, input: PostInput) -> result<void> {
+    let slot: int = slotOf(context.session);
+    if (!signed[slot]) { return err(system.error(ErrorCode.AccessDenied, "Sign in first")); }
+    match (text.parseInt(input.post)) {
+        ok(id) => {
+            let position: int = indexOfInt(postIds, id);
+            if (position >= 0) {
+                let thread: int = postThreads[position];
+                dropPost(id);
+                // A thread with no posts left is gone too.
+                if (repliesIn(thread) < 1) { dropThread(thread); }
+                await save();
+            }
+        }
+        err(problem) => { }
+    }
+    return ok(());
+}
+
+pub async fn removeThread(context: app.AppContext, input: NoteInput) -> result<void> {
+    let slot: int = slotOf(context.session);
+    if (!signed[slot]) { return err(system.error(ErrorCode.AccessDenied, "Sign in first")); }
+    dropThread(views[slot]);
+    await save();
+    return ok(());
+}
+
+pub async fn ban(context: app.AppContext, input: DeviceInput) -> result<void> {
+    let slot: int = slotOf(context.session);
+    if (!signed[slot]) { return err(system.error(ErrorCode.AccessDenied, "Sign in first")); }
+    let device: string = clean(input.device, 6);
+    if (device.length == 6 && indexOfText(banned, device) < 0 && banned.length < maxBanned) {
+        banned.push(device);
+        await save();
+    }
+    return ok(());
+}

@@ -168,10 +168,12 @@ public sealed partial class NCMetaWorkspaceSystem
                 physical?.LoadFactor ?? 0, physical?.AppliedWatts ?? 0, physical?.TemperatureKelvin, linkReserve, linkCapacity,
                 profile.Reliability, physical == null ? 0 : (int) Math.Clamp(physical.WearSeconds / 36f, 0, 1000), physical?.Failures ?? 0));
         }
-        var chipId = ""; var chipName = "";
-        if (_chipSlots.TryGetSlot(context.Terminal, NCMetaChipSlot.Id, out var slot) && slot.Item is { } chip &&
-            _devices.TryGetEntry(chip, out var chipEntry) && _devices.CanManage(chipEntry.Entity, context.User, requireRange: false))
-        { chipId = chipEntry.Id; chipName = Name(chip); }
+        var chips = new List<NCMetaInstallerChip>();
+        TryComp<ItemSlotsComponent>(context.Terminal, out var chipSlots);
+        foreach (var chip in Content.Server._NC.Meta.Network.NCMetaChipSlots.Chips(chipSlots))
+            if (chips.Count < 16 && _devices.TryGetEntry(chip, out var chipEntry) && (HasComp<NCMetaFactoryProgramComponent>(chip) ||
+                _devices.CanManage(chipEntry.Entity, context.User, requireRange: false)))
+                chips.Add(new(chipEntry.Id, Name(chip)));
         var network = new List<NCMetaConnectedDevice>();
         foreach (var entry in _devices.GetOwned(context.Owner).Take(128))
         {
@@ -183,8 +185,9 @@ public sealed partial class NCMetaWorkspaceSystem
         _citiNet.WarmLocalSites(context.Terminal);
         var localSites = _citiNet.GetLocalSites(context.Terminal).Select(site => new NCMetaLocalSite(site.Address, site.Host, site.View)).ToList();
         state.Surface = NCMetaSurface.ServicePanel;
-        state.NativeTools = new(view, hardware, chipId, chipName, network, CanOpenDevelopmentWorkspace(context.Terminal), localSites, context.DeviceId);
+        state.NativeTools = new(view, hardware, chips, network, CanOpenDevelopmentWorkspace(context.Terminal), localSites, context.DeviceId);
         state.Files.Clear(); state.Contents.Clear(); state.DebugVariables.Clear();
-        state.Templates = state.Templates.Where(value => IsStockTemplate(value.Id)).ToList();
+        // Shipped programs are not offered from a list: they come on chips, and the installer loads them from the slots.
+        state.Templates = [];
     }
 }

@@ -29,3 +29,48 @@
   components:
   - type: NCMetaRemovableMedia
     capacityBytes: 262144
+
+# Chips with a shipped program on them. They are open, so anyone holding one may load its program.
+- type: entity
+  parent: NCMetaProgramChip
+  id: NCMetaProgramChipForum
+  name: CitiNet forum chip
+  description: "A program chip with the CitiNet forum on it. Load it in a server's installer, link it, start it and publish its page."
+  components:
+  - type: NCMetaRemovableMedia
+    open: true
+  - type: NCMetaFactoryProgram
+    template: meta-stock-citinet-forum
+
+- type: entity
+  parent: NCMetaProgramChip
+  id: NCMetaProgramChipRegistrar
+  name: CitiNet name registrar chip
+  description: "A program chip with the CitiNet name registrar: the server that keeps the names of sites."
+  components:
+  - type: NCMetaRemovableMedia
+    open: true
+  - type: NCMetaFactoryProgram
+    template: meta-stock-citinet-registrar
+
+- type: entity
+  parent: NCMetaProgramChip
+  id: NCMetaProgramChipGate
+  name: device gate chip
+  description: "A program chip with the device gate: its program decides who may open the device's interface."
+  components:
+  - type: NCMetaRemovableMedia
+    open: true
+  - type: NCMetaFactoryProgram
+    template: meta-stock-gate
+
+- type: entity
+  parent: NCMetaProgramChip
+  id: NCMetaProgramChipGuard
+  name: host guard chip
+  description: "A program chip with the host guard: it answers a sender that keeps hammering the port."
+  components:
+  - type: NCMetaRemovableMedia
+    open: true
+  - type: NCMetaFactoryProgram
+    template: meta-stock-guard

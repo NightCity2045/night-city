@@ -41,7 +41,8 @@
   idleWatts: 100
   activeWatts: 400
   interfaces: [meta.files.FileStore, meta.net.MessagePort, meta.doors.Door, meta.doors.DoorPanel, meta.sensors.TemperatureSensor, meta.security.Camera, meta.security.Alarm, meta.vehicle.EngineController, meta.vehicle.TransmissionController, meta.vehicle.VehicleDashboard, meta.vehicle.DriverAssistance, meta.vehicle.VehicleSecurity, meta.industrial.Conveyor, meta.industrial.LoadSensor, meta.industrial.Fabricator, meta.lab.Grinder, meta.lab.ChemMaster, meta.implants.FunctionalController, meta.implants.MedicalProgrammer, meta.drone.DroneController, meta.drone.NavigationSupervisor, meta.drone.Perception, meta.drone.Manipulator, meta.drone.WeaponController, meta.citinet.Gateway, meta.economy.Wallet, meta.security.Countermeasure, meta.security.Trace, meta.devices.Gate]
-  memoryBytes: 16777216
+  # Each of the 16 processes gets a slice of this, and the stock site programs need about 1.5 MB of it.
+  memoryBytes: 67108864
   storageBytes: 268435456
   maxProcesses: 16
   cpuWeight: 16

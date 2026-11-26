@@ -37,13 +37,6 @@ public sealed partial class NCMetaWorkspaceWindow
             var host = _state.NativeTools?.Hardware.FirstOrDefault(row => row.DeviceId == _selectedDeviceId);
             if (host != null) Request(NCMetaWorkspaceOperation.SetMaintenance, host.Maintenance ? "leave" : "enter");
         };
-        ToolsLoadChip.OnPressed += _ =>
-        {
-            // The chip is the media device; the program it carries becomes the active project of this device and goes
-            // through the ordinary bindings, consent and install below.
-            if (_state.NativeTools is { ChipDeviceId.Length: > 0 } chip)
-                Requested?.Invoke(new(NCMetaWorkspaceOperation.ImportMedia, Guid.NewGuid(), deviceId: chip.ChipDeviceId, projectId: _state.ProjectId));
-        };
         ToolsLocalSites.OnItemSelected += args =>
         {
             if (_state.NativeTools?.LocalSites is { } sites && args.ItemIndex >= 0 && args.ItemIndex < sites.Count)
@@ -150,8 +143,7 @@ public sealed partial class NCMetaWorkspaceWindow
         ToolsHelp.SetMessage(Loc.GetString(tools.View == "recovery" ? "nc-meta-tools-recovery-help" :
             tools.View == "diagnostics" ? "nc-meta-tools-diagnostics-help" : tools.View == "network" ? "nc-meta-tools-network-help" : "nc-meta-tools-description"));
         ToolsStockPanel.Visible = tools.View == "installer";
-        ToolsLoadChip.Visible = tools.View == "installer" && tools.ChipDeviceId.Length > 0;
-        ToolsLoadChip.Text = Loc.GetString("nc-meta-tools-load-chip", ("name", tools.ChipName));
+        UpdateToolsChips(tools);
         // The list views fill the height themselves; the scrolling part holds only what grows with its content.
         NativeToolsScroll.Visible = tools.View is "installer" or "network";
         MeasurementsCard.Visible = tools.View == "hardware";
@@ -189,7 +181,7 @@ public sealed partial class NCMetaWorkspaceWindow
         ToolsStock.Visible = ToolsPrepare.Visible = ToolsStock.ItemCount > 0;
         UpdateToolsLinks();
         ToolsConnections.Visible = _state.Links.Count > 0 || _state.ActiveReleaseId != Guid.Empty;
-        ToolsNoProgram.Visible = tools.ChipDeviceId.Length == 0 && _state.Links.Count == 0 && ToolsStock.ItemCount == 0;
+        ToolsNoProgram.Visible = (tools.Chips?.Count ?? 0) == 0 && _state.Links.Count == 0 && ToolsStock.ItemCount == 0;
         // The programs installed on this host, with Start and Stop: nothing runs until it is started.
         _toolsInstallations.Clear();
         _toolsInstallations.AddRange(_state.Installations.Where(installation => installation.DeviceId == _selectedDeviceId).Take(64));
@@ -282,4 +274,21 @@ public sealed partial class NCMetaWorkspaceWindow
     private void UpdateToolsInstall() => ToolsInstall.Disabled = !ToolsBindingConsent.Pressed || _state.ActiveReleaseId == Guid.Empty ||
         !_state.Devices.Any(row => row.DeviceId == _selectedDeviceId && row.CanInstall) ||
         _state.Links.Take(64).Any(link => !_toolsBindings.ContainsKey(link.Slot));
+
+    /// <summary>One button per chip in the device's slots. The chip is the media device; the program it carries becomes the active
+    /// project of this device and goes through the ordinary bindings, consent and install below.</summary>
+    private void UpdateToolsChips(NCMetaNativeToolsState tools)
+    {
+        ToolsChips.DisposeAllChildren();
+        var chips = tools.View == "installer" ? tools.Chips : null;
+        ToolsChips.Visible = chips is { Count: > 0 };
+        if (chips == null) return;
+        foreach (var chip in chips.Take(16))
+        {
+            var id = chip.DeviceId;
+            var button = new Button { Text = Loc.GetString("nc-meta-tools-load-chip", ("name", chip.Name)), StyleClasses = { "ncMetaAction" } };
+            button.OnPressed += _ => Requested?.Invoke(new(NCMetaWorkspaceOperation.ImportMedia, Guid.NewGuid(), deviceId: id, projectId: _state.ProjectId));
+            ToolsChips.AddChild(button);
+        }
+    }
 }

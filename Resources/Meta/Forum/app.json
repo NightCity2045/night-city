@@ -1,0 +1,244 @@
+{
+  "version": "1.0",
+  "views": {
+    "main": {
+      "function": "citinet.forum.view",
+      "document": "ui/main.mui",
+      "stateType": "citinet.forum.ForumState",
+      "fields": {
+        "title": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "subtitle": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "status": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "threadsHeading": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "threadHeading": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "handleLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "titleLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "textLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "newLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "replyLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "backLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "passLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "loginLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "logoutLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "adminHeading": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "adminHint": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "deleteLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "deviceLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "banLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "listVisible": {
+          "type": "boolean"
+        },
+        "threadVisible": {
+          "type": "boolean"
+        },
+        "adminVisible": {
+          "type": "boolean"
+        },
+        "loginVisible": {
+          "type": "boolean"
+        },
+        "threads": {
+          "type": "array",
+          "maxLength": 512
+        },
+        "posts": {
+          "type": "array",
+          "maxLength": 512
+        },
+        "adminPosts": {
+          "type": "array",
+          "maxLength": 512
+        }
+      },
+      "actions": [
+        "openThread",
+        "back",
+        "newThread",
+        "reply",
+        "login",
+        "logout",
+        "removePost",
+        "removeThread",
+        "ban"
+      ]
+    }
+  },
+  "actions": {
+    "openThread": {
+      "function": "citinet.forum.openThread",
+      "inputType": "citinet.forum.ThreadInput",
+      "inputs": {
+        "thread": {
+          "type": "string",
+          "maxLength": 12
+        }
+      },
+      "scopes": []
+    },
+    "back": {
+      "function": "citinet.forum.back",
+      "inputType": "citinet.forum.NoteInput",
+      "inputs": {
+        "note": {
+          "type": "string",
+          "maxLength": 32,
+          "required": false
+        }
+      },
+      "scopes": []
+    },
+    "newThread": {
+      "function": "citinet.forum.newThread",
+      "inputType": "citinet.forum.NewThreadInput",
+      "inputs": {
+        "handle": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 48
+        },
+        "text": {
+          "type": "string",
+          "maxLength": 240
+        }
+      },
+      "scopes": []
+    },
+    "reply": {
+      "function": "citinet.forum.reply",
+      "inputType": "citinet.forum.ReplyInput",
+      "inputs": {
+        "handle": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "text": {
+          "type": "string",
+          "maxLength": 240
+        }
+      },
+      "scopes": []
+    },
+    "login": {
+      "function": "citinet.forum.login",
+      "inputType": "citinet.forum.PasswordInput",
+      "inputs": {
+        "password": {
+          "type": "string",
+          "maxLength": 32
+        }
+      },
+      "scopes": []
+    },
+    "logout": {
+      "function": "citinet.forum.logout",
+      "inputType": "citinet.forum.NoteInput",
+      "inputs": {
+        "note": {
+          "type": "string",
+          "maxLength": 32,
+          "required": false
+        }
+      },
+      "scopes": []
+    },
+    "removePost": {
+      "function": "citinet.forum.removePost",
+      "inputType": "citinet.forum.PostInput",
+      "inputs": {
+        "post": {
+          "type": "string",
+          "maxLength": 12
+        }
+      },
+      "scopes": []
+    },
+    "removeThread": {
+      "function": "citinet.forum.removeThread",
+      "inputType": "citinet.forum.NoteInput",
+      "inputs": {
+        "note": {
+          "type": "string",
+          "maxLength": 32,
+          "required": false
+        }
+      },
+      "scopes": []
+    },
+    "ban": {
+      "function": "citinet.forum.ban",
+      "inputType": "citinet.forum.DeviceInput",
+      "inputs": {
+        "device": {
+          "type": "string",
+          "maxLength": 6
+        }
+      },
+      "scopes": []
+    }
+  },
+  "resources": [
+    "fonts/noto-bold",
+    "fonts/mono",
+    "images/info"
+  ]
+}

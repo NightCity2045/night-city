@@ -149,17 +149,21 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
         {
             var name = ChipName.Text.Trim();
             // A chip in the slot is written to as it is; otherwise a new chip is made and must be named.
-            var slotChip = _state.Chip is { Owned: true } ? _state.Chip.DeviceId : "";
+            var slotChip = PickedChip is { Owned: true } picked ? picked.DeviceId : "";
             if (name.Length == 0 && slotChip.Length == 0) { Status.Text = Loc.GetString("nc-meta-chip-name-required"); return; }
             Requested?.Invoke(new(NCMetaWorkspaceOperation.ExportMedia, Guid.NewGuid(), deviceId: slotChip, projectId: _state.ProjectId,
                 payload: new NCMetaChipPayload(name, ChipDescription.Text.Trim(), ChipOpen.Pressed)));
         };
-        HackMedia.OnPressed += _ => Request(NCMetaWorkspaceOperation.HackChip);
+        HackMedia.OnPressed += _ =>
+        {
+            if (PickedChip is { } chip) Request(NCMetaWorkspaceOperation.HackChip, chip.DeviceId);
+        };
         ImportMedia.OnPressed += _ =>
         {
-            if (_state.Chip is { } chip)
+            if (PickedChip is { } chip)
                 Requested?.Invoke(new(NCMetaWorkspaceOperation.ImportMedia, Guid.NewGuid(), deviceId: chip.DeviceId, projectId: _state.ProjectId));
         };
+        ChipPick.OnItemSelected += args => { ChipPick.SelectId(args.Id); UpdateDeviceControls(); };
         HostingOffer.OnPressed += _ =>
         {
             if (ApplicationViews.ItemCount > 0 && ApplicationViews.SelectedId < _state.ApplicationViews.Count)
@@ -670,6 +674,18 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
             Editor.CaretUtf8, _state.ProjectId, path, installationId: _selectedInstallationId, payload: payload));
     }
 
+    /// <summary>The chip the player works with: the one chosen in the list, or the only one there is.</summary>
+    private NCMetaChipSummary? PickedChip => _state.Chips.Count == 0 ? null :
+        _state.Chips[Math.Clamp(ChipPick.ItemCount == 0 ? 0 : ChipPick.SelectedId, 0, _state.Chips.Count - 1)];
+
+    private void FillChipPick()
+    {
+        var kept = ChipPick.ItemCount == 0 ? 0 : ChipPick.SelectedId;
+        ChipPick.Clear();
+        for (var index = 0; index < Math.Min(16, _state.Chips.Count); index++) ChipPick.AddItem(_state.Chips[index].Name, index);
+        if (ChipPick.ItemCount > 0) ChipPick.SelectId(Math.Clamp(kept, 0, ChipPick.ItemCount - 1));
+    }
+
     private NCMetaInstallationSummary? SelectedInstallation => _visibleInstallations.FirstOrDefault(installation => installation.Id == _selectedInstallationId);
 
     private static bool IsInstallationOperation(NCMetaWorkspaceOperation operation) => operation is
@@ -724,10 +740,13 @@ public sealed partial class NCMetaWorkspaceWindow : FancyWindow
     {
         var device = _state.Devices.Take(64).FirstOrDefault(candidate => candidate.DeviceId == _selectedDeviceId);
         ExportMedia.Disabled = device is null;
-        ExportMedia.Text = Loc.GetString(_state.Chip is { Owned: true } ? "nc-meta-export-to-chip" : "nc-meta-export-media");
-        ChipInSlot.Visible = ImportMedia.Visible = _state.Chip != null;
-        if (_state.Chip == null) HackMedia.Visible = false;
-        if (_state.Chip is { } slotted)
+        FillChipPick();
+        var slotted = PickedChip;
+        ExportMedia.Text = Loc.GetString(slotted is { Owned: true } ? "nc-meta-export-to-chip" : "nc-meta-export-media");
+        ChipInSlot.Visible = ImportMedia.Visible = slotted != null;
+        ChipPick.Visible = _state.Chips.Count > 1;
+        if (slotted == null) HackMedia.Visible = false;
+        if (slotted != null)
         {
             var kind = slotted.Cracked ? "nc-meta-chip-in-slot-cracked" :
                 slotted.Open ? "nc-meta-chip-in-slot-open" : "nc-meta-chip-in-slot-closed";

@@ -545,6 +545,13 @@ public sealed partial class NCMetaRuntimeSystem : EntitySystem
         TryComp<NCMetaHostComponent>(uid, out var host) && _prototypes.TryIndex(host.Profile, out var hostProfile) &&
         hostProfile.Interfaces.Contains(capability) && _adapters.Values.Distinct().Any(adapter => adapter.CanBind(uid, capability));
 
+    /// <summary>What a computer or server offers for binding: its hardware profile's interfaces that a native adapter agrees to serve.</summary>
+    public IEnumerable<string> GetHostInterfaces(EntityUid uid) // NC
+    {
+        if (!TryComp<NCMetaHostComponent>(uid, out var host) || !_prototypes.TryIndex(host.Profile, out var profile)) return [];
+        return profile.Interfaces.Where(capability => _adapters.Values.Distinct().Any(adapter => adapter.CanBind(uid, capability))).ToArray();
+    }
+
     public bool CanReach(EntityUid host, EntityUid target)
     {
         return _network.CanRoute(host, target);
