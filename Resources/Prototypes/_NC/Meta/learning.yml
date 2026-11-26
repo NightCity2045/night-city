@@ -37,7 +37,6 @@
     NCMetaLoadCell: 4
     NCMetaWaypointA: 4
     NCMetaWaypointB: 4
-    NCMetaLoadingWaypoint: 4
     NCMetaClinicalController: 2
     NCMetaServiceTablet: 2
     NCMetaCommissioningKit: 2
