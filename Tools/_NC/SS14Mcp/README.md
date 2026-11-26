@@ -88,7 +88,7 @@ Partial selections fail closed. Before starting the game process, the supervisor
 
 The standalone CLI also supports `validate <workspace> <seedId> <seedSha256> <manifestSha256> <databaseAssembly> <databaseSha256>` and `materialize <workspace> <seedId> <seedSha256> <manifestSha256> <ownedEnvironmentGuidN> <databaseSha256>`. Materialize derives its database assembly and destination from that environment ID; it does not accept an arbitrary output path. The original four-argument package producer remains supported.
 
-Tool-only tests are in `Tools/_NC/Meta/SqliteSeed.Tests`. The opt-in `SqliteSeedOwnedProcessTests` additionally runs the real pinned helper against a selected package/actual server database assembly, checks no-overwrite/source integrity, and removes only its own fresh test directory. It starts no game processes. Native server startup and its migration pass require a separate runtime verification.
+The SqliteSeed tool tests were removed together with the other META tests. Native server startup and its migration pass require a separate runtime verification.
 
 | Area | Tools / behavior | Coverage |
 |---|---|---|

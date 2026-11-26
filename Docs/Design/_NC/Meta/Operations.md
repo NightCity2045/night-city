@@ -48,7 +48,7 @@ ncmeta revoke <installation-guid> <reason>
 
 Для полного native прогона использовать `Tools/_NC/Meta/build-acceptance.ps1`, затем `run-integration.ps1 -BuiltDirectory <private-cohort>/bin/Content.IntegrationTests`. Новая сборка получает отдельный GUID output/intermediate. Manifest сверяет runtime/core/server/worker hashes; PE inventory исключает случайное использование сборки с вырезанными META fixtures. Ресурсы копируются в staging, hot reload выключен. Параллельные обычные диагностические сборки не должны изменять запущенный cohort.
 
-`Content.Meta.Tests` проверяет пакеты каталога, source hashes, ABI bindings, fixtures, app contracts, каждый `.mui` и `.mstyle`. Отдельный CI workflow собирает worker и выполняет этот набор на Windows. Workflow не выгружает counterexamples или результаты во внешнее artifact storage. Изолированный compiler worker текущего профиля использует Windows Job Objects; работоспособность на другой ОС требует отдельного ограничителя и отдельной приёмки.
+Автоматические тесты META (`Content.Meta.Tests`, интеграционные и unit-тесты META, CI workflow `meta-validation`) удалены. Пакеты каталога, ABI bindings, `.mui` и `.mstyle` сейчас ничем автоматически не проверяются. Изолированный compiler worker текущего профиля использует Windows Job Objects; работоспособность на другой ОС требует отдельного ограничителя и отдельной приёмки.
 
 Нагрузочный драйвер и ограничения измерения описаны в `Tools/_NC/Meta/Performance/README.md`. Raw distributions, CPU attribution, UI transport и физическое завершение действий имеют разные измерительные границы. Их нельзя заменять друг другом или выдавать синтетический расчёт за измеренный предел.
 
