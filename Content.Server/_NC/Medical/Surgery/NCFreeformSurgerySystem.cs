@@ -191,6 +191,8 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         session.Region = region;
         if (changedSite)
             session.ActiveIncisionId = null;
+        if (TryComp<NCSurgicalSiteComponent>(region, out var selectedSite))
+            session.Surface = ResolveOperativeSurface(selectedSite, request.Zone, session.Surface);
         session.Depth = Math.Clamp(request.Depth, 0f, 1f);
         session.StructureHandles.Clear();
         session.AttachmentHandles.Clear();
@@ -221,7 +223,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         if (request.IncisionId is { } incisionId)
         {
             var incision = FindIncision(site, incisionId);
-            if (incision == null || incision.TargetZone != request.Zone || incision.Surface != request.Surface)
+            if (incision == null || incision.TargetZone != request.Zone)
             {
                 SendState(surgeon, session, args.SenderSession, false, NCFreeformSurgeryFailure.NoApplicableTarget);
                 return;
@@ -230,7 +232,9 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
 
         session.TargetZone = request.Zone;
         session.Region = region;
-        session.Surface = request.Surface;
+        session.Surface = request.IncisionId != null
+            ? FindIncision(site, request.IncisionId.Value)?.Surface ?? request.Surface
+            : ResolveOperativeSurface(site, request.Zone, request.Surface);
         session.ActiveIncisionId = request.IncisionId;
         session.StructureHandles.Clear();
         session.AttachmentHandles.Clear();
@@ -407,12 +411,14 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         // The zone under the first stroke pixel becomes authoritative as part of the same request. A newly hit
         // region has no client-known revision yet; same-region actions retain the strict stale-state check.
         var regionChanged = request.Zone != session.TargetZone || requestedRegion != session.Region;
-        var selectionChanged = regionChanged || request.Surface != session.Surface;
+        var requestedSurface = ResolveOperativeSurface(
+            TryComp<NCSurgicalSiteComponent>(requestedRegion, out var requestedSite) ? requestedSite : null, request.Zone, request.Surface);
+        var selectionChanged = regionChanged || requestedSurface != session.Surface;
         if (selectionChanged)
         {
             session.TargetZone = request.Zone;
             session.Region = requestedRegion;
-            session.Surface = request.Surface;
+            session.Surface = requestedSurface;
             session.ActiveIncisionId = null;
             session.StructureHandles.Clear();
             session.AttachmentHandles.Clear();
@@ -612,7 +618,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             return;
         }
 
-        var incision = FindOperativeSite(site, request.Zone, request.Surface);
+        var incision = FindOperativeSite(site, request.Zone, ResolveOperativeSurface(site, request.Zone, request.Surface));
         if (incision == null || incision.Sutured || incision.Depth + 0.001f < definition.MinimumDepth ||
             definition.Action == NCFreeformSurgeryAction.DrainCavity &&
             !HasComp<NCCavityFluidComponent>(requestedRegion))
@@ -686,12 +692,14 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
 
         // RMB attachment follows the same server-authored zone and incision targeting contract as other actions.
         var regionChanged = request.Zone != session.TargetZone || requestedRegion != session.Region;
-        var selectionChanged = regionChanged || request.Surface != session.Surface;
+        var requestedSurface = ResolveOperativeSurface(
+            TryComp<NCSurgicalSiteComponent>(requestedRegion, out var requestedSite) ? requestedSite : null, request.Zone, request.Surface);
+        var selectionChanged = regionChanged || requestedSurface != session.Surface;
         if (selectionChanged)
         {
             session.TargetZone = request.Zone;
             session.Region = requestedRegion;
-            session.Surface = request.Surface;
+            session.Surface = requestedSurface;
             session.ActiveIncisionId = null;
             session.StructureHandles.Clear();
             session.AttachmentHandles.Clear();
@@ -1209,7 +1217,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             var start = i * step;
             var end = (i + 1) * step;
             var exposed = i == 0 || site.Incisions.Any(incision =>
-                incision.TargetZone == session.TargetZone && incision.Surface == session.Surface &&
+                incision.TargetZone == session.TargetZone &&
                 !incision.Sutured && (incision.BoneCasingOpen || incision.Depth >= start));
             result[i] = new NCFreeformSurgeryLayerSummary(profile.Layers[i].Kind, start, end, exposed);
         }
@@ -1741,7 +1749,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         // NC: A retracted Ocular-style site exposes the authored contents of the whole operative window.
         // Structure positions are interactive sprite coordinates, not a requirement to draw a cut through them.
         return site.Incisions.Any(incision =>
-            incision.TargetZone == session.TargetZone && incision.Surface == session.Surface &&
+            incision.TargetZone == session.TargetZone &&
             !incision.Sutured && incision.EdgeSeparation >= minimumOpenRetraction &&
             (incision.BoneCasingOpen || incision.Depth >= structure.MinimumDepth));
     }
@@ -1751,7 +1759,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         NCFreeformSurgerySessionComponent session)
     {
         return site.Incisions.Any(incision =>
-            incision.TargetZone == session.TargetZone && incision.Surface == session.Surface &&
+            incision.TargetZone == session.TargetZone &&
             !incision.Sutured && incision.BoneCasingOpen);
     }
 
@@ -1994,6 +2002,27 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         return null;
     }
 
+    /// <summary>
+    /// NC: A body zone owns one operative opening. When the zone already has an unsutured incision, every request
+    /// for that zone is bound to the incision's surface regardless of the view the surgeon clicked on, so recutting
+    /// an opened head never spawns a second closed site (a "second skull") that hides the real opening.
+    /// </summary>
+    private static NCWoundSurface ResolveOperativeSurface(
+        NCSurgicalSiteComponent? site,
+        ProtoId<NCTargetZonePrototype> zone,
+        NCWoundSurface requested)
+    {
+        if (site == null)
+            return requested;
+
+        var existing = site.Incisions
+            .Where(incision => incision.TargetZone == zone && !incision.Sutured)
+            .OrderBy(incision => incision.CreatedAt)
+            .ThenBy(incision => incision.IncisionId)
+            .FirstOrDefault();
+        return existing?.Surface ?? requested;
+    }
+
     private static NCSurgicalIncisionRecord? FindOperativeSite(
         NCSurgicalSiteComponent site,
         NCFreeformSurgerySessionComponent session)
@@ -2048,7 +2077,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
                 }
             }
             foreach (var group in site.Incisions
-                         .GroupBy(incision => (Zone: incision.TargetZone, incision.Surface))
+                         .GroupBy(incision => (Zone: incision.TargetZone, Surface: default(NCWoundSurface)))
                          .ToArray())
             {
                 var records = group

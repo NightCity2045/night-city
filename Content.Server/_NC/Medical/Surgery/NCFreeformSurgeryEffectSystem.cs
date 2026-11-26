@@ -872,7 +872,7 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
         var requiredDepth = context.StructureMinimumDepth ?? context.Depth;
         foreach (var incision in site.Incisions)
         {
-            if (incision.TargetZone == context.Zone && incision.Surface == context.Surface &&
+            if (incision.TargetZone == context.Zone &&
                 !incision.Sutured && incision.EdgeSeparation >= context.MinimumOpenRetraction &&
                 (incision.BoneCasingOpen || incision.Depth + 0.001f >= requiredDepth))
             {
@@ -964,14 +964,17 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
         };
     }
 
+    // NC: A body zone owns exactly one operative opening; the view surface only chooses where a NEW incision is
+    // created. Looking an existing opening up by surface made a recut on another view spawn a closed second site.
     private static NCSurgicalIncisionRecord? FindCanonicalIncision(
         NCSurgicalSiteComponent site,
         ProtoId<NCTargetZonePrototype> zone,
         NCWoundSurface surface)
     {
         return site.Incisions
-            .Where(incision => incision.TargetZone == zone && incision.Surface == surface)
-            .OrderBy(incision => incision.CreatedAt)
+            .Where(incision => incision.TargetZone == zone)
+            .OrderBy(incision => incision.Sutured)
+            .ThenBy(incision => incision.CreatedAt)
             .ThenBy(incision => incision.IncisionId)
             .FirstOrDefault();
     }
@@ -982,7 +985,7 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
         NCWoundSurface surface)
     {
         return site.Incisions
-            .Where(incision => incision.TargetZone == zone && incision.Surface == surface && !incision.Sutured)
+            .Where(incision => incision.TargetZone == zone && !incision.Sutured)
             .OrderBy(incision => incision.CreatedAt)
             .ThenBy(incision => incision.IncisionId)
             .FirstOrDefault();

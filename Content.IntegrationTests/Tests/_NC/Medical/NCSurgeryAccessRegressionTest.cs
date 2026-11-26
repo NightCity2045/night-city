@@ -129,6 +129,31 @@ public sealed class NCSurgeryAccessRegressionTest : GameTest
         });
     }
 
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void RecuttingAnOpenedZoneReusesTheExistingOpening()
+    {
+        var (body, user, _) = Scene();
+        var head = Organ(body, "Head");
+        Open(head, "NCZoneHead");
+        var site = SComp<NCSurgicalSiteComponent>(head);
+        var original = site.Incisions.Single();
+
+        foreach (var surface in new[] { NCWoundSurface.Front, NCWoundSurface.Rear, NCWoundSurface.Left })
+        {
+            var cut = SpawnAt("NCSurgeryDebugMultitool", user);
+            var result = _effects.ApplyStroke(Stroke(body, user, head, cut, null, "NCSurgeryToolIncision", "NCZoneHead",
+                [new Vector2(0.5f, 0.3f), new Vector2(0.5f, 0.5f)], surface));
+            Assert.That(result.Accepted, Is.True, $"recut from {surface} must be accepted ({result.Failure})");
+            Assert.That(site.Incisions, Has.Count.EqualTo(1), $"recut from {surface} must not open a second site");
+        }
+
+        var survivor = site.Incisions.Single();
+        Assert.That(survivor.IncisionId, Is.EqualTo(original.IncisionId));
+        Assert.That(survivor.BoneCasingOpen, Is.True, "an opened skull must stay open after another cut");
+        Assert.That(survivor.EdgeSeparation, Is.GreaterThanOrEqualTo(0.3f));
+    }
+
     private void Medical(EntityUid body, EntityUid user, EntityUid region, EntityUid tool, EntityUid module,
         ProtoId<NCTargetZonePrototype> zone)
     {
