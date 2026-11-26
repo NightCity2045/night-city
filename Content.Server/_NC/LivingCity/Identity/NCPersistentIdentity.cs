@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.Economy;
 using Content.Shared._NC.LivingCity.Fixers;
 using Content.Shared._NC.LivingCity.CityServices;

@@ -3,8 +3,6 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System.Linq;
-using Content.Server._NC.LivingCity.Actors;
-using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.Medical.Treatment;
 using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Medical.Anatomy;

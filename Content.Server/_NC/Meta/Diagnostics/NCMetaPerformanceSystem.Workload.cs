@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using Content.Meta.Bytecode;
 using Content.Meta.Language;
 using Content.Meta.Verification;
-using Content.Server._NC.LivingCity.Actors;
 using Content.Server._NC.Meta.Authority;
 using Content.Server._NC.Meta.Compilation;
 using Content.Server._NC.Meta.Devices;
@@ -53,8 +52,6 @@ public sealed partial class NCMetaPerformanceSystem
     [Dependency] private NCMetaDeviceRegistrySystem _devices = default!;
     [Dependency] private NCMetaAuthoritySystem _authority = default!;
     [Dependency] private NCMetaNetworkSystem _network = default!;
-    [Dependency] private NCCityActorRegistrySystem _actors = default!;
-    [Dependency] private NCCityActorRuntimeIndexSystem _actorIndex = default!;
     [Dependency] private SharedUserInterfaceSystem _ui = default!;
     [Dependency] private SharedMapSystem _maps = default!;
     [Dependency] private ITileDefinitionManager _tiles = default!;
@@ -151,15 +148,8 @@ public sealed partial class NCMetaPerformanceSystem
                 var owner = await Main(() =>
                 {
                     var actor = SpawnOwned("NCMetaPerformanceBot", origin);
-                    if (!_actorIndex.TryBind(actorId, actor)) throw new InvalidOperationException("Native actor binding failed.");
                     var entry = new Owner(actor, actorId, NCPartyRef.ForActor(actorId).ToString(), origin); _owners.Add(entry); return entry;
                 });
-                var appearance = await Main(() => NCHumanoidProfilePayload.Serialize(_serialization, HumanoidCharacterProfile.Random()));
-                var command = Guid.NewGuid();
-                var created = await _actors.CreateResidentAsync(new(command, actorId, Loc.GetString("nc-meta-performance-bot-name"),
-                    new("NCLivingCityResident"), new("NCDefaultResidentPersona"), appearance, default, null, command,
-                    AuditSource: "isolated.meta-performance-owner"));
-                if (created.Status != NCCityActorMutationStatus.Applied) throw new InvalidOperationException("Native test principal creation rejected.");
                 owner.Sender = await CreateDeviceAsync(id, owner, new(-1.5f, -0.5f));
                 owner.Silent = await CreateDeviceAsync(id, owner, new(1.5f, -0.5f));
                 var shape = Shape(request.Workload);
@@ -341,14 +331,6 @@ public sealed partial class NCMetaPerformanceSystem
         {
             if (preparation != null) await preparation;
             var owners = await Main(() => _owners.ToArray());
-            foreach (var owner in owners)
-            {
-                var record = await _actors.GetAsync(owner.Id);
-                if (record == null) continue;
-                var archived = await _actors.SetStatusAsync(new(Guid.NewGuid(), owner.Id, record.AggregateVersion,
-                    Content.Shared._NC.LivingCity.Actors.NCCityActorStatus.Archived, Guid.NewGuid(), AuditSource: "isolated.meta-performance-cleanup"));
-                if (archived.Status != NCCityActorMutationStatus.Applied) throw new InvalidOperationException("Cannot archive physical fixture actor.");
-            }
             await Main(() =>
             {
                 if (_id != id) return false;

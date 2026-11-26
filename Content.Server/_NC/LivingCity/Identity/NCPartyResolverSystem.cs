@@ -3,8 +3,6 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Server.Database;
-using Content.Server._NC.LivingCity.Actors;
-using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.Persistence.Identity;
 using System.Threading.Tasks;
 
@@ -16,7 +14,6 @@ namespace Content.Server._NC.LivingCity.Identity;
 public sealed partial class NCPartyResolverSystem : EntitySystem
 {
     [Dependency] private IServerDbManager _database = default!;
-    [Dependency] private NCCityActorRegistrySystem _actors = default!;
     [Dependency] private NCPartyDirectorySystem _directory = default!;
 
     public async Task<NCPartyResolution> ResolveAsync(NCPartyRef party, bool requireActive = false)
@@ -42,30 +39,9 @@ public sealed partial class NCPartyResolverSystem : EntitySystem
                 break;
             }
             case NCPartyKind.Actor:
-            {
-                var actor = await _actors.GetAsync(new NCActorId(party.PersistentId));
-                if (actor == null)
-                {
-                    resolution = Reject(party, NCPartyResolutionStatus.NotFound,
-                        "The persistent actor party does not exist.");
-                    break;
-                }
-
-                var lifecycle = actor.Snapshot.Lifecycle.Status switch
-                {
-                    NCCityActorStatus.Dead => NCPartyLifecycle.Deceased,
-                    NCCityActorStatus.Archived => NCPartyLifecycle.Archived,
-                    _ => NCPartyLifecycle.Active,
-                };
-                resolution = new NCPartyResolution(
-                    NCPartyResolutionStatus.Resolved,
-                    party,
-                    actor.Snapshot.Identity.FullName,
-                    lifecycle,
-                    actor.AggregateVersion,
-                    null);
+                // NC: Persistent city NPC actors were removed; old actor references no longer resolve.
+                resolution = Reject(party, NCPartyResolutionStatus.NotFound, "Persistent city actors were removed.");
                 break;
-            }
             default:
             {
                 var record = await _directory.GetAsync(party);

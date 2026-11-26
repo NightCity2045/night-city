@@ -2,6 +2,18 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 
 - type: entity
+  parent: MobHumanBase
+  id: NCShopkeeperDisplayBase
+  abstract: true
+  suffix: Static, Invulnerable
+  components:
+  - type: RandomHumanoidAppearance
+    randomizeName: false
+  - type: Godmode
+  - type: Physics
+    bodyType: Static
+
+- type: entity
   abstract: true
   parent: NCShopkeeperDisplayBase
   id: NCPawnShopkeeperBase

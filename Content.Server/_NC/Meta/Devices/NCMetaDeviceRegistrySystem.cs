@@ -3,7 +3,6 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Server._NC.LivingCity.Identity;
-using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.Meta.Persistence;
 using Robust.Shared.Asynchronous;
 using Content.Shared._NC.Meta;
@@ -27,8 +26,8 @@ public sealed class NCMetaDeviceEntry(EntityUid uid, string id, string owner)
 /// <summary>Runtime index only. Persistent IDs address devices; callers must separately authorize each use.</summary>
 public sealed partial class NCMetaDeviceRegistrySystem : EntitySystem
 {
-    public Content.Shared._NC.Persistence.Identity.NCItemId? GetEconomicItemId(EntityUid uid) =>
-        TryComp<NCCityPersistentItemAdapterComponent>(uid, out var item) && item.ItemId.IsValid ? item.ItemId : null;
+    // NC: Economic item identities were attached only to physicalized NPC inventories, which were removed.
+    public Content.Shared._NC.Persistence.Identity.NCItemId? GetEconomicItemId(EntityUid uid) => null;
     public event Action<NCMetaDeviceEntry>? Changed;
     [Dependency] private NCEntityPartyResolverSystem _parties = default!;
     [Dependency] private SharedInteractionSystem _interaction = default!;
@@ -86,9 +85,7 @@ public sealed partial class NCMetaDeviceRegistrySystem : EntitySystem
             return;
         }
         if (id.Length == 0)
-            id = TryComp<NCCityPersistentItemAdapterComponent>(uid, out var item) && item.ItemId.IsValid
-                ? NCMetaPersistenceSystem.StableGuid("meta-device:item:" + item.ItemId).ToString("D")
-                : Guid.NewGuid().ToString("D");
+            id = Guid.NewGuid().ToString("D");
         if (!Guid.TryParseExact(id, "D", out var stable) || stable == Guid.Empty || _devices.ContainsKey(id))
         {
             Log.Error($"Rejected duplicate or invalid META device identity for {ToPrettyString(uid)}.");

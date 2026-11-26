@@ -4,8 +4,6 @@
 
 using System.Linq;
 using Content.Server._NC.Combat.Targeting;
-using Content.Server._NC.LivingCity.Actors;
-using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;

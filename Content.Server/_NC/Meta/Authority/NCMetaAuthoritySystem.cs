@@ -3,7 +3,6 @@ using System.Threading;
 using Content.Meta.Hosting;
 using Content.Server.Database;
 using Content.Server._NC.LivingCity.Identity;
-using Content.Server._NC.LivingCity.Actors;
 using Content.Server._NC.Meta.Devices;
 using Content.Server._NC.Meta.Network;
 using Content.Server._NC.Meta.Persistence;
@@ -11,7 +10,6 @@ using Content.Shared._NC.Meta.UI;
 using Content.Shared.Interaction;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
-using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared.Roles;
 using Robust.Shared.Asynchronous;
 using Robust.Shared.Prototypes;
@@ -48,7 +46,6 @@ public sealed partial class NCMetaAuthoritySystem : EntitySystem
     [Dependency] private NCEntityPartyResolverSystem _parties = default!;
     [Dependency] private NCPartyResolverSystem _partyResolver = default!;
     [Dependency] private NCPartyDirectorySystem _directory = default!;
-    [Dependency] private NCCityActorRegistrySystem _actors = default!;
     [Dependency] private NCMetaPersistenceSystem _persistence = default!;
     [Dependency] private NCMetaDeviceRegistrySystem _devices = default!;
     [Dependency] private NCMetaNetworkSystem _network = default!;
@@ -71,7 +68,6 @@ public sealed partial class NCMetaAuthoritySystem : EntitySystem
         _devices.RegisterManagementAuthority(CanActFor);
         SubscribeLocalEvent<PrototypesReloadedEventArgs>(OnPrototypesReloaded);
         SubscribeLocalEvent<NCPartyDirectoryPersistedEvent>(OnPartyChanged);
-        SubscribeLocalEvent<NCCityActorPersistedEvent>(OnPrincipalActorChanged);
     }
     public override void Shutdown()
     {
@@ -110,20 +106,10 @@ public sealed partial class NCMetaAuthoritySystem : EntitySystem
         Interlocked.Exchange(ref _managementDirty, 1);
     }
 
-    private void OnPrincipalActorChanged(NCCityActorPersistedEvent args)
-    {
-        if (args.Status is not (NCCityActorStatus.Dead or NCCityActorStatus.Archived)) return;
-        var principal = NCPartyRef.ForActor(args.ActorId);
-        if (_policyPrincipals.TryGetValue(principal.ToString(), out var policies))
-            foreach (var id in policies.ToArray()) InvalidateServicePolicy(id);
-        foreach (var key in _management.Where(value => value.Value.Owner == principal).Select(value => value.Key).ToArray())
-            _management.Remove(key);
-    }
-
     private bool IsPrincipalActive(NCPartyRef owner) => owner.Kind switch
     {
-        NCPartyKind.Actor => _actors.TryGetCached(new(owner.PersistentId), out var actor) &&
-            actor.Snapshot.Lifecycle.Status is not (NCCityActorStatus.Dead or NCCityActorStatus.Archived),
+        // NC: Persistent city NPC actors were removed, so an actor principal can never be active.
+        NCPartyKind.Actor => false,
         NCPartyKind.Organization => _directory.TryGetCached(owner, out var organization) && organization.Snapshot.Lifecycle == NCPartyLifecycle.Active,
         _ => true,
     };
