@@ -127,3 +127,6 @@ nc-surgery-ui-failure-patient-unavailable = The patient is no longer available.
 nc-surgery-ui-failure-invalid-region = That anatomical region cannot be operated on.
 nc-surgery-ui-failure-invalid-surface = That body surface cannot be operated on.
 nc-surgery-ui-failure-invalid-input = The surgical input was rejected.
+
+nc-surgery-ui-failure-surgical-access-not-retracted = The incision is deep enough but its edges are closed. Spread them with a retractor first.
+nc-surgery-ui-failure-surgical-access-too-shallow = The local incision is too shallow for this depth. Deepen it with a scalpel first.

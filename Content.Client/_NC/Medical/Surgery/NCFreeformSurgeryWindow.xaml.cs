@@ -461,6 +461,10 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
         NCFreeformSurgeryFailure.AttachmentUnavailable => Loc.GetString("nc-surgery-ui-failure-attachment-unavailable"),
         NCFreeformSurgeryFailure.SurgicalAccessClosed =>
             Loc.GetString("nc-surgery-ui-failure-surgical-access-closed"),
+        NCFreeformSurgeryFailure.SurgicalAccessNotRetracted =>
+            Loc.GetString("nc-surgery-ui-failure-surgical-access-not-retracted"),
+        NCFreeformSurgeryFailure.SurgicalAccessTooShallow =>
+            Loc.GetString("nc-surgery-ui-failure-surgical-access-too-shallow"),
         NCFreeformSurgeryFailure.NoApplicableTarget => Loc.GetString("nc-surgery-ui-failure-no-applicable-target"),
         NCFreeformSurgeryFailure.RateLimited => Loc.GetString("nc-surgery-ui-failure-rate-limited"),
         NCFreeformSurgeryFailure.SessionUnavailable => Loc.GetString("nc-surgery-ui-failure-session"),

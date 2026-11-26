@@ -154,6 +154,44 @@ public sealed class NCSurgeryAccessRegressionTest : GameTest
         Assert.That(survivor.EdgeSeparation, Is.GreaterThanOrEqualTo(0.3f));
     }
 
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void ClosedAccessNamesTheMissingStepAndIgnoresOtherZones()
+    {
+        var (body, user, _) = Scene();
+        var thorax = Organ(body, "Thorax");
+        var abdomen = Organ(body, "Abdomen");
+        Open(thorax, "NCZoneChest");
+
+        // No abdomen incision at all: the cut is missing, however open the chest is.
+        var clamp = SpawnAt("NCSurgeryDebugMultitool", user);
+        var noCut = _effects.ApplyStroke(Stroke(body, user, abdomen, clamp, null, "NCSurgeryToolHemostasis",
+            "NCZoneAbdomen"));
+        Assert.That(noCut.Failure, Is.EqualTo(NCFreeformSurgeryFailure.SurgicalAccessTooShallow));
+
+        // A deep but unretracted abdomen incision needs a retractor.
+        var site = SComp<NCSurgicalSiteComponent>(abdomen);
+        site.Incisions.Add(new NCSurgicalIncisionRecord
+        {
+            IncisionId = Guid.NewGuid(), TargetZone = "NCZoneAbdomen", Depth = 0.95f,
+            EdgeSeparation = 0f, Surface = NCWoundSurface.Front,
+            Polyline = [new Vector2(0.45f, 0.5f), new Vector2(0.55f, 0.5f)],
+            SourceResolutionId = NCActionResolutionId.New(),
+            CreatedAt = SGameTiming.CurTime, ModifiedAt = SGameTiming.CurTime,
+        });
+        var closed = _effects.ApplyStroke(Stroke(body, user, abdomen, clamp, null, "NCSurgeryToolHemostasis",
+            "NCZoneAbdomen"));
+        Assert.That(closed.Failure, Is.EqualTo(NCFreeformSurgeryFailure.SurgicalAccessNotRetracted));
+
+        var retractor = _effects.ApplyStroke(Stroke(body, user, abdomen, clamp, null, "NCSurgeryToolRetraction",
+            "NCZoneAbdomen"));
+        Assert.That(retractor.Accepted, Is.True, $"retraction must open the abdomen ({retractor.Failure})");
+        var open = _effects.ApplyStroke(Stroke(body, user, abdomen, clamp, null, "NCSurgeryToolHemostasis",
+            "NCZoneAbdomen"));
+        Assert.That(open.Failure, Is.Not.EqualTo(NCFreeformSurgeryFailure.SurgicalAccessNotRetracted));
+        Assert.That(open.Failure, Is.Not.EqualTo(NCFreeformSurgeryFailure.SurgicalAccessTooShallow));
+    }
+
     private void Medical(EntityUid body, EntityUid user, EntityUid region, EntityUid tool, EntityUid module,
         ProtoId<NCTargetZonePrototype> zone)
     {

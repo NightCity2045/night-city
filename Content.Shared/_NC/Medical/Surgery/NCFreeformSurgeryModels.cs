@@ -140,6 +140,8 @@ public enum NCFreeformSurgeryFailure : byte
     DermalSurgeryIncomplete,
     DermalPrerequisitesMissing,
     DermalTissueDamaged,
+    SurgicalAccessNotRetracted,
+    SurgicalAccessTooShallow,
 }
 
 [Serializable, NetSerializable]

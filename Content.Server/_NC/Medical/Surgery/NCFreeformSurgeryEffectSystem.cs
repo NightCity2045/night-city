@@ -80,7 +80,7 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
             return NCFreeformSurgeryEffectResult.NoTarget;
         var center = StrokeCenter(context.Points);
         if (context.Definition.RequiresOpenAccess && !HasLocalOpenAccess(context, site, center))
-            return NCFreeformSurgeryEffectResult.AccessClosed;
+            return ResolveAccessFailure(context, site);
         if (!_legacy.CanConsumeToolResource(context.Tool, context.ToolComponent, context.Definition.ConsumedUses))
             return NCFreeformSurgeryEffectResult.ResourceEmpty;
 
@@ -852,6 +852,28 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
         return applied;
     }
 
+    /// <summary>
+    /// NC: Tells the surgeon which step is missing. A deep-enough but unretracted incision needs a retractor; any
+    /// other closed state needs a deeper cut, so the same refusal never hides what to do next.
+    /// </summary>
+    private static NCFreeformSurgeryEffectResult ResolveAccessFailure(
+        in NCFreeformSurgeryEffectContext context,
+        NCSurgicalSiteComponent site)
+    {
+        var requiredDepth = context.StructureMinimumDepth ?? context.Depth;
+        foreach (var incision in site.Incisions)
+        {
+            if (incision.TargetZone == context.Zone && !incision.Sutured &&
+                incision.EdgeSeparation < context.MinimumOpenRetraction &&
+                (incision.BoneCasingOpen || incision.Depth + 0.001f >= requiredDepth))
+            {
+                return NCFreeformSurgeryEffectResult.AccessNotRetracted;
+            }
+        }
+
+        return NCFreeformSurgeryEffectResult.AccessTooShallow;
+    }
+
     private bool HasLocalOpenAccess(
         in NCFreeformSurgeryEffectContext context,
         NCSurgicalSiteComponent site,
@@ -1087,5 +1109,7 @@ public readonly record struct NCFreeformSurgeryEffectResult(bool Accepted, bool 
     public static readonly NCFreeformSurgeryEffectResult Rejected = new(false, false, NCFreeformSurgeryFailure.InvalidInput);
     public static readonly NCFreeformSurgeryEffectResult NoTarget = new(false, false, NCFreeformSurgeryFailure.NoApplicableTarget);
     public static readonly NCFreeformSurgeryEffectResult ResourceEmpty = new(false, false, NCFreeformSurgeryFailure.ResourceEmpty);
+    public static readonly NCFreeformSurgeryEffectResult AccessNotRetracted = new(false, false, NCFreeformSurgeryFailure.SurgicalAccessNotRetracted);
+    public static readonly NCFreeformSurgeryEffectResult AccessTooShallow = new(false, false, NCFreeformSurgeryFailure.SurgicalAccessTooShallow);
     public static readonly NCFreeformSurgeryEffectResult AccessClosed = new(false, false, NCFreeformSurgeryFailure.SurgicalAccessClosed);
 }

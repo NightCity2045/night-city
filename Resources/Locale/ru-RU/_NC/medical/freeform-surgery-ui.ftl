@@ -127,3 +127,6 @@ nc-surgery-ui-failure-patient-unavailable = Пациент больше недо
 nc-surgery-ui-failure-invalid-region = На этой анатомической области нельзя оперировать.
 nc-surgery-ui-failure-invalid-surface = На этой поверхности тела нельзя оперировать.
 nc-surgery-ui-failure-invalid-input = Хирургический ввод отклонён.
+
+nc-surgery-ui-failure-surgical-access-not-retracted = Разрез достаточно глубокий, но края сомкнуты. Сначала разведите их ретрактором.
+nc-surgery-ui-failure-surgical-access-too-shallow = Местный разрез слишком мелкий для этой глубины. Сначала углубите его скальпелем.
