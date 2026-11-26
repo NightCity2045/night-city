@@ -123,7 +123,7 @@ If the task touches NPCs, HTN, pathfinding, steering, mob AI, AI debug overlays,
 - `ss14-standard-optimizations` for high-frequency simulation or perception code
 - `ss14-transform-physics` when physical movement, city navigation, portals, maps, grids, or Z-levels are involved
 
-If the task touches the world infrastructure under `_NC/LivingCity` (active world time, party identity, ledger, estates, reputation) or player housing:
+If the task touches the world infrastructure under `_NC/LivingCity` (active world time, party identity, ledger, reputation) or player housing:
 
 - `ss14-gameplay-feature`
 - `ss14-databases-migrations` when authoritative persistence or schema compatibility is involved
@@ -197,7 +197,7 @@ This repository is a large RobustToolbox/SS14-based Night City 2045 overhaul wit
 - CityGraph and Room/Portal Graph augment physical pathfinding; they do not replace local movement.
 - The city map window (`NCCityMapSystem`, keybind `NCOpenCityMap`) is the player's map; it renders public zone cartography from the City Zone systems.
 - Roles are the vanilla jobs. Night City organizations, employment, personnel consoles, the Agent device and the Living City NPC simulation were removed; do not reintroduce them without an explicit request.
-- `_NC/LivingCity` now holds only world infrastructure that other features depend on: active world time, party identity, the economy ledger, cash and asset registry, housing and property, police registries, estates and death succession, and fixer reputation. Actor parties no longer resolve.
+- `_NC/LivingCity` now holds only world infrastructure that other features depend on: active world time, party identity, the economy ledger, cash and asset registry, housing and property, police registries, and fixer reputation. Actor parties no longer resolve. Player inheritance (estates and death succession) was removed; a dead character is simply deleted at the round boundary.
 - World state advances only while the round/server world is active. Do not invent offline progression.
 
 ## ECS Rules

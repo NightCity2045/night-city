@@ -157,13 +157,6 @@ public static class NCPersistentIdentity
         return new NCCityNewsId(CreateGuid($"city-news/{incidentId}/{stage}"));
     }
 
-    public static NCEstateId Estate(NCPartyRef decedent)
-    {
-        if (!decedent.IsValid)
-            throw new ArgumentOutOfRangeException(nameof(decedent));
-        return new NCEstateId(CreateGuid($"estate/{decedent}"));
-    }
-
     public static NCCommodityBatchId CommodityBatch(string commodityId, Guid sourceWorldEventId, string lotKey)
     {
         if (sourceWorldEventId == Guid.Empty)

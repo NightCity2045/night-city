@@ -4,14 +4,12 @@
 
 using System.Globalization;
 using System.Text.Json;
-using Content.Server._NC.LivingCity.Lifecycle;
 using Content.Server._NC.LivingCity.Time;
 using Content.Server._NC.Medical.Persistence;
 using Content.Server.Preferences.Managers;
 using Content.Shared._NC.Identity;
 using Content.Shared._NC.Medical.Physiology;
 using Content.Shared.GameTicking;
-using Robust.Shared.Asynchronous;
 using Robust.Shared.Network;
 using Robust.Shared.Player;
 
@@ -28,15 +26,12 @@ public sealed partial class NCCharacterLifecycleSnapshotSystem : EntitySystem
     private const int FormatVersion = 1;
 
     [Dependency] private IServerPreferencesManager _preferences = default!;
-    [Dependency] private NCDeathSuccessionSystem _deathSuccession = default!;
     [Dependency] private NCMedicalPersistenceSystem _medicalPersistence = default!;
-    [Dependency] private ITaskManager _taskManager = default!;
 
     private readonly Dictionary<EntityUid, CharacterBinding> _bindings = [];
     private readonly Dictionary<NCCharacterId, NetUserId> _owners = [];
     private readonly HashSet<NCCharacterId> _irreversiblyDead = [];
     private readonly HashSet<NCCharacterId> _clinicalDeathsAtClose = [];
-    private readonly Dictionary<NCCharacterId, EstatePreparation> _estatePreparations = [];
 
     public override void Initialize()
     {
@@ -94,17 +89,6 @@ public sealed partial class NCCharacterLifecycleSnapshotSystem : EntitySystem
             else if (physiology.Condition == NCPhysiologicalCondition.ClinicalArrest)
                 _clinicalDeathsAtClose.Add(characterId);
         }
-
-        var preparations = new List<Task>();
-        foreach (var characterId in _irreversiblyDead.Union(_clinicalDeathsAtClose))
-        {
-            EnsureEstatePreparation(characterId);
-            preparations.Add(_estatePreparations[characterId].Task);
-        }
-
-        // Estate writes need the active-world clock. Finish them before closing it; capture checks their results.
-        if (preparations.Count != 0)
-            _taskManager.BlockWaitOnTask(Task.WhenAll(preparations));
     }
 
     private void OnRoundSnapshotCapture(NCRoundSnapshotCaptureEvent args)
@@ -122,17 +106,7 @@ public sealed partial class NCCharacterLifecycleSnapshotSystem : EntitySystem
                 1,
                 payload);
             if (irreversible || clinicalArrest)
-            {
-                if (!_estatePreparations.TryGetValue(characterId, out var preparation) ||
-                    !preparation.Task.IsCompletedSuccessfully ||
-                    preparation.Task.GetAwaiter().GetResult() == null)
-                {
-                    args.Fail($"Character {characterId.Value} estate was not prepared before profile deletion.");
-                    continue;
-                }
-
                 args.DeleteCharacter(characterId.Value);
-            }
         }
     }
 
@@ -157,23 +131,7 @@ public sealed partial class NCCharacterLifecycleSnapshotSystem : EntitySystem
     private void RememberDeath(EntityUid body, NCCharacterId characterId)
     {
         if (TryComp<NCPhysiologyComponent>(body, out var physiology) && physiology.Irreversible)
-        {
             _irreversiblyDead.Add(characterId);
-            EnsureEstatePreparation(characterId);
-        }
-    }
-
-    private void EnsureEstatePreparation(NCCharacterId characterId)
-    {
-        if (_estatePreparations.ContainsKey(characterId))
-            return;
-
-        // The generated event id remains stable for every retry/read during this round, keeping estate opening
-        // and account collection idempotent without depending on the abandoned physical A-Life lifecycle.
-        var deathEventId = Guid.NewGuid();
-        _estatePreparations.Add(characterId, new EstatePreparation(
-            deathEventId,
-            _deathSuccession.OpenCharacterEstateAsync(characterId, deathEventId)));
     }
 
     private void OnRoundRestart(RoundRestartCleanupEvent args)
@@ -182,10 +140,8 @@ public sealed partial class NCCharacterLifecycleSnapshotSystem : EntitySystem
         _owners.Clear();
         _irreversiblyDead.Clear();
         _clinicalDeathsAtClose.Clear();
-        _estatePreparations.Clear();
     }
 
     private readonly record struct CharacterBinding(NCCharacterId CharacterId, NetUserId UserId);
-    private readonly record struct EstatePreparation(Guid DeathEventId, Task<NCEstateRecord?> Task);
     private sealed record CharacterLifecycleDocument(bool IrreversiblyDead, bool ClinicalArrestAtClose);
 }
