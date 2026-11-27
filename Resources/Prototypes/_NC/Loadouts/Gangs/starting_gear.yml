@@ -268,3 +268,47 @@
     shoes: ClothingShoesColorBlack
   inhand:
   - KitchenKnife
+
+- type: startingGear
+  id: NCSecurityMedicalTechnologiesGuardGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitSecGrey
+    shoes: ClothingShoesBootsJack
+    outerClothing: ClothingOuterArmorBasic
+    head: ClothingHeadHatSurgcapBlue
+    gloves: ClothingHandsGlovesLatex
+  inhand:
+  - NCWeaponPistolP35
+
+- type: startingGear
+  id: NCSecurityMedicalTechnologiesOrderlyGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitMedicalDoctor
+    shoes: ClothingShoesColorWhite
+    mask: ClothingMaskSterile
+    head: ClothingHeadHatSurgcapGreen
+    gloves: ClothingHandsGlovesLatex
+  inhand:
+  - Machete
+
+- type: startingGear
+  id: NCSecurityMedicalTechnologiesSurgeonGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitMedicalDoctor
+    shoes: ClothingShoesColorWhite
+    outerClothing: ClothingOuterCoatLab
+    mask: ClothingMaskSterile
+    gloves: ClothingHandsGlovesLatex
+  inhand:
+  - KitchenKnife
+
+- type: startingGear
+  id: NCSecurityMedicalTechnologiesChiefGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitMedicalDoctor
+    shoes: ClothingShoesBootsJack
+    outerClothing: ClothingOuterCoatLabCmo
+    eyes: ClothingEyesGlassesSecurity
+    gloves: ClothingHandsGlovesLatex
+  inhand:
+  - NCWeaponPistolAvenger

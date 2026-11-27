@@ -178,6 +178,51 @@ public sealed class NCFixerMissionTest : GameTest
         });
     }
 
+    /// <summary>
+    /// Vlad's sabotage of the Medical Technologies limb farm: the vat controller appears at the objective with
+    /// armed staff at the guard posts, and destroying it completes the job.
+    /// </summary>
+    [Test]
+    public async Task DestroyedVatControllerCompletesSabotage()
+    {
+        var missions = Server.System<NCFixerMissionSystem>();
+        var reputation = Server.System<NCStreetReputationSystem>();
+        var map = await Pair.CreateTestMap();
+        var profile = 0;
+
+        await Server.WaitAssertion(() =>
+        {
+            var coords = map.GridCoords;
+            var fixerUid = SEntMan.SpawnEntity("NCFixerVlad", coords);
+            SEntMan.SpawnEntity("NCMissionMarkerObjectiveMedicalTechnologies", coords.Offset(new System.Numerics.Vector2(6, 0)));
+            SEntMan.SpawnEntity("NCMissionMarkerGuardMedicalTechnologies", coords.Offset(new System.Numerics.Vector2(6, 3)));
+            SEntMan.SpawnEntity("NCMissionMarkerGuardMedicalTechnologies", coords.Offset(new System.Numerics.Vector2(9, 0)));
+            (var worker, profile) = SpawnWorker(coords, 900004);
+            var fixer = new Entity<NCFixerComponent>(fixerUid, SEntMan.GetComponent<NCFixerComponent>(fixerUid));
+
+            Assert.That(missions.TrySetOffer("NCFixerVlad", 0, "NCFixerVladMedTechVats"), Is.True);
+            Assert.That(missions.TryAccept(fixer, 0, worker), Is.False, "Not trusted without street reputation.");
+            reputation.AddReputation(profile, 25);
+            Assert.That(missions.TryAccept(fixer, 0, worker), Is.True);
+
+            var spawned = missions.GetMissionEntities(profile);
+            Assert.That(spawned.Count(uid => SEntMan.HasComponent<NCMissionGuardComponent>(uid)), Is.GreaterThanOrEqualTo(7),
+                "The lab staff hold the place.");
+            var controller = spawned.First(uid => SEntMan.GetComponent<MetaDataComponent>(uid).EntityPrototype?.ID == "NCMedTechVatController");
+            SEntMan.DeleteEntity(controller);
+        });
+
+        await Pair.RunSeconds(2);
+
+        await Server.WaitAssertion(() =>
+        {
+            // Vlad pays in person once the saboteur comes back.
+            Assert.That(missions.TryGetActiveMission(profile, out _, out var status), Is.True);
+            Assert.That(status, Is.EqualTo(NCFixerMissionStatus.AwaitingPayment));
+            Assert.That(reputation.GetReputation(profile), Is.EqualTo(31));
+        });
+    }
+
     /// <summary>A beating counts when the debtor is down but alive; killing the debtor fails the job.</summary>
     [Test]
     public async Task BeatingNeedsTheDebtorAlive()

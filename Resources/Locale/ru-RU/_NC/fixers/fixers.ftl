@@ -57,6 +57,7 @@ nc-mission-owner-valentinos = Валентинос
 nc-mission-owner-bozos = Бозос
 nc-mission-owner-inquisitors = Инквизиторы
 nc-mission-owner-philharmonic-vampyres = Филармонические вампиры
+nc-mission-owner-medical-technologies = Medical Technologies
 
 nc-fixer-mission-target-killed = Цель мертва, а мёртвые долгов не отдают: «{$mission}» провален.
 nc-mission-terminal-hacking = Ты начинаешь взламывать терминал...
@@ -89,6 +90,8 @@ nc-fixer-mission-insider-biotech-trials = Клинические испытан�
 nc-fixer-mission-insider-biotech-trials-desc = Биотехника испытывает препараты на людях, которые ничего не подписывали. Данные испытаний лежат на терминале их объекта.
 nc-fixer-mission-insider-biotech-lab = Грязный секрет лаборатории
 nc-fixer-mission-insider-biotech-lab-desc = Лаборатория Биотехники прячет исследования, которые кончат не одну карьеру. Охрана серьёзная. История того стоит.
+nc-fixer-mission-insider-medtech-boosters = Хром для бустеров
+nc-fixer-mission-insider-medtech-boosters-desc = Medical Technologies выращивает конечности в порту, а по-тихому продаёт кибернетику бустерам. Список клиентов лежит на терминале в их здании. Три этажа, персонал с пистолетами и ножами. Принеси мне шард.
 nc-fixer-mission-insider-corporate-pda = Чужой ПДА
 nc-fixer-mission-insider-corporate-pda-desc = Сотрудник корпорации носит всю свою работу в ПДА. Принеси его в мой тайник, дальше я сам.
 
@@ -108,6 +111,8 @@ nc-fixer-mission-vlad-debtor = Выбить долг
 nc-fixer-mission-vlad-debtor-desc = Этот человек должен Владу. Найди и хорошенько отделай. Живым. Мёртвые не платят.
 nc-fixer-mission-vlad-debtor-valentinos = Должник под крышей
 nc-fixer-mission-vlad-debtor-valentinos-desc = Мой должник сбежал к Валентинос и думает, что он в безопасности. Покажи ему, что нет. Живым, и войну не начинай.
+nc-fixer-mission-vlad-medtech-vats = Испорченный урожай
+nc-fixer-mission-vlad-medtech-vats-desc = Medical Technologies растит руки и ноги в порту и продаёт хром бустерам на моих улицах. Влад не любит конкурентов. Сломай машину, на которой держатся их баки. Их доктора ходят с пушками и мачете, будь готов.
 
 ent-NCFixerInsider = сетевой терминал
     .desc = Общественная точка доступа к Сети. На экране лицо в маске и мигающий курсор.
