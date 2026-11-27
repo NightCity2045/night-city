@@ -16,6 +16,5 @@ public sealed partial class NCMappingHubWindow : DefaultWindow
         RobustXamlLoader.Load(this);
         Tabs.SetTabTitle(0, Loc.GetString("nc-mapping-hub-tab-tools"));
         Tabs.SetTabTitle(1, Loc.GetString("nc-mapping-hub-tab-floors"));
-        Tabs.SetTabTitle(2, Loc.GetString("nc-mapping-hub-tab-zones"));
     }
 }

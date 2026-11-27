@@ -4,7 +4,6 @@
 
 using System.Linq;
 using System.Text.RegularExpressions;
-using Content.Server._NC.City.Zones.Mapping;
 using Content.Server._NC.ZLevels.Core;
 using Content.Server.Administration;
 using Content.Shared._NC.Coordinates;
@@ -29,7 +28,6 @@ public sealed partial class NCLoadZNetworkCommand : LocalizedEntityCommands
     [Dependency] private IResourceManager _resources = default!;
     [Dependency] private MapLoaderSystem _mapLoader = default!;
     [Dependency] private NCZLevelsSystem _zLevels = default!;
-    [Dependency] private NCZoneEditorServerSystem _zoneEditor = default!;
     [Dependency] private MetaDataSystem _meta = default!;
 
     public override string Command => "znetwork-load";
@@ -142,23 +140,6 @@ public sealed partial class NCLoadZNetworkCommand : LocalizedEntityCommands
             _zLevels.DeleteMapNetwork(network);
             shell.WriteError("Failed to attach the loaded maps to the Z-network.");
             return;
-        }
-
-        var zonePath = folder / NCZoneEditorServerSystem.NetworkSaveFileName;
-        if (_resources.UserData.Exists(zonePath))
-        {
-            if (!_zoneEditor.TryLoadNetworkZones(zonePath, networkId, out var zoneError))
-            {
-                _zLevels.DeleteMapNetwork(network);
-                shell.WriteError(zoneError ?? $"Unable to load city zones from {zonePath}.");
-                return;
-            }
-
-            shell.WriteLine($"Loaded city zones from {zonePath}.");
-        }
-        else
-        {
-            shell.WriteLine("This legacy Z-network save has no _zones.yml sidecar.");
         }
 
         shell.WriteLine($"Successfully loaded Z-network '{saveName}' with {loadedMaps.Count} maps.");

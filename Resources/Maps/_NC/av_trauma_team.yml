@@ -166,7 +166,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 1.5,-1.5
-    - type: NCCityLocation
 - proto: BedsheetMedical
   entities:
   - uid: 97
@@ -186,7 +185,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -1.5,1.5
-    - type: NCCityLocation
     - type: DeviceLinkSink
       invokeCounter: 1
   - uid: 3
@@ -194,7 +192,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -1.5,0.5
-    - type: NCCityLocation
     - type: DeviceLinkSink
       invokeCounter: 1
   - uid: 4
@@ -202,7 +199,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 2.5,1.5
-    - type: NCCityLocation
     - type: DeviceLinkSink
       invokeCounter: 1
   - uid: 5
@@ -210,7 +206,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 2.5,0.5
-    - type: NCCityLocation
     - type: DeviceLinkSink
       invokeCounter: 1
 - proto: ButtonFrameExit
@@ -414,7 +409,6 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 0.5,3.5
-    - type: NCCityLocation
 - proto: Defibrillator
   entities:
   - uid: 101
@@ -498,14 +492,12 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 1.5,-1.5
-    - type: NCCityLocation
   - uid: 94
     components:
     - type: Transform
       parent: 1
       rot: 3.141592653589793 rad
       pos: -0.5,-1.5
-    - type: NCCityLocation
 - proto: Morgue
   entities:
   - uid: 99
@@ -569,7 +561,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 0.5,4.5
-    - type: NCCityLocation
 - proto: Poweredlight
   entities:
   - uid: 70
@@ -666,7 +657,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -0.5,-1.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -806,7 +796,6 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: -0.5,-2.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -817,7 +806,6 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 0.5,-2.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -828,7 +816,6 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 1.5,-2.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState

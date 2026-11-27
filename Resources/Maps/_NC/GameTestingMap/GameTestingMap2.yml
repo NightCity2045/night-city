@@ -506,37 +506,31 @@ entities:
     - type: Transform
       parent: 1
       pos: 8.5,-33.5
-    - type: NCCityLocation
   - uid: 565
     components:
     - type: Transform
       parent: 1
       pos: 14.5,-34.5
-    - type: NCCityLocation
   - uid: 568
     components:
     - type: Transform
       parent: 1
       pos: 17.5,-34.5
-    - type: NCCityLocation
   - uid: 1525
     components:
     - type: Transform
       parent: 1
       pos: -13.5,-22.5
-    - type: NCCityLocation
   - uid: 1539
     components:
     - type: Transform
       parent: 1
       pos: -7.5,-22.5
-    - type: NCCityLocation
   - uid: 1562
     components:
     - type: Transform
       parent: 1
       pos: 19.5,-34.5
-    - type: NCCityLocation
 - proto: AirlockChemistry
   entities:
   - uid: 1540
@@ -544,7 +538,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -16.5,-25.5
-    - type: NCCityLocation
 - proto: AirlockMaintChapelLocked
   entities:
   - uid: 1496
@@ -553,27 +546,23 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: -13.5,-47.5
-    - type: NCCityLocation
   - uid: 1505
     components:
     - type: Transform
       parent: 1
       rot: 3.141592653589793 rad
       pos: -19.5,-44.5
-    - type: NCCityLocation
   - uid: 1515
     components:
     - type: Transform
       parent: 1
       rot: 3.141592653589793 rad
       pos: -13.5,-44.5
-    - type: NCCityLocation
   - uid: 1553
     components:
     - type: Transform
       parent: 1
       pos: -12.5,-28.5
-    - type: NCCityLocation
 - proto: AlwaysPoweredlightBlue
   entities:
   - uid: 569
@@ -655,19 +644,16 @@ entities:
     - type: Transform
       parent: 1
       pos: 20.5,-38.5
-    - type: NCCityLocation
   - uid: 561
     components:
     - type: Transform
       parent: 1
       pos: 13.5,-35.5
-    - type: NCCityLocation
   - uid: 1549
     components:
     - type: Transform
       parent: 1
       pos: -13.5,-31.5
-    - type: NCCityLocation
 - proto: CannabisSeeds
   entities:
   - uid: 1582
@@ -696,13 +682,11 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 19.488625,-37.584114
-    - type: NCCityLocation
   - uid: 1585
     components:
     - type: Transform
       parent: 1
       pos: 13.429511,-36.756737
-    - type: NCCityLocation
 - proto: DresserWardenFilled
   entities:
   - uid: 1552
@@ -711,7 +695,6 @@ entities:
       parent: 1
       rot: -1.5707963267948966 rad
       pos: -12.5,-31.5
-    - type: NCCityLocation
 - proto: GunSafeShotgunEnforcer
   entities:
   - uid: 1554
@@ -726,7 +709,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -15.5,-31.5
-    - type: NCCityLocation
 - proto: LockerFreezerBase
   entities:
   - uid: 1557
@@ -6377,7 +6359,6 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 13.685247,-35.47477
-    - type: NCCityLocation
 - proto: Poweredlight
   entities:
   - uid: 1547
@@ -6499,21 +6480,18 @@ entities:
     - type: Transform
       parent: 1
       pos: 20.5,-35.5
-    - type: NCCityLocation
   - uid: 1538
     components:
     - type: Transform
       parent: 1
       rot: -1.5707963267948966 rad
       pos: -15.5,-24.5
-    - type: NCCityLocation
   - uid: 1581
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 13.5,-38.5
-    - type: NCCityLocation
 - proto: WallSolid
   entities:
   - uid: 14
@@ -9298,7 +9276,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -16.5,-23.5
-    - type: NCCityLocation
 - proto: Window
   entities:
   - uid: 103

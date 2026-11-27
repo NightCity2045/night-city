@@ -391,13 +391,11 @@ entities:
     - type: Transform
       parent: 1
       pos: -7.5,-22.5
-    - type: NCCityLocation
   - uid: 744
     components:
     - type: Transform
       parent: 1
       pos: -13.5,-22.5
-    - type: NCCityLocation
 - proto: AirlockChemistry
   entities:
   - uid: 796
@@ -405,7 +403,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -10.5,-25.5
-    - type: NCCityLocation
 - proto: AirlockMaintChapelLocked
   entities:
   - uid: 809
@@ -413,7 +410,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -10.5,-28.5
-    - type: NCCityLocation
 - proto: AlwaysPoweredlightBlue
   entities:
   - uid: 661
@@ -459,7 +455,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -10.5,-31.5
-    - type: NCCityLocation
 - proto: DresserWardenFilled
   entities:
   - uid: 854
@@ -468,7 +463,6 @@ entities:
       parent: 1
       rot: -1.5707963267948966 rad
       pos: -9.5,-31.5
-    - type: NCCityLocation
 - proto: DrinkBottleWine
   entities:
   - uid: 876
@@ -477,14 +471,12 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: -6.317796,-30.881676
-    - type: NCCityLocation
   - uid: 877
     components:
     - type: Transform
       parent: 1
       rot: 3.141592653589793 rad
       pos: -6.742633,-31.103367
-    - type: NCCityLocation
 - proto: GunSafeShotgunEnforcer
   entities:
   - uid: 823
@@ -499,7 +491,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -6.5,-31.5
-    - type: NCCityLocation
 - proto: LockerFreezerBase
   entities:
   - uid: 837
@@ -4691,7 +4682,6 @@ entities:
       parent: 1
       rot: -1.5707963267948966 rad
       pos: -9.5,-24.5
-    - type: NCCityLocation
 - proto: WallSolid
   entities:
   - uid: 3
@@ -5501,7 +5491,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -10.5,-23.5
-    - type: NCCityLocation
 - proto: WindowDirectional
   entities:
   - uid: 718

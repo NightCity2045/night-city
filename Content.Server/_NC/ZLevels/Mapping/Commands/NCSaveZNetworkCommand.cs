@@ -5,7 +5,6 @@
 
 using Content.Server.Administration;
 // NC start: persist the stable identity of saved Z-networks.
-using Content.Server._NC.City.Zones.Mapping;
 using Content.Shared._NC.Coordinates.Components;
 // NC end
 using Content.Shared._NC.ZLevels.Core.Components;
@@ -30,7 +29,6 @@ public sealed partial class NCSaveZNetworkCommand : LocalizedEntityCommands
     [Dependency] private MapLoaderSystem _mapLoader = default!;
     // NC start: save NCZNetworkId beside the network maps.
     [Dependency] private IResourceManager _resources = default!;
-    [Dependency] private NCZoneEditorServerSystem _zoneEditor = default!;
     // NC end
 
     public override string Command => "znetwork-save";
@@ -105,16 +103,6 @@ public sealed partial class NCSaveZNetworkCommand : LocalizedEntityCommands
             return;
         }
 
-        // Validate the mapper's current zone draft before overwriting any map in the bundle.
-        if (!_zoneEditor.TryValidateNetworkSave(
-                shell.Player?.UserId,
-                identity.NetworkId,
-                out var hasZones,
-                out var zoneError))
-        {
-            shell.WriteError(zoneError ?? "The zone draft cannot be saved.");
-            return;
-        }
         // NC end
 
         foreach (var (depth, mapUid) in levelComp.ZLevels)
@@ -122,7 +110,7 @@ public sealed partial class NCSaveZNetworkCommand : LocalizedEntityCommands
             if (!_entities.TryGetComponent<MapComponent>(mapUid, out var mapComp))
             {
                 shell.WriteError($"Map entity {mapUid} doesnt have MapComponent.");
-                // NC start: an incomplete map set must not publish fresh network or zone metadata.
+                // NC start: an incomplete map set must not publish fresh network metadata.
                 allMapsSaved = false;
                 // NC end
                 continue;
@@ -163,32 +151,9 @@ public sealed partial class NCSaveZNetworkCommand : LocalizedEntityCommands
             }
         }
 
-        // NC start: publish the sidecars only after every map was written successfully.
+        // NC start: publish the network manifest only after every map was written successfully.
         if (!allMapsSaved)
             return;
-
-        if (hasZones)
-        {
-            var zonePath = saveFolder / NCZoneEditorServerSystem.NetworkSaveFileName;
-            if (!_zoneEditor.TrySaveNetworkZones(
-                    shell.Player?.UserId,
-                    identity.NetworkId,
-                    zonePath,
-                    out zoneError))
-            {
-                shell.WriteError(zoneError ?? "Unable to save the Z-network zone set.");
-                return;
-            }
-
-            shell.WriteLine($"Saved city zones to {zonePath}.");
-        }
-        else
-        {
-            var zonePath = saveFolder / NCZoneEditorServerSystem.NetworkSaveFileName;
-            shell.WriteLine(_resources.UserData.Exists(zonePath)
-                ? $"No current zone source belongs to this network; existing {zonePath} was preserved."
-                : "No zone draft or loaded zone set belongs to this network; no zone sidecar was written.");
-        }
 
         NCZNetworkSaveManifest.Write(_resources.UserData, saveFolder, identity.NetworkId);
         // NC end

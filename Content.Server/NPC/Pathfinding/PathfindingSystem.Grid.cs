@@ -74,9 +74,6 @@ public sealed partial class PathfindingSystem
 
         component.DirtyChunks.Clear();
 
-        // NC start: the Living City cache owns only derived snapshots and is notified after the vanilla graph is ready.
-        RemoveNCCityPathGraphRevision(uid);
-        // NC end
         component.Chunks.Clear();
     }
 
@@ -221,9 +218,6 @@ public sealed partial class PathfindingSystem
 
             comp.DirtyChunks.Clear();
 
-            // NC start: publish one bounded grid-level invalidation after vanilla pathfinding finishes rebuilding.
-            RaiseNCCityPathGraphUpdated(uid);
-            // NC end
         }
     }
 

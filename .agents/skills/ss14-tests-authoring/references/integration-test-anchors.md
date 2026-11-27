@@ -8,7 +8,6 @@
 - `Content.IntegrationTests/Pair/TestPair.cs`
 - `Content.IntegrationTests/Tests/ResearchTest.cs`
 - `Content.IntegrationTests/Tests/_NC/GameRules/NCNightCityGameRuleTest.cs`
-- `Content.IntegrationTests/Tests/_NC/City/Zones/NCZoneSystemTest.cs`
 
 ## Use These For
 

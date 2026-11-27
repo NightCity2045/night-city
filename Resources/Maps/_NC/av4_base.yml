@@ -82,7 +82,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -1.5,1.5
-    - type: NCCityLocation
     - type: DeviceLinkSink
       invokeCounter: 1
   - uid: 3
@@ -90,7 +89,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -1.5,0.5
-    - type: NCCityLocation
     - type: DeviceLinkSink
       invokeCounter: 1
   - uid: 4
@@ -98,7 +96,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 2.5,1.5
-    - type: NCCityLocation
     - type: DeviceLinkSink
       invokeCounter: 1
   - uid: 5
@@ -106,7 +103,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 2.5,0.5
-    - type: NCCityLocation
     - type: DeviceLinkSink
       invokeCounter: 1
 - proto: ButtonFrameExit
@@ -124,7 +120,6 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 0.5,3.5
-    - type: NCCityLocation
 - proto: Grille
   entities:
   - uid: 8
@@ -150,7 +145,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 0.5,4.5
-    - type: NCCityLocation
 - proto: ReinforcedWindow
   entities:
   - uid: 9

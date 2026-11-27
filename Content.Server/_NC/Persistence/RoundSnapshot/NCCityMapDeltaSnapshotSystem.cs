@@ -7,9 +7,7 @@ using System.Text;
 using System.Text.Json;
 using Content.Server.Database;
 using Content.Server.Maps;
-using Content.Server._NC.Housing.Components;
 using Content.Server._NC.LivingCity.Time;
-using Content.Shared._NC.City.ZoneTemplates.Components;
 using Content.Shared._NC.Coordinates;
 using Content.Shared._NC.ZLevels.Elevators;
 using Content.Shared._NC.Coordinates.Systems;
@@ -270,8 +268,6 @@ public sealed partial class NCCityMapDeltaSnapshotSystem : EntitySystem
 
     private bool IsOwnedElsewhere(EntityUid uid) =>
         HasComp<ActorComponent>(uid) ||
-        HasComp<NCZoneDeploymentComponent>(uid) ||
-        HasComp<NCPropertyResidentItemComponent>(uid) ||
         HasComp<NCElevatorCabinPartComponent>(uid) ||
         HasComp<MobStateComponent>(uid);
 

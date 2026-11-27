@@ -118,7 +118,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -1.5,1.5
-    - type: NCCityLocation
     - type: DeviceLinkSink
       invokeCounter: 1
   - uid: 3
@@ -126,7 +125,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -1.5,0.5
-    - type: NCCityLocation
     - type: DeviceLinkSink
       invokeCounter: 1
   - uid: 4
@@ -134,7 +132,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 2.5,1.5
-    - type: NCCityLocation
     - type: DeviceLinkSink
       invokeCounter: 1
   - uid: 5
@@ -142,7 +139,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 2.5,0.5
-    - type: NCCityLocation
     - type: DeviceLinkSink
       invokeCounter: 1
 - proto: ButtonFrameExit
@@ -321,35 +317,30 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 0.5,3.5
-    - type: NCCityLocation
   - uid: 84
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: -0.5,-1.5
-    - type: NCCityLocation
   - uid: 85
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: -0.5,-0.5
-    - type: NCCityLocation
   - uid: 86
     components:
     - type: Transform
       parent: 1
       rot: -1.5707963267948966 rad
       pos: 1.5,-0.5
-    - type: NCCityLocation
   - uid: 87
     components:
     - type: Transform
       parent: 1
       rot: -1.5707963267948966 rad
       pos: 1.5,-1.5
-    - type: NCCityLocation
 - proto: GeneratorBasic15kW
   entities:
   - uid: 35
@@ -460,7 +451,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 0.5,4.5
-    - type: NCCityLocation
 - proto: Poweredlight
   entities:
   - uid: 70
@@ -716,7 +706,6 @@ entities:
       pos: -0.5,-2.5
     - type: ApcPowerReceiver
       needsPower: False
-    - type: NCCityLocation
     - type: AlwaysPoweredReceiverState
       needsPower: True
   - uid: 76
@@ -727,7 +716,6 @@ entities:
       pos: 0.5,-2.5
     - type: ApcPowerReceiver
       needsPower: False
-    - type: NCCityLocation
     - type: AlwaysPoweredReceiverState
       needsPower: True
   - uid: 77
@@ -738,7 +726,6 @@ entities:
       pos: 1.5,-2.5
     - type: ApcPowerReceiver
       needsPower: False
-    - type: NCCityLocation
     - type: AlwaysPoweredReceiverState
       needsPower: True
 ...

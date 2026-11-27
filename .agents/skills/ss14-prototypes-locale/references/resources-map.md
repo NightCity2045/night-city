@@ -40,7 +40,7 @@ Do not assume the FTL path from the prototype path. Search nearby locale folders
 
 ## Night City Content
 
-Current `Resources/Prototypes/_NC/` content includes `Access`, `AmbientMusic`, `Bank`, `Catalog`, `City`, `Combat`, `Entities`, `Events`, `GameRules`, `Guidebook`, `Housing`, `LivingCity` (world infrastructure data only), `Loadouts`, `Maps`, `Medical`, `Meta`, `Missions`, `Recipes`, `Shaders`, `Skills`, `Tiles`, and `Vehicle`.
+Current `Resources/Prototypes/_NC/` content includes `Access`, `AmbientMusic`, `Bank`, `Catalog`, `City`, `Combat`, `Entities`, `Events`, `GameRules`, `Guidebook`, `LivingCity` (world infrastructure data only), `Loadouts`, `Maps`, `Medical`, `Recipes`, `Shaders`, `Skills`, `Tiles`, and `Vehicle`.
 
 NC locale exists under both `Resources/Locale/en-US/_NC/` and `Resources/Locale/ru-RU/_NC/`. Search for the actual FTL key before assuming the locale path mirrors the prototype folder.
 
@@ -52,7 +52,7 @@ Use `Resources/Prototypes/_NC/`, `Resources/Locale/*/_NC/`, `Resources/Textures/
 - Reusable sound bundles belong under `SoundCollections/`.
 - Character selection or role data often belongs under `Loadouts/`, `Roles/`, or `Traits/`.
 - Chemistry data usually spans `Reagents/`, `Recipes/`, and locale under `chemistry` or a nearby gameplay domain.
-- Mapping entities may still live under `Entities/`, while city, housing, mission, dungeon, and test map assets live under `Maps/`.
+- Mapping entities may still live under `Entities/`, while city and test map assets live under `Maps/`.
 
 ## Code-To-Resource Pairing
 

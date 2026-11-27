@@ -763,7 +763,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 8.5,-33.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -773,7 +772,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 14.5,-34.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -783,7 +781,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 17.5,-34.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -796,7 +793,6 @@ entities:
     - type: Door
       state: Opening
       secondsUntilStateChange: -3531.13
-    - type: NCCityLocation
     - type: DeviceLinkSource
       lastSignals:
         DoorStatus: True
@@ -809,7 +805,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -7.5,-22.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -819,7 +814,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 19.5,-34.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -830,7 +824,6 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: -7.5,-44.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -841,7 +834,6 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: -7.5,-48.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -851,7 +843,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 112.5,191.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -861,7 +852,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 111.5,191.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -871,7 +861,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 108.5,187.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -881,7 +870,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 110.5,189.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -891,7 +879,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 117.5,195.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -901,7 +888,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 117.5,194.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -911,7 +897,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 120.5,186.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -921,7 +906,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 114.5,196.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -933,7 +917,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -25.5,10.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -945,7 +928,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -16.5,-25.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -958,7 +940,6 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: -19.5,-47.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -969,7 +950,6 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: -19.5,-44.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -980,7 +960,6 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: -13.5,-44.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -990,7 +969,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -12.5,-28.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -1001,7 +979,6 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: -13.5,-47.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -1263,27 +1240,23 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 6.445715,16.35937
-    - type: NCCityLocation
   - uid: 2400
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 6.3623815,18.715172
-    - type: NCCityLocation
   - uid: 2401
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 6.2998815,18.027195
-    - type: NCCityLocation
   - uid: 2529
     components:
     - type: Transform
       parent: 1
       pos: -8.034227,-19.427303
-    - type: NCCityLocation
 - proto: BarSignEmprah
   entities:
   - uid: 2112
@@ -1330,7 +1303,6 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: -10.5,-31.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -1354,25 +1326,21 @@ entities:
     - type: Transform
       parent: 1
       pos: 108.10764,184.689
-    - type: NCCityLocation
   - uid: 1929
     components:
     - type: Transform
       parent: 1
       pos: 108.41233,184.52493
-    - type: NCCityLocation
   - uid: 1930
     components:
     - type: Transform
       parent: 1
       pos: 108.646706,184.71243
-    - type: NCCityLocation
   - uid: 1931
     components:
     - type: Transform
       parent: 1
       pos: 108.365456,184.78275
-    - type: NCCityLocation
 - proto: Bed
   entities:
   - uid: 560
@@ -1380,25 +1348,21 @@ entities:
     - type: Transform
       parent: 1
       pos: 20.5,-38.5
-    - type: NCCityLocation
   - uid: 561
     components:
     - type: Transform
       parent: 1
       pos: 13.5,-35.5
-    - type: NCCityLocation
   - uid: 1549
     components:
     - type: Transform
       parent: 1
       pos: -13.5,-31.5
-    - type: NCCityLocation
   - uid: 2290
     components:
     - type: Transform
       parent: 2287
       pos: 1.5,-1.5
-    - type: NCCityLocation
 - proto: BedsheetGreen
   entities:
   - uid: 1796
@@ -1445,7 +1409,6 @@ entities:
     - type: Transform
       parent: 2287
       pos: -1.5,1.5
-    - type: NCCityLocation
     - type: DeviceLinkSink
       invokeCounter: 1
   - uid: 2294
@@ -1453,7 +1416,6 @@ entities:
     - type: Transform
       parent: 2287
       pos: -1.5,0.5
-    - type: NCCityLocation
     - type: DeviceLinkSink
       invokeCounter: 1
   - uid: 2295
@@ -1461,7 +1423,6 @@ entities:
     - type: Transform
       parent: 2287
       pos: 2.5,1.5
-    - type: NCCityLocation
     - type: DeviceLinkSink
       invokeCounter: 1
   - uid: 2296
@@ -1469,7 +1430,6 @@ entities:
     - type: Transform
       parent: 2287
       pos: 2.5,0.5
-    - type: NCCityLocation
     - type: DeviceLinkSink
       invokeCounter: 1
 - proto: BoxFolderBase
@@ -1479,7 +1439,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -15.471727,-19.505484
-    - type: NCCityLocation
 - proto: BoxFolderBlack
   entities:
   - uid: 2145
@@ -1487,61 +1446,51 @@ entities:
     - type: Transform
       parent: 1
       pos: 27.3862,20.000624
-    - type: NCCityLocation
   - uid: 2146
     components:
     - type: Transform
       parent: 1
       pos: 28.472038,15.596708
-    - type: NCCityLocation
   - uid: 2147
     components:
     - type: Transform
       parent: 1
       pos: 33.487663,15.612333
-    - type: NCCityLocation
   - uid: 2166
     components:
     - type: Transform
       parent: 1
       pos: 32.639606,17.64278
-    - type: NCCityLocation
   - uid: 2209
     components:
     - type: Transform
       parent: 1
       pos: 24.650555,21.586418
-    - type: NCCityLocation
   - uid: 2210
     components:
     - type: Transform
       parent: 1
       pos: 15.400555,21.586418
-    - type: NCCityLocation
   - uid: 2211
     components:
     - type: Transform
       parent: 1
       pos: 21.63493,21.617668
-    - type: NCCityLocation
   - uid: 2245
     components:
     - type: Transform
       parent: 1
       pos: 6.8363247,15.738415
-    - type: NCCityLocation
   - uid: 2246
     components:
     - type: Transform
       parent: 1
       pos: 6.8363247,15.738415
-    - type: NCCityLocation
   - uid: 2247
     components:
     - type: Transform
       parent: 1
       pos: 6.9417934,15.738415
-    - type: NCCityLocation
 - proto: BoxFolderGreenEmpty
   entities:
   - uid: 2148
@@ -1549,97 +1498,81 @@ entities:
     - type: Transform
       parent: 1
       pos: 28.347038,15.674833
-    - type: NCCityLocation
   - uid: 2149
     components:
     - type: Transform
       parent: 1
       pos: 33.393913,15.706083
-    - type: NCCityLocation
   - uid: 2150
     components:
     - type: Transform
       parent: 1
       pos: 27.632294,19.75453
-    - type: NCCityLocation
   - uid: 2167
     components:
     - type: Transform
       parent: 1
       pos: 32.545856,17.720905
-    - type: NCCityLocation
   - uid: 2212
     components:
     - type: Transform
       parent: 1
       pos: 24.44743,21.398918
-    - type: NCCityLocation
   - uid: 2213
     components:
     - type: Transform
       parent: 1
       pos: 21.479822,21.492668
-    - type: NCCityLocation
   - uid: 2214
     components:
     - type: Transform
       parent: 1
       pos: 15.636072,21.398918
-    - type: NCCityLocation
   - uid: 2242
     components:
     - type: Transform
       parent: 1
       pos: 13.419403,20.588348
-    - type: NCCityLocation
   - uid: 2243
     components:
     - type: Transform
       parent: 1
       pos: 13.665497,20.588348
-    - type: NCCityLocation
   - uid: 2244
     components:
     - type: Transform
       parent: 1
       pos: 13.419403,20.588348
-    - type: NCCityLocation
   - uid: 2278
     components:
     - type: Transform
       parent: 1
       pos: 16.333261,13.700624
-    - type: NCCityLocation
   - uid: 2279
     components:
     - type: Transform
       parent: 1
       pos: 16.223886,13.591249
-    - type: NCCityLocation
   - uid: 2280
     components:
     - type: Transform
       parent: 1
       pos: 16.333261,13.684999
-    - type: NCCityLocation
   - uid: 2281
     components:
     - type: Transform
       parent: 1
       pos: 22.192253,14.6693735
-    - type: NCCityLocation
   - uid: 2282
     components:
     - type: Transform
       parent: 1
       pos: 22.192253,14.6693735
-    - type: NCCityLocation
   - uid: 2283
     components:
     - type: Transform
       parent: 1
       pos: 22.192253,14.7318735
-    - type: NCCityLocation
 - proto: Bucket
   entities:
   - uid: 2493
@@ -1648,7 +1581,6 @@ entities:
       parent: 1
       rot: -1.5707963267948966 rad
       pos: -6.4474874,-32.410675
-    - type: NCCityLocation
 - proto: ButtonFrameExit
   entities:
   - uid: 2297
@@ -1869,7 +1801,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 109.42048,196.29893
-    - type: NCCityLocation
 - proto: ChairFolding
   entities:
   - uid: 1584
@@ -1878,13 +1809,11 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 19.488625,-37.584114
-    - type: NCCityLocation
   - uid: 1585
     components:
     - type: Transform
       parent: 1
       pos: 13.429511,-36.756737
-    - type: NCCityLocation
 - proto: ChairOfficeDark
   entities:
   - uid: 179
@@ -1893,93 +1822,79 @@ entities:
       parent: 1
       rot: -1.5707963267948966 rad
       pos: 28.351732,20.353745
-    - type: NCCityLocation
   - uid: 190
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 26.629076,20.740463
-    - type: NCCityLocation
   - uid: 208
     components:
     - type: Transform
       parent: 1
       rot: 3.141592653589793 rad
       pos: 32.640797,14.693588
-    - type: NCCityLocation
   - uid: 209
     components:
     - type: Transform
       parent: 1
       rot: 3.141592653589793 rad
       pos: 27.507982,14.201401
-    - type: NCCityLocation
   - uid: 232
     components:
     - type: Transform
       parent: 1
       rot: -1.5707963267948966 rad
       pos: 33.5197,18.771713
-    - type: NCCityLocation
   - uid: 1948
     components:
     - type: Transform
       parent: 1
       rot: 3.141592653589793 rad
       pos: 117.79243,186.77493
-    - type: NCCityLocation
   - uid: 1949
     components:
     - type: Transform
       parent: 1
       rot: 3.141592653589793 rad
       pos: 112.447205,186.91556
-    - type: NCCityLocation
   - uid: 1950
     components:
     - type: Transform
       parent: 1
       pos: 108.43939,185.41556
-    - type: NCCityLocation
   - uid: 1951
     components:
     - type: Transform
       parent: 1
       pos: 122.44222,192.61917
-    - type: NCCityLocation
   - uid: 1952
     components:
     - type: Transform
       parent: 1
       rot: 3.141592653589793 rad
       pos: 123.11127,195.77493
-    - type: NCCityLocation
   - uid: 2131
     components:
     - type: Transform
       parent: 1
       pos: 27.51477,16.65823
-    - type: NCCityLocation
   - uid: 2132
     components:
     - type: Transform
       parent: 1
       pos: 32.518494,16.673855
-    - type: NCCityLocation
   - uid: 2157
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 31.533112,18.687313
-    - type: NCCityLocation
   - uid: 2473
     components:
     - type: Transform
       parent: 1
       pos: -9.521697,-24.293804
-    - type: NCCityLocation
 - proto: ChairOfficeLight
   entities:
   - uid: 134
@@ -1991,7 +1906,6 @@ entities:
     - type: Physics
       linearDamping: 8
       angularDamping: 8
-    - type: NCCityLocation
     - type: Pullable
       prevFixedRotation: True
   - uid: 237
@@ -2000,28 +1914,24 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 16.60832,20.757206
-    - type: NCCityLocation
   - uid: 238
     components:
     - type: Transform
       parent: 1
       rot: 3.141592653589793 rad
       pos: 19.561445,20.757206
-    - type: NCCityLocation
   - uid: 248
     components:
     - type: Transform
       parent: 1
       rot: 3.141592653589793 rad
       pos: 20.510664,20.651737
-    - type: NCCityLocation
   - uid: 257
     components:
     - type: Transform
       parent: 1
       rot: 3.141592653589793 rad
       pos: 23.52333,20.651737
-    - type: NCCityLocation
   - uid: 270
     components:
     - type: Transform
@@ -2031,7 +1941,6 @@ entities:
     - type: Physics
       linearDamping: 8
       angularDamping: 8
-    - type: NCCityLocation
     - type: Pullable
       prevFixedRotation: True
   - uid: 281
@@ -2040,7 +1949,6 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 5.5610275,18.548027
-    - type: NCCityLocation
   - uid: 282
     components:
     - type: Transform
@@ -2051,7 +1959,6 @@ entities:
       sleepTime: 0.049999952
       linearDamping: 8
       angularDamping: 8
-    - type: NCCityLocation
     - type: Pullable
       prevFixedRotation: True
   - uid: 290
@@ -2060,47 +1967,40 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 5.676084,16.626484
-    - type: NCCityLocation
   - uid: 291
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 5.6726656,17.782728
-    - type: NCCityLocation
   - uid: 2239
     components:
     - type: Transform
       parent: 1
       rot: 3.141592653589793 rad
       pos: 11.399475,20.631588
-    - type: NCCityLocation
   - uid: 2253
     components:
     - type: Transform
       parent: 1
       pos: 15.533745,14.680662
-    - type: NCCityLocation
   - uid: 2273
     components:
     - type: Transform
       parent: 1
       pos: 21.361002,15.576519
-    - type: NCCityLocation
   - uid: 2487
     components:
     - type: Transform
       parent: 1
       rot: -1.5707963267948966 rad
       pos: -9.591991,-31.219023
-    - type: NCCityLocation
   - uid: 2511
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: -9.366829,-19.176285
-    - type: NCCityLocation
 - proto: ChairPilotSeat
   entities:
   - uid: 2334
@@ -2109,7 +2009,6 @@ entities:
       parent: 2287
       rot: 3.141592653589793 rad
       pos: 0.5,3.5
-    - type: NCCityLocation
 - proto: ChemDispenser
   entities:
   - uid: 1828
@@ -2117,7 +2016,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 121.5,196.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -2129,145 +2027,121 @@ entities:
     - type: Transform
       parent: 1
       pos: 123.268814,193.1265
-    - type: NCCityLocation
   - uid: 1856
     components:
     - type: Transform
       parent: 1
       pos: 123.52663,193.17337
-    - type: NCCityLocation
   - uid: 1857
     components:
     - type: Transform
       parent: 1
       pos: 123.69069,193.17337
-    - type: NCCityLocation
   - uid: 1858
     components:
     - type: Transform
       parent: 1
       pos: 123.78444,192.89212
-    - type: NCCityLocation
   - uid: 1859
     components:
     - type: Transform
       parent: 1
       pos: 123.550064,192.77493
-    - type: NCCityLocation
   - uid: 1860
     components:
     - type: Transform
       parent: 1
       pos: 123.386,192.7515
-    - type: NCCityLocation
   - uid: 1861
     components:
     - type: Transform
       parent: 1
       pos: 123.386,192.49368
-    - type: NCCityLocation
   - uid: 1862
     components:
     - type: Transform
       parent: 1
       pos: 123.69069,192.42337
-    - type: NCCityLocation
   - uid: 1863
     components:
     - type: Transform
       parent: 1
       pos: 123.831314,192.23587
-    - type: NCCityLocation
   - uid: 1864
     components:
     - type: Transform
       parent: 1
       pos: 123.550064,192.189
-    - type: NCCityLocation
   - uid: 1865
     components:
     - type: Transform
       parent: 1
       pos: 123.40944,191.95462
-    - type: NCCityLocation
   - uid: 1866
     components:
     - type: Transform
       parent: 1
       pos: 123.66725,191.74368
-    - type: NCCityLocation
   - uid: 1915
     components:
     - type: Transform
       parent: 1
       pos: 107.28733,185.6265
-    - type: NCCityLocation
   - uid: 1917
     components:
     - type: Transform
       parent: 1
       pos: 107.521706,185.48587
-    - type: NCCityLocation
   - uid: 1918
     components:
     - type: Transform
       parent: 1
       pos: 107.802956,185.439
-    - type: NCCityLocation
   - uid: 1919
     components:
     - type: Transform
       parent: 1
       pos: 107.35764,185.04056
-    - type: NCCityLocation
   - uid: 1920
     components:
     - type: Transform
       parent: 1
       pos: 107.63889,184.94681
-    - type: NCCityLocation
   - uid: 1921
     components:
     - type: Transform
       parent: 1
       pos: 107.75608,185.22806
-    - type: NCCityLocation
   - uid: 1922
     components:
     - type: Transform
       parent: 1
       pos: 107.47483,185.53275
-    - type: NCCityLocation
   - uid: 1923
     components:
     - type: Transform
       parent: 1
       pos: 107.615456,185.50931
-    - type: NCCityLocation
   - uid: 1924
     components:
     - type: Transform
       parent: 1
       pos: 107.35764,185.01712
-    - type: NCCityLocation
   - uid: 1925
     components:
     - type: Transform
       parent: 1
       pos: 107.54514,185.32181
-    - type: NCCityLocation
   - uid: 1926
     components:
     - type: Transform
       parent: 1
       pos: 107.73264,185.064
-    - type: NCCityLocation
   - uid: 1927
     components:
     - type: Transform
       parent: 1
       pos: 107.40452,185.20462
-    - type: NCCityLocation
 - proto: ChemistryHotplate
   entities:
   - uid: 1839
@@ -2298,7 +2172,6 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 5.9445596,15.408699
-    - type: NCCityLocation
 - proto: Cigarette
   entities:
   - uid: 2415
@@ -2422,7 +2295,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 109.654854,195.97081
-    - type: NCCityLocation
 - proto: ClothingHeadHatHoodBioGeneral
   entities:
   - uid: 1939
@@ -2430,19 +2302,16 @@ entities:
     - type: Transform
       parent: 1
       pos: 107.240456,188.74368
-    - type: NCCityLocation
   - uid: 1940
     components:
     - type: Transform
       parent: 1
       pos: 107.82639,188.67337
-    - type: NCCityLocation
   - uid: 1941
     components:
     - type: Transform
       parent: 1
       pos: 107.40452,188.46243
-    - type: NCCityLocation
 - proto: ClothingOuterBioGeneral
   entities:
   - uid: 1936
@@ -2468,33 +2337,28 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 6.5,14.5
-    - type: NCCityLocation
   - uid: 2237
     components:
     - type: Transform
       parent: 1
       pos: 11.5,22.5
-    - type: NCCityLocation
   - uid: 2252
     components:
     - type: Transform
       parent: 1
       rot: 3.141592653589793 rad
       pos: 15.5,12.5
-    - type: NCCityLocation
   - uid: 2274
     components:
     - type: Transform
       parent: 1
       rot: 3.141592653589793 rad
       pos: 21.5,13.5
-    - type: NCCityLocation
   - uid: 2510
     components:
     - type: Transform
       parent: 1
       pos: -15.5,-18.5
-    - type: NCCityLocation
 - proto: computerBodyScanner
   entities:
   - uid: 1806
@@ -2502,7 +2366,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 107.5,196.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -2513,7 +2376,6 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 116.5,184.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -2525,7 +2387,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -6.5,-28.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -2662,7 +2523,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -12.5,-25.5
-    - type: NCCityLocation
 - proto: DresserWardenFilled
   entities:
   - uid: 1552
@@ -2671,7 +2531,6 @@ entities:
       parent: 1
       rot: -1.5707963267948966 rad
       pos: -12.5,-31.5
-    - type: NCCityLocation
 - proto: Dropper
   entities:
   - uid: 1853
@@ -2703,19 +2562,16 @@ entities:
     - type: Transform
       parent: 1
       pos: 36.5,14.5
-    - type: NCCityLocation
   - uid: 2138
     components:
     - type: Transform
       parent: 1
       pos: 37.5,14.5
-    - type: NCCityLocation
   - uid: 2477
     components:
     - type: Transform
       parent: 1
       pos: -9.782997,-32.503307
-    - type: NCCityLocation
     - type: Physics
       sleepTime: 0.6333327
       linearDamping: 8
@@ -2727,7 +2583,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -10.816848,-32.50238
-    - type: NCCityLocation
     - type: Physics
       sleepTime: 2.3166645
       linearDamping: 8
@@ -2737,7 +2592,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -10.127595,-32.503967
-    - type: NCCityLocation
     - type: Physics
       sleepTime: 0.6333327
       linearDamping: 8
@@ -2749,7 +2603,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -10.472214,-32.502052
-    - type: NCCityLocation
     - type: Physics
       sleepTime: 0.6333327
       linearDamping: 8
@@ -2761,7 +2614,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -9.438434,-32.505077
-    - type: NCCityLocation
     - type: Physics
       sleepTime: 0.6499994
       linearDamping: 8
@@ -2773,7 +2625,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -9.133307,-32.49984
-    - type: NCCityLocation
     - type: Physics
       sleepTime: 0.6499994
       linearDamping: 8
@@ -2787,13 +2638,11 @@ entities:
     - type: Transform
       parent: 1
       pos: 34.5,14.5
-    - type: NCCityLocation
   - uid: 2137
     components:
     - type: Transform
       parent: 1
       pos: 26.5,14.5
-    - type: NCCityLocation
 - proto: filingCabinetTall
   entities:
   - uid: 2233
@@ -2801,31 +2650,26 @@ entities:
     - type: Transform
       parent: 1
       pos: 6.5,20.5
-    - type: NCCityLocation
   - uid: 2234
     components:
     - type: Transform
       parent: 1
       pos: 8.5,20.5
-    - type: NCCityLocation
   - uid: 2240
     components:
     - type: Transform
       parent: 1
       pos: 13.5,21.5
-    - type: NCCityLocation
   - uid: 2258
     components:
     - type: Transform
       parent: 1
       pos: 18.5,13.5
-    - type: NCCityLocation
   - uid: 2271
     components:
     - type: Transform
       parent: 1
       pos: 24.5,14.5
-    - type: NCCityLocation
 - proto: Floodlight
   entities:
   - uid: 2534
@@ -2850,7 +2694,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -20.25261,-19.465519
-    - type: NCCityLocation
 - proto: FoodBoxPizza
   entities:
   - uid: 2497
@@ -2859,7 +2702,6 @@ entities:
       parent: 1
       rot: -1.5707963267948966 rad
       pos: -7.616503,-27.095585
-    - type: NCCityLocation
 - proto: FoodDonutBungo
   entities:
   - uid: 2540
@@ -2868,14 +2710,12 @@ entities:
       parent: 1
       rot: -1.5707963267948966 rad
       pos: -20.65886,-19.262253
-    - type: NCCityLocation
   - uid: 2541
     components:
     - type: Transform
       parent: 1
       rot: 3.141592653589793 rad
       pos: -20.393234,-18.58991
-    - type: NCCityLocation
 - proto: FoodPizzaPineappleSlice
   entities:
   - uid: 2498
@@ -2884,7 +2724,6 @@ entities:
       parent: 1
       rot: -1.5707963267948966 rad
       pos: -7.819628,-27.283215
-    - type: NCCityLocation
 - proto: GeneratorBasic15kW
   entities:
   - uid: 2337
@@ -3025,14 +2864,12 @@ entities:
       parent: 2287
       rot: 3.141592653589793 rad
       pos: 1.5,-1.5
-    - type: NCCityLocation
   - uid: 2347
     components:
     - type: Transform
       parent: 2287
       rot: 3.141592653589793 rad
       pos: -0.5,-1.5
-    - type: NCCityLocation
 - proto: JanitorialTrolley
   entities:
   - uid: 2548
@@ -3041,7 +2878,6 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 7.5,-32.5
-    - type: NCCityLocation
 - proto: KitchenMicrowave
   entities:
   - uid: 1559
@@ -3049,7 +2885,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -15.5,-31.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -3059,7 +2894,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 18.5,14.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -3069,7 +2903,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -8.5,-27.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -3152,13 +2985,11 @@ entities:
     - type: Transform
       parent: 1
       pos: 14.578493,13.743162
-    - type: NCCityLocation
   - uid: 2275
     components:
     - type: Transform
       parent: 1
       pos: 20.536652,14.674522
-    - type: NCCityLocation
 - proto: LargeBeaker
   entities:
   - uid: 1840
@@ -3166,37 +2997,31 @@ entities:
     - type: Transform
       parent: 1
       pos: 118.34694,196.85306
-    - type: NCCityLocation
   - uid: 1848
     components:
     - type: Transform
       parent: 1
       pos: 118.487564,196.47806
-    - type: NCCityLocation
   - uid: 1849
     components:
     - type: Transform
       parent: 1
       pos: 118.79225,196.80618
-    - type: NCCityLocation
   - uid: 1850
     components:
     - type: Transform
       parent: 1
       pos: 118.81569,196.43118
-    - type: NCCityLocation
   - uid: 1851
     components:
     - type: Transform
       parent: 1
       pos: 119.16725,196.82962
-    - type: NCCityLocation
   - uid: 1852
     components:
     - type: Transform
       parent: 1
       pos: 119.30788,196.40775
-    - type: NCCityLocation
 - proto: LockerBooze
   entities:
   - uid: 2394
@@ -3326,7 +3151,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -7.5,-26.5
-    - type: NCCityLocation
 - proto: MedicalBed
   entities:
   - uid: 1792
@@ -3334,31 +3158,26 @@ entities:
     - type: Transform
       parent: 1
       pos: 112.5,195.5
-    - type: NCCityLocation
   - uid: 1793
     components:
     - type: Transform
       parent: 1
       pos: 113.5,195.5
-    - type: NCCityLocation
   - uid: 1794
     components:
     - type: Transform
       parent: 1
       pos: 111.5,195.5
-    - type: NCCityLocation
   - uid: 1901
     components:
     - type: Transform
       parent: 1
       pos: 123.5,184.5
-    - type: NCCityLocation
   - uid: 1902
     components:
     - type: Transform
       parent: 1
       pos: 123.5,187.5
-    - type: NCCityLocation
 - proto: MedicalTechFab
   entities:
   - uid: 1803
@@ -3377,7 +3196,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 6.5,-34.5
-    - type: NCCityLocation
 - proto: MopItem
   entities:
   - uid: 2542
@@ -3386,7 +3204,6 @@ entities:
       parent: 1
       rot: -1.5707963267948966 rad
       pos: 6.403745,-34.53781
-    - type: NCCityLocation
 - proto: Morgue
   entities:
   - uid: 2348
@@ -3409,7 +3226,6 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 9.5,17.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -3420,7 +3236,6 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 9.5,14.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -3431,7 +3246,6 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 7.5,21.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -3444,7 +3258,6 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 25.5,18.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -3455,7 +3268,6 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 25.5,17.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -3468,7 +3280,6 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 22.5,16.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -3479,7 +3290,6 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 12.5,19.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -3490,7 +3300,6 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 17.5,16.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -3503,7 +3312,6 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 34.5,20.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -3514,7 +3322,6 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 34.5,21.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -3525,7 +3332,6 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 36.5,19.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -3536,7 +3342,6 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 25.5,22.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -3548,7 +3353,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 135.5,15.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -3560,7 +3364,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 129.5,10.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -3614,7 +3417,6 @@ entities:
     - type: Transform
       parent: 2287
       pos: 0.5,4.5
-    - type: NCCityLocation
 - proto: NCComputerPoliceRecords
   entities:
   - uid: 2117
@@ -3622,7 +3424,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 26.5,21.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -3633,7 +3434,6 @@ entities:
       parent: 1
       rot: -1.5707963267948966 rad
       pos: 28.5,14.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -3644,7 +3444,6 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 31.5,14.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -3655,7 +3454,6 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 20.5,13.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -3666,7 +3464,6 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 33.5,17.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -3677,7 +3474,6 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 10.5,22.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -4203,25 +3999,21 @@ entities:
     - type: Transform
       parent: 1
       pos: 136.14276,11.672635
-    - type: NCCityLocation
   - uid: 2026
     components:
     - type: Transform
       parent: 1
       pos: 136.68964,11.641385
-    - type: NCCityLocation
   - uid: 2029
     components:
     - type: Transform
       parent: 1
       pos: 137.34589,11.610135
-    - type: NCCityLocation
   - uid: 2030
     components:
     - type: Transform
       parent: 1
       pos: 135.50214,11.68826
-    - type: NCCityLocation
 - proto: NCWallbeton
   entities:
   - uid: 2
@@ -7985,7 +7777,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -7.662697,-25.889233
-    - type: NCCityLocation
 - proto: NCWeaponSMGShingen
   entities:
   - uid: 2017
@@ -7993,25 +7784,21 @@ entities:
     - type: Transform
       parent: 1
       pos: 132.49303,13.38511
-    - type: NCCityLocation
   - uid: 2018
     components:
     - type: Transform
       parent: 1
       pos: 132.47058,14.588235
-    - type: NCCityLocation
   - uid: 2022
     components:
     - type: Transform
       parent: 1
       pos: 132.51746,13.63511
-    - type: NCCityLocation
   - uid: 2027
     components:
     - type: Transform
       parent: 1
       pos: 132.50183,14.306985
-    - type: NCCityLocation
 - proto: OperatingTable
   entities:
   - uid: 1812
@@ -8019,13 +7806,11 @@ entities:
     - type: Transform
       parent: 1
       pos: 108.5,196.5
-    - type: NCCityLocation
   - uid: 1914
     components:
     - type: Transform
       parent: 1
       pos: 115.5,184.5
-    - type: NCCityLocation
 - proto: Paper
   entities:
   - uid: 2418
@@ -8034,33 +7819,28 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 6.484192,16.90974
-    - type: NCCityLocation
   - uid: 2419
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 6.7550254,17.566448
-    - type: NCCityLocation
   - uid: 2420
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 6.7237754,18.139763
-    - type: NCCityLocation
   - uid: 2421
     components:
     - type: Transform
       parent: 1
       pos: 6.171692,17.212034
-    - type: NCCityLocation
   - uid: 2485
     components:
     - type: Transform
       parent: 1
       pos: -10.698032,-30.315842
-    - type: NCCityLocation
 - proto: PaperBin20
   entities:
   - uid: 225
@@ -8133,43 +7913,36 @@ entities:
     - type: Transform
       parent: 1
       pos: 122.987564,196.73587
-    - type: NCCityLocation
   - uid: 1868
     components:
     - type: Transform
       parent: 1
       pos: 123.15163,196.71243
-    - type: NCCityLocation
   - uid: 1869
     components:
     - type: Transform
       parent: 1
       pos: 123.24538,196.71243
-    - type: NCCityLocation
   - uid: 1870
     components:
     - type: Transform
       parent: 1
       pos: 123.362564,196.71243
-    - type: NCCityLocation
   - uid: 1871
     components:
     - type: Transform
       parent: 1
       pos: 123.52663,196.71243
-    - type: NCCityLocation
   - uid: 1872
     components:
     - type: Transform
       parent: 1
       pos: 123.71413,196.689
-    - type: NCCityLocation
   - uid: 1873
     components:
     - type: Transform
       parent: 1
       pos: 123.69069,196.47806
-    - type: NCCityLocation
 - proto: PlushieRainbowCarp
   entities:
   - uid: 1589
@@ -8178,7 +7951,6 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 13.685247,-35.47477
-    - type: NCCityLocation
 - proto: PosterContrabandSpaceCola
   entities:
   - uid: 2537
@@ -8535,14 +8307,12 @@ entities:
       parent: 1
       rot: -1.5707963267948966 rad
       pos: -6.6037374,-32.56703
-    - type: NCCityLocation
   - uid: 2547
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 6.122495,-34.72544
-    - type: NCCityLocation
 - proto: Railing
   entities:
   - uid: 314
@@ -9911,7 +9681,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 107.52204,191.68175
-    - type: NCCityLocation
 - proto: Screen
   entities:
   - uid: 2172
@@ -9962,7 +9731,6 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: -10.047999,-23.978489
-    - type: NCCityLocation
 - proto: ShotGunCabinet
   entities:
   - uid: 2475
@@ -9978,19 +9746,16 @@ entities:
     - type: Transform
       parent: 1
       pos: 12.5,23.5
-    - type: NCCityLocation
   - uid: 2285
     components:
     - type: Transform
       parent: 1
       pos: 16.5,11.5
-    - type: NCCityLocation
   - uid: 2286
     components:
     - type: Transform
       parent: 1
       pos: 23.5,12.5
-    - type: NCCityLocation
 - proto: ShuttersWindow
   entities:
   - uid: 2393
@@ -10000,7 +9765,6 @@ entities:
       rot: 1.5707963267948966 rad
       pos: 3.5,18.5
       anchored: False
-    - type: NCCityLocation
 - proto: SignalButton
   entities:
   - uid: 2363
@@ -10088,7 +9852,6 @@ entities:
       parent: 1
       rot: -1.5707963267948966 rad
       pos: -7.5,-29.5
-    - type: NCCityLocation
 - proto: Sink
   entities:
   - uid: 1879
@@ -10402,7 +10165,6 @@ entities:
     - type: Transform
       parent: 2287
       pos: -0.5,-1.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -11112,7 +10874,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 121.5,189.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -11123,7 +10884,6 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: -7.5,-32.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -11135,7 +10895,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 20.5,-35.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -11146,7 +10905,6 @@ entities:
       parent: 1
       rot: -1.5707963267948966 rad
       pos: -15.5,-24.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -11157,7 +10915,6 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 13.5,-38.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -11168,7 +10925,6 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 5.5,22.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -11192,7 +10948,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 5.5,20.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -11204,7 +10959,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -20.5,-21.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -11216,7 +10970,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -20.5,-20.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -11228,7 +10981,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -12.5,-18.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -15768,7 +15520,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -16.5,-23.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -15781,7 +15532,6 @@ entities:
       parent: 2287
       rot: 3.141592653589793 rad
       pos: -0.5,-2.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -15792,7 +15542,6 @@ entities:
       parent: 2287
       rot: 3.141592653589793 rad
       pos: 0.5,-2.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -15803,7 +15552,6 @@ entities:
       parent: 2287
       rot: 3.141592653589793 rad
       pos: 1.5,-2.5
-    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
