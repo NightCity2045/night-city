@@ -11,15 +11,15 @@
   name: clinical cyberarm
   manufacturer: Night City clinical adaptation
   icon:
-    sprite: _NC/Objects/Cyberware/implants.rsi
-    state: cyberarm_right
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: clinical_right
   hostIcons:
     ArmLeft:
-      sprite: _NC/Objects/Cyberware/implants.rsi
-      state: cyberarm_left
+      sprite: _NC/Objects/Cyberware/arms.rsi
+      state: clinical_left
     ArmRight:
-      sprite: _NC/Objects/Cyberware/implants.rsi
-      state: cyberarm_right
+      sprite: _NC/Objects/Cyberware/arms.rsi
+      state: clinical_right
   form: LimbReplacement
   size: 5
   maximumIntegrity: 160
@@ -111,6 +111,9 @@
   parent: NCOrganHumanCyberArmLeft
   id: NCOrganHumanClinicalCyberArmLeft
   components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: clinical_left
   - type: NCCyberware
     profile: NCClinicalCyberArm
   - type: NCCyberwareExterior
@@ -159,6 +162,9 @@
   parent: NCOrganHumanCyberArmRight
   id: NCOrganHumanClinicalCyberArmRight
   components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: clinical_right
   - type: NCCyberware
     profile: NCClinicalCyberArm
   - type: NCCyberwareExterior

@@ -7,6 +7,8 @@
   id: NCBorgPodHead
   name: biopod casing
   components:
+  - type: Sprite
+    state: pod
   - type: Organ
     category: Head
   - type: ParentOrgan
@@ -21,6 +23,8 @@
   id: NCBorgPerfusionPump
   name: biopod life support node
   components:
+  - type: Sprite
+    state: perfusion_pump
   - type: Organ
     category: Heart
   - type: NCOrganFunction
@@ -34,6 +38,8 @@
   id: NCBorgOxygenator
   name: biopod life support node
   components:
+  - type: Sprite
+    state: oxygenator
   - type: Organ
     category: Lungs
   - type: NCOrganFunction
@@ -46,6 +52,8 @@
   id: NCBorgMetabolicFilter
   name: biopod life support node
   components:
+  - type: Sprite
+    state: metabolic_filter
   - type: Organ
     category: Liver
   - type: NCOrganFunction
@@ -59,6 +67,8 @@
   id: NCBorgWasteFilter
   name: biopod life support node
   components:
+  - type: Sprite
+    state: waste_filter
   - type: Organ
     category: Kidneys
   - type: NCOrganFunction
@@ -71,6 +81,8 @@
   id: NCBorgNutrientProcessor
   name: biopod life support node
   components:
+  - type: Sprite
+    state: nutrient_processor
   - type: Organ
     category: Stomach
   - type: NCOrganFunction
@@ -108,6 +120,8 @@
   id: NCBorgFramePowerHolder
   name: civilian frame cell holder
   components:
+  - type: Sprite
+    state: power_holder
   - type: Organ
     category: Thorax
   - type: ParentOrgan
