@@ -11,6 +11,12 @@ namespace Content.Shared._NC.Medical.Cyberware.Visuals;
 public sealed partial class NCCyberwareExteriorComponent : Component
 {
     [DataField] public ProtoId<NCCyberwareFinishPrototype> Finish = "NCFinishChrome";
+
+    /// <summary>The mechanical body-part sheet shown when no synthetic skin covers the part.</summary>
+    [DataField] public string Rsi = "_NC/Mobs/Cyberware/parts.rsi";
+
+    /// <summary>False for fully painted sheets: the finish colour is not multiplied over them.</summary>
+    [DataField] public bool Tint = true;
     [DataField] public bool Ruptured;
     [DataField] public Color? SkinColor;
     [ViewVariables] public float? ObservedIntegrity;

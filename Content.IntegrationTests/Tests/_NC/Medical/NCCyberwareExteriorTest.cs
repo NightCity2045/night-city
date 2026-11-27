@@ -101,7 +101,7 @@ public sealed class NCCyberwareExteriorTest : GameTest
         SEntMan.EventBus.RaiseLocalEvent(part, ref ev);
         Assert.That(source.RsiPath, Is.EqualTo("Mobs/Species/Human/parts.rsi"));
         Assert.That(ev.Data, Is.Not.SameAs(source));
-        Assert.That(ev.Data.RsiPath, Is.EqualTo("_NC/Mobs/Cyberware/parts.rsi"));
+        Assert.That(ev.Data.RsiPath, Is.EqualTo(SComp<NCCyberwareExteriorComponent>(part).Rsi));
     }
 
     private (EntityUid User, EntityUid Part, EntityUid Kit) Scene()
