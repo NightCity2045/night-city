@@ -1,0 +1,20 @@
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<controls:FancyWindow xmlns="https://spacestation14.io"
+                      xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      x:Class="Content.Client._NC.Corporations.NCCorpSalesWindow"
+                      Title="{Loc 'nc-corp-sales-title'}"
+                      SetSize="620 640"
+                      MinSize="480 420">
+    <BoxContainer Margin="10" Orientation="Vertical" SeparationOverride="8">
+        <BoxContainer Orientation="Horizontal" SeparationOverride="6">
+            <Label Name="CorporationLabel" StyleClasses="LabelHeading" HorizontalExpand="True" />
+            <Button Name="RefreshButton" Text="{Loc 'nc-corp-sales-refresh'}" />
+        </BoxContainer>
+        <Label Name="WarningLabel" FontColorOverride="#FFD66B" Visible="False" />
+        <Label Text="{Loc 'nc-corp-sales-hint'}" FontColorOverride="#888888" />
+        <ScrollContainer VerticalExpand="True" HScrollEnabled="False">
+            <BoxContainer Name="ContractsContainer" Orientation="Vertical" SeparationOverride="10" />
+        </ScrollContainer>
+    </BoxContainer>
+</controls:FancyWindow>

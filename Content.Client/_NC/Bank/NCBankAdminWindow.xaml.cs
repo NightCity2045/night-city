@@ -44,7 +44,7 @@ public sealed partial class NCBankAdminWindow : FancyWindow
         foreach (var account in state.Departments)
         {
             var row = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 8 };
-            row.AddChild(new Label { Text = DepartmentName(account.Department), HorizontalExpand = true });
+            row.AddChild(new Label { Text = AccountName(account.Name), HorizontalExpand = true });
             row.AddChild(new Label { Text = account.Number, MinWidth = 90 });
             row.AddChild(new Label { Text = NCBankFormat.Money(account.Balance), MinWidth = 120 });
             var select = new Button { Text = Loc.GetString("nc-bank-admin-select") };
@@ -61,7 +61,7 @@ public sealed partial class NCBankAdminWindow : FancyWindow
         LookupLabel.Text = state.Lookup is { } lookup
             ? Loc.GetString("nc-bank-admin-lookup-result",
                 ("number", lookup.Number),
-                ("owner", lookup.Department != null ? DepartmentName(lookup.Department) : Loc.GetString("nc-bank-admin-owner-character")),
+                ("owner", lookup.Name != null ? AccountName(lookup.Name) : Loc.GetString("nc-bank-admin-owner-character")),
                 ("balance", lookup.Balance))
             : string.Empty;
 
@@ -69,7 +69,7 @@ public sealed partial class NCBankAdminWindow : FancyWindow
         foreach (var fee in state.Fees)
         {
             var row = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 6 };
-            var name = fee.Department != null ? DepartmentName(fee.Department) : Loc.GetString("nc-bank-admin-fee-resident");
+            var name = fee.Name != null ? AccountName(fee.Name) : Loc.GetString("nc-bank-admin-fee-resident");
             row.AddChild(new Label { Text = name, HorizontalExpand = true });
             var edit = new LineEdit { Text = (fee.BasisPoints / 100f).ToString(CultureInfo.InvariantCulture), MinWidth = 70 };
             row.AddChild(edit);
@@ -86,10 +86,8 @@ public sealed partial class NCBankAdminWindow : FancyWindow
         }
     }
 
-    private string DepartmentName(ProtoId<DepartmentPrototype>? department)
+    private static string AccountName(string? name)
     {
-        return department is { } id && _prototypes.TryIndex(id, out var prototype)
-            ? Loc.GetString(prototype.Name)
-            : string.Empty;
+        return name != null && Loc.TryGetString(name, out var text) ? text : name ?? string.Empty;
     }
 }

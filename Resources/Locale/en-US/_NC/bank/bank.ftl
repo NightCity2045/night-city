@@ -48,6 +48,7 @@ nc-bank-kind-salary = Salary
 nc-bank-kind-admin-grant = Budget grant
 nc-bank-kind-admin-withdrawal = Budget withdrawal
 nc-bank-kind-salary-missed = Salary not paid
+nc-bank-kind-contract = Contract reward
 nc-bank-kind-unknown = Operation
 
 nc-bank-atm-title = Night City Bank ATM
@@ -83,3 +84,6 @@ ent-NCBankTerminalBase = department finance terminal
     .desc = Department account terminal. Only the department manager can use it.
 ent-NCBankCartridge = bank cartridge
     .desc = Night City Bank program: balance, history and transfers.
+
+nc-bank-account-militech-hq = Militech (corporation)
+nc-bank-account-biotechnica-hq = Biotechnica (corporation)

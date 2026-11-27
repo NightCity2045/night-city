@@ -48,9 +48,11 @@ public sealed class NCBankAdminEui : BaseEui
 
         foreach (var department in _prototypes.EnumeratePrototypes<NCBankDepartmentPrototype>().OrderBy(d => d.ID))
         {
-            fees.Add(new NCBankAdminFeeLine(department.ID, department.Department, _bank.GetFeeBasisPoints(department.ID)));
+            var name = _bank.GetAccountName(department.ID);
+            if (department.Department != null)
+                fees.Add(new NCBankAdminFeeLine(department.ID, name, _bank.GetFeeBasisPoints(department.ID)));
             if (_bank.TryGetDepartmentAccount(department.ID, out var account))
-                departments.Add(new NCBankAdminAccountLine(account.Number, department.Department, null, account.Balance));
+                departments.Add(new NCBankAdminAccountLine(account.Number, name, account.Balance));
         }
 
         return new NCBankAdminEuiState(departments, fees, _lookup, _status);
@@ -110,11 +112,8 @@ public sealed class NCBankAdminEui : BaseEui
 
     private NCBankAdminAccountLine ToLine(NCBankAccountRecord account)
     {
-        ProtoId<Content.Shared.Roles.DepartmentPrototype>? department = null;
-        if (account.Department is { } bankDepartment && _prototypes.TryIndex(bankDepartment, out var prototype))
-            department = prototype.Department;
-
-        return new NCBankAdminAccountLine(account.Number, department, null, account.Balance);
+        var name = account.Department is { } department ? _bank.GetAccountName(department) : null;
+        return new NCBankAdminAccountLine(account.Number, name, account.Balance);
     }
 }
 

@@ -200,7 +200,7 @@ public sealed class NCBankMachinesSystem : EntitySystem
     private string? PrototypeDepartment(string bankDepartment)
     {
         return _prototypes.TryIndex<NCBankDepartmentPrototype>(bankDepartment, out var prototype)
-            ? prototype.Department.Id
+            ? prototype.Department?.Id
             : null;
     }
 

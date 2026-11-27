@@ -1,0 +1,85 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: entity
+  abstract: true
+  parent: BaseComputer
+  id: NCCorpSalesConsoleBase
+  components:
+  - type: Sprite
+    layers:
+    - map: [ "computerLayerBody" ]
+      state: computer
+    - map: [ "computerLayerKeyboard" ]
+      state: generic_keyboard
+    - map: [ "computerLayerScreen" ]
+      state: request
+    - map: [ "computerLayerKeys" ]
+      state: generic_keys
+    - map: [ "enum.WiresVisualLayers.MaintenancePanel" ]
+      state: generic_panel_open
+  - type: ActivatableUI
+    key: enum.NCCorpSalesUiKey.Key
+  - type: UserInterface
+    interfaces:
+      enum.NCCorpSalesUiKey.Key:
+        type: NCCorpSalesBoundUserInterface
+
+- type: entity
+  parent: NCCorpSalesConsoleBase
+  id: NCCorpSalesConsoleMilitech
+  suffix: Militech
+  components:
+  - type: NCCorpSalesConsole
+    corporation: Militech
+  - type: Sprite
+    layers:
+    - map: [ "computerLayerBody" ]
+      state: computer
+    - map: [ "computerLayerKeyboard" ]
+      state: generic_keyboard
+    - map: [ "computerLayerScreen" ]
+      state: request-sec
+    - map: [ "computerLayerKeys" ]
+      state: generic_keys
+    - map: [ "enum.WiresVisualLayers.MaintenancePanel" ]
+      state: generic_panel_open
+  - type: PointLight
+    color: "#E34A4A"
+
+- type: entity
+  parent: NCCorpSalesConsoleBase
+  id: NCCorpSalesConsoleBiotechnica
+  suffix: Biotechnica
+  components:
+  - type: NCCorpSalesConsole
+    corporation: Biotechnica
+  - type: Sprite
+    layers:
+    - map: [ "computerLayerBody" ]
+      state: computer
+    - map: [ "computerLayerKeyboard" ]
+      state: generic_keyboard
+    - map: [ "computerLayerScreen" ]
+      state: request-med
+    - map: [ "computerLayerKeys" ]
+      state: generic_keys
+    - map: [ "enum.WiresVisualLayers.MaintenancePanel" ]
+      state: generic_panel_open
+  - type: PointLight
+    color: "#4AE38C"
+
+- type: entity
+  parent: BaseCargoPallet
+  id: NCCorpSalesPallet
+  components:
+  - type: NCCorpSalesPallet
+  - type: Damageable
+    damageModifierSet: Metallic
+  - type: Sprite
+    drawdepth: FloorTiles
+    layers:
+    - sprite: Structures/catwalk.rsi
+      state: catwalk_preview
+    - sprite: Structures/catwalk.rsi
+      state: catwalk_preview
+      color: "#FFB21F55"

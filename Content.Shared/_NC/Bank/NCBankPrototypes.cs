@@ -43,7 +43,8 @@ public sealed partial class NCBankConfigurationPrototype : IPrototype
 }
 
 /// <summary>
-/// Bank settings of one department account. The prototype id is the department id.
+/// Bank settings of one organization account: a department (the prototype id is the department id) or an account
+/// with no department, such as a corporation's headquarters.
 /// </summary>
 [Prototype("ncBankDepartment")]
 public sealed partial class NCBankDepartmentPrototype : IPrototype
@@ -51,8 +52,13 @@ public sealed partial class NCBankDepartmentPrototype : IPrototype
     [IdDataField]
     public string ID { get; private set; } = default!;
 
-    [DataField(required: true)]
-    public ProtoId<DepartmentPrototype> Department;
+    /// <summary>The department whose jobs this account pays. Null for accounts that employ nobody.</summary>
+    [DataField]
+    public ProtoId<DepartmentPrototype>? Department;
+
+    /// <summary>Display name; defaults to the department name.</summary>
+    [DataField]
+    public LocId? Name;
 
     /// <summary>Jobs allowed to manage the account from a department terminal.</summary>
     [DataField]

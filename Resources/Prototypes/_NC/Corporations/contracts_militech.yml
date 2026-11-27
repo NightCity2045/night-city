@@ -1,0 +1,121 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Rewards are about 1.5x the material value of the goods plus the work of making and hauling them.
+
+- type: ncCorpContract
+  id: NCContractMilitechSaratoga
+  corporation: Militech
+  name: nc-corp-contract-militech-saratoga
+  description: nc-corp-contract-militech-saratoga-desc
+  reward: 6000
+  requirements:
+  - !type:NCCorpItemRequirement
+    item: NCWeaponSMGSaratoga
+    amount: 10
+
+- type: ncCorpContract
+  id: NCContractMilitechCopperhead
+  corporation: Militech
+  name: nc-corp-contract-militech-copperhead
+  reward: 4800
+  requirements:
+  - !type:NCCorpItemRequirement
+    item: NCWeaponRifleCopperhead
+    amount: 6
+
+- type: ncCorpContract
+  id: NCContractMilitechSidearms
+  corporation: Militech
+  name: nc-corp-contract-militech-sidearms
+  reward: 3200
+  requirements:
+  - !type:NCCorpItemRequirement
+    item: NCWeaponPistolFederalX9
+    amount: 8
+
+- type: ncCorpContract
+  id: NCContractMilitechSnipers
+  corporation: Militech
+  name: nc-corp-contract-militech-snipers
+  reward: 4400
+  requirements:
+  - !type:NCCorpItemRequirement
+    item: NCWeaponRifleNomadSniper
+    amount: 4
+
+- type: ncCorpContract
+  id: NCContractMilitechBreachers
+  corporation: Militech
+  name: nc-corp-contract-militech-breachers
+  reward: 4500
+  requirements:
+  - !type:NCCorpItemRequirement
+    item: NCWeaponShotgunCrusher
+    amount: 5
+
+- type: ncCorpContract
+  id: NCContractMilitechAssaultKit
+  corporation: Militech
+  name: nc-corp-contract-militech-assault-kit
+  description: nc-corp-contract-militech-assault-kit-desc
+  reward: 4000
+  requirements:
+  - !type:NCCorpItemRequirement
+    item: NCWeaponRifleCopperhead
+    amount: 4
+  - !type:NCCorpItemRequirement
+    item: NCMagazine556Rifle
+    amount: 10
+
+- type: ncCorpContract
+  id: NCContractMilitechAmmo
+  corporation: Militech
+  name: nc-corp-contract-militech-ammo
+  reward: 2000
+  requirements:
+  - !type:NCCorpItemRequirement
+    item: NCMagazine9x19SMG
+    amount: 15
+  - !type:NCCorpItemRequirement
+    item: NCBox9x19
+    amount: 10
+
+- type: ncCorpContract
+  id: NCContractMilitechArmor
+  corporation: Militech
+  name: nc-corp-contract-militech-armor
+  reward: 3600
+  requirements:
+  - !type:NCCorpItemRequirement
+    item: ClothingOuterArmorBulletproof
+    amount: 6
+  - !type:NCCorpItemRequirement
+    item: ClothingHeadHelmetBasic
+    amount: 6
+
+- type: ncCorpContract
+  id: NCContractMilitechOptics
+  corporation: Militech
+  name: nc-corp-contract-militech-optics
+  description: nc-corp-contract-militech-optics-desc
+  reward: 1800
+  requirements:
+  - !type:NCCorpItemRequirement
+    item: NCOpticControllerStandard
+    amount: 6
+  - !type:NCCorpItemRequirement
+    item: NCOpticMatrixStandard
+    amount: 6
+
+- type: ncCorpContract
+  id: NCContractMilitechNeural
+  corporation: Militech
+  name: nc-corp-contract-militech-neural
+  reward: 1600
+  requirements:
+  - !type:NCCorpItemRequirement
+    item: NCNeuralProcessorStandard
+    amount: 4
+  - !type:NCCorpItemRequirement
+    item: NCNeuralControllerStandard
+    amount: 4

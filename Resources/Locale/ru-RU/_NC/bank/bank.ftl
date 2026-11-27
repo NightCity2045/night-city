@@ -48,6 +48,7 @@ nc-bank-kind-salary = Зарплата
 nc-bank-kind-admin-grant = Пополнение бюджета
 nc-bank-kind-admin-withdrawal = Изъятие из бюджета
 nc-bank-kind-salary-missed = Зарплата не выплачена
+nc-bank-kind-contract = Оплата контракта
 nc-bank-kind-unknown = Операция
 
 nc-bank-atm-title = Банкомат Банка Найт-Сити
@@ -83,3 +84,6 @@ ent-NCBankTerminalBase = финансовый терминал отдела
     .desc = Терминал счёта отдела. Пользоваться им может только глава отдела.
 ent-NCBankCartridge = картридж «Банк»
     .desc = Программа Банка Найт-Сити: баланс, история и переводы.
+
+nc-bank-account-militech-hq = Милитех (корпорация)
+nc-bank-account-biotechnica-hq = Биотехника (корпорация)

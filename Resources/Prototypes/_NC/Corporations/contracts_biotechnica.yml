@@ -1,0 +1,134 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Food and produce are cheap per unit; certified drugs are the expensive line.
+
+- type: ncCorpContract
+  id: NCContractBiotechnicaBurgers
+  corporation: Biotechnica
+  name: nc-corp-contract-biotechnica-burgers
+  reward: 600
+  requirements:
+  - !type:NCCorpItemRequirement
+    item: FoodBurgerCheese
+    amount: 10
+
+- type: ncCorpContract
+  id: NCContractBiotechnicaPizza
+  corporation: Biotechnica
+  name: nc-corp-contract-biotechnica-pizza
+  reward: 800
+  requirements:
+  - !type:NCCorpItemRequirement
+    item: FoodPizzaMargherita
+    amount: 8
+
+- type: ncCorpContract
+  id: NCContractBiotechnicaBread
+  corporation: Biotechnica
+  name: nc-corp-contract-biotechnica-bread
+  reward: 600
+  requirements:
+  - !type:NCCorpItemRequirement
+    item: FoodBreadPlain
+    amount: 15
+
+- type: ncCorpContract
+  id: NCContractBiotechnicaSoup
+  corporation: Biotechnica
+  name: nc-corp-contract-biotechnica-soup
+  reward: 700
+  requirements:
+  - !type:NCCorpItemRequirement
+    item: FoodSoupTomato
+    amount: 10
+
+- type: ncCorpContract
+  id: NCContractBiotechnicaTomatoes
+  corporation: Biotechnica
+  name: nc-corp-contract-biotechnica-tomatoes
+  reward: 450
+  requirements:
+  - !type:NCCorpItemRequirement
+    item: FoodTomato
+    amount: 30
+
+- type: ncCorpContract
+  id: NCContractBiotechnicaWheat
+  corporation: Biotechnica
+  name: nc-corp-contract-biotechnica-wheat
+  reward: 400
+  requirements:
+  - !type:NCCorpItemRequirement
+    item: WheatBushel
+    amount: 20
+
+- type: ncCorpContract
+  id: NCContractBiotechnicaVegetables
+  corporation: Biotechnica
+  name: nc-corp-contract-biotechnica-vegetables
+  reward: 600
+  requirements:
+  - !type:NCCorpItemRequirement
+    item: FoodPotato
+    amount: 20
+  - !type:NCCorpItemRequirement
+    item: FoodCabbage
+    amount: 20
+
+- type: ncCorpContract
+  id: NCContractBiotechnicaOrchard
+  corporation: Biotechnica
+  name: nc-corp-contract-biotechnica-orchard
+  reward: 450
+  requirements:
+  - !type:NCCorpItemRequirement
+    item: FoodApple
+    amount: 15
+  - !type:NCCorpItemRequirement
+    item: FoodCorn
+    amount: 15
+
+- type: ncCorpContract
+  id: NCContractBiotechnicaAntibiotic
+  corporation: Biotechnica
+  name: nc-corp-contract-biotechnica-antibiotic
+  description: nc-corp-contract-biotechnica-drug-desc
+  reward: 2000
+  requirements:
+  - !type:NCCorpDrugRequirement
+    formula: NCPharmaFormulaBroadAntibiotic
+    amount: 20
+
+- type: ncCorpContract
+  id: NCContractBiotechnicaAnalgesic
+  corporation: Biotechnica
+  name: nc-corp-contract-biotechnica-analgesic
+  description: nc-corp-contract-biotechnica-drug-desc
+  reward: 2400
+  requirements:
+  - !type:NCCorpDrugRequirement
+    formula: NCPharmaFormulaTraumaAnalgesic
+    amount: 30
+
+- type: ncCorpContract
+  id: NCContractBiotechnicaSyntheticBlood
+  corporation: Biotechnica
+  name: nc-corp-contract-biotechnica-synthetic-blood
+  description: nc-corp-contract-biotechnica-drug-desc
+  reward: 1500
+  requirements:
+  - !type:NCCorpDrugRequirement
+    formula: NCPharmaFormulaSyntheticBlood
+    amount: 10
+
+- type: ncCorpContract
+  id: NCContractBiotechnicaAutoinjectors
+  corporation: Biotechnica
+  name: nc-corp-contract-biotechnica-autoinjectors
+  description: nc-corp-contract-biotechnica-corporate-desc
+  reward: 3000
+  requirements:
+  - !type:NCCorpDrugRequirement
+    formula: NCPharmaFormulaVasopressorAutoinjector
+    minimumGrade: Corporate
+    amount: 20

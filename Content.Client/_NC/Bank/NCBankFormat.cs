@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 
 using Content.Shared._NC.Bank;
+using Content.Shared._NC.Corporations;
 using Content.Shared._NC.Bank;
+using Content.Shared._NC.Corporations;
 using Content.Shared.Roles;
 using Robust.Client.UserInterface.Controls;
 using Robust.Shared.Prototypes;
@@ -34,6 +36,7 @@ public static class NCBankFormat
             NCBankTransactionKind.AdminGrant => "nc-bank-kind-admin-grant",
             NCBankTransactionKind.AdminWithdrawal => "nc-bank-kind-admin-withdrawal",
             NCBankTransactionKind.SalaryMissed => "nc-bank-kind-salary-missed",
+            NCBankTransactionKind.ContractReward => "nc-bank-kind-contract",
             _ => "nc-bank-kind-unknown",
         });
     }
@@ -52,6 +55,11 @@ public static class NCBankFormat
             prototypes.TryIndex<JobPrototype>(note, out var job))
         {
             note = job.LocalizedName;
+        }
+        else if (line.Kind == NCBankTransactionKind.ContractReward &&
+                 prototypes.TryIndex<NCCorpContractPrototype>(note, out var contract))
+        {
+            note = Loc.GetString(contract.Name);
         }
 
         var text = Loc.GetString("nc-bank-history-line",

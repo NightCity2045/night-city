@@ -100,11 +100,13 @@ public sealed class NCBankCartridgeTransferMessage(string target, long amount) :
     public readonly long Amount = amount;
 }
 
+/// <summary>An account in the admin window. <see cref="Name"/> is a localization id, or null for a character.</summary>
 [Serializable, NetSerializable]
-public sealed record NCBankAdminAccountLine(string Number, ProtoId<DepartmentPrototype>? Department, string? Owner, long Balance);
+public sealed record NCBankAdminAccountLine(string Number, string? Name, long Balance);
 
+/// <summary>A fee category. <see cref="Name"/> is a localization id, or null for personal accounts.</summary>
 [Serializable, NetSerializable]
-public sealed record NCBankAdminFeeLine(string Category, ProtoId<DepartmentPrototype>? Department, int BasisPoints);
+public sealed record NCBankAdminFeeLine(string Category, string? Name, int BasisPoints);
 
 [Serializable, NetSerializable]
 public sealed class NCBankAdminEuiState(

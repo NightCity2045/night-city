@@ -16,4 +16,5 @@ public enum NCBankTransactionKind : byte
     AdminGrant,
     AdminWithdrawal,
     SalaryMissed,
+    ContractReward,
 }

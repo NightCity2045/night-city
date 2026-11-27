@@ -105,3 +105,12 @@
       sprite: _NC/Interface/Misc/bank_program.rsi
       state: bank
   - type: NCBankCartridge
+
+# Corporation accounts: half of every contract reward lands here. They employ nobody and pay no salaries.
+- type: ncBankDepartment
+  id: MilitechHQ
+  name: nc-bank-account-militech-hq
+
+- type: ncBankDepartment
+  id: BiotechnicaHQ
+  name: nc-bank-account-biotechnica-hq

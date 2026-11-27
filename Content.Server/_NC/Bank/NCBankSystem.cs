@@ -133,7 +133,7 @@ public sealed partial class NCBankSystem : EntitySystem
         _jobDepartments.Clear();
         foreach (var bankDepartment in _prototypes.EnumeratePrototypes<NCBankDepartmentPrototype>())
         {
-            if (!_prototypes.TryIndex(bankDepartment.Department, out var department))
+            if (bankDepartment.Department is not { } departmentId || !_prototypes.TryIndex(departmentId, out var department))
                 continue;
 
             foreach (var job in department.Roles)
@@ -214,14 +214,24 @@ public sealed partial class NCBankSystem : EntitySystem
 
     public string? GetDepartmentName(NCBankAccountRecord account)
     {
-        if (account.Department is not { } department ||
-            !_prototypes.TryIndex<NCBankDepartmentPrototype>(department, out var bankDepartment) ||
-            !_prototypes.TryIndex(bankDepartment.Department, out var departmentPrototype))
-        {
-            return null;
-        }
+        return account.Department is { } department && GetAccountName(department) is { } name
+            ? Loc.GetString(name)
+            : null;
+    }
 
-        return Loc.GetString(departmentPrototype.Name);
+    /// <summary>The localization id naming an organization account.</summary>
+    public string? GetAccountName(ProtoId<NCBankDepartmentPrototype> id)
+    {
+        if (!_prototypes.TryIndex(id, out var bankDepartment))
+            return null;
+
+        if (bankDepartment.Name is { } name)
+            return name.Id;
+
+        if (bankDepartment.Department is { } department && _prototypes.TryIndex(department, out var prototype))
+            return prototype.Name;
+
+        return null;
     }
 
     private async void OnPlayerSpawnComplete(PlayerSpawnCompleteEvent args)
@@ -305,7 +315,8 @@ public sealed partial class NCBankSystem : EntitySystem
     public IEnumerable<ProtoId<JobPrototype>> GetDepartmentJobs(ProtoId<NCBankDepartmentPrototype> department)
     {
         if (!_prototypes.TryIndex(department, out var bankDepartment) ||
-            !_prototypes.TryIndex(bankDepartment.Department, out var prototype))
+            bankDepartment.Department is not { } departmentId ||
+            !_prototypes.TryIndex(departmentId, out var prototype))
         {
             return [];
         }
@@ -412,6 +423,33 @@ public sealed partial class NCBankSystem : EntitySystem
         _adminLog.Add(LogType.NCBank, LogImpact.High,
             $"{admin} adjusted {account.Number} by {amount}: {reason}");
         return account;
+    }
+
+    /// <summary>
+    /// Pays a fulfilled corporate contract: the field department receives its share and the corporation
+    /// account the rest. No bank fee applies.
+    /// </summary>
+    public bool TryPayContract(
+        ProtoId<NCBankDepartmentPrototype> department,
+        ProtoId<NCBankDepartmentPrototype> corporation,
+        long reward,
+        float departmentShare,
+        string contract,
+        EntityUid? actor)
+    {
+        if (reward <= 0 ||
+            !_byDepartment.TryGetValue(department, out var departmentAccount) ||
+            !_byDepartment.TryGetValue(corporation, out var corporationAccount))
+        {
+            return false;
+        }
+
+        var departmentAmount = (long) Math.Round(reward * Math.Clamp(departmentShare, 0f, 1f));
+        Apply(departmentAccount, NCBankTransactionKind.ContractReward, departmentAmount, 0, null, contract);
+        Apply(corporationAccount, NCBankTransactionKind.ContractReward, reward - departmentAmount, 0, null, contract);
+        _adminLog.Add(LogType.NCBank, LogImpact.Medium,
+            $"{ToPrettyString(actor):actor} fulfilled contract {contract}: {departmentAmount} to {departmentAccount.Number}, {reward - departmentAmount} to {corporationAccount.Number}");
+        return true;
     }
 
     /// <summary>This round's operations on the account, newest first. History is not stored between rounds.</summary>

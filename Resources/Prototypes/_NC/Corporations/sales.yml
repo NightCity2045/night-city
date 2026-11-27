@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: ncCorpSales
+  id: Militech
+  name: nc-corp-militech
+  department: Militech
+  corporation: MilitechHQ
+
+- type: ncCorpSales
+  id: Biotechnica
+  name: nc-corp-biotechnica
+  department: Biotechnica
+  corporation: BiotechnicaHQ
