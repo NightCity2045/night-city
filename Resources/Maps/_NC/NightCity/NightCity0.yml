@@ -5,7 +5,7 @@ meta:
   forkId: EchoCyber
   forkVersion: be524da4b41781c61399952aad42f92f7e1b6dd0
   time: 11/26/2026 07:14:57
-  entityCount: 15094
+  entityCount: 15128
 maps:
 - 1
 grids:
@@ -44654,6 +44654,69 @@ entities:
       parent: 14815
     - type: ContainedSolution
       container: 14815
+- proto: SpawnPointBiotechnicaBotanist
+  entities:
+  - uid: 15302
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointBiotechnicaChief
+  entities:
+  - uid: 15303
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointBiotechnicaMedTech
+  entities:
+  - uid: 15304
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointBiotechnicaNetrunner
+  entities:
+  - uid: 15305
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointBiotechnicaOperative
+  entities:
+  - uid: 15306
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointBiotechnicaOperativeLead
+  entities:
+  - uid: 15307
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointBiotechnicaParamedic
+  entities:
+  - uid: 15308
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointBiotechnicaRigger
+  entities:
+  - uid: 15309
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointBiotechnicaTech
+  entities:
+  - uid: 15310
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
 - proto: SpawnPointLatejoin
   entities:
   - uid: 1050
@@ -44701,6 +44764,160 @@ entities:
     - type: Transform
       parent: 1
       pos: -6.5,38.5
+- proto: SpawnPointMilitechChief
+  entities:
+  - uid: 15317
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointMilitechCombatMedic
+  entities:
+  - uid: 15318
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointMilitechNetrunner
+  entities:
+  - uid: 15319
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointMilitechOperative
+  entities:
+  - uid: 15320
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointMilitechOperativeLead
+  entities:
+  - uid: 15321
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointMilitechQuartermaster
+  entities:
+  - uid: 15322
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointMilitechRigger
+  entities:
+  - uid: 15323
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointMilitechSecuritySpecialist
+  entities:
+  - uid: 15324
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointMilitechTech
+  entities:
+  - uid: 15325
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointNCMedicalChief
+  entities:
+  - uid: 15311
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointNCMedicalCoroner
+  entities:
+  - uid: 15312
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointNCMedicalDoctor
+  entities:
+  - uid: 15313
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointNCMedicalIntern
+  entities:
+  - uid: 15314
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointNCMedicalPsychologist
+  entities:
+  - uid: 15315
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointNCMedicalTechnician
+  entities:
+  - uid: 15316
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointNCPDCadet
+  entities:
+  - uid: 15326
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointNCPDChief
+  entities:
+  - uid: 15327
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointNCPDCommander
+  entities:
+  - uid: 15328
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointNCPDInspector
+  entities:
+  - uid: 15329
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointNCPDLieutenant
+  entities:
+  - uid: 15330
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointNCPDOfficer
+  entities:
+  - uid: 15331
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointNCPDSergeant
+  entities:
+  - uid: 15332
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
 - proto: SpawnPointPassenger
   entities:
   - uid: 11223
@@ -44748,6 +44965,27 @@ entities:
     - type: Transform
       parent: 1
       pos: -6.5,33.5
+- proto: SpawnPointTraumaTeamOperative
+  entities:
+  - uid: 15333
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointTraumaTeamParamedic
+  entities:
+  - uid: 15334
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
+- proto: SpawnPointZhirafaJanitor
+  entities:
+  - uid: 15335
+    components:
+    - type: Transform
+      parent: 1
+      pos: -7.5,35.5
 - proto: SpoonPlastic
   entities:
   - uid: 14207
