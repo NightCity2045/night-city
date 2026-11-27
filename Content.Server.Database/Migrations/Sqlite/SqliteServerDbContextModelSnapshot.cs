@@ -1090,52 +1090,6 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.ToTable("nc_bank_salary", (string)null);
                 });
 
-            modelBuilder.Entity("Content.Server.Database.NCBankTransaction", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("nc_bank_transaction_id");
-
-                    b.Property<int>("AccountId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("account_id");
-
-                    b.Property<long>("Amount")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("amount");
-
-                    b.Property<string>("Counterparty")
-                        .HasMaxLength(16)
-                        .HasColumnType("TEXT")
-                        .HasColumnName("counterparty");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("created_at");
-
-                    b.Property<long>("Fee")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("fee");
-
-                    b.Property<byte>("Kind")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("kind");
-
-                    b.Property<string>("Note")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("TEXT")
-                        .HasColumnName("note");
-
-                    b.HasKey("Id")
-                        .HasName("PK_nc_bank_transaction");
-
-                    b.HasIndex("AccountId", "Id");
-
-                    b.ToTable("nc_bank_transaction", (string)null);
-                });
-
             modelBuilder.Entity("Content.Server.Database.NCCharacterSkillProgress", b =>
                 {
                     b.Property<int>("ProfileId")
@@ -2896,16 +2850,6 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .HasForeignKey("Content.Server.Database.NCBankAccount", "ProfileId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("FK_nc_bank_account_profile_profile_id");
-                });
-
-            modelBuilder.Entity("Content.Server.Database.NCBankTransaction", b =>
-                {
-                    b.HasOne("Content.Server.Database.NCBankAccount", null)
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_nc_bank_transaction_nc_bank_account_ncbank_account_id");
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCCharacterSkillProgress", b =>

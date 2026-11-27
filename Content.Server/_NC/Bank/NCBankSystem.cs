@@ -12,7 +12,7 @@ using Content.Server.Preferences.Managers;
 using Content.Server.Stack;
 using Content.Shared._NC.Bank;
 using Content.Shared.Database;
-using Content.Shared.Database._NC.Bank;
+using Content.Shared._NC.Bank;
 using Content.Shared.GameTicking;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Mind;
@@ -52,6 +52,7 @@ public sealed partial class NCBankSystem : EntitySystem
     public const string ResidentFeeCategory = "resident";
     public const int MaximumFeeBasisPoints = 10000;
     public const int MaximumSalary = 100000;
+    private const int HistoryLength = 50;
 
     [Dependency] private IServerDbManager _db = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
@@ -75,6 +76,7 @@ public sealed partial class NCBankSystem : EntitySystem
     private readonly Dictionary<string, NCBankDepartmentPrototype> _jobDepartments = new();
 
     private readonly List<NCBankEntry> _pending = new();
+    private readonly Dictionary<int, List<NCBankHistoryLine>> _history = new();
     private Task _writeTask = Task.CompletedTask;
     private TimeSpan _sincePayday;
 
@@ -88,7 +90,11 @@ public sealed partial class NCBankSystem : EntitySystem
         base.Initialize();
         SubscribeLocalEvent<PlayerSpawnCompleteEvent>(OnPlayerSpawnComplete);
         SubscribeLocalEvent<PrototypesReloadedEventArgs>(OnPrototypesReloaded);
-        SubscribeLocalEvent<RoundRestartCleanupEvent>(_ => _sincePayday = TimeSpan.Zero);
+        SubscribeLocalEvent<RoundRestartCleanupEvent>(_ =>
+        {
+            _sincePayday = TimeSpan.Zero;
+            _history.Clear();
+        });
         // The world session close waits for queued bank writes, both at round end and at server shutdown.
         SubscribeLocalEvent<NCActiveWorldSessionClosingEvent>(args => args.AddPendingWrite(FlushAsync()));
 
@@ -408,18 +414,29 @@ public sealed partial class NCBankSystem : EntitySystem
         return account;
     }
 
-    public async Task<List<NCBankHistoryLine>> GetHistoryAsync(NCBankAccountRecord account, int limit = 30)
+    /// <summary>This round's operations on the account, newest first. History is not stored between rounds.</summary>
+    public List<NCBankHistoryLine> GetHistory(NCBankAccountRecord account, int limit = 30)
     {
-        await FlushAsync();
-        var rows = await _db.GetNCBankHistoryAsync(account.Id, limit);
-        return rows.Select(row => new NCBankHistoryLine(row.Kind, row.Amount, row.Fee, row.Counterparty, row.Note, row.CreatedAt))
-            .ToList();
+        if (!_history.TryGetValue(account.Id, out var lines))
+            return [];
+
+        return Enumerable.Reverse(lines).Take(limit).ToList();
     }
 
     private void Apply(NCBankAccountRecord account, NCBankTransactionKind kind, long amount, long fee, string? counterparty, string note)
     {
-        account.Balance += amount;
-        _pending.Add(new NCBankEntry(account.Id, kind, amount, fee, counterparty, note, DateTime.UtcNow));
+        if (amount != 0)
+        {
+            account.Balance += amount;
+            _pending.Add(new NCBankEntry(account.Id, amount));
+        }
+
+        if (!_history.TryGetValue(account.Id, out var lines))
+            _history[account.Id] = lines = new List<NCBankHistoryLine>();
+
+        lines.Add(new NCBankHistoryLine(kind, amount, fee, counterparty, note, _ticker.RoundDuration()));
+        if (lines.Count > HistoryLength)
+            lines.RemoveAt(0);
     }
 
     private void GiveCash(EntityUid user, int amount)

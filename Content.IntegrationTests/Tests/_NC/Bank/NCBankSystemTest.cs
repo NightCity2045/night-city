@@ -4,7 +4,7 @@ using System.Linq;
 using Content.IntegrationTests.Fixtures;
 using Content.Server._NC.Bank;
 using Content.Server.Database;
-using Content.Shared.Database._NC.Bank;
+using Content.Shared._NC.Bank;
 
 namespace Content.IntegrationTests.Tests._NC.Bank;
 
@@ -21,7 +21,7 @@ public sealed class NCBankSystemTest : GameTest
 
     /// <summary>
     /// Department accounts open with their budgets; deposits lose the payer's fee, transfers charge it on top,
-    /// admin adjustments cannot overdraw, and every change reaches the database journal.
+    /// admin adjustments cannot overdraw, balances reach the database, and the operations stay in the round history.
     /// </summary>
     [Test]
     public async Task DepositsTransfersAndAdjustmentsFollowTheFeeRules()
@@ -80,11 +80,11 @@ public sealed class NCBankSystemTest : GameTest
         });
         await PoolManager.WaitUntil(Server, () => flushed);
         var stored = await db.GetNCBankAccountAsync(ncpd.Id);
-        var history = await db.GetNCBankHistoryAsync(ncpd.Id, 10);
+        var history = bank.GetHistory(ncpd, 10);
         Assert.Multiple(() =>
         {
             Assert.That(stored!.Balance, Is.EqualTo(ncpd.Balance), "The database balance follows the loaded account.");
-            Assert.That(history.Select(line => line.Kind), Does.Contain(NCBankTransactionKind.CashDeposit));
+            Assert.That(history.Select(line => line.Kind), Does.Contain(NCBankTransactionKind.CashDeposit), "The round history lists the deposit.");
             Assert.That(history.Select(line => line.Kind), Does.Contain(NCBankTransactionKind.TransferIn));
             Assert.That(history.Single(line => line.Kind == NCBankTransactionKind.AdminGrant).Note, Is.EqualTo("test grant"));
         });

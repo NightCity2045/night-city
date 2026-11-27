@@ -159,7 +159,7 @@ public sealed class NCBankMachinesSystem : EntitySystem
         UpdateTerminal(ent);
     }
 
-    private async void UpdateTerminal(Entity<NCBankTerminalComponent> ent)
+    private void UpdateTerminal(Entity<NCBankTerminalComponent> ent)
     {
         var actor = _ui.GetActors(ent.Owner, NCBankUiKey.Terminal).Select(uid => (EntityUid?) uid).FirstOrDefault();
         if (actor == null)
@@ -184,10 +184,7 @@ public sealed class NCBankMachinesSystem : EntitySystem
             .Select(job => new NCBankSalaryLine(job, _bank.GetSalary(ent.Comp.Department, job)))
             .ToList();
         var department = ent.Comp.Department;
-        var history = await _bank.GetHistoryAsync(account);
-        if (Deleted(ent))
-            return;
-
+        var history = _bank.GetHistory(account);
         _ui.SetUiState(ent.Owner, NCBankUiKey.Terminal, new NCBankTerminalUiState(
             true,
             true,
@@ -242,7 +239,7 @@ public sealed class NCBankMachinesSystem : EntitySystem
         UpdateCartridge(loader, args.Actor);
     }
 
-    private async void UpdateCartridge(EntityUid loader, EntityUid? actor)
+    private void UpdateCartridge(EntityUid loader, EntityUid? actor)
     {
         if (actor == null || !_bank.TryGetCharacterAccount(actor.Value, out var account))
         {
@@ -250,10 +247,7 @@ public sealed class NCBankMachinesSystem : EntitySystem
             return;
         }
 
-        var history = await _bank.GetHistoryAsync(account, 15);
-        if (Deleted(loader))
-            return;
-
+        var history = _bank.GetHistory(account, 15);
         _cartridgeLoader.UpdateCartridgeUiState(loader, new NCBankCartridgeUiState(
             true,
             account.Number,

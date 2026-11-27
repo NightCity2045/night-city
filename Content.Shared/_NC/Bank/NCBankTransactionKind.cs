@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 
-namespace Content.Shared.Database._NC.Bank;
+namespace Content.Shared._NC.Bank;
 
 /// <summary>
-/// What a bank journal line records. Stored as a byte, so only append new values.
+/// What a bank history line records.
 /// </summary>
 public enum NCBankTransactionKind : byte
 {

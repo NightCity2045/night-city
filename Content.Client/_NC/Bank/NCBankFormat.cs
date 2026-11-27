@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 
 using Content.Shared._NC.Bank;
-using Content.Shared.Database._NC.Bank;
+using Content.Shared._NC.Bank;
 using Content.Shared.Roles;
 using Robust.Client.UserInterface.Controls;
 using Robust.Shared.Prototypes;
@@ -38,6 +38,13 @@ public static class NCBankFormat
         });
     }
 
+    /// <summary>Time since the round started.</summary>
+    public static string Time(NCBankHistoryLine line)
+    {
+        var time = line.RoundTime;
+        return $"{(int) time.TotalHours:00}:{time.Minutes:00}";
+    }
+
     public static string Line(NCBankHistoryLine line, IPrototypeManager prototypes)
     {
         var note = line.Note;
@@ -48,7 +55,7 @@ public static class NCBankFormat
         }
 
         var text = Loc.GetString("nc-bank-history-line",
-            ("time", line.Time.ToLocalTime().ToString("dd.MM HH:mm")),
+            ("time", Time(line)),
             ("kind", KindName(line.Kind)),
             ("amount", line.Amount));
         if (line.Fee > 0)

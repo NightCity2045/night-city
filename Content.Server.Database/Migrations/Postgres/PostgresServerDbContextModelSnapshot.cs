@@ -1146,54 +1146,6 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.ToTable("nc_bank_salary", (string)null);
                 });
 
-            modelBuilder.Entity("Content.Server.Database.NCBankTransaction", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("nc_bank_transaction_id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<int>("AccountId")
-                        .HasColumnType("integer")
-                        .HasColumnName("account_id");
-
-                    b.Property<long>("Amount")
-                        .HasColumnType("bigint")
-                        .HasColumnName("amount");
-
-                    b.Property<string>("Counterparty")
-                        .HasMaxLength(16)
-                        .HasColumnType("character varying(16)")
-                        .HasColumnName("counterparty");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<long>("Fee")
-                        .HasColumnType("bigint")
-                        .HasColumnName("fee");
-
-                    b.Property<byte>("Kind")
-                        .HasColumnType("smallint")
-                        .HasColumnName("kind");
-
-                    b.Property<string>("Note")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("note");
-
-                    b.HasKey("Id")
-                        .HasName("PK_nc_bank_transaction");
-
-                    b.HasIndex("AccountId", "Id");
-
-                    b.ToTable("nc_bank_transaction", (string)null);
-                });
-
             modelBuilder.Entity("Content.Server.Database.NCCharacterSkillProgress", b =>
                 {
                     b.Property<int>("ProfileId")
@@ -2995,16 +2947,6 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasForeignKey("Content.Server.Database.NCBankAccount", "ProfileId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("FK_nc_bank_account_profile_profile_id");
-                });
-
-            modelBuilder.Entity("Content.Server.Database.NCBankTransaction", b =>
-                {
-                    b.HasOne("Content.Server.Database.NCBankAccount", null)
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_nc_bank_transaction_nc_bank_account_ncbank_account_id");
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCCharacterSkillProgress", b =>

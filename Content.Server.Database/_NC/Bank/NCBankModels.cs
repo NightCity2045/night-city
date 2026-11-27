@@ -31,33 +31,6 @@ public sealed class NCBankAccount
     public DateTime CreatedAt { get; set; }
 }
 
-/// <summary>
-/// One journal line of a bank account. <see cref="Amount"/> is the signed balance change of the account and
-/// <see cref="Fee"/> the bank fee taken as part of the same operation.
-/// </summary>
-[Table("nc_bank_transaction")]
-public sealed class NCBankTransaction
-{
-    [Key]
-    public long Id { get; set; }
-
-    public int AccountId { get; set; }
-
-    public byte Kind { get; set; }
-
-    public long Amount { get; set; }
-
-    public long Fee { get; set; }
-
-    [MaxLength(16)]
-    public string? Counterparty { get; set; }
-
-    [MaxLength(200)]
-    public string Note { get; set; } = string.Empty;
-
-    public DateTime CreatedAt { get; set; }
-}
-
 /// <summary>Bank fee rate of a payer category, in basis points (1/100 of a percent).</summary>
 [Table("nc_bank_fee_rate")]
 public sealed class NCBankFeeRate
@@ -85,7 +58,6 @@ public sealed class NCBankSalary
 public abstract partial class ServerDbContext
 {
     public DbSet<NCBankAccount> NCBankAccounts => Set<NCBankAccount>();
-    public DbSet<NCBankTransaction> NCBankTransactions => Set<NCBankTransaction>();
     public DbSet<NCBankFeeRate> NCBankFeeRates => Set<NCBankFeeRate>();
     public DbSet<NCBankSalary> NCBankSalaries => Set<NCBankSalary>();
 
@@ -107,13 +79,6 @@ public abstract partial class ServerDbContext
             .HasConstraintName("FK_nc_bank_account_profile_profile_id")
             .OnDelete(DeleteBehavior.Cascade);
 
-        modelBuilder.Entity<NCBankTransaction>()
-            .HasOne<NCBankAccount>()
-            .WithMany()
-            .HasForeignKey(transaction => transaction.AccountId)
-            .OnDelete(DeleteBehavior.Cascade);
-        modelBuilder.Entity<NCBankTransaction>()
-            .HasIndex(transaction => new { transaction.AccountId, transaction.Id });
 
         modelBuilder.Entity<NCBankSalary>()
             .HasKey(salary => new { salary.DepartmentId, salary.JobId });

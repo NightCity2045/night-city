@@ -3,7 +3,6 @@
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
-using Content.Shared.Database._NC.Bank;
 using Microsoft.EntityFrameworkCore;
 
 namespace Content.Server.Database;
@@ -12,24 +11,8 @@ public sealed record NCBankAccountData(int Id, string Number, int? ProfileId, st
 
 public sealed record NCBankAccountOpenResult(NCBankAccountData Account, bool Created);
 
-/// <summary>One balance change to write: <paramref name="Amount"/> is added to the account balance.</summary>
-public sealed record NCBankEntry(
-    int AccountId,
-    NCBankTransactionKind Kind,
-    long Amount,
-    long Fee,
-    string? Counterparty,
-    string Note,
-    DateTime CreatedAt);
-
-public sealed record NCBankTransactionData(
-    long Id,
-    NCBankTransactionKind Kind,
-    long Amount,
-    long Fee,
-    string? Counterparty,
-    string Note,
-    DateTime CreatedAt);
+/// <summary>A balance change to write: <paramref name="Amount"/> is added to the account balance.</summary>
+public sealed record NCBankEntry(int AccountId, long Amount);
 
 public sealed record NCBankSalaryData(string DepartmentId, string JobId, int Amount);
 
@@ -40,7 +23,6 @@ public partial interface IServerDbManager
     Task<NCBankAccountData?> GetNCBankAccountByNumberAsync(string number);
     Task<NCBankAccountData?> GetNCBankAccountAsync(int accountId);
     Task ApplyNCBankEntriesAsync(IReadOnlyList<NCBankEntry> entries);
-    Task<List<NCBankTransactionData>> GetNCBankHistoryAsync(int accountId, int limit);
     Task<Dictionary<string, int>> GetNCBankFeeRatesAsync();
     Task SetNCBankFeeRateAsync(string category, int basisPoints);
     Task<List<NCBankSalaryData>> GetNCBankSalariesAsync();
@@ -79,11 +61,6 @@ public sealed partial class ServerDbManager
         return RunDbCommand(() => _db.ApplyNCBankEntriesAsync(entries));
     }
 
-    public Task<List<NCBankTransactionData>> GetNCBankHistoryAsync(int accountId, int limit)
-    {
-        DbReadOpsMetric.Inc();
-        return RunDbCommand(() => _db.GetNCBankHistoryAsync(accountId, limit));
-    }
 
     public Task<Dictionary<string, int>> GetNCBankFeeRatesAsync()
     {
@@ -166,17 +143,6 @@ public abstract partial class ServerDbBase
         context.NCBankAccounts.Add(account);
         await context.SaveChangesAsync();
 
-        if (openingBalance != 0)
-        {
-            context.NCBankTransactions.Add(new NCBankTransaction
-            {
-                AccountId = account.Id,
-                Kind = (byte) NCBankTransactionKind.OpeningBalance,
-                Amount = openingBalance,
-                CreatedAt = now,
-            });
-            await context.SaveChangesAsync();
-        }
 
         return ToData(account);
     }
@@ -212,45 +178,17 @@ public abstract partial class ServerDbBase
 
         foreach (var entry in entries)
         {
-            // An account deleted with its character since the change was made simply drops the line.
+            // An account deleted with its character since the change was made simply drops the change.
             if (!accounts.TryGetValue(entry.AccountId, out var account))
                 continue;
 
             account.Balance += entry.Amount;
-            db.DbContext.NCBankTransactions.Add(new NCBankTransaction
-            {
-                AccountId = entry.AccountId,
-                Kind = (byte) entry.Kind,
-                Amount = entry.Amount,
-                Fee = entry.Fee,
-                Counterparty = entry.Counterparty,
-                Note = entry.Note.Length > 200 ? entry.Note[..200] : entry.Note,
-                CreatedAt = entry.CreatedAt,
-            });
         }
 
         await db.DbContext.SaveChangesAsync();
         await transaction.CommitAsync();
     }
 
-    public async Task<List<NCBankTransactionData>> GetNCBankHistoryAsync(int accountId, int limit)
-    {
-        await using var db = await GetDb();
-        var rows = await db.DbContext.NCBankTransactions.AsNoTracking()
-            .Where(transaction => transaction.AccountId == accountId)
-            .OrderByDescending(transaction => transaction.Id)
-            .Take(Math.Clamp(limit, 1, 200))
-            .ToListAsync();
-        return rows.Select(row => new NCBankTransactionData(
-                row.Id,
-                (NCBankTransactionKind) row.Kind,
-                row.Amount,
-                row.Fee,
-                row.Counterparty,
-                row.Note,
-                row.CreatedAt))
-            .ToList();
-    }
 
     public async Task<Dictionary<string, int>> GetNCBankFeeRatesAsync()
     {

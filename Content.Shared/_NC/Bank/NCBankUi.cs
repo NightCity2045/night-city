@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 
 using Content.Shared.CartridgeLoader;
-using Content.Shared.Database._NC.Bank;
 using Content.Shared.Eui;
 using Content.Shared.Roles;
 using Robust.Shared.Prototypes;
@@ -16,7 +15,7 @@ public enum NCBankUiKey : byte
     Terminal,
 }
 
-/// <summary>One journal line shown in a bank UI.</summary>
+/// <summary>One operation of the current round shown in a bank UI.</summary>
 [Serializable, NetSerializable]
 public sealed record NCBankHistoryLine(
     NCBankTransactionKind Kind,
@@ -24,7 +23,7 @@ public sealed record NCBankHistoryLine(
     long Fee,
     string? Counterparty,
     string Note,
-    DateTime Time);
+    TimeSpan RoundTime);
 
 [Serializable, NetSerializable]
 public sealed record NCBankSalaryLine(ProtoId<JobPrototype> Job, int Amount);
