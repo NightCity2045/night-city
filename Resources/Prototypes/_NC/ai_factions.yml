@@ -5,3 +5,35 @@
 - type: npcFaction
   id: NCSixthStreet
   friendly: [NCSixthStreet]
+
+- type: npcFaction
+  id: NCTygerClaws
+  friendly: [NCTygerClaws]
+
+- type: npcFaction
+  id: NCMaelstrom
+  friendly: [NCMaelstrom]
+
+- type: npcFaction
+  id: NCValentinos
+  friendly: [NCValentinos]
+
+- type: npcFaction
+  id: NCBozos
+  friendly: [NCBozos]
+
+- type: npcFaction
+  id: NCInquisitors
+  friendly: [NCInquisitors]
+
+- type: npcFaction
+  id: NCPhilharmonicVampyres
+  friendly: [NCPhilharmonicVampyres]
+
+- type: npcFaction
+  id: NCMilitechSecurity
+  friendly: [NCMilitechSecurity]
+
+- type: npcFaction
+  id: NCBiotechnicaSecurity
+  friendly: [NCBiotechnicaSecurity]

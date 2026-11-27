@@ -104,3 +104,14 @@ nc-mission-guard-warning-1 = Эй. Тут частные дела. Проход�
 nc-mission-guard-warning-2 = Заблудился? Двигай дальше, чумба.
 nc-mission-guard-alarm-1 = Всё, вали его!
 nc-mission-guard-alarm-2 = Чужой! Положить его!
+
+nc-fixer-mission-alpha-militech-crate = Шард со склада Милитеха
+nc-fixer-mission-alpha-militech-crate-desc = Милитех держит шард на охраняемом складе. Зайди, возьми, уйди.
+nc-fixer-mission-alpha-valentinos-drop = Посылка с территории Валентинос
+nc-fixer-mission-alpha-valentinos-drop-desc = Посылка лежит на земле Валентинос. Забери её, не начиная войну.
+nc-fixer-mission-beta-biotech-lab = Несчастный случай в лаборатории
+nc-fixer-mission-beta-biotech-lab-desc = В лаборатории Биотехники стоит сервер, который кто-то хочет уничтожить. Охрана серьёзная.
+nc-fixer-mission-beta-maelstrom-boss = Главарь Мальстрёма
+nc-fixer-mission-beta-maelstrom-boss-desc = Главарь Мальстрёма засел со своей бандой. Убери его.
+nc-fixer-mission-beta-tyger-server = Бухгалтерия Когтей
+nc-fixer-mission-beta-tyger-server-desc = Тигриные когти держат свою бухгалтерию на сервере. Разнеси его.

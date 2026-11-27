@@ -1,0 +1,201 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Gang wear: recoloured SS14 shapes with a glowing (unshaded) trim layer.
+
+- type: entity
+  parent: ClothingOuterBase
+  id: NCGangTygerClawsOuter
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/OuterClothing/Gangs/tyger_claws_jacket.rsi
+    layers:
+    - state: icon
+    - state: icon-unshaded
+      shader: unshaded
+  - type: Clothing
+    sprite: _NC/Clothing/OuterClothing/Gangs/tyger_claws_jacket.rsi
+    clothingVisuals:
+      outerClothing:
+      - state: equipped-OUTERCLOTHING
+      - state: equipped-OUTERCLOTHING-unshaded
+        shader: unshaded
+
+- type: entity
+  parent: ClothingMaskBase
+  id: NCGangTygerClawsMask
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Mask/Gangs/tyger_claws_mask.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Mask/Gangs/tyger_claws_mask.rsi
+    clothingVisuals:
+      mask:
+      - state: equipped-MASK
+      - state: equipped-MASK-unshaded
+        shader: unshaded
+
+- type: entity
+  parent: ClothingOuterBase
+  id: NCGangMaelstromOuter
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/OuterClothing/Gangs/maelstrom_jacket.rsi
+    layers:
+    - state: icon
+    - state: icon-unshaded
+      shader: unshaded
+  - type: Clothing
+    sprite: _NC/Clothing/OuterClothing/Gangs/maelstrom_jacket.rsi
+    clothingVisuals:
+      outerClothing:
+      - state: equipped-OUTERCLOTHING
+      - state: equipped-OUTERCLOTHING-unshaded
+        shader: unshaded
+
+- type: entity
+  parent: ClothingMaskBase
+  id: NCGangMaelstromMask
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Mask/Gangs/maelstrom_faceplate.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Mask/Gangs/maelstrom_faceplate.rsi
+    clothingVisuals:
+      mask:
+      - state: equipped-MASK
+      - state: equipped-MASK-unshaded
+        shader: unshaded
+
+- type: entity
+  parent: ClothingOuterBase
+  id: NCGangValentinosOuter
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/OuterClothing/Gangs/valentinos_coat.rsi
+    layers:
+    - state: icon
+    - state: icon-unshaded
+      shader: unshaded
+  - type: Clothing
+    sprite: _NC/Clothing/OuterClothing/Gangs/valentinos_coat.rsi
+    clothingVisuals:
+      outerClothing:
+      - state: equipped-OUTERCLOTHING
+      - state: equipped-OUTERCLOTHING-unshaded
+        shader: unshaded
+
+- type: entity
+  parent: ClothingMaskBase
+  id: NCGangValentinosMask
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Mask/Gangs/valentinos_bandana.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Mask/Gangs/valentinos_bandana.rsi
+    clothingVisuals:
+      mask:
+      - state: equipped-MASK
+      - state: equipped-MASK-unshaded
+        shader: unshaded
+
+- type: entity
+  parent: ClothingOuterBase
+  id: NCGangBozosOuter
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/OuterClothing/Gangs/bozos_jacket.rsi
+    layers:
+    - state: icon
+    - state: icon-unshaded
+      shader: unshaded
+  - type: Clothing
+    sprite: _NC/Clothing/OuterClothing/Gangs/bozos_jacket.rsi
+    clothingVisuals:
+      outerClothing:
+      - state: equipped-OUTERCLOTHING
+      - state: equipped-OUTERCLOTHING-unshaded
+        shader: unshaded
+
+- type: entity
+  parent: ClothingMaskBase
+  id: NCGangBozosMask
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Mask/Gangs/bozos_mask.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Mask/Gangs/bozos_mask.rsi
+    clothingVisuals:
+      mask:
+      - state: equipped-MASK
+      - state: equipped-MASK-unshaded
+        shader: unshaded
+
+- type: entity
+  parent: ClothingOuterBase
+  id: NCGangInquisitorsOuter
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/OuterClothing/Gangs/inquisitors_robe.rsi
+    layers:
+    - state: icon
+    - state: icon-unshaded
+      shader: unshaded
+  - type: Clothing
+    sprite: _NC/Clothing/OuterClothing/Gangs/inquisitors_robe.rsi
+    clothingVisuals:
+      outerClothing:
+      - state: equipped-OUTERCLOTHING
+      - state: equipped-OUTERCLOTHING-unshaded
+        shader: unshaded
+
+- type: entity
+  parent: ClothingMaskBase
+  id: NCGangInquisitorsMask
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Mask/Gangs/inquisitors_veil.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Mask/Gangs/inquisitors_veil.rsi
+    clothingVisuals:
+      mask:
+      - state: equipped-MASK
+      - state: equipped-MASK-unshaded
+        shader: unshaded
+
+- type: entity
+  parent: ClothingOuterBase
+  id: NCGangPhilharmonicVampyresOuter
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/OuterClothing/Gangs/vampyres_coat.rsi
+    layers:
+    - state: icon
+    - state: icon-unshaded
+      shader: unshaded
+  - type: Clothing
+    sprite: _NC/Clothing/OuterClothing/Gangs/vampyres_coat.rsi
+    clothingVisuals:
+      outerClothing:
+      - state: equipped-OUTERCLOTHING
+      - state: equipped-OUTERCLOTHING-unshaded
+        shader: unshaded
+
+- type: entity
+  parent: ClothingMaskBase
+  id: NCGangPhilharmonicVampyresMask
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Mask/Gangs/vampyres_mask.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Mask/Gangs/vampyres_mask.rsi
+    clothingVisuals:
+      mask:
+      - state: equipped-MASK
+      - state: equipped-MASK-unshaded
+        shader: unshaded

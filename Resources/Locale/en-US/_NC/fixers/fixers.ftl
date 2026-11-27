@@ -104,3 +104,14 @@ nc-mission-guard-warning-1 = Hey. Private business here. Walk away.
 nc-mission-guard-warning-2 = You lost? Keep moving, choom.
 nc-mission-guard-alarm-1 = That's it, light 'em up!
 nc-mission-guard-alarm-2 = Intruder! Take them down!
+
+nc-fixer-mission-alpha-militech-crate = Militech warehouse shard
+nc-fixer-mission-alpha-militech-crate-desc = Militech keeps a shard in a guarded warehouse. Get in, get it, get out.
+nc-fixer-mission-alpha-valentinos-drop = Package through Valentinos turf
+nc-fixer-mission-alpha-valentinos-drop-desc = The package sits on Valentinos ground. Pick it up without starting a war.
+nc-fixer-mission-beta-biotech-lab = Lab accident
+nc-fixer-mission-beta-biotech-lab-desc = A Biotechnica lab runs a server someone wants dead. Security is tight.
+nc-fixer-mission-beta-maelstrom-boss = Maelstrom boss
+nc-fixer-mission-beta-maelstrom-boss-desc = A Maelstrom boss is holed up with his crew. Take him out.
+nc-fixer-mission-beta-tyger-server = Claws bookkeeping
+nc-fixer-mission-beta-tyger-server-desc = The Tyger Claws keep their books on a server. Wreck it.

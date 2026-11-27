@@ -189,4 +189,23 @@ public sealed class NCFixerMissionTest : GameTest
                 Assert.That(SEntMan.GetComponent<NCMissionGuardComponent>(uid).Hostile.Contains(armed), "The whole group turns on the armed visitor.");
         });
     }
+
+    /// <summary>Every defender of every encounter spawns with its gear.</summary>
+    [Test]
+    public async Task EncounterMobsSpawn()
+    {
+        var map = await Pair.CreateTestMap();
+        await Server.WaitAssertion(() =>
+        {
+            foreach (var encounter in SProtoMan.EnumeratePrototypes<NCFixerEncounterPrototype>())
+            {
+                foreach (var entry in encounter.Entries)
+                {
+                    var mob = SEntMan.SpawnEntity(entry.Mob, map.GridCoords);
+                    Assert.That(SEntMan.HasComponent<Content.Shared.NPC.Components.NpcFactionMemberComponent>(mob), $"{encounter.ID}: {entry.Mob}");
+                    SEntMan.DeleteEntity(mob);
+                }
+            }
+        });
+    }
 }

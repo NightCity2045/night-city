@@ -1,0 +1,214 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+
+- type: ncFixerEncounter
+  id: GangTygerClawsPost
+  warnings: [ nc-gang-tygerclaws-warning-1, nc-gang-tygerclaws-warning-2 ]
+  alarms: [ nc-gang-tygerclaws-alarm-1, nc-gang-tygerclaws-alarm-2 ]
+  entries:
+  - mob: NCMobHumanGangTygerClawsGanger
+    min: 2
+    max: 3
+  - mob: NCMobHumanGangTygerClawsEnforcer
+    min: 0
+    max: 1
+
+- type: ncFixerEncounter
+  id: GangTygerClawsStronghold
+  extraPerLevel: 1
+  warnings: [ nc-gang-tygerclaws-warning-1, nc-gang-tygerclaws-warning-2 ]
+  alarms: [ nc-gang-tygerclaws-alarm-1, nc-gang-tygerclaws-alarm-2 ]
+  entries:
+  - mob: NCMobHumanGangTygerClawsGanger
+    min: 2
+    max: 3
+  - mob: NCMobHumanGangTygerClawsEnforcer
+    min: 1
+    max: 2
+  - mob: NCMobHumanGangTygerClawsBoss
+    min: 1
+    max: 1
+
+- type: ncFixerEncounter
+  id: GangMaelstromPost
+  warnings: [ nc-gang-maelstrom-warning-1, nc-gang-maelstrom-warning-2 ]
+  alarms: [ nc-gang-maelstrom-alarm-1, nc-gang-maelstrom-alarm-2 ]
+  entries:
+  - mob: NCMobHumanGangMaelstromGanger
+    min: 2
+    max: 3
+  - mob: NCMobHumanGangMaelstromEnforcer
+    min: 0
+    max: 1
+
+- type: ncFixerEncounter
+  id: GangMaelstromStronghold
+  extraPerLevel: 1
+  warnings: [ nc-gang-maelstrom-warning-1, nc-gang-maelstrom-warning-2 ]
+  alarms: [ nc-gang-maelstrom-alarm-1, nc-gang-maelstrom-alarm-2 ]
+  entries:
+  - mob: NCMobHumanGangMaelstromGanger
+    min: 2
+    max: 3
+  - mob: NCMobHumanGangMaelstromEnforcer
+    min: 1
+    max: 2
+  - mob: NCMobHumanGangMaelstromBoss
+    min: 1
+    max: 1
+
+- type: ncFixerEncounter
+  id: GangValentinosPost
+  warnings: [ nc-gang-valentinos-warning-1, nc-gang-valentinos-warning-2 ]
+  alarms: [ nc-gang-valentinos-alarm-1, nc-gang-valentinos-alarm-2 ]
+  entries:
+  - mob: NCMobHumanGangValentinosGanger
+    min: 2
+    max: 3
+  - mob: NCMobHumanGangValentinosEnforcer
+    min: 0
+    max: 1
+
+- type: ncFixerEncounter
+  id: GangValentinosStronghold
+  extraPerLevel: 1
+  warnings: [ nc-gang-valentinos-warning-1, nc-gang-valentinos-warning-2 ]
+  alarms: [ nc-gang-valentinos-alarm-1, nc-gang-valentinos-alarm-2 ]
+  entries:
+  - mob: NCMobHumanGangValentinosGanger
+    min: 2
+    max: 3
+  - mob: NCMobHumanGangValentinosEnforcer
+    min: 1
+    max: 2
+  - mob: NCMobHumanGangValentinosBoss
+    min: 1
+    max: 1
+
+- type: ncFixerEncounter
+  id: GangBozosPost
+  warnings: [ nc-gang-bozos-warning-1, nc-gang-bozos-warning-2 ]
+  alarms: [ nc-gang-bozos-alarm-1, nc-gang-bozos-alarm-2 ]
+  entries:
+  - mob: NCMobHumanGangBozosGanger
+    min: 2
+    max: 3
+  - mob: NCMobHumanGangBozosEnforcer
+    min: 0
+    max: 1
+
+- type: ncFixerEncounter
+  id: GangBozosStronghold
+  extraPerLevel: 1
+  warnings: [ nc-gang-bozos-warning-1, nc-gang-bozos-warning-2 ]
+  alarms: [ nc-gang-bozos-alarm-1, nc-gang-bozos-alarm-2 ]
+  entries:
+  - mob: NCMobHumanGangBozosGanger
+    min: 2
+    max: 3
+  - mob: NCMobHumanGangBozosEnforcer
+    min: 1
+    max: 2
+  - mob: NCMobHumanGangBozosBoss
+    min: 1
+    max: 1
+
+- type: ncFixerEncounter
+  id: GangInquisitorsPost
+  warnings: [ nc-gang-inquisitors-warning-1, nc-gang-inquisitors-warning-2 ]
+  alarms: [ nc-gang-inquisitors-alarm-1, nc-gang-inquisitors-alarm-2 ]
+  entries:
+  - mob: NCMobHumanGangInquisitorsGanger
+    min: 2
+    max: 3
+  - mob: NCMobHumanGangInquisitorsEnforcer
+    min: 0
+    max: 1
+
+- type: ncFixerEncounter
+  id: GangInquisitorsStronghold
+  extraPerLevel: 1
+  warnings: [ nc-gang-inquisitors-warning-1, nc-gang-inquisitors-warning-2 ]
+  alarms: [ nc-gang-inquisitors-alarm-1, nc-gang-inquisitors-alarm-2 ]
+  entries:
+  - mob: NCMobHumanGangInquisitorsGanger
+    min: 2
+    max: 3
+  - mob: NCMobHumanGangInquisitorsEnforcer
+    min: 1
+    max: 2
+  - mob: NCMobHumanGangInquisitorsBoss
+    min: 1
+    max: 1
+
+- type: ncFixerEncounter
+  id: GangPhilharmonicVampyresPost
+  warnings: [ nc-gang-philharmonicvampyres-warning-1, nc-gang-philharmonicvampyres-warning-2 ]
+  alarms: [ nc-gang-philharmonicvampyres-alarm-1, nc-gang-philharmonicvampyres-alarm-2 ]
+  entries:
+  - mob: NCMobHumanGangPhilharmonicVampyresGanger
+    min: 2
+    max: 3
+  - mob: NCMobHumanGangPhilharmonicVampyresEnforcer
+    min: 0
+    max: 1
+
+- type: ncFixerEncounter
+  id: GangPhilharmonicVampyresStronghold
+  extraPerLevel: 1
+  warnings: [ nc-gang-philharmonicvampyres-warning-1, nc-gang-philharmonicvampyres-warning-2 ]
+  alarms: [ nc-gang-philharmonicvampyres-alarm-1, nc-gang-philharmonicvampyres-alarm-2 ]
+  entries:
+  - mob: NCMobHumanGangPhilharmonicVampyresGanger
+    min: 2
+    max: 3
+  - mob: NCMobHumanGangPhilharmonicVampyresEnforcer
+    min: 1
+    max: 2
+  - mob: NCMobHumanGangPhilharmonicVampyresBoss
+    min: 1
+    max: 1
+
+- type: ncFixerEncounter
+  id: SecurityMilitechPost
+  warnings: [ nc-security-warning-1, nc-security-warning-2 ]
+  alarms: [ nc-security-alarm-1, nc-security-alarm-2 ]
+  entries:
+  - mob: NCMobHumanSecurityMilitechGuard
+    min: 2
+    max: 3
+
+- type: ncFixerEncounter
+  id: SecurityMilitechStronghold
+  extraPerLevel: 1
+  warnings: [ nc-security-warning-1, nc-security-warning-2 ]
+  alarms: [ nc-security-alarm-1, nc-security-alarm-2 ]
+  entries:
+  - mob: NCMobHumanSecurityMilitechGuard
+    min: 2
+    max: 3
+  - mob: NCMobHumanSecurityMilitechHeavy
+    min: 1
+    max: 2
+
+- type: ncFixerEncounter
+  id: SecurityBiotechnicaPost
+  warnings: [ nc-security-warning-1, nc-security-warning-2 ]
+  alarms: [ nc-security-alarm-1, nc-security-alarm-2 ]
+  entries:
+  - mob: NCMobHumanSecurityBiotechnicaGuard
+    min: 2
+    max: 3
+
+- type: ncFixerEncounter
+  id: SecurityBiotechnicaStronghold
+  extraPerLevel: 1
+  warnings: [ nc-security-warning-1, nc-security-warning-2 ]
+  alarms: [ nc-security-alarm-1, nc-security-alarm-2 ]
+  entries:
+  - mob: NCMobHumanSecurityBiotechnicaGuard
+    min: 2
+    max: 3
+  - mob: NCMobHumanSecurityBiotechnicaHeavy
+    min: 1
+    max: 2

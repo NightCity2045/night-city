@@ -1,0 +1,238 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+
+- type: startingGear
+  id: NCGangTygerClawsGangerGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorBlack
+    shoes: ClothingShoesColorBlack
+    outerClothing: NCGangTygerClawsOuter
+    mask: NCGangTygerClawsMask
+  inhand:
+  - NCWeaponSMGShingen
+
+- type: startingGear
+  id: NCGangTygerClawsEnforcerGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorBlack
+    shoes: ClothingShoesColorBlack
+    outerClothing: NCGangTygerClawsOuter
+    mask: NCGangTygerClawsMask
+    gloves: ClothingHandsGlovesFingerless
+  inhand:
+  - Katana
+
+- type: startingGear
+  id: NCGangTygerClawsBossGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorBlack
+    shoes: ClothingShoesColorBlack
+    outerClothing: NCGangTygerClawsOuter
+    mask: NCGangTygerClawsMask
+    gloves: ClothingHandsGlovesFingerless
+  inhand:
+  - NCWeaponPistolOverlord
+
+- type: startingGear
+  id: NCGangMaelstromGangerGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorBlack
+    shoes: ClothingShoesBootsJack
+    outerClothing: NCGangMaelstromOuter
+    mask: NCGangMaelstromMask
+  inhand:
+  - NCWeaponPistolBoomerBuster
+
+- type: startingGear
+  id: NCGangMaelstromEnforcerGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorBlack
+    shoes: ClothingShoesBootsJack
+    outerClothing: NCGangMaelstromOuter
+    mask: NCGangMaelstromMask
+    gloves: ClothingHandsGlovesFingerless
+  inhand:
+  - NCWeaponShotgunCrusher
+
+- type: startingGear
+  id: NCGangMaelstromBossGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorBlack
+    shoes: ClothingShoesBootsJack
+    outerClothing: NCGangMaelstromOuter
+    mask: NCGangMaelstromMask
+    gloves: ClothingHandsGlovesFingerless
+  inhand:
+  - NCWeaponRifleCopperhead
+
+- type: startingGear
+  id: NCGangValentinosGangerGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorWhite
+    shoes: ClothingShoesColorWhite
+    outerClothing: NCGangValentinosOuter
+    mask: NCGangValentinosMask
+  inhand:
+  - NCWeaponPistolCheesemaker
+
+- type: startingGear
+  id: NCGangValentinosEnforcerGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorWhite
+    shoes: ClothingShoesColorWhite
+    outerClothing: NCGangValentinosOuter
+    mask: NCGangValentinosMask
+    gloves: ClothingHandsGlovesFingerless
+  inhand:
+  - NCWeaponSMGSaratoga
+
+- type: startingGear
+  id: NCGangValentinosBossGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorWhite
+    shoes: ClothingShoesColorWhite
+    outerClothing: NCGangValentinosOuter
+    mask: NCGangValentinosMask
+    gloves: ClothingHandsGlovesFingerless
+  inhand:
+  - NCWeaponPistolMarkIII
+
+- type: startingGear
+  id: NCGangBozosGangerGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorPurple
+    shoes: ClothingShoesColorBlack
+    outerClothing: NCGangBozosOuter
+    mask: NCGangBozosMask
+  inhand:
+  - BaseBallBat
+
+- type: startingGear
+  id: NCGangBozosEnforcerGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorPurple
+    shoes: ClothingShoesColorBlack
+    outerClothing: NCGangBozosOuter
+    mask: NCGangBozosMask
+    gloves: ClothingHandsGlovesFingerless
+  inhand:
+  - NCWeaponPistolStreetmaster
+
+- type: startingGear
+  id: NCGangBozosBossGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorPurple
+    shoes: ClothingShoesColorBlack
+    outerClothing: NCGangBozosOuter
+    mask: NCGangBozosMask
+    gloves: ClothingHandsGlovesFingerless
+  inhand:
+  - NCWeaponShotgunCrusher
+
+- type: startingGear
+  id: NCGangInquisitorsGangerGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorGrey
+    shoes: ClothingShoesBootsJack
+    outerClothing: NCGangInquisitorsOuter
+    mask: NCGangInquisitorsMask
+  inhand:
+  - Machete
+
+- type: startingGear
+  id: NCGangInquisitorsEnforcerGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorGrey
+    shoes: ClothingShoesBootsJack
+    outerClothing: NCGangInquisitorsOuter
+    mask: NCGangInquisitorsMask
+    gloves: ClothingHandsGlovesFingerless
+  inhand:
+  - NCWeaponShotgunCrusher
+
+- type: startingGear
+  id: NCGangInquisitorsBossGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorGrey
+    shoes: ClothingShoesBootsJack
+    outerClothing: NCGangInquisitorsOuter
+    mask: NCGangInquisitorsMask
+    gloves: ClothingHandsGlovesFingerless
+  inhand:
+  - NCWeaponRifleCopperhead
+
+- type: startingGear
+  id: NCGangPhilharmonicVampyresGangerGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorBlack
+    shoes: ClothingShoesColorBlack
+    outerClothing: NCGangPhilharmonicVampyresOuter
+    mask: NCGangPhilharmonicVampyresMask
+  inhand:
+  - NCWeaponPistolHelloCutie
+
+- type: startingGear
+  id: NCGangPhilharmonicVampyresEnforcerGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorBlack
+    shoes: ClothingShoesColorBlack
+    outerClothing: NCGangPhilharmonicVampyresOuter
+    mask: NCGangPhilharmonicVampyresMask
+    gloves: ClothingHandsGlovesFingerless
+  inhand:
+  - NCWeaponSMGShingen
+
+- type: startingGear
+  id: NCGangPhilharmonicVampyresBossGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorBlack
+    shoes: ClothingShoesColorBlack
+    outerClothing: NCGangPhilharmonicVampyresOuter
+    mask: NCGangPhilharmonicVampyresMask
+    gloves: ClothingHandsGlovesFingerless
+  inhand:
+  - NCWeaponPistolAvenger
+
+- type: startingGear
+  id: NCSecurityMilitechGuardGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitSecGrey
+    shoes: ClothingShoesBootsJack
+    outerClothing: ClothingOuterArmorMilitechBulletproof
+    head: ClothingHeadHatMilitechCap
+    gloves: ClothingHandsGlovesFingerless
+  inhand:
+  - NCWeaponSMGSaratoga
+
+- type: startingGear
+  id: NCSecurityMilitechHeavyGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitSecGrey
+    shoes: ClothingShoesBootsJack
+    outerClothing: ClothingOuterArmorMilitechBulletproof
+    head: ClothingHeadHelmetBasic
+    gloves: ClothingHandsGlovesFingerless
+  inhand:
+  - NCWeaponRifleCopperhead
+
+- type: startingGear
+  id: NCSecurityBiotechnicaGuardGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitSecGrey
+    shoes: ClothingShoesBootsJack
+    outerClothing: ClothingOuterArmorBiotechBulletproof
+    head: ClothingHeadHatBiotechCap
+    gloves: ClothingHandsGlovesFingerless
+  inhand:
+  - NCWeaponPistolFederalX9
+
+- type: startingGear
+  id: NCSecurityBiotechnicaHeavyGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitSecGrey
+    shoes: ClothingShoesBootsJack
+    outerClothing: ClothingOuterArmorBiotechBulletproof
+    head: ClothingHeadHelmetBasic
+    gloves: ClothingHandsGlovesFingerless
+  inhand:
+  - NCWeaponSMGSaratoga

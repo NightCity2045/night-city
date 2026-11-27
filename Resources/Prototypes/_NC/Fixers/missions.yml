@@ -105,3 +105,77 @@
   reward: 4000
   reputationGain: 5
   timeLimit: 2400
+
+# Gang and corporate jobs.
+
+- type: ncFixerMission
+  id: NCFixerAlphaMilitechCrate
+  fixer: NCFixerAlpha
+  kind: Retrieval
+  name: nc-fixer-mission-alpha-militech-crate
+  description: nc-fixer-mission-alpha-militech-crate-desc
+  minimumReputation: 25
+  owner: Militech
+  item: NCMissionDataShard
+  encounter: SecurityMilitechPost
+  reward: 4000
+  reputationGain: 5
+  timeLimit: 2400
+
+- type: ncFixerMission
+  id: NCFixerAlphaValentinosDrop
+  fixer: NCFixerAlpha
+  kind: Delivery
+  name: nc-fixer-mission-alpha-valentinos-drop
+  description: nc-fixer-mission-alpha-valentinos-drop-desc
+  minimumReputation: 10
+  owner: Valentinos
+  item: NCMissionPackage
+  encounter: GangValentinosPost
+  reward: 2000
+  reputationGain: 3
+  timeLimit: 1800
+
+- type: ncFixerMission
+  id: NCFixerBetaBiotechLab
+  fixer: NCFixerBeta
+  kind: Sabotage
+  name: nc-fixer-mission-beta-biotech-lab
+  description: nc-fixer-mission-beta-biotech-lab-desc
+  minimumReputation: 50
+  owner: Biotechnica
+  item: NCMissionSabotageTarget
+  encounter: SecurityBiotechnicaStronghold
+  reward: 7000
+  reputationGain: 7
+  reputationLoss: 5
+  timeLimit: 2400
+
+- type: ncFixerMission
+  id: NCFixerBetaMaelstromBoss
+  fixer: NCFixerBeta
+  kind: Elimination
+  name: nc-fixer-mission-beta-maelstrom-boss
+  description: nc-fixer-mission-beta-maelstrom-boss-desc
+  minimumReputation: 50
+  owner: Maelstrom
+  item: NCMobHumanGangMaelstromBoss
+  encounter: GangMaelstromStronghold
+  reward: 7500
+  reputationGain: 8
+  reputationLoss: 5
+  timeLimit: 2400
+
+- type: ncFixerMission
+  id: NCFixerBetaTygerServer
+  fixer: NCFixerBeta
+  kind: Sabotage
+  name: nc-fixer-mission-beta-tyger-server
+  description: nc-fixer-mission-beta-tyger-server-desc
+  minimumReputation: 25
+  owner: TygerClaws
+  item: NCMissionSabotageTarget
+  encounter: GangTygerClawsPost
+  reward: 4000
+  reputationGain: 5
+  timeLimit: 1800

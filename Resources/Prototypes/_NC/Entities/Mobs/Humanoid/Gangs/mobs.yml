@@ -1,0 +1,284 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+
+- type: entity
+  abstract: true
+  parent: MobHuman
+  id: NCMobHumanGangTygerClawsBase
+  components:
+  - type: RandomHumanoidAppearance
+    randomizeName: false
+    allowedMarkingLayers: [ Hair, FacialHair, UndergarmentTop, UndergarmentBottom ]
+  - type: NpcFactionMember
+    factions: [ NCTygerClaws ]
+  - type: FactionException
+  - type: NPCRetaliation
+  - type: HTN
+    rootTask:
+      task: SimpleHumanoidHostileCompound
+
+- type: entity
+  parent: NCMobHumanGangTygerClawsBase
+  id: NCMobHumanGangTygerClawsGanger
+  components:
+  - type: Loadout
+    prototypes: [ NCGangTygerClawsGangerGear ]
+
+- type: entity
+  parent: NCMobHumanGangTygerClawsBase
+  id: NCMobHumanGangTygerClawsEnforcer
+  components:
+  - type: Loadout
+    prototypes: [ NCGangTygerClawsEnforcerGear ]
+
+- type: entity
+  parent: NCMobHumanGangTygerClawsBase
+  id: NCMobHumanGangTygerClawsBoss
+  components:
+  - type: Loadout
+    prototypes: [ NCGangTygerClawsBossGear ]
+
+- type: entity
+  abstract: true
+  parent: MobHuman
+  id: NCMobHumanGangMaelstromBase
+  components:
+  - type: RandomHumanoidAppearance
+    randomizeName: false
+    allowedMarkingLayers: [ Hair, FacialHair, UndergarmentTop, UndergarmentBottom ]
+  - type: NpcFactionMember
+    factions: [ NCMaelstrom ]
+  - type: FactionException
+  - type: NPCRetaliation
+  - type: HTN
+    rootTask:
+      task: SimpleHumanoidHostileCompound
+
+- type: entity
+  parent: NCMobHumanGangMaelstromBase
+  id: NCMobHumanGangMaelstromGanger
+  components:
+  - type: Loadout
+    prototypes: [ NCGangMaelstromGangerGear ]
+
+- type: entity
+  parent: NCMobHumanGangMaelstromBase
+  id: NCMobHumanGangMaelstromEnforcer
+  components:
+  - type: Loadout
+    prototypes: [ NCGangMaelstromEnforcerGear ]
+
+- type: entity
+  parent: NCMobHumanGangMaelstromBase
+  id: NCMobHumanGangMaelstromBoss
+  components:
+  - type: Loadout
+    prototypes: [ NCGangMaelstromBossGear ]
+
+- type: entity
+  abstract: true
+  parent: MobHuman
+  id: NCMobHumanGangValentinosBase
+  components:
+  - type: RandomHumanoidAppearance
+    randomizeName: false
+    allowedMarkingLayers: [ Hair, FacialHair, UndergarmentTop, UndergarmentBottom ]
+  - type: NpcFactionMember
+    factions: [ NCValentinos ]
+  - type: FactionException
+  - type: NPCRetaliation
+  - type: HTN
+    rootTask:
+      task: SimpleHumanoidHostileCompound
+
+- type: entity
+  parent: NCMobHumanGangValentinosBase
+  id: NCMobHumanGangValentinosGanger
+  components:
+  - type: Loadout
+    prototypes: [ NCGangValentinosGangerGear ]
+
+- type: entity
+  parent: NCMobHumanGangValentinosBase
+  id: NCMobHumanGangValentinosEnforcer
+  components:
+  - type: Loadout
+    prototypes: [ NCGangValentinosEnforcerGear ]
+
+- type: entity
+  parent: NCMobHumanGangValentinosBase
+  id: NCMobHumanGangValentinosBoss
+  components:
+  - type: Loadout
+    prototypes: [ NCGangValentinosBossGear ]
+
+- type: entity
+  abstract: true
+  parent: MobHuman
+  id: NCMobHumanGangBozosBase
+  components:
+  - type: RandomHumanoidAppearance
+    randomizeName: false
+    allowedMarkingLayers: [ Hair, FacialHair, UndergarmentTop, UndergarmentBottom ]
+  - type: NpcFactionMember
+    factions: [ NCBozos ]
+  - type: FactionException
+  - type: NPCRetaliation
+  - type: HTN
+    rootTask:
+      task: SimpleHumanoidHostileCompound
+
+- type: entity
+  parent: NCMobHumanGangBozosBase
+  id: NCMobHumanGangBozosGanger
+  components:
+  - type: Loadout
+    prototypes: [ NCGangBozosGangerGear ]
+
+- type: entity
+  parent: NCMobHumanGangBozosBase
+  id: NCMobHumanGangBozosEnforcer
+  components:
+  - type: Loadout
+    prototypes: [ NCGangBozosEnforcerGear ]
+
+- type: entity
+  parent: NCMobHumanGangBozosBase
+  id: NCMobHumanGangBozosBoss
+  components:
+  - type: Loadout
+    prototypes: [ NCGangBozosBossGear ]
+
+- type: entity
+  abstract: true
+  parent: MobHuman
+  id: NCMobHumanGangInquisitorsBase
+  components:
+  - type: RandomHumanoidAppearance
+    randomizeName: false
+    allowedMarkingLayers: [ Hair, FacialHair, UndergarmentTop, UndergarmentBottom ]
+  - type: NpcFactionMember
+    factions: [ NCInquisitors ]
+  - type: FactionException
+  - type: NPCRetaliation
+  - type: HTN
+    rootTask:
+      task: SimpleHumanoidHostileCompound
+
+- type: entity
+  parent: NCMobHumanGangInquisitorsBase
+  id: NCMobHumanGangInquisitorsGanger
+  components:
+  - type: Loadout
+    prototypes: [ NCGangInquisitorsGangerGear ]
+
+- type: entity
+  parent: NCMobHumanGangInquisitorsBase
+  id: NCMobHumanGangInquisitorsEnforcer
+  components:
+  - type: Loadout
+    prototypes: [ NCGangInquisitorsEnforcerGear ]
+
+- type: entity
+  parent: NCMobHumanGangInquisitorsBase
+  id: NCMobHumanGangInquisitorsBoss
+  components:
+  - type: Loadout
+    prototypes: [ NCGangInquisitorsBossGear ]
+
+- type: entity
+  abstract: true
+  parent: MobHuman
+  id: NCMobHumanGangPhilharmonicVampyresBase
+  components:
+  - type: RandomHumanoidAppearance
+    randomizeName: false
+    allowedMarkingLayers: [ Hair, FacialHair, UndergarmentTop, UndergarmentBottom ]
+  - type: NpcFactionMember
+    factions: [ NCPhilharmonicVampyres ]
+  - type: FactionException
+  - type: NPCRetaliation
+  - type: HTN
+    rootTask:
+      task: SimpleHumanoidHostileCompound
+
+- type: entity
+  parent: NCMobHumanGangPhilharmonicVampyresBase
+  id: NCMobHumanGangPhilharmonicVampyresGanger
+  components:
+  - type: Loadout
+    prototypes: [ NCGangPhilharmonicVampyresGangerGear ]
+
+- type: entity
+  parent: NCMobHumanGangPhilharmonicVampyresBase
+  id: NCMobHumanGangPhilharmonicVampyresEnforcer
+  components:
+  - type: Loadout
+    prototypes: [ NCGangPhilharmonicVampyresEnforcerGear ]
+
+- type: entity
+  parent: NCMobHumanGangPhilharmonicVampyresBase
+  id: NCMobHumanGangPhilharmonicVampyresBoss
+  components:
+  - type: Loadout
+    prototypes: [ NCGangPhilharmonicVampyresBossGear ]
+
+- type: entity
+  abstract: true
+  parent: MobHuman
+  id: NCMobHumanSecurityMilitechBase
+  components:
+  - type: RandomHumanoidAppearance
+    randomizeName: false
+    allowedMarkingLayers: [ Hair, FacialHair, UndergarmentTop, UndergarmentBottom ]
+  - type: NpcFactionMember
+    factions: [ NCMilitechSecurity ]
+  - type: FactionException
+  - type: NPCRetaliation
+  - type: HTN
+    rootTask:
+      task: SimpleHumanoidHostileCompound
+
+- type: entity
+  parent: NCMobHumanSecurityMilitechBase
+  id: NCMobHumanSecurityMilitechGuard
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityMilitechGuardGear ]
+
+- type: entity
+  parent: NCMobHumanSecurityMilitechBase
+  id: NCMobHumanSecurityMilitechHeavy
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityMilitechHeavyGear ]
+
+- type: entity
+  abstract: true
+  parent: MobHuman
+  id: NCMobHumanSecurityBiotechnicaBase
+  components:
+  - type: RandomHumanoidAppearance
+    randomizeName: false
+    allowedMarkingLayers: [ Hair, FacialHair, UndergarmentTop, UndergarmentBottom ]
+  - type: NpcFactionMember
+    factions: [ NCBiotechnicaSecurity ]
+  - type: FactionException
+  - type: NPCRetaliation
+  - type: HTN
+    rootTask:
+      task: SimpleHumanoidHostileCompound
+
+- type: entity
+  parent: NCMobHumanSecurityBiotechnicaBase
+  id: NCMobHumanSecurityBiotechnicaGuard
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityBiotechnicaGuardGear ]
+
+- type: entity
+  parent: NCMobHumanSecurityBiotechnicaBase
+  id: NCMobHumanSecurityBiotechnicaHeavy
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityBiotechnicaHeavyGear ]
