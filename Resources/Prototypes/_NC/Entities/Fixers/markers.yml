@@ -1,0 +1,333 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Generated: one marker per kind and owner, for the spawn menu while mapping.
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerObjectiveNeutral
+  suffix: Objective, Neutral
+  components:
+  - type: Sprite
+    state: pink
+  - type: NCMissionMarker
+    kind: Objective
+    owner: Neutral
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerObjectiveMilitech
+  suffix: Objective, Militech
+  components:
+  - type: Sprite
+    state: pink
+  - type: NCMissionMarker
+    kind: Objective
+    owner: Militech
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerObjectiveBiotechnica
+  suffix: Objective, Biotechnica
+  components:
+  - type: Sprite
+    state: pink
+  - type: NCMissionMarker
+    kind: Objective
+    owner: Biotechnica
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerObjectiveSixthStreet
+  suffix: Objective, SixthStreet
+  components:
+  - type: Sprite
+    state: pink
+  - type: NCMissionMarker
+    kind: Objective
+    owner: SixthStreet
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerObjectiveTygerClaws
+  suffix: Objective, TygerClaws
+  components:
+  - type: Sprite
+    state: pink
+  - type: NCMissionMarker
+    kind: Objective
+    owner: TygerClaws
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerObjectiveMaelstrom
+  suffix: Objective, Maelstrom
+  components:
+  - type: Sprite
+    state: pink
+  - type: NCMissionMarker
+    kind: Objective
+    owner: Maelstrom
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerObjectiveValentinos
+  suffix: Objective, Valentinos
+  components:
+  - type: Sprite
+    state: pink
+  - type: NCMissionMarker
+    kind: Objective
+    owner: Valentinos
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerObjectiveBozos
+  suffix: Objective, Bozos
+  components:
+  - type: Sprite
+    state: pink
+  - type: NCMissionMarker
+    kind: Objective
+    owner: Bozos
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerObjectiveInquisitors
+  suffix: Objective, Inquisitors
+  components:
+  - type: Sprite
+    state: pink
+  - type: NCMissionMarker
+    kind: Objective
+    owner: Inquisitors
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerObjectivePhilharmonicVampyres
+  suffix: Objective, PhilharmonicVampyres
+  components:
+  - type: Sprite
+    state: pink
+  - type: NCMissionMarker
+    kind: Objective
+    owner: PhilharmonicVampyres
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerDeadDropNeutral
+  suffix: DeadDrop, Neutral
+  components:
+  - type: Sprite
+    state: green
+  - type: NCMissionMarker
+    kind: DeadDrop
+    owner: Neutral
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerDeadDropMilitech
+  suffix: DeadDrop, Militech
+  components:
+  - type: Sprite
+    state: green
+  - type: NCMissionMarker
+    kind: DeadDrop
+    owner: Militech
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerDeadDropBiotechnica
+  suffix: DeadDrop, Biotechnica
+  components:
+  - type: Sprite
+    state: green
+  - type: NCMissionMarker
+    kind: DeadDrop
+    owner: Biotechnica
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerDeadDropSixthStreet
+  suffix: DeadDrop, SixthStreet
+  components:
+  - type: Sprite
+    state: green
+  - type: NCMissionMarker
+    kind: DeadDrop
+    owner: SixthStreet
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerDeadDropTygerClaws
+  suffix: DeadDrop, TygerClaws
+  components:
+  - type: Sprite
+    state: green
+  - type: NCMissionMarker
+    kind: DeadDrop
+    owner: TygerClaws
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerDeadDropMaelstrom
+  suffix: DeadDrop, Maelstrom
+  components:
+  - type: Sprite
+    state: green
+  - type: NCMissionMarker
+    kind: DeadDrop
+    owner: Maelstrom
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerDeadDropValentinos
+  suffix: DeadDrop, Valentinos
+  components:
+  - type: Sprite
+    state: green
+  - type: NCMissionMarker
+    kind: DeadDrop
+    owner: Valentinos
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerDeadDropBozos
+  suffix: DeadDrop, Bozos
+  components:
+  - type: Sprite
+    state: green
+  - type: NCMissionMarker
+    kind: DeadDrop
+    owner: Bozos
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerDeadDropInquisitors
+  suffix: DeadDrop, Inquisitors
+  components:
+  - type: Sprite
+    state: green
+  - type: NCMissionMarker
+    kind: DeadDrop
+    owner: Inquisitors
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerDeadDropPhilharmonicVampyres
+  suffix: DeadDrop, PhilharmonicVampyres
+  components:
+  - type: Sprite
+    state: green
+  - type: NCMissionMarker
+    kind: DeadDrop
+    owner: PhilharmonicVampyres
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerGuardNeutral
+  suffix: Guard, Neutral
+  components:
+  - type: Sprite
+    state: red
+  - type: NCMissionMarker
+    kind: Guard
+    owner: Neutral
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerGuardMilitech
+  suffix: Guard, Militech
+  components:
+  - type: Sprite
+    state: red
+  - type: NCMissionMarker
+    kind: Guard
+    owner: Militech
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerGuardBiotechnica
+  suffix: Guard, Biotechnica
+  components:
+  - type: Sprite
+    state: red
+  - type: NCMissionMarker
+    kind: Guard
+    owner: Biotechnica
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerGuardSixthStreet
+  suffix: Guard, SixthStreet
+  components:
+  - type: Sprite
+    state: red
+  - type: NCMissionMarker
+    kind: Guard
+    owner: SixthStreet
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerGuardTygerClaws
+  suffix: Guard, TygerClaws
+  components:
+  - type: Sprite
+    state: red
+  - type: NCMissionMarker
+    kind: Guard
+    owner: TygerClaws
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerGuardMaelstrom
+  suffix: Guard, Maelstrom
+  components:
+  - type: Sprite
+    state: red
+  - type: NCMissionMarker
+    kind: Guard
+    owner: Maelstrom
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerGuardValentinos
+  suffix: Guard, Valentinos
+  components:
+  - type: Sprite
+    state: red
+  - type: NCMissionMarker
+    kind: Guard
+    owner: Valentinos
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerGuardBozos
+  suffix: Guard, Bozos
+  components:
+  - type: Sprite
+    state: red
+  - type: NCMissionMarker
+    kind: Guard
+    owner: Bozos
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerGuardInquisitors
+  suffix: Guard, Inquisitors
+  components:
+  - type: Sprite
+    state: red
+  - type: NCMissionMarker
+    kind: Guard
+    owner: Inquisitors
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerGuardPhilharmonicVampyres
+  suffix: Guard, PhilharmonicVampyres
+  components:
+  - type: Sprite
+    state: red
+  - type: NCMissionMarker
+    kind: Guard
+    owner: PhilharmonicVampyres

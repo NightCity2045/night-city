@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# The two starting fixers. Names, lines and payment are placeholders until their write-ups land.
+
+- type: ncFixer
+  id: NCFixerAlpha
+  name: nc-fixer-alpha-name
+  description: nc-fixer-alpha-desc
+  payment: DeadDrop
+  greetings:
+  - nc-fixer-alpha-greeting-1
+  - nc-fixer-alpha-greeting-2
+  - nc-fixer-alpha-greeting-3
+
+- type: ncFixer
+  id: NCFixerBeta
+  name: nc-fixer-beta-name
+  description: nc-fixer-beta-desc
+  payment: InPerson
+  greetings:
+  - nc-fixer-beta-greeting-1
+  - nc-fixer-beta-greeting-2
+  - nc-fixer-beta-greeting-3

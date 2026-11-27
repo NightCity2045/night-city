@@ -1,0 +1,56 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# A fixer is a fixed object players talk to: no damage, no pulling, no AI.
+- type: entity
+  abstract: true
+  id: NCFixerBase
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Transform
+    anchored: true
+  - type: Clickable
+  - type: InteractionOutline
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeCircle
+          radius: 0.25
+        density: 100
+        mask:
+        - MachineMask
+        layer:
+        - MidImpassable
+  - type: Sprite
+    noRot: true
+    sprite: Structures/Decoration/mannequin.rsi
+    state: mannequin
+  - type: ActivatableUI
+    key: enum.NCFixerUiKey.Key
+  - type: UserInterface
+    interfaces:
+      enum.NCFixerUiKey.Key:
+        type: NCFixerBoundUserInterface
+
+- type: entity
+  abstract: true
+  parent: CrateGenericSteel
+  id: NCFixerDeadDropBase
+  components:
+  - type: Transform
+    anchored: true
+  - type: Physics
+    bodyType: Static
+
+- type: entity
+  abstract: true
+  parent: MarkerBase
+  id: NCMissionMarkerBase
+  suffix: Mission marker
+  components:
+  - type: Sprite
+    sprite: Markers/cross.rsi
+    state: pink

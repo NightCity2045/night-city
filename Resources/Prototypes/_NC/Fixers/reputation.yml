@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: ncStreetReputation
+  id: Default
+  thresholds: [ 0, 10, 25, 50, 100, 200 ]
+  levelNames:
+  - nc-street-rep-level-0
+  - nc-street-rep-level-1
+  - nc-street-rep-level-2
+  - nc-street-rep-level-3
+  - nc-street-rep-level-4
+  - nc-street-rep-level-5

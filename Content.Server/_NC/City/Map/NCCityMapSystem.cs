@@ -80,7 +80,7 @@ public sealed class NCCityMapSystem : EntitySystem
                 coordinates.NetworkId.ToString(),
                 coordinates.Z,
                 coordinates.Position,
-                []), viewer);
+                CollectMarkers(user)), viewer);
         }
     }
 
@@ -166,8 +166,16 @@ public sealed class NCCityMapSystem : EntitySystem
             coordinates.Z,
             coordinates.Position,
             features,
-            [],
+            CollectMarkers(user),
             features.Count == 0 ? Loc.GetString("nc-city-map-grid-only") : string.Empty,
             CanEdit(session));
+    }
+
+    private List<NCCityMapMarker> CollectMarkers(EntityUid viewer)
+    {
+        var markers = new List<NCCityMapMarker>();
+        var ev = new NCCityMapCollectMarkersEvent(markers);
+        RaiseLocalEvent(viewer, ref ev);
+        return markers;
     }
 }

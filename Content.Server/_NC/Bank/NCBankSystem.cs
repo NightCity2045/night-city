@@ -20,6 +20,7 @@ using Content.Shared.Mobs.Systems;
 using Content.Shared.Roles;
 using Content.Shared.Roles.Jobs;
 using Robust.Server.Player;
+using Robust.Shared.Map;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server._NC.Bank;
@@ -373,6 +374,18 @@ public sealed partial class NCBankSystem : EntitySystem
         return true;
     }
 
+    /// <summary>Spawns cash and puts it in the user's hands, or at their feet.</summary>
+    public void GiveCashTo(EntityUid user, int amount)
+    {
+        GiveCash(user, amount);
+    }
+
+    /// <summary>Spawns a cash stack at the given place.</summary>
+    public EntityUid SpawnCash(EntityCoordinates coordinates, int amount)
+    {
+        return _stacks.SpawnAtPosition(amount, Configuration.CurrencyStack, coordinates);
+    }
+
     /// <summary>Withdraws cash and puts it in the user's hands.</summary>
     public bool TryWithdrawCash(NCBankAccountRecord account, long amount, EntityUid user)
     {
@@ -449,6 +462,17 @@ public sealed partial class NCBankSystem : EntitySystem
         Apply(corporationAccount, NCBankTransactionKind.ContractReward, reward - departmentAmount, 0, null, contract);
         _adminLog.Add(LogType.NCBank, LogImpact.Medium,
             $"{ToPrettyString(actor):actor} fulfilled contract {contract}: {departmentAmount} to {departmentAccount.Number}, {reward - departmentAmount} to {corporationAccount.Number}");
+        return true;
+    }
+
+    /// <summary>Pays a fixer's reward to a loaded character account. No bank fee applies.</summary>
+    public bool TryPayFixer(int profileId, long amount, string mission)
+    {
+        if (amount <= 0 || !_byProfile.TryGetValue(profileId, out var account))
+            return false;
+
+        Apply(account, NCBankTransactionKind.FixerPayment, amount, 0, null, mission);
+        _adminLog.Add(LogType.NCBank, LogImpact.Low, $"Fixer mission {mission} paid {amount} to {account.Number}");
         return true;
     }
 

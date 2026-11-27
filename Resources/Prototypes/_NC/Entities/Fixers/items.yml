@@ -1,0 +1,34 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: entity
+  parent: BoxCardboard
+  id: NCMissionPackage
+
+- type: entity
+  parent: ResearchDisk
+  id: NCMissionDataShard
+  components:
+  - type: StaticPrice
+    price: 0
+
+# Something to wreck: a rack of hardware that breaks apart under enough damage.
+- type: entity
+  parent: BaseStructure
+  id: NCMissionSabotageTarget
+  components:
+  - type: Sprite
+    sprite: Structures/Machines/server.rsi
+    state: server
+  - type: InteractionOutline
+  - type: Damageable
+    damageModifierSet: Metallic
+  - type: Injurable
+    damageContainer: StructuralInorganic
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 150
+      behaviors:
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]

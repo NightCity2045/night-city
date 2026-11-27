@@ -1032,20 +1032,24 @@ public sealed partial class NCCityMapControl : LayoutContainer
         }
         foreach (var tracked in _markers)
         {
-            if (tracked.Z != _z || !string.Equals(tracked.NetworkId, _networkId, StringComparison.Ordinal))
+            if (!string.Equals(tracked.NetworkId, _networkId, StringComparison.Ordinal))
                 continue;
 
             var marker = MapToScreen(tracked.Position);
             if (!IsInCanvas(marker))
                 continue;
 
-            var color = tracked.Live ? TraumaLiveColor : TraumaLastKnownColor;
+            // Markers on other floors stay visible but dimmed, with their floor in the label.
+            var otherFloor = tracked.Z != _z;
+            var color = (tracked.Live ? TraumaLiveColor : TraumaLastKnownColor).WithAlpha(otherFloor ? 0.55f : 1f);
             var pulse = (float) (_timing.RealTime.TotalSeconds % 1.2d / 1.2d);
             handle.DrawCircle(marker, 8f + pulse * 10f, color.WithAlpha((1f - pulse) * 0.18f));
             handle.DrawCircle(marker, 6f, color.WithAlpha(0.35f));
             handle.DrawCircle(marker, 3f, color);
-            var suffix = tracked.Live ? " // LIVE" : " // LAST KNOWN";
-            handle.DrawString(_smallFont, marker + new Vector2(9f, -7f), tracked.Label.ToUpperInvariant() + suffix, color);
+            var label = tracked.Label.ToUpperInvariant();
+            if (otherFloor)
+                label += $" // Z {tracked.Z:+0;-0;0}";
+            handle.DrawString(_smallFont, marker + new Vector2(9f, -7f), label, color);
         }
     }
 

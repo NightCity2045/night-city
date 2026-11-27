@@ -52,6 +52,13 @@ public sealed record NCCityMapMarker(
     Vector2 Position,
     bool Live);
 
+/// <summary>
+/// Raised on the viewer entity whenever the server builds the markers of a city map update, so features such as
+/// fixer missions can add theirs.
+/// </summary>
+[ByRefEvent]
+public readonly record struct NCCityMapCollectMarkersEvent(List<NCCityMapMarker> Markers);
+
 /// <summary>Client asks for the city map; the server answers with one snapshot and then live tracking.</summary>
 [Serializable, NetSerializable]
 public sealed class NCCityMapOpenRequestEvent : EntityEventArgs;

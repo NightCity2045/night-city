@@ -1,0 +1,107 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Starter mission pools, one of each kind. A mission only shows up when the map has what it needs.
+
+- type: ncFixerMission
+  id: NCFixerAlphaDelivery
+  fixer: NCFixerAlpha
+  kind: Delivery
+  name: nc-fixer-mission-alpha-delivery
+  description: nc-fixer-mission-alpha-delivery-desc
+  owner: Neutral
+  item: NCMissionPackage
+  reward: 800
+  timeLimit: 1200
+
+- type: ncFixerMission
+  id: NCFixerAlphaCourier
+  fixer: NCFixerAlpha
+  kind: Delivery
+  name: nc-fixer-mission-alpha-courier
+  description: nc-fixer-mission-alpha-courier-desc
+  owner: Neutral
+  item: NCMissionPackage
+  dropAtMarker: true
+  reward: 1000
+  timeLimit: 1200
+
+- type: ncFixerMission
+  id: NCFixerAlphaCollection
+  fixer: NCFixerAlpha
+  kind: Collection
+  name: nc-fixer-mission-alpha-collection
+  description: nc-fixer-mission-alpha-collection-desc
+  reward: 1500
+  timeLimit: 2400
+  requirements:
+  - !type:NCCorpItemRequirement
+    item: NCWeaponPistolStreetmaster
+    amount: 3
+
+- type: ncFixerMission
+  id: NCFixerAlphaRetrieval
+  fixer: NCFixerAlpha
+  kind: Retrieval
+  name: nc-fixer-mission-alpha-retrieval
+  description: nc-fixer-mission-alpha-retrieval-desc
+  minimumReputation: 10
+  owner: SixthStreet
+  item: NCMissionDataShard
+  encounter: SixthStreetPost
+  reward: 2500
+  reputationGain: 4
+  timeLimit: 1800
+
+- type: ncFixerMission
+  id: NCFixerBetaSabotage
+  fixer: NCFixerBeta
+  kind: Sabotage
+  name: nc-fixer-mission-beta-sabotage
+  description: nc-fixer-mission-beta-sabotage-desc
+  minimumReputation: 10
+  owner: SixthStreet
+  item: NCMissionSabotageTarget
+  encounter: SixthStreetPost
+  reward: 3000
+  reputationGain: 4
+  timeLimit: 1800
+
+- type: ncFixerMission
+  id: NCFixerBetaElimination
+  fixer: NCFixerBeta
+  kind: Elimination
+  name: nc-fixer-mission-beta-elimination
+  description: nc-fixer-mission-beta-elimination-desc
+  minimumReputation: 25
+  owner: SixthStreet
+  item: NCMobHumanSixthStreetVeteran
+  encounter: SixthStreetStronghold
+  reward: 5000
+  reputationGain: 6
+  reputationLoss: 5
+  timeLimit: 1800
+
+- type: ncFixerMission
+  id: NCFixerBetaCorporateHit
+  fixer: NCFixerBeta
+  kind: Elimination
+  name: nc-fixer-mission-beta-corporate-hit
+  description: nc-fixer-mission-beta-corporate-hit-desc
+  minimumReputation: 50
+  targetDepartments: [ Militech, Biotechnica ]
+  reward: 8000
+  reputationGain: 8
+  reputationLoss: 6
+  timeLimit: 2400
+
+- type: ncFixerMission
+  id: NCFixerBetaCorporatePda
+  fixer: NCFixerBeta
+  kind: Retrieval
+  name: nc-fixer-mission-beta-corporate-pda
+  description: nc-fixer-mission-beta-corporate-pda-desc
+  minimumReputation: 25
+  targetDepartments: [ Militech, Biotechnica ]
+  reward: 4000
+  reputationGain: 5
+  timeLimit: 2400

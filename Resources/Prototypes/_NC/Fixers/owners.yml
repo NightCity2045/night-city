@@ -1,0 +1,43 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Who holds a mission place. Markers carry one, missions ask for one, and the owner picks the defenders.
+
+- type: ncMissionOwner
+  id: Neutral
+  name: nc-mission-owner-neutral
+
+- type: ncMissionOwner
+  id: Militech
+  name: nc-mission-owner-militech
+
+- type: ncMissionOwner
+  id: Biotechnica
+  name: nc-mission-owner-biotechnica
+
+- type: ncMissionOwner
+  id: SixthStreet
+  name: nc-mission-owner-sixth-street
+
+- type: ncMissionOwner
+  id: TygerClaws
+  name: nc-mission-owner-tyger-claws
+
+- type: ncMissionOwner
+  id: Maelstrom
+  name: nc-mission-owner-maelstrom
+
+- type: ncMissionOwner
+  id: Valentinos
+  name: nc-mission-owner-valentinos
+
+- type: ncMissionOwner
+  id: Bozos
+  name: nc-mission-owner-bozos
+
+- type: ncMissionOwner
+  id: Inquisitors
+  name: nc-mission-owner-inquisitors
+
+- type: ncMissionOwner
+  id: PhilharmonicVampyres
+  name: nc-mission-owner-philharmonic-vampyres

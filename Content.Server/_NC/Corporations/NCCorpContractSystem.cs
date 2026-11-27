@@ -195,11 +195,19 @@ public sealed class NCCorpContractSystem : EntitySystem
         NCCorpContractPrototype contract,
         List<EntityUid> goods)
     {
+        return Match(contract.Requirements, goods);
+    }
+
+    /// <inheritdoc cref="Match(NCCorpContractPrototype, List{EntityUid})"/>
+    public List<(NCCorpRequirementProgress Progress, List<(EntityUid Entity, int Units)> Taken)> Match(
+        List<NCCorpContractRequirement> requirements,
+        List<EntityUid> goods)
+    {
         var used = new HashSet<EntityUid>();
         var result = new List<(NCCorpRequirementProgress, List<(EntityUid, int)>)>();
-        for (var i = 0; i < contract.Requirements.Count; i++)
+        for (var i = 0; i < requirements.Count; i++)
         {
-            var requirement = contract.Requirements[i];
+            var requirement = requirements[i];
             var taken = new List<(EntityUid, int)>();
             var have = 0;
             foreach (var entity in goods)
@@ -221,6 +229,38 @@ public sealed class NCCorpContractSystem : EntitySystem
         }
 
         return result;
+    }
+
+    /// <summary>Takes the matched goods: partial stacks shrink, everything else is deleted.</summary>
+    public void Consume(List<(NCCorpRequirementProgress Progress, List<(EntityUid Entity, int Units)> Taken)> match)
+    {
+        foreach (var (_, taken) in match)
+        {
+            foreach (var (entity, units) in taken)
+            {
+                if (TryComp<StackComponent>(entity, out var stack) && stack.Count > units)
+                    _stacks.SetCount((entity, stack), stack.Count - units);
+                else
+                    QueueDel(entity);
+            }
+        }
+    }
+
+    /// <summary>An entity's contents, recursively through containers, never including mobs.</summary>
+    public List<EntityUid> GetContents(EntityUid root)
+    {
+        var goods = new List<EntityUid>();
+        var seen = new HashSet<EntityUid> { root };
+        if (!TryComp<ContainerManagerComponent>(root, out var manager))
+            return goods;
+
+        foreach (var container in _containers.GetAllContainers(root, manager))
+        {
+            foreach (var contained in container.ContainedEntities)
+                Collect(contained, goods, seen);
+        }
+
+        return goods;
     }
 
     #endregion
@@ -276,16 +316,7 @@ public sealed class NCCorpContractSystem : EntitySystem
             return false;
         }
 
-        foreach (var (_, taken) in match)
-        {
-            foreach (var (entity, units) in taken)
-            {
-                if (TryComp<StackComponent>(entity, out var stack) && stack.Count > units)
-                    _stacks.SetCount((entity, stack), stack.Count - units);
-                else
-                    QueueDel(entity);
-            }
-        }
+        Consume(match);
 
         if (_open.TryGetValue(corporation, out var open))
             open[slot] = Draw(corporation, open);

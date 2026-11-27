@@ -37,6 +37,7 @@ public static class NCBankFormat
             NCBankTransactionKind.AdminWithdrawal => "nc-bank-kind-admin-withdrawal",
             NCBankTransactionKind.SalaryMissed => "nc-bank-kind-salary-missed",
             NCBankTransactionKind.ContractReward => "nc-bank-kind-contract",
+            NCBankTransactionKind.FixerPayment => "nc-bank-kind-fixer",
             _ => "nc-bank-kind-unknown",
         });
     }

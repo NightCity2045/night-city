@@ -1,0 +1,38 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: entity
+  parent: NCFixerBase
+  id: NCFixerAlpha
+  components:
+  - type: NCFixer
+    fixer: NCFixerAlpha
+
+- type: entity
+  parent: NCFixerBase
+  id: NCFixerBeta
+  components:
+  - type: NCFixer
+    fixer: NCFixerBeta
+
+- type: entity
+  parent: NCFixerDeadDropBase
+  id: NCFixerDeadDropAlpha
+  suffix: NCFixerAlpha
+  components:
+  - type: NCFixerDeadDrop
+    fixer: NCFixerAlpha
+
+- type: entity
+  parent: NCFixerDeadDropBase
+  id: NCFixerDeadDropBeta
+  suffix: NCFixerBeta
+  components:
+  - type: NCFixerDeadDrop
+    fixer: NCFixerBeta
+
+# Spawned at a dead drop marker for deliveries that do not end at the fixer; removed after the mission.
+- type: entity
+  parent: NCFixerDeadDropBase
+  id: NCFixerMissionDeadDrop
+  components:
+  - type: NCFixerDeadDrop

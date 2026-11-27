@@ -1906,6 +1906,22 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.ToTable("nc_round_snapshot_section", (string)null);
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCStreetReputation", b =>
+                {
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<int>("Value")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("value");
+
+                    b.HasKey("ProfileId")
+                        .HasName("PK_nc_street_reputation");
+
+                    b.ToTable("nc_street_reputation", (string)null);
+                });
+
             modelBuilder.Entity("Content.Server.Database.PlayTime", b =>
                 {
                     b.Property<int>("Id")
@@ -2963,6 +2979,16 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_nc_round_snapshot_section_nc_round_snapshot_snapshot_id");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCStreetReputation", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", null)
+                        .WithOne()
+                        .HasForeignKey("Content.Server.Database.NCStreetReputation", "ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_street_reputation_profile_profile_id");
                 });
 
             modelBuilder.Entity("Content.Server.Database.Player", b =>
