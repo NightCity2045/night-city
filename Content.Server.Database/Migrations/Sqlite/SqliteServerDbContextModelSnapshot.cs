@@ -1784,6 +1784,10 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .HasColumnType("TEXT")
                         .HasColumnName("property_id");
 
+                    b.Property<bool>("IsHome")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("is_home");
+
                     b.Property<int>("KeyVersion")
                         .HasColumnType("INTEGER")
                         .HasColumnName("key_version");

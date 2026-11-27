@@ -25,6 +25,9 @@ public sealed class NCProperty
 
     public int KeyVersion { get; set; }
 
+    /// <summary>The tenant enters the round here.</summary>
+    public bool IsHome { get; set; }
+
     /// <summary>Asking price when the tenant offers the lease for resale.</summary>
     public long? ResalePrice { get; set; }
 

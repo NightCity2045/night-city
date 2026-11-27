@@ -22,6 +22,13 @@ public sealed partial class NCPropertySystem
         SubscribeLocalEvent<NCRealEstateTerminalComponent, NCRealEstateListMessage>(OnList);
         SubscribeLocalEvent<NCRealEstateTerminalComponent, NCRealEstateUnlistMessage>(OnUnlist);
         SubscribeLocalEvent<NCRealEstateTerminalComponent, NCRealEstateBuyMessage>(OnBuy);
+        SubscribeLocalEvent<NCRealEstateTerminalComponent, NCRealEstateSetHomeMessage>(OnSetHome);
+    }
+
+    private void OnSetHome(Entity<NCRealEstateTerminalComponent> ent, ref NCRealEstateSetHomeMessage args)
+    {
+        Report(ent, args.Actor, TrySetHome(args.Actor, args.Property, args.Home, out var error),
+            args.Home ? "nc-property-home-set" : "nc-property-home-cleared", error);
     }
 
     private void OnDuplicate(Entity<NCRealEstateTerminalComponent> ent, ref NCRealEstateDuplicateMessage args)
@@ -121,7 +128,8 @@ public sealed partial class NCPropertySystem
                         status is NCPropertyStatus.Mine or NCPropertyStatus.ForSale ? GetRemaining(lease) : TimeSpan.Zero,
                         lease.ResalePrice ?? 0,
                         reserved,
-                        status == NCPropertyStatus.Mine ? lease.ResaleBuyer ?? string.Empty : string.Empty));
+                        status == NCPropertyStatus.Mine ? lease.ResaleBuyer ?? string.Empty : string.Empty,
+                        status == NCPropertyStatus.Mine && lease.Home));
                 }
             }
 

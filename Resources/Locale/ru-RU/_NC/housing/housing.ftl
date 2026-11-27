@@ -75,3 +75,8 @@ nc-real-estate-unlist = Снять с продажи
 nc-real-estate-price-placeholder = Цена
 nc-real-estate-buyer-placeholder = Счёт покупателя (необязательно)
 nc-real-estate-list = Выставить на перепродажу
+
+nc-property-home-set = Теперь вы будете входить в раунд здесь.
+nc-property-home-cleared = Вы будете входить в раунд как обычно.
+nc-real-estate-home-on = Дом: вы входите в раунд здесь
+nc-real-estate-home-off = Входить в раунд здесь

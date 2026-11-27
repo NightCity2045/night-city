@@ -1852,6 +1852,10 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasColumnType("character varying(64)")
                         .HasColumnName("property_id");
 
+                    b.Property<bool>("IsHome")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_home");
+
                     b.Property<int>("KeyVersion")
                         .HasColumnType("integer")
                         .HasColumnName("key_version");

@@ -36,7 +36,8 @@ public sealed record NCPropertyListing(
     TimeSpan Remaining,
     long ResalePrice,
     bool ResaleReserved,
-    string ResaleBuyer);
+    string ResaleBuyer,
+    bool Home);
 
 [Serializable, NetSerializable]
 public sealed class NCRealEstateUiState(
@@ -113,4 +114,12 @@ public sealed class NCRealEstateUnlistMessage(string property) : BoundUserInterf
 public sealed class NCRealEstateBuyMessage(string property) : BoundUserInterfaceMessage
 {
     public readonly string Property = property;
+}
+
+/// <summary>Marks the user's own lease as the place they enter the round, or clears it.</summary>
+[Serializable, NetSerializable]
+public sealed class NCRealEstateSetHomeMessage(string property, bool home) : BoundUserInterfaceMessage
+{
+    public readonly string Property = property;
+    public readonly bool Home = home;
 }

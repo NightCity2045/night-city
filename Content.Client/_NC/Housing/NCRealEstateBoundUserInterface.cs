@@ -21,6 +21,7 @@ public sealed class NCRealEstateBoundUserInterface(EntityUid owner, Enum uiKey) 
         _window.OnList += (property, price, buyer) => SendMessage(new NCRealEstateListMessage(property, price, buyer));
         _window.OnUnlist += property => SendMessage(new NCRealEstateUnlistMessage(property));
         _window.OnBuy += property => SendMessage(new NCRealEstateBuyMessage(property));
+        _window.OnSetHome += (property, home) => SendMessage(new NCRealEstateSetHomeMessage(property, home));
     }
 
     protected override void UpdateState(BoundUserInterfaceState state)

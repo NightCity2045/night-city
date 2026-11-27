@@ -203,7 +203,7 @@ public sealed partial class NCPropertySystem
         lease.Tenant = buyer.ProfileId;
         lease.KeyVersion++;
         lease.Warned = false;
-        ClearResale(lease);
+        ClearTenancy(lease);
         Save(lease);
         if (!Deleted(user))
             IssueCards(user, property, lease);

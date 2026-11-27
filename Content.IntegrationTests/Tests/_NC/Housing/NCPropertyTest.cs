@@ -199,4 +199,50 @@ public sealed class NCPropertyTest : GameTest
             Assert.That(SEntMan.GetComponent<NCPropertyCardComponent>(card).KeyVersion, Is.EqualTo(3));
         });
     }
+
+    /// <summary>
+    /// A tenant marks the flat as home and is moved onto the bed inside when entering the round; only one home
+    /// per character, and losing the lease clears it.
+    /// </summary>
+    [Test]
+    public async Task HomeSpawnsOnTheBed()
+    {
+        var properties = Server.System<NCPropertySystem>();
+        var map = await Pair.CreateTestMap();
+        EntityUid bed = default;
+        await Server.WaitPost(() =>
+        {
+            BuildFlat(map);
+            bed = SEntMan.SpawnEntity("Bed", new EntityCoordinates(map.Grid.Owner, 2.5f, 4.5f));
+        });
+        await Server.WaitRunTicks(1);
+
+        await Server.WaitAssertion(() =>
+        {
+            properties.EnsureIndexed();
+            var tenant = new NCBankAccountRecord(990003, "NC-990003", 4243, null, 0);
+            var lease = properties.GetLease(PropertyId);
+            lease.Tenant = 4243;
+            lease.KeyVersion = 1;
+            lease.PaidUntil = new NCActiveWorldTime(TimeSpan.FromHours(2).Ticks);
+            var other = properties.GetLease("NCTestOtherFlat");
+            other.Tenant = 4243;
+            other.Home = true;
+
+            Assert.That(properties.TrySetHome(tenant, PropertyId, true, out _), Is.True);
+            Assert.That(lease.Home, Is.True);
+            Assert.That(other.Home, Is.False, "One home per character.");
+
+            var mob = SEntMan.SpawnEntity("MobHuman", new EntityCoordinates(map.Grid.Owner, -0.5f, -0.5f));
+            Assert.That(properties.TrySendHome(mob, 4243), Is.True);
+            var xform = SEntMan.GetComponent<TransformComponent>(mob);
+            Assert.That(xform.Coordinates.Position, Is.EqualTo(SEntMan.GetComponent<TransformComponent>(bed).Coordinates.Position),
+                "The resident wakes up on the bed.");
+            Assert.That(properties.TrySendHome(mob, 4244), Is.False, "Someone else's home is not yours.");
+
+            properties.CheckLeases(new NCActiveWorldTime(TimeSpan.FromHours(3).Ticks));
+            Assert.That(lease.Home, Is.False, "Eviction clears the home.");
+            Assert.That(properties.TrySendHome(mob, 4243), Is.False);
+        });
+    }
 }

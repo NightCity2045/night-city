@@ -13,7 +13,8 @@ public sealed record NCPropertyData(
     int KeyVersion,
     long? ResalePrice = null,
     string? ResaleSeller = null,
-    string? ResaleBuyer = null);
+    string? ResaleBuyer = null,
+    bool IsHome = false);
 
 public partial interface IServerDbManager
 {
@@ -49,7 +50,8 @@ public abstract partial class ServerDbBase
                 row.KeyVersion,
                 row.ResalePrice,
                 row.ResaleSeller,
-                row.ResaleBuyer))
+                row.ResaleBuyer,
+                row.IsHome))
             .ToListAsync();
     }
 
@@ -62,7 +64,7 @@ public abstract partial class ServerDbBase
         if (tenant is { } profileId && !await db.DbContext.Profile.AnyAsync(profile => profile.Id == profileId))
         {
             tenant = null;
-            resale = property with { ResalePrice = null, ResaleSeller = null, ResaleBuyer = null };
+            resale = property with { ResalePrice = null, ResaleSeller = null, ResaleBuyer = null, IsHome = false };
         }
 
         var row = await db.DbContext.NCProperties.SingleOrDefaultAsync(value => value.PropertyId == property.PropertyId);
@@ -78,6 +80,7 @@ public abstract partial class ServerDbBase
         row.ResalePrice = resale.ResalePrice;
         row.ResaleSeller = resale.ResaleSeller;
         row.ResaleBuyer = resale.ResaleBuyer;
+        row.IsHome = resale.IsHome;
         await db.DbContext.SaveChangesAsync();
     }
 }

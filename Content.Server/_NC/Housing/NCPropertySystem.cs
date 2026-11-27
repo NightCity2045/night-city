@@ -63,6 +63,9 @@ public sealed class NCPropertyLease
 
     /// <summary>The only bank account allowed to buy, if the tenant named one.</summary>
     public string? ResaleBuyer;
+
+    /// <summary>The tenant enters the round here.</summary>
+    public bool Home;
 }
 
 /// <summary>
@@ -131,6 +134,7 @@ public sealed partial class NCPropertySystem : EntitySystem
         SubscribeLocalEvent<NCPropertyDoorComponent, BeforeDoorOpenedEvent>(OnBeforeDoorOpened);
         SubscribeLocalEvent<NCPropertyCardComponent, ExaminedEvent>(OnCardExamined);
         InitializeAgency();
+        InitializeHome();
         LoadLeases();
     }
 
@@ -140,6 +144,7 @@ public sealed partial class NCPropertySystem : EntitySystem
         _deniedPopups.Clear();
         _indexed = false;
         _indexAt = TimeSpan.Zero;
+        _homeQueue.Clear();
         foreach (var lease in _leases.Values)
             lease.Warned = false;
     }
@@ -159,6 +164,7 @@ public sealed partial class NCPropertySystem : EntitySystem
                     ResalePrice = row.ResalePrice,
                     ResaleSeller = row.ResaleSeller,
                     ResaleBuyer = row.ResaleBuyer,
+                    Home = row.IsHome,
                 };
             }
 
@@ -180,7 +186,10 @@ public sealed partial class NCPropertySystem : EntitySystem
             if (_indexAt == TimeSpan.Zero)
                 _indexAt = now + IndexDelay;
             else if (now >= _indexAt)
+            {
                 EnsureIndexed();
+                SendQueuedHome();
+            }
         }
 
         if (now < _nextCheck)
@@ -196,6 +205,10 @@ public sealed partial class NCPropertySystem : EntitySystem
     /// <summary>Finds the properties on the map once per round and marks their doors.</summary>
     public void EnsureIndexed()
     {
+        // A property whose grid is gone (a map unloaded mid-round) means the index is stale.
+        if (_indexed && _properties.Values.Any(property => TerminatingOrDeleted(property.Grid)))
+            _indexed = false;
+
         if (_indexed)
             return;
 
@@ -460,8 +473,15 @@ public sealed partial class NCPropertySystem : EntitySystem
         lease.PaidUntil = NCActiveWorldTime.Zero;
         lease.KeyVersion++;
         lease.Warned = false;
-        ClearResale(lease);
+        ClearTenancy(lease);
         Save(lease);
+    }
+
+    /// <summary>Clears what belonged to the departing tenant: the resale offer and the home mark.</summary>
+    private static void ClearTenancy(NCPropertyLease lease)
+    {
+        ClearResale(lease);
+        lease.Home = false;
     }
 
     private static void ClearResale(NCPropertyLease lease)
@@ -504,7 +524,8 @@ public sealed partial class NCPropertySystem : EntitySystem
                 lease.KeyVersion,
                 lease.ResalePrice,
                 lease.ResaleSeller,
-                lease.ResaleBuyer));
+                lease.ResaleBuyer,
+                lease.Home));
         }
         catch (Exception exception)
         {

@@ -20,6 +20,7 @@ public sealed partial class NCRealEstateWindow : FancyWindow
     public event Action<string, long, string>? OnList;
     public event Action<string>? OnUnlist;
     public event Action<string>? OnBuy;
+    public event Action<string, bool>? OnSetHome;
 
     private NCRealEstateUiState? _state;
 
@@ -141,6 +142,16 @@ public sealed partial class NCRealEstateWindow : FancyWindow
 
     private void BuildOwnerControls(BoxContainer box, NCPropertyListing listing, NCRealEstateUiState state)
     {
+        var home = new Button
+        {
+            Text = Loc.GetString(listing.Home ? "nc-real-estate-home-on" : "nc-real-estate-home-off"),
+            ToggleMode = true,
+            Pressed = listing.Home,
+            HorizontalAlignment = HAlignment.Left,
+        };
+        home.OnToggled += args => OnSetHome?.Invoke(listing.Id, args.Pressed);
+        box.AddChild(home);
+
         // Keys: a duplicate for one door, or new locks with a fresh set of cards.
         var keys = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 5 };
         var doors = new OptionButton();

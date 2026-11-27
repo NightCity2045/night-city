@@ -73,3 +73,8 @@ nc-real-estate-unlist = Take off the market
 nc-real-estate-price-placeholder = Price
 nc-real-estate-buyer-placeholder = Buyer account (optional)
 nc-real-estate-list = Offer for resale
+
+nc-property-home-set = You will enter the round here.
+nc-property-home-cleared = You will enter the round as usual.
+nc-real-estate-home-on = Home: you enter the round here
+nc-real-estate-home-off = Enter the round here
