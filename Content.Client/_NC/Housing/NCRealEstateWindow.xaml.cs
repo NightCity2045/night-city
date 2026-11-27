@@ -15,6 +15,11 @@ public sealed partial class NCRealEstateWindow : FancyWindow
     public event Action<string, int>? OnRent;
     public event Action<string, int>? OnExtend;
     public event Action<string>? OnCancel;
+    public event Action<string, int>? OnDuplicate;
+    public event Action<string>? OnRekey;
+    public event Action<string, long, string>? OnList;
+    public event Action<string>? OnUnlist;
+    public event Action<string>? OnBuy;
 
     private NCRealEstateUiState? _state;
 
@@ -78,12 +83,26 @@ public sealed partial class NCRealEstateWindow : FancyWindow
         {
             NCPropertyStatus.Mine => (Loc.GetString("nc-real-estate-status-mine", ("time", Format(listing.Remaining))), "#9FE3A5"),
             NCPropertyStatus.Rented => (Loc.GetString("nc-real-estate-status-rented"), "#E3A59F"),
+            NCPropertyStatus.ForSale => (Loc.GetString("nc-real-estate-status-for-sale",
+                ("price", listing.ResalePrice), ("time", Format(listing.Remaining))), "#7FD3FF"),
             _ => (Loc.GetString("nc-real-estate-status-vacant"), "#FFB21F"),
         };
         box.AddChild(new Label { Text = statusText, FontColorOverride = Color.FromHex(statusColor) });
 
         var usable = state.Open && state.HasAccount;
-        if (usable && listing.Status != NCPropertyStatus.Rented)
+        if (usable && listing.Status == NCPropertyStatus.ForSale)
+        {
+            var buy = new Button
+            {
+                Text = Loc.GetString(listing.ResaleReserved ? "nc-real-estate-reserved" : "nc-real-estate-buy", ("price", listing.ResalePrice)),
+                Disabled = listing.ResaleReserved || listing.ResalePrice > state.Balance,
+                HorizontalAlignment = HAlignment.Left,
+            };
+            buy.OnPressed += _ => OnBuy?.Invoke(listing.Id);
+            box.AddChild(buy);
+        }
+
+        if (usable && listing.Status is NCPropertyStatus.Vacant or NCPropertyStatus.Mine)
         {
             var terms = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 5 };
             terms.AddChild(new Label
@@ -114,14 +133,72 @@ public sealed partial class NCRealEstateWindow : FancyWindow
         }
 
         if (usable && listing.Status == NCPropertyStatus.Mine)
-        {
-            var cancel = new Button { Text = Loc.GetString("nc-real-estate-cancel"), HorizontalAlignment = HAlignment.Left };
-            cancel.OnPressed += _ => OnCancel?.Invoke(listing.Id);
-            box.AddChild(cancel);
-        }
+            BuildOwnerControls(box, listing, state);
 
         box.AddChild(new PanelContainer { StyleClasses = { "LowDivider" } });
         return box;
+    }
+
+    private void BuildOwnerControls(BoxContainer box, NCPropertyListing listing, NCRealEstateUiState state)
+    {
+        // Keys: a duplicate for one door, or new locks with a fresh set of cards.
+        var keys = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 5 };
+        var doors = new OptionButton();
+        for (var i = 0; i < listing.Doors; i++)
+            doors.AddItem(Loc.GetString("nc-real-estate-door", ("door", i + 1)), i);
+        doors.OnItemSelected += args => doors.SelectId(args.Id);
+        var duplicate = new Button
+        {
+            Text = Loc.GetString("nc-real-estate-duplicate", ("price", state.CardPrice)),
+            Disabled = listing.Doors == 0 || state.CardPrice > state.Balance,
+        };
+        duplicate.OnPressed += _ => OnDuplicate?.Invoke(listing.Id, doors.SelectedId);
+        var rekey = new Button
+        {
+            Text = Loc.GetString("nc-real-estate-rekey", ("price", state.RekeyPrice)),
+            Disabled = state.RekeyPrice > state.Balance,
+        };
+        rekey.OnPressed += _ => OnRekey?.Invoke(listing.Id);
+        keys.AddChild(doors);
+        keys.AddChild(duplicate);
+        keys.AddChild(rekey);
+        box.AddChild(keys);
+
+        // Resale of the lease to another character.
+        if (listing.ResalePrice > 0)
+        {
+            var listed = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 5 };
+            listed.AddChild(new Label
+            {
+                Text = Loc.GetString(string.IsNullOrEmpty(listing.ResaleBuyer) ? "nc-real-estate-listed" : "nc-real-estate-listed-for",
+                    ("price", listing.ResalePrice), ("buyer", listing.ResaleBuyer)),
+                FontColorOverride = Color.FromHex("#7FD3FF"),
+            });
+            var unlist = new Button { Text = Loc.GetString("nc-real-estate-unlist") };
+            unlist.OnPressed += _ => OnUnlist?.Invoke(listing.Id);
+            listed.AddChild(unlist);
+            box.AddChild(listed);
+        }
+        else
+        {
+            var sale = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 5 };
+            var price = new LineEdit { PlaceHolder = Loc.GetString("nc-real-estate-price-placeholder"), MinWidth = 90 };
+            var buyer = new LineEdit { PlaceHolder = Loc.GetString("nc-real-estate-buyer-placeholder"), HorizontalExpand = true };
+            var list = new Button { Text = Loc.GetString("nc-real-estate-list") };
+            list.OnPressed += _ =>
+            {
+                if (long.TryParse(price.Text.Trim(), out var amount) && amount > 0)
+                    OnList?.Invoke(listing.Id, amount, buyer.Text.Trim());
+            };
+            sale.AddChild(price);
+            sale.AddChild(buyer);
+            sale.AddChild(list);
+            box.AddChild(sale);
+        }
+
+        var cancel = new Button { Text = Loc.GetString("nc-real-estate-cancel"), HorizontalAlignment = HAlignment.Left };
+        cancel.OnPressed += _ => OnCancel?.Invoke(listing.Id);
+        box.AddChild(cancel);
     }
 
     private static string Place(string value)

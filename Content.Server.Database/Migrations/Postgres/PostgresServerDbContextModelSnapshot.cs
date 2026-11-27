@@ -1860,6 +1860,20 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasColumnType("bigint")
                         .HasColumnName("paid_until");
 
+                    b.Property<string>("ResaleBuyer")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("resale_buyer");
+
+                    b.Property<long?>("ResalePrice")
+                        .HasColumnType("bigint")
+                        .HasColumnName("resale_price");
+
+                    b.Property<string>("ResaleSeller")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("resale_seller");
+
                     b.Property<int?>("TenantProfileId")
                         .HasColumnType("integer")
                         .HasColumnName("tenant_profile_id");

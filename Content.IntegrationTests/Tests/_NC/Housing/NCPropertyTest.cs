@@ -2,6 +2,7 @@
 
 using System.Linq;
 using Content.IntegrationTests.Fixtures;
+using Content.Server._NC.Bank;
 using Content.Server._NC.Housing;
 using Content.Shared._NC.Housing;
 using Content.Shared._NC.Persistence.Time;
@@ -116,6 +117,86 @@ public sealed class NCPropertyTest : GameTest
             Assert.That(lease.Tenant, Is.Null, "Unpaid time evicts the tenant.");
             Assert.That(lease.KeyVersion, Is.EqualTo(4), "Eviction changes the locks.");
             Assert.That(properties.CanOpen(outside, flat, key), Is.False, "The old card is dead.");
+        });
+    }
+
+    /// <summary>
+    /// The tenant cuts a duplicate and changes the locks, offers the lease for resale, and a buyer pays the seller
+    /// by bank transfer, takes over the paid time and gets fresh cards.
+    /// </summary>
+    [Test]
+    public async Task KeysAndResale()
+    {
+        var properties = Server.System<NCPropertySystem>();
+        var bank = Server.System<NCBankSystem>();
+        var hands = Server.System<Content.Shared.Hands.EntitySystems.SharedHandsSystem>();
+        var map = await Pair.CreateTestMap();
+        await PoolManager.WaitUntil(Server, () => bank.Ready);
+        await Server.WaitPost(() => BuildFlat(map));
+        await Server.WaitRunTicks(1);
+
+        var tenant = new NCBankAccountRecord(990001, "NC-990001", 4241, null, 5000);
+        var buyer = new NCBankAccountRecord(990002, "NC-990002", 4242, null, 10000);
+        bank.TryGetDepartmentAccount("NCPD", out var seller);
+        var sellerStart = seller.Balance;
+        EntityUid tenantMob = default;
+        EntityUid buyerMob = default;
+        NCPropertyLease lease = default!;
+
+        await Server.WaitAssertion(() =>
+        {
+            properties.EnsureIndexed();
+            lease = properties.GetLease(PropertyId);
+            lease.Tenant = 4241;
+            lease.KeyVersion = 1;
+            lease.PaidUntil = new NCActiveWorldTime(TimeSpan.FromHours(2).Ticks);
+            tenantMob = SEntMan.SpawnEntity("MobHuman", new EntityCoordinates(map.Grid.Owner, -0.5f, 3.5f));
+            buyerMob = SEntMan.SpawnEntity("MobHuman", new EntityCoordinates(map.Grid.Owner, -0.5f, 2.5f));
+
+            Assert.That(properties.TryDuplicate(tenantMob, tenant, PropertyId, 0, out _), Is.True);
+            Assert.That(tenant.Balance, Is.EqualTo(5000 - properties.Config.CardPrice));
+            var duplicate = hands.EnumerateHeld(tenantMob).Single();
+            Assert.That(SEntMan.GetComponent<NCPropertyCardComponent>(duplicate).KeyVersion, Is.EqualTo(1));
+            Assert.That(properties.TryDuplicate(buyerMob, buyer, PropertyId, 0, out var notYours), Is.False);
+            Assert.That(notYours, Is.EqualTo("nc-property-error-not-yours"));
+
+            Assert.That(properties.TryRekey(tenantMob, tenant, PropertyId, out _), Is.True);
+            Assert.That(lease.KeyVersion, Is.EqualTo(2), "New locks.");
+            Assert.That(tenant.Balance, Is.EqualTo(5000 - properties.Config.CardPrice - properties.Config.RekeyPrice));
+
+            Assert.That(properties.TryListForSale(tenant, PropertyId, 0, null, out _), Is.False, "A price is needed.");
+            Assert.That(properties.TryListForSale(tenant, PropertyId, 1000, "nc-990001", out _), Is.False, "Not to oneself.");
+            Assert.That(properties.TryListForSale(tenant, PropertyId, 1000, "NC-999999", out _), Is.True);
+            Assert.That(lease.ResaleSeller, Is.EqualTo("NC-990001"));
+
+            // The test characters have no stored accounts: let a real account receive the money.
+            lease.ResaleSeller = seller.Number;
+        });
+
+        (bool Success, string Error)? reserved = null;
+        await Server.WaitPost(async () => reserved = await properties.TryBuyAsync(buyerMob, buyer, PropertyId));
+        await PoolManager.WaitUntil(Server, () => reserved != null);
+        Assert.That(reserved!.Value.Error, Is.EqualTo("nc-property-error-reserved"));
+
+        (bool Success, string Error)? bought = null;
+        await Server.WaitPost(async () =>
+        {
+            lease.ResaleBuyer = null;
+            bought = await properties.TryBuyAsync(buyerMob, buyer, PropertyId);
+        });
+        await PoolManager.WaitUntil(Server, () => bought != null);
+
+        await Server.WaitAssertion(() =>
+        {
+            Assert.That(bought!.Value.Success, Is.True, bought.Value.Error);
+            Assert.That(lease.Tenant, Is.EqualTo(4242));
+            Assert.That(lease.KeyVersion, Is.EqualTo(3), "The locks change for the new tenant.");
+            Assert.That(lease.ResalePrice, Is.Null);
+            Assert.That(lease.PaidUntil.Elapsed, Is.EqualTo(TimeSpan.FromHours(2)), "The paid time goes with the lease.");
+            Assert.That(buyer.Balance, Is.EqualTo(10000 - 1000 - bank.GetFeeBasisPoints(buyer) * 1000 / 10000));
+            Assert.That(seller.Balance, Is.EqualTo(sellerStart + 1000));
+            var card = hands.EnumerateHeld(buyerMob).Single();
+            Assert.That(SEntMan.GetComponent<NCPropertyCardComponent>(card).KeyVersion, Is.EqualTo(3));
         });
     }
 }

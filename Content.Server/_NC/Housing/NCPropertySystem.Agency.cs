@@ -17,6 +17,43 @@ public sealed partial class NCPropertySystem
         SubscribeLocalEvent<NCRealEstateTerminalComponent, NCRealEstateRentMessage>(OnRent);
         SubscribeLocalEvent<NCRealEstateTerminalComponent, NCRealEstateExtendMessage>(OnExtend);
         SubscribeLocalEvent<NCRealEstateTerminalComponent, NCRealEstateCancelMessage>(OnCancel);
+        SubscribeLocalEvent<NCRealEstateTerminalComponent, NCRealEstateDuplicateMessage>(OnDuplicate);
+        SubscribeLocalEvent<NCRealEstateTerminalComponent, NCRealEstateRekeyMessage>(OnRekey);
+        SubscribeLocalEvent<NCRealEstateTerminalComponent, NCRealEstateListMessage>(OnList);
+        SubscribeLocalEvent<NCRealEstateTerminalComponent, NCRealEstateUnlistMessage>(OnUnlist);
+        SubscribeLocalEvent<NCRealEstateTerminalComponent, NCRealEstateBuyMessage>(OnBuy);
+    }
+
+    private void OnDuplicate(Entity<NCRealEstateTerminalComponent> ent, ref NCRealEstateDuplicateMessage args)
+    {
+        Report(ent, args.Actor, TryDuplicate(args.Actor, args.Property, args.Door, out var error), "nc-property-duplicated", error);
+    }
+
+    private void OnRekey(Entity<NCRealEstateTerminalComponent> ent, ref NCRealEstateRekeyMessage args)
+    {
+        Report(ent, args.Actor, TryRekey(args.Actor, args.Property, out var error), "nc-property-rekeyed", error);
+    }
+
+    private void OnList(Entity<NCRealEstateTerminalComponent> ent, ref NCRealEstateListMessage args)
+    {
+        Report(ent, args.Actor, TryListForSale(args.Actor, args.Property, args.Price, args.Buyer, out var error), "nc-property-listed", error);
+    }
+
+    private void OnUnlist(Entity<NCRealEstateTerminalComponent> ent, ref NCRealEstateUnlistMessage args)
+    {
+        Report(ent, args.Actor, TryUnlist(args.Actor, args.Property, out var error), "nc-property-unlisted", error);
+    }
+
+    private void OnBuy(Entity<NCRealEstateTerminalComponent> ent, ref NCRealEstateBuyMessage args)
+    {
+        Buy(ent, args.Actor, args.Property);
+    }
+
+    private async void Buy(Entity<NCRealEstateTerminalComponent> ent, EntityUid user, string property)
+    {
+        var (success, error) = await TryBuyAsync(user, property);
+        if (!Deleted(ent) && !Deleted(user))
+            Report(ent, user, success, "nc-property-bought", error);
     }
 
     private void OnRent(Entity<NCRealEstateTerminalComponent> ent, ref NCRealEstateRentMessage args)
@@ -67,7 +104,10 @@ public sealed partial class NCPropertySystem
                     var lease = GetLease(property.Id);
                     var status = lease.Tenant == null ? NCPropertyStatus.Vacant :
                         hasAccount && lease.Tenant == account.ProfileId ? NCPropertyStatus.Mine :
+                        lease.ResalePrice != null ? NCPropertyStatus.ForSale :
                         NCPropertyStatus.Rented;
+                    var reserved = status == NCPropertyStatus.ForSale && lease.ResaleBuyer != null &&
+                                   (!hasAccount || lease.ResaleBuyer != account.Number);
                     listings.Add(new NCPropertyListing(
                         property.Id,
                         property.Name,
@@ -78,7 +118,10 @@ public sealed partial class NCPropertySystem
                         property.Doors.Count,
                         property.RentPerHour,
                         status,
-                        status == NCPropertyStatus.Mine ? GetRemaining(lease) : TimeSpan.Zero));
+                        status is NCPropertyStatus.Mine or NCPropertyStatus.ForSale ? GetRemaining(lease) : TimeSpan.Zero,
+                        lease.ResalePrice ?? 0,
+                        reserved,
+                        status == NCPropertyStatus.Mine ? lease.ResaleBuyer ?? string.Empty : string.Empty));
                 }
             }
 
@@ -86,7 +129,9 @@ public sealed partial class NCPropertySystem
                 Ready,
                 hasAccount,
                 hasAccount ? account.Balance : 0,
-                Terms.ToList(),
+                Config.Terms.ToList(),
+                Config.CardPrice,
+                Config.RekeyPrice,
                 listings));
         }
     }

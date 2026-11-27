@@ -16,6 +16,9 @@ public enum NCPropertyStatus : byte
     Vacant,
     Rented,
     Mine,
+
+    /// <summary>Someone else's lease offered for resale.</summary>
+    ForSale,
 }
 
 /// <summary>One property on the agency's list.</summary>
@@ -30,7 +33,10 @@ public sealed record NCPropertyListing(
     int Doors,
     int RentPerHour,
     NCPropertyStatus Status,
-    TimeSpan Remaining);
+    TimeSpan Remaining,
+    long ResalePrice,
+    bool ResaleReserved,
+    string ResaleBuyer);
 
 [Serializable, NetSerializable]
 public sealed class NCRealEstateUiState(
@@ -38,6 +44,8 @@ public sealed class NCRealEstateUiState(
     bool hasAccount,
     long balance,
     List<int> terms,
+    int cardPrice,
+    int rekeyPrice,
     List<NCPropertyListing> properties) : BoundUserInterfaceState
 {
     /// <summary>False while the world clock or the lease records are not ready.</summary>
@@ -47,6 +55,8 @@ public sealed class NCRealEstateUiState(
 
     /// <summary>The prepayment terms on offer, in hours.</summary>
     public readonly List<int> Terms = terms;
+    public readonly int CardPrice = cardPrice;
+    public readonly int RekeyPrice = rekeyPrice;
     public readonly List<NCPropertyListing> Properties = properties;
 }
 
@@ -66,6 +76,41 @@ public sealed class NCRealEstateExtendMessage(string property, int hours) : Boun
 
 [Serializable, NetSerializable]
 public sealed class NCRealEstateCancelMessage(string property) : BoundUserInterfaceMessage
+{
+    public readonly string Property = property;
+}
+
+/// <summary>A duplicate card for one door (0-based) of the user's own lease.</summary>
+[Serializable, NetSerializable]
+public sealed class NCRealEstateDuplicateMessage(string property, int door) : BoundUserInterfaceMessage
+{
+    public readonly string Property = property;
+    public readonly int Door = door;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCRealEstateRekeyMessage(string property) : BoundUserInterfaceMessage
+{
+    public readonly string Property = property;
+}
+
+/// <summary>Offers the user's lease for resale; an empty buyer means anyone may buy.</summary>
+[Serializable, NetSerializable]
+public sealed class NCRealEstateListMessage(string property, long price, string buyer) : BoundUserInterfaceMessage
+{
+    public readonly string Property = property;
+    public readonly long Price = price;
+    public readonly string Buyer = buyer;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCRealEstateUnlistMessage(string property) : BoundUserInterfaceMessage
+{
+    public readonly string Property = property;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCRealEstateBuyMessage(string property) : BoundUserInterfaceMessage
 {
     public readonly string Property = property;
 }

@@ -6,7 +6,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Content.Server.Database;
 
-public sealed record NCPropertyData(string PropertyId, int? TenantProfileId, long PaidUntil, int KeyVersion);
+public sealed record NCPropertyData(
+    string PropertyId,
+    int? TenantProfileId,
+    long PaidUntil,
+    int KeyVersion,
+    long? ResalePrice = null,
+    string? ResaleSeller = null,
+    string? ResaleBuyer = null);
 
 public partial interface IServerDbManager
 {
@@ -35,7 +42,14 @@ public abstract partial class ServerDbBase
     {
         await using var db = await GetDb();
         return await db.DbContext.NCProperties.AsNoTracking()
-            .Select(row => new NCPropertyData(row.PropertyId, row.TenantProfileId, row.PaidUntil, row.KeyVersion))
+            .Select(row => new NCPropertyData(
+                row.PropertyId,
+                row.TenantProfileId,
+                row.PaidUntil,
+                row.KeyVersion,
+                row.ResalePrice,
+                row.ResaleSeller,
+                row.ResaleBuyer))
             .ToListAsync();
     }
 
@@ -44,8 +58,12 @@ public abstract partial class ServerDbBase
         await using var db = await GetDb();
         var tenant = property.TenantProfileId;
         // A character deleted since the change was made leaves the property vacant.
+        var resale = property;
         if (tenant is { } profileId && !await db.DbContext.Profile.AnyAsync(profile => profile.Id == profileId))
+        {
             tenant = null;
+            resale = property with { ResalePrice = null, ResaleSeller = null, ResaleBuyer = null };
+        }
 
         var row = await db.DbContext.NCProperties.SingleOrDefaultAsync(value => value.PropertyId == property.PropertyId);
         if (row == null)
@@ -57,6 +75,9 @@ public abstract partial class ServerDbBase
         row.TenantProfileId = tenant;
         row.PaidUntil = property.PaidUntil;
         row.KeyVersion = property.KeyVersion;
+        row.ResalePrice = resale.ResalePrice;
+        row.ResaleSeller = resale.ResaleSeller;
+        row.ResaleBuyer = resale.ResaleBuyer;
         await db.DbContext.SaveChangesAsync();
     }
 }

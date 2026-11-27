@@ -24,6 +24,17 @@ public sealed class NCProperty
     public long PaidUntil { get; set; }
 
     public int KeyVersion { get; set; }
+
+    /// <summary>Asking price when the tenant offers the lease for resale.</summary>
+    public long? ResalePrice { get; set; }
+
+    /// <summary>Bank account the resale money goes to.</summary>
+    [MaxLength(32)]
+    public string? ResaleSeller { get; set; }
+
+    /// <summary>The only bank account allowed to buy, if the tenant named one.</summary>
+    [MaxLength(32)]
+    public string? ResaleBuyer { get; set; }
 }
 
 public abstract partial class ServerDbContext

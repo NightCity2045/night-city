@@ -1792,6 +1792,20 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .HasColumnType("INTEGER")
                         .HasColumnName("paid_until");
 
+                    b.Property<string>("ResaleBuyer")
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("resale_buyer");
+
+                    b.Property<long?>("ResalePrice")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("resale_price");
+
+                    b.Property<string>("ResaleSeller")
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("resale_seller");
+
                     b.Property<int?>("TenantProfileId")
                         .HasColumnType("INTEGER")
                         .HasColumnName("tenant_profile_id");

@@ -16,6 +16,11 @@ public sealed class NCRealEstateBoundUserInterface(EntityUid owner, Enum uiKey) 
         _window.OnRent += (property, hours) => SendMessage(new NCRealEstateRentMessage(property, hours));
         _window.OnExtend += (property, hours) => SendMessage(new NCRealEstateExtendMessage(property, hours));
         _window.OnCancel += property => SendMessage(new NCRealEstateCancelMessage(property));
+        _window.OnDuplicate += (property, door) => SendMessage(new NCRealEstateDuplicateMessage(property, door));
+        _window.OnRekey += property => SendMessage(new NCRealEstateRekeyMessage(property));
+        _window.OnList += (property, price, buyer) => SendMessage(new NCRealEstateListMessage(property, price, buyer));
+        _window.OnUnlist += property => SendMessage(new NCRealEstateUnlistMessage(property));
+        _window.OnBuy += property => SendMessage(new NCRealEstateBuyMessage(property));
     }
 
     protected override void UpdateState(BoundUserInterfaceState state)

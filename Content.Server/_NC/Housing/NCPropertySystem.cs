@@ -54,6 +54,15 @@ public sealed class NCPropertyLease
     public NCActiveWorldTime PaidUntil;
     public int KeyVersion;
     public bool Warned;
+
+    /// <summary>Asking price while the tenant offers the lease for resale.</summary>
+    public long? ResalePrice;
+
+    /// <summary>Bank account the resale money goes to.</summary>
+    public string? ResaleSeller;
+
+    /// <summary>The only bank account allowed to buy, if the tenant named one.</summary>
+    public string? ResaleBuyer;
 }
 
 /// <summary>
@@ -64,11 +73,9 @@ public sealed class NCPropertyLease
 /// </summary>
 public sealed partial class NCPropertySystem : EntitySystem
 {
-    public static readonly int[] Terms = [2, 6, 12, 24];
     public static readonly EntProtoId CardPrototype = "NCPropertyKeyCard";
     private static readonly TimeSpan IndexDelay = TimeSpan.FromSeconds(5);
     private static readonly TimeSpan CheckInterval = TimeSpan.FromSeconds(5);
-    private static readonly TimeSpan WarningTime = TimeSpan.FromMinutes(15);
     private static readonly TimeSpan DeniedPopupCooldown = TimeSpan.FromSeconds(2);
     private static readonly ProtoId<TagPrototype> WallTag = "Wall";
 
@@ -77,6 +84,7 @@ public sealed partial class NCPropertySystem : EntitySystem
     [Dependency] private IPlayerManager _players = default!;
     [Dependency] private IServerPreferencesManager _preferences = default!;
     [Dependency] private IChatManager _chat = default!;
+    [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private GameTicker _ticker = default!;
     [Dependency] private SharedMapSystem _map = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
@@ -94,10 +102,15 @@ public sealed partial class NCPropertySystem : EntitySystem
     private readonly Dictionary<string, NCPropertyRecord> _properties = new();
     private readonly Dictionary<string, NCPropertyLease> _leases = new();
     private readonly Dictionary<EntityUid, TimeSpan> _deniedPopups = new();
+
+    /// <summary>Properties with a resale payment in flight; nothing else may touch their lease meanwhile.</summary>
+    private readonly HashSet<string> _pendingSales = new();
     private bool _indexed;
     private bool _leasesLoaded;
     private TimeSpan _indexAt;
     private TimeSpan _nextCheck;
+
+    public NCRealEstatePrototype Config => _prototypes.Index<NCRealEstatePrototype>(NCRealEstatePrototype.DefaultId);
 
     /// <summary>Leases load from the database and the world clock runs.</summary>
     public bool Ready => _leasesLoaded && _worldTime.IsReady;
@@ -143,6 +156,9 @@ public sealed partial class NCPropertySystem : EntitySystem
                     Tenant = row.TenantProfileId,
                     PaidUntil = new NCActiveWorldTime(row.PaidUntil),
                     KeyVersion = row.KeyVersion,
+                    ResalePrice = row.ResalePrice,
+                    ResaleSeller = row.ResaleSeller,
+                    ResaleBuyer = row.ResaleBuyer,
                 };
             }
 
@@ -346,6 +362,12 @@ public sealed partial class NCPropertySystem : EntitySystem
             return false;
 
         var lease = GetLease(propertyId);
+        if (_pendingSales.Contains(propertyId))
+        {
+            error = "nc-property-error-busy";
+            return false;
+        }
+
         if (lease.Tenant == null || lease.Tenant != account.ProfileId)
         {
             error = "nc-property-error-not-yours";
@@ -376,6 +398,12 @@ public sealed partial class NCPropertySystem : EntitySystem
         }
 
         var lease = GetLease(propertyId);
+        if (_pendingSales.Contains(propertyId))
+        {
+            error = "nc-property-error-busy";
+            return false;
+        }
+
         if (lease.Tenant == null || lease.Tenant != account.ProfileId)
         {
             error = "nc-property-error-not-yours";
@@ -411,7 +439,7 @@ public sealed partial class NCPropertySystem : EntitySystem
             return false;
         }
 
-        if (!Terms.Contains(hours))
+        if (!Config.Terms.Contains(hours))
         {
             error = "nc-property-error-term";
             return false;
@@ -432,7 +460,15 @@ public sealed partial class NCPropertySystem : EntitySystem
         lease.PaidUntil = NCActiveWorldTime.Zero;
         lease.KeyVersion++;
         lease.Warned = false;
+        ClearResale(lease);
         Save(lease);
+    }
+
+    private static void ClearResale(NCPropertyLease lease)
+    {
+        lease.ResalePrice = null;
+        lease.ResaleSeller = null;
+        lease.ResaleBuyer = null;
     }
 
     /// <summary>Evicts tenants whose prepaid time is over and warns those about to run out.</summary>
@@ -440,7 +476,7 @@ public sealed partial class NCPropertySystem : EntitySystem
     {
         foreach (var lease in _leases.Values)
         {
-            if (lease.Tenant is not { } tenant)
+            if (lease.Tenant is not { } tenant || _pendingSales.Contains(lease.PropertyId))
                 continue;
 
             var name = _properties.TryGetValue(lease.PropertyId, out var property) ? property.Name : lease.PropertyId;
@@ -449,7 +485,7 @@ public sealed partial class NCPropertySystem : EntitySystem
                 Vacate(lease);
                 Notify(tenant, Loc.GetString("nc-property-evicted", ("property", name)));
             }
-            else if (!lease.Warned && lease.PaidUntil.Elapsed - now.Elapsed <= WarningTime)
+            else if (!lease.Warned && lease.PaidUntil.Elapsed - now.Elapsed <= Config.WarningTime)
             {
                 lease.Warned = true;
                 Notify(tenant, Loc.GetString("nc-property-expiring", ("property", name)));
@@ -461,7 +497,14 @@ public sealed partial class NCPropertySystem : EntitySystem
     {
         try
         {
-            await _db.SetNCPropertyAsync(new NCPropertyData(lease.PropertyId, lease.Tenant, lease.PaidUntil.Ticks, lease.KeyVersion));
+            await _db.SetNCPropertyAsync(new NCPropertyData(
+                lease.PropertyId,
+                lease.Tenant,
+                lease.PaidUntil.Ticks,
+                lease.KeyVersion,
+                lease.ResalePrice,
+                lease.ResaleSeller,
+                lease.ResaleBuyer));
         }
         catch (Exception exception)
         {
@@ -487,18 +530,21 @@ public sealed partial class NCPropertySystem : EntitySystem
 
     private void IssueCards(EntityUid user, NCPropertyRecord property, NCPropertyLease lease)
     {
-        var coordinates = Transform(user).Coordinates;
         for (var i = 0; i < property.Doors.Count; i++)
-        {
-            var card = Spawn(CardPrototype, coordinates);
-            var component = EnsureComp<NCPropertyCardComponent>(card);
-            component.PropertyId = property.Id;
-            component.DoorKey = property.Doors[i].Key;
-            component.KeyVersion = lease.KeyVersion;
-            _metaData.SetEntityName(card, Loc.GetString("nc-property-card-name",
-                ("property", property.Name), ("door", i + 1), ("doors", property.Doors.Count)));
-            _hands.TryPickupAnyHand(user, card);
-        }
+            IssueCard(user, property, lease, i);
+    }
+
+    private EntityUid IssueCard(EntityUid user, NCPropertyRecord property, NCPropertyLease lease, int door)
+    {
+        var card = Spawn(CardPrototype, Transform(user).Coordinates);
+        var component = EnsureComp<NCPropertyCardComponent>(card);
+        component.PropertyId = property.Id;
+        component.DoorKey = property.Doors[door].Key;
+        component.KeyVersion = lease.KeyVersion;
+        _metaData.SetEntityName(card, Loc.GetString("nc-property-card-name",
+            ("property", property.Name), ("door", door + 1), ("doors", property.Doors.Count)));
+        _hands.TryPickupAnyHand(user, card);
+        return card;
     }
 
     private void OnBeforeDoorOpened(Entity<NCPropertyDoorComponent> ent, ref BeforeDoorOpenedEvent args)

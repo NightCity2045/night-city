@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: ncRealEstate
+  id: Default
+  terms: [ 2, 6, 12, 24 ]
+  cardPrice: 50
+  rekeyPrice: 250
+  warningTime: 900
