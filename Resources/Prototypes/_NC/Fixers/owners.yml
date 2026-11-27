@@ -61,3 +61,7 @@
 - type: ncMissionOwner
   id: NightCityUniversity
   name: nc-mission-owner-night-city-university
+
+- type: ncMissionOwner
+  id: Network54
+  name: nc-mission-owner-network-54

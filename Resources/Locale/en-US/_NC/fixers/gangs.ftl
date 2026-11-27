@@ -187,3 +187,17 @@ ent-NCMobHumanSecurityNightCityUniversityResponder = NCU response officer
     .desc = Helmet, vest, pistol. Called in when someone goes after the labs.
 ent-NCMobHumanSecurityNightCityUniversityChief = NCU chief of campus security
     .desc = Takes the university's mission of protecting knowledge very seriously.
+
+nc-n54-warning-1 = Press passes only. Step back from the door.
+nc-n54-warning-2 = This is a private broadcast facility. Leave now.
+nc-n54-alarm-1 = Breach in the bureau! Lock the servers!
+nc-n54-alarm-2 = Nobody walks out with our footage!
+
+ent-NCMobHumanSecurityNetwork54Doorman = Network 54 doorman
+    .desc = A suit with an earpiece and a stun baton, minding the bureau door.
+ent-NCMobHumanSecurityNetwork54Guard = Network 54 security guard
+    .desc = Corporate security for the news. The pistol is not for the cameras.
+ent-NCMobHumanSecurityNetwork54Responder = Network 54 response officer
+    .desc = Armoured, with a submachine gun. Called when someone goes after the footage.
+ent-NCMobHumanSecurityNetwork54Chief = Network 54 head of security
+    .desc = Keeps the bureau's secrets off the air and out of other people's hands.

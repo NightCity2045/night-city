@@ -572,3 +572,66 @@
   reputationGain: 3
   reputationLoss: 4
   timeLimit: 1200
+
+# Downtown: the Philharmonic Vampyres' club, the Network 54 bureau and the Stone Beach Hotel.
+- type: ncFixerMission
+  id: NCFixerVanceVampyresBlackmail
+  fixer: NCFixerVance
+  kind: Retrieval
+  name: nc-fixer-mission-vance-vampyres-blackmail
+  description: nc-fixer-mission-vance-vampyres-blackmail-desc
+  minimumReputation: 25
+  owner: PhilharmonicVampyres
+  terminal: NCMissionIntelTerminal
+  item: NCMissionDataShard
+  encounter: GangPhilharmonicVampyresStronghold
+  reward: 4500
+  reputationGain: 5
+  reputationLoss: 5
+  timeLimit: 2400
+
+- type: ncFixerMission
+  id: NCFixerFengBadBlood
+  fixer: NCFixerFeng
+  kind: Elimination
+  name: nc-fixer-mission-feng-bad-blood
+  description: nc-fixer-mission-feng-bad-blood-desc
+  minimumReputation: 25
+  owner: PhilharmonicVampyres
+  item: NCMobHumanGangPhilharmonicVampyresBoss
+  encounter: GangPhilharmonicVampyresPost
+  reward: 4000
+  reputationGain: 6
+  reputationLoss: 5
+  timeLimit: 2400
+
+- type: ncFixerMission
+  id: NCFixerInsiderN54Footage
+  fixer: NCFixerInsider
+  kind: Retrieval
+  name: nc-fixer-mission-insider-n54-footage
+  description: nc-fixer-mission-insider-n54-footage-desc
+  minimumReputation: 25
+  owner: Network54
+  terminal: NCMissionIntelTerminal
+  item: NCMissionDataShard
+  encounter: SecurityNetwork54Bureau
+  reward: 5000
+  reputationGain: 6
+  reputationLoss: 5
+  timeLimit: 2400
+
+- type: ncFixerMission
+  id: NCFixerVladRoomService
+  fixer: NCFixerVlad
+  kind: Delivery
+  name: nc-fixer-mission-vlad-room-service
+  description: nc-fixer-mission-vlad-room-service-desc
+  minimumReputation: 10
+  itemFromFixer: true
+  dropAtMarker: true
+  owner: Neutral
+  item: NCMissionDrugBrick
+  reward: 1500
+  reputationGain: 3
+  timeLimit: 1800

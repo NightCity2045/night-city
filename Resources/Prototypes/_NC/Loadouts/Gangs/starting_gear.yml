@@ -390,3 +390,46 @@
     neck: ClothingNeckScarfStripedBlue
   inhand:
   - NCWeaponPistolAvenger
+
+- type: startingGear
+  id: NCSecurityNetwork54DoormanGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitLawyerBlack
+    shoes: ClothingShoesColorBlack
+    outerClothing: ClothingOuterArmorBasicSlim
+    ears: ClothingHeadsetGrey
+  inhand:
+  - Stunbaton
+
+- type: startingGear
+  id: NCSecurityNetwork54GuardGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitLawyerBlack
+    shoes: ClothingShoesColorBlack
+    outerClothing: ClothingOuterArmorBasicSlim
+    ears: ClothingHeadsetGrey
+    eyes: ClothingEyesGlassesSunglasses
+  inhand:
+  - NCWeaponPistolFederalX9
+
+- type: startingGear
+  id: NCSecurityNetwork54ResponderGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitLawyerBlack
+    shoes: ClothingShoesColorBlack
+    outerClothing: ClothingOuterArmorBasic
+    ears: ClothingHeadsetGrey
+    eyes: ClothingEyesGlassesSunglasses
+  inhand:
+  - NCWeaponSMGSaratoga
+
+- type: startingGear
+  id: NCSecurityNetwork54ChiefGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitLawyerBlack
+    shoes: ClothingShoesColorBlack
+    outerClothing: ClothingOuterArmorBasic
+    ears: ClothingHeadsetGrey
+    eyes: ClothingEyesGlassesSunglasses
+  inhand:
+  - NCWeaponPistolOverlord

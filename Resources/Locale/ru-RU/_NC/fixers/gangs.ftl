@@ -187,3 +187,17 @@ ent-NCMobHumanSecurityNightCityUniversityResponder = боец группы ре�
     .desc = Шлем, жилет, пистолет. Его зовут, когда кто-то лезет в лаборатории.
 ent-NCMobHumanSecurityNightCityUniversityChief = начальник охраны кампуса (NCU)
     .desc = Очень серьёзно относится к миссии университета по защите знаний.
+
+nc-n54-warning-1 = Только по пресс-картам. Отойди от двери.
+nc-n54-warning-2 = Это закрытый вещательный объект. Уходи.
+nc-n54-alarm-1 = Проникновение в бюро! Блокировать серверы!
+nc-n54-alarm-2 = Никто не уйдёт с нашими записями!
+
+ent-NCMobHumanSecurityNetwork54Doorman = швейцар (Network 54)
+    .desc = Костюм, гарнитура и шоковая дубинка. Стережёт дверь бюро.
+ent-NCMobHumanSecurityNetwork54Guard = охранник (Network 54)
+    .desc = Корпоративная охрана новостей. Пистолет не для камеры.
+ent-NCMobHumanSecurityNetwork54Responder = боец группы реагирования (Network 54)
+    .desc = Броня и пистолет-пулемёт. Его зовут, когда кто-то лезет за записями.
+ent-NCMobHumanSecurityNetwork54Chief = начальник охраны (Network 54)
+    .desc = Держит секреты бюро подальше от эфира и чужих рук.

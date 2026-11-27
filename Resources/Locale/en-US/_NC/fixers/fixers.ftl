@@ -59,6 +59,7 @@ nc-mission-owner-inquisitors = Inquisitors
 nc-mission-owner-philharmonic-vampyres = Philharmonic Vampyres
 nc-mission-owner-medical-technologies = Medical Technologies
 nc-mission-owner-night-city-university = Night City University
+nc-mission-owner-network-54 = Network 54
 
 nc-fixer-mission-target-killed = The target is dead and dead men pay no debts: {$mission} failed.
 nc-mission-terminal-hacking = You start cracking the terminal...
@@ -294,3 +295,12 @@ nc-fixer-mission-feng-inquisitors-broadcast = Dead air
 nc-fixer-mission-feng-inquisitors-broadcast-desc = The Inquisitors squat in the old lecture annex by the university and broadcast sermons against "chromed filth" every night. My club kids are getting jumped on the way home. Smash their broadcast rig.
 nc-fixer-mission-vlad-student-dealer = Tuition fees
 nc-fixer-mission-vlad-student-dealer-desc = A student sells my goods around the university and keeps the money for himself. Find him and explain the business. Hands only, I want him able to pay.
+
+nc-fixer-mission-vance-vampyres-blackmail = Velvet tapes
+nc-fixer-mission-vance-vampyres-blackmail-desc = The Philharmonic Vampyres film everything that happens in the salon under their Downtown club, and half the district's executives have been down there. Get into the salon, pull the recordings off their terminal and bring me the shard.
+nc-fixer-mission-feng-bad-blood = Bad blood
+nc-fixer-mission-feng-bad-blood-desc = The Vampyres' host keeps poaching my best customers and sending them back drained and broken. He holds court under their club in Downtown. End the party.
+nc-fixer-mission-insider-n54-footage = Hot material
+nc-fixer-mission-insider-n54-footage-desc = Network 54 sat on footage someone paid them to bury. It is still on the bureau's servers on 14th Street. Get into the bureau, copy it onto a shard and get out before their security works out you are not a guest.
+nc-fixer-mission-vlad-room-service = Room service
+nc-fixer-mission-vlad-room-service-desc = A guest of mine is waiting for a package. Take it, leave it where I tell you and walk away like you were never there.

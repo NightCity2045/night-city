@@ -59,6 +59,7 @@ nc-mission-owner-inquisitors = Инквизиторы
 nc-mission-owner-philharmonic-vampyres = Филармонические вампиры
 nc-mission-owner-medical-technologies = Medical Technologies
 nc-mission-owner-night-city-university = Night City University
+nc-mission-owner-network-54 = Network 54
 
 nc-fixer-mission-target-killed = Цель мертва, а мёртвые долгов не отдают: «{$mission}» провален.
 nc-mission-terminal-hacking = Ты начинаешь взламывать терминал...
@@ -294,3 +295,12 @@ nc-fixer-mission-feng-inquisitors-broadcast = Мёртвый эфир
 nc-fixer-mission-feng-inquisitors-broadcast-desc = Inquisitors засели в старом учебном корпусе у университета и каждую ночь вещают проповеди против «хромированной мрази». Мои клубные ребята получают по дороге домой. Разнеси их вещательную стойку.
 nc-fixer-mission-vlad-student-dealer = Плата за обучение
 nc-fixer-mission-vlad-student-dealer-desc = Один студент толкает мой товар вокруг университета, а деньги оставляет себе. Найди его и объясни, как устроен бизнес. Только руками: мне нужно, чтобы он мог заплатить.
+
+nc-fixer-mission-vance-vampyres-blackmail = Бархатные плёнки
+nc-fixer-mission-vance-vampyres-blackmail-desc = Philharmonic Vampyres снимают всё, что творится в салоне под их клубом в Даунтауне, а там побывала половина местных начальников. Проберись в салон, слей записи с их терминала и принеси шард.
+nc-fixer-mission-feng-bad-blood = Дурная кровь
+nc-fixer-mission-feng-bad-blood-desc = Хозяин вечеринок у Vampyres переманивает моих лучших клиентов и возвращает их обескровленными и сломанными. Он принимает гостей под их клубом в Даунтауне. Закончи эту вечеринку.
+nc-fixer-mission-insider-n54-footage = Горячий материал
+nc-fixer-mission-insider-n54-footage-desc = Network 54 придержали запись, которую им заплатили похоронить. Она всё ещё на серверах бюро на 14-й улице. Проникни в бюро, скопируй её на шард и уходи, пока охрана не поняла, что ты не гость.
+nc-fixer-mission-vlad-room-service = Обслуживание номеров
+nc-fixer-mission-vlad-room-service-desc = Мой гость ждёт посылку. Возьми её, оставь там, где я скажу, и уходи так, будто тебя здесь не было.

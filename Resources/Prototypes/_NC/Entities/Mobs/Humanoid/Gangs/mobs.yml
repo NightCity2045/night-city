@@ -437,3 +437,48 @@
   components:
   - type: Loadout
     prototypes: [ NCSecurityNightCityUniversityChiefGear ]
+
+# Network 54 news bureau security: suits, earpieces and real guns.
+- type: entity
+  abstract: true
+  parent: MobHuman
+  id: NCMobHumanSecurityNetwork54Base
+  components:
+  - type: RandomHumanoidAppearance
+    randomizeName: false
+    allowedMarkingLayers: [ Hair, FacialHair, UndergarmentTop, UndergarmentBottom ]
+  - type: NpcFactionMember
+    factions: [ NCNetwork54Security ]
+  - type: FactionException
+  - type: NPCRetaliation
+  - type: HTN
+    rootTask:
+      task: SimpleHumanoidHostileCompound
+
+- type: entity
+  parent: NCMobHumanSecurityNetwork54Base
+  id: NCMobHumanSecurityNetwork54Doorman
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityNetwork54DoormanGear ]
+
+- type: entity
+  parent: NCMobHumanSecurityNetwork54Base
+  id: NCMobHumanSecurityNetwork54Guard
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityNetwork54GuardGear ]
+
+- type: entity
+  parent: NCMobHumanSecurityNetwork54Base
+  id: NCMobHumanSecurityNetwork54Responder
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityNetwork54ResponderGear ]
+
+- type: entity
+  parent: NCMobHumanSecurityNetwork54Base
+  id: NCMobHumanSecurityNetwork54Chief
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityNetwork54ChiefGear ]

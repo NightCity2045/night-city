@@ -496,3 +496,36 @@
   - type: NCMissionMarker
     kind: Guard
     owner: NightCityUniversity
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerObjectiveNetwork54
+  suffix: Objective, Network 54
+  components:
+  - type: Sprite
+    state: objective
+  - type: NCMissionMarker
+    kind: Objective
+    owner: Network54
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerDeadDropNetwork54
+  suffix: DeadDrop, Network 54
+  components:
+  - type: Sprite
+    state: drop
+  - type: NCMissionMarker
+    kind: DeadDrop
+    owner: Network54
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerGuardNetwork54
+  suffix: Guard, Network 54
+  components:
+  - type: Sprite
+    state: guard
+  - type: NCMissionMarker
+    kind: Guard
+    owner: Network54

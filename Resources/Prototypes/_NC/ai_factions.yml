@@ -53,3 +53,7 @@
 - type: npcFaction
   id: NCNightCityUniversitySecurity
   friendly: [NCNightCityUniversitySecurity]
+
+- type: npcFaction
+  id: NCNetwork54Security
+  friendly: [NCNetwork54Security]
