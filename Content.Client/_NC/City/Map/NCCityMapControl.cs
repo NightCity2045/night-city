@@ -39,7 +39,7 @@ public sealed partial class NCCityMapControl : LayoutContainer
     private static readonly Color TraumaLastKnownColor = Color.FromHex("#FFCF66");
     private static readonly Color ScanColor = Color.FromHex("#42E9DC20");
     private static readonly Color DistrictFill = Color.FromHex("#123C4538");
-    private static readonly Color DistrictLine = Color.FromHex("#38B9B0A0");
+    private static readonly Color DistrictLine = Color.FromHex("#D46BFFB0");
     private static readonly Color BuildingFill = Color.FromHex("#0B2630C8");
     private static readonly Color BuildingLine = Color.FromHex("#75FFF0D8");
     private static readonly Color FloorColor = Color.FromHex("#081A23E8");
@@ -60,7 +60,6 @@ public sealed partial class NCCityMapControl : LayoutContainer
     private readonly Font _smallFont;
     private readonly SharedTransformSystem _transformSystem;
     private readonly Label _zoomLabel;
-    private readonly Label _lodLabel;
     private readonly Label _coordinateLabel;
     private readonly Label _networkLabel;
     private readonly Label _noticeLabel;
@@ -126,7 +125,6 @@ public sealed partial class NCCityMapControl : LayoutContainer
         MouseFilter = MouseFilterMode.Stop;
 
         _zoomLabel = CreateHudLabel("1.0X", SignalColor);
-        _lodLabel = CreateHudLabel("STREETS", Color.FromHex("#F0C75E"));
         _coordinateLabel = CreateHudLabel("X -- // Y -- // Z --", Color.FromHex("#6CA8A4"));
         _networkLabel = CreateHudLabel("CITY GRID // OFFLINE", SignalColor);
         _noticeLabel = CreateHudLabel(string.Empty, Color.FromHex("#FFD66B"));
@@ -279,20 +277,7 @@ public sealed partial class NCCityMapControl : LayoutContainer
         _zoom = float.Lerp(_zoom, _targetZoom, blend);
         _viewCenter = Vector2.Lerp(_viewCenter, _targetCenter, blend);
 
-        var lod = GetLod();
         _zoomLabel.Text = $"{_zoom:0.0}X";
-        _lodLabel.Text = lod switch
-        {
-            MapLod.City => "DISTRICTS",
-            MapLod.Streets => "STREETS",
-            _ => "BUILDINGS",
-        };
-        _lodLabel.FontColorOverride = lod switch
-        {
-            MapLod.City => Color.FromHex("#E05CFF"),
-            MapLod.Streets => Color.FromHex("#F0C75E"),
-            _ => SignalColor,
-        };
     }
 
     protected override void Draw(DrawingHandleScreen handle)
@@ -330,8 +315,6 @@ public sealed partial class NCCityMapControl : LayoutContainer
         };
         statusRow.AddChild(_networkLabel);
         statusRow.AddChild(new Control { HorizontalExpand = true });
-        statusRow.AddChild(_lodLabel);
-        statusRow.AddChild(CreateHudLabel(" // ", Color.FromHex("#427C78")));
         statusRow.AddChild(_zoomLabel);
 
         // Two compact rows preserve all map status information in the map window.
@@ -1130,7 +1113,7 @@ public sealed partial class NCCityMapControl : LayoutContainer
     {
         if (_zoom < 0.72f)
             return MapLod.City;
-        return _zoom < 2.5f ? MapLod.Streets : MapLod.Buildings;
+        return _zoom < 2.5f ? MapLod.Overview : MapLod.Buildings;
     }
 
     private static bool ShouldDraw(NCCityMapFeatureKind kind, MapLod lod)
@@ -1138,7 +1121,7 @@ public sealed partial class NCCityMapControl : LayoutContainer
         return lod switch
         {
             MapLod.City => kind == NCCityMapFeatureKind.District,
-            MapLod.Streets => true,
+            MapLod.Overview => true,
             MapLod.Buildings => true,
             _ => false,
         };
@@ -1149,7 +1132,7 @@ public sealed partial class NCCityMapControl : LayoutContainer
         return lod switch
         {
             MapLod.City => kind == NCCityMapFeatureKind.District,
-            MapLod.Streets => true,
+            MapLod.Overview => true,
             MapLod.Buildings => kind == NCCityMapFeatureKind.Building,
             _ => false,
         };
@@ -1186,7 +1169,7 @@ public sealed partial class NCCityMapControl : LayoutContainer
     private enum MapLod : byte
     {
         City,
-        Streets,
+        Overview,
         Buildings,
     }
 

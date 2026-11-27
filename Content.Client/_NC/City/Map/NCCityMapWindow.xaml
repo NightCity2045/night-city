@@ -19,8 +19,8 @@
                 <Button Name="UndoPointButton" Text="{Loc 'nc-city-map-edit-undo-point'}" />
                 <Button Name="DeleteButton" Text="{Loc 'nc-city-map-edit-delete'}" />
                 <Button Name="CancelButton" Text="{Loc 'nc-city-map-edit-cancel'}" />
-                <Label Name="EditStatusLabel" HorizontalExpand="True" ClipText="True" />
             </BoxContainer>
+            <Label Name="EditStatusLabel" HorizontalExpand="True" ClipText="True" />
         </BoxContainer>
         <map:NCCityMapControl Name="MapControl" HorizontalExpand="True" VerticalExpand="True" />
     </BoxContainer>
