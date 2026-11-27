@@ -17,7 +17,7 @@ public sealed partial class NCNeuralHardwareSystem
             if (!TryComp<NCNeuralHardwareComponent>(uid, out var neural)) continue;
             var module = uid;
             args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString("nc-neural-status", ("name", Name(module))), Act = () => ShowStatus(module, user) });
-            if (neural.Kind is NCNeuralKind.Kerenzikov or NCNeuralKind.Interface)
+            if (neural.Kind == NCNeuralKind.Kerenzikov)
                 args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString(neural.Enabled ? "nc-neural-disable" : "nc-neural-enable", ("name", Name(module))),
                     Act = () =>
                     {

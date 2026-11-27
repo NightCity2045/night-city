@@ -13,7 +13,6 @@ namespace Content.Server.Database;
 public sealed record NCPoliceRecordData(
     NCCharacterId CharacterId,
     string CharacterName,
-    string? JobPrototypeId,
     NCPoliceOperationalStatus Status,
     string? Reason,
     int? UpdatedByProfileId,
@@ -91,8 +90,7 @@ public abstract partial class ServerDbBase
         var normalized = query.Trim().ToLowerInvariant();
         await using var db = await GetDb();
         IQueryable<Profile> profileQuery = db.DbContext.Profile
-            .AsNoTracking()
-            .Include(profile => profile.NCEmployment);
+            .AsNoTracking();
 
         // An empty query represents the city registry shown when the terminal opens.
         if (normalized.Length > 0)
@@ -122,7 +120,6 @@ public abstract partial class ServerDbBase
         await using var db = await GetDb();
         var profile = await db.DbContext.Profile
             .AsNoTracking()
-            .Include(value => value.NCEmployment)
             .SingleOrDefaultAsync(value => value.Id == characterId.Value);
         if (profile == null)
             return null;
@@ -177,7 +174,6 @@ public abstract partial class ServerDbBase
 
         await using var db = await GetDb();
         var profile = await db.DbContext.Profile
-            .Include(value => value.NCEmployment)
             .SingleOrDefaultAsync(value => value.Id == characterId.Value);
         if (profile == null)
             return null;
@@ -221,7 +217,6 @@ public abstract partial class ServerDbBase
         return new NCPoliceRecordData(
             new NCCharacterId(profile.Id),
             profile.CharacterName,
-            profile.NCEmployment?.JobPrototypeId,
             record?.Status ?? NCPoliceOperationalStatus.None,
             record?.Reason,
             record?.UpdatedByProfileId,

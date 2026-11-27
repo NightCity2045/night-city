@@ -877,7 +877,7 @@
   targetRequirements: Integrity
   requiresGraft: true
   cyberwareOperation: Install
-  compatibleCyberwareProfiles: [ NCNeuralLinkMk1, NCNeuralInterface, NCNeuralChipSocket, NCCirculatoryAssistMk1, NCToolHand, NCBiomonitor, NCMantisBlade, NCSandevistan, NCKerenzikov, NCGraftedMuscleBoneLace, NCImplantedLinearFrameSigma, NCImplantedLinearFrameBeta ]
+  compatibleCyberwareProfiles: [ NCNeuralLinkMk1, NCNeuralChipSocket, NCCirculatoryAssistMk1, NCToolHand, NCBiomonitor, NCMantisBlade, NCSandevistan, NCKerenzikov, NCGraftedMuscleBoneLace, NCImplantedLinearFrameSigma, NCImplantedLinearFrameBeta ]
   facility:
     required: true
     capabilities: [ NCSurgeryFacilityStableSurface, NCSurgeryFacilityMonitoring, NCSurgeryFacilityVentilation ]
@@ -920,7 +920,7 @@
   compatibleTargetCategories: [ Head, Thorax, Spine, ArmLeft, ArmRight ]
   targetRequirements: Integrity
   cyberwareOperation: Remove
-  compatibleCyberwareProfiles: [ NCNeuralLinkMk1, NCNeuralInterface, NCNeuralChipSocket, NCCirculatoryAssistMk1, NCToolHand, NCBiomonitor, NCMantisBlade, NCSandevistan, NCKerenzikov, NCGraftedMuscleBoneLace, NCImplantedLinearFrameSigma, NCImplantedLinearFrameBeta ]
+  compatibleCyberwareProfiles: [ NCNeuralLinkMk1, NCNeuralChipSocket, NCCirculatoryAssistMk1, NCToolHand, NCBiomonitor, NCMantisBlade, NCSandevistan, NCKerenzikov, NCGraftedMuscleBoneLace, NCImplantedLinearFrameSigma, NCImplantedLinearFrameBeta ]
   facility:
     required: true
     capabilities: [ NCSurgeryFacilityStableSurface, NCSurgeryFacilityMonitoring, NCSurgeryFacilityVentilation ]

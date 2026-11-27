@@ -50,6 +50,16 @@ public sealed partial class NCNeuralHardwareSystem : EntitySystem
     public bool TryGetController(EntityUid module, out EntityUid controller) =>
         _cyberware.TryGetMedicalPart(module, "NCNeuralControllerSlot", out controller) && HasComp<NCNeuralControllerComponent>(controller);
 
+    /// <summary>Fraction of the thermal shutdown threshold at which the Sandevistan turns itself off.</summary>
+    private const float SandevistanCutoffHeat = 0.85f;
+
+    private bool ShouldCutOff(EntityUid module)
+    {
+        var hardware = Comp<NCCyberwareComponent>(module);
+        var threshold = _prototypes.Index(hardware.Profile).HeatShutdownThreshold;
+        return threshold > 0 && hardware.Heat >= threshold * SandevistanCutoffHeat;
+    }
+
     public bool TrySetEnabled(EntityUid module, bool enabled)
     {
         if (!TryComp<NCNeuralHardwareComponent>(module, out var neural) ||
@@ -109,6 +119,13 @@ public sealed partial class NCNeuralHardwareSystem : EntitySystem
                     Active = hasState && state.Active }, actor.PlayerSession.Channel);
             }
             if (neural.Kind != NCNeuralKind.Sandevistan || !TryComp<NCCyberwareAbilityComponent>(uid, out var ability) || !ability.Active || !IsReady(uid)) continue;
+            if (ShouldCutOff(uid))
+            {
+                // Firmware cutoff ahead of the native thermal shutdown, so overheating stays a player choice to avoid.
+                if (_abilities.TrySetEnabled(body, uid, false))
+                    _popup.PopupEntity(Loc.GetString("nc-neural-sandevistan-cutoff"), body, body, PopupType.MediumCaution);
+                continue;
+            }
             activeBodies.Add(body);
             var visual = EnsureComp<NCNeuralVisualComponent>(body);
             if (!visual.Burst) { visual.Burst = true; Dirty(body, visual); }

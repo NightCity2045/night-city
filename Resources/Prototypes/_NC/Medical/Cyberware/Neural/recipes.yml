@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 
-
 - type: latheRecipe
   id: NCProduceNCNeuralControllerStandard
   result: NCNeuralControllerStandard
@@ -194,57 +193,6 @@
 - type: latheRecipe
   id: NCProduceNCNeuralElectrodePremium
   result: NCNeuralElectrodePremium
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralConnectorStandard
-  result: NCNeuralConnectorStandard
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 200
-    Glass: 200
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralConnectorImprovised
-  result: NCNeuralConnectorImprovised
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralConnectorImproved
-  result: NCNeuralConnectorImproved
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralConnectorPremium
-  result: NCNeuralConnectorPremium
   completetime: 10
   applyMaterialDiscount: false
   categories:
@@ -551,57 +499,6 @@
 - type: latheRecipe
   id: NCProduceNCSandevistanImplantQualityPremiumEmpty
   result: NCSandevistanImplantQualityPremiumEmpty
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 400
-    Glass: 400
-    Plastic: 100
-    Gold: 100
-    Silver: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralInterfaceImplantEmpty
-  result: NCNeuralInterfaceImplantEmpty
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 200
-    Glass: 200
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralInterfaceImplantQualityImprovisedEmpty
-  result: NCNeuralInterfaceImplantQualityImprovisedEmpty
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 100
-    Glass: 100
-    Plastic: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralInterfaceImplantQualityImprovedEmpty
-  result: NCNeuralInterfaceImplantQualityImprovedEmpty
-  completetime: 10
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 300
-    Glass: 300
-    Plastic: 100
-    Gold: 100
-
-- type: latheRecipe
-  id: NCProduceNCNeuralInterfaceImplantQualityPremiumEmpty
-  result: NCNeuralInterfaceImplantQualityPremiumEmpty
   completetime: 10
   applyMaterialDiscount: false
   categories:

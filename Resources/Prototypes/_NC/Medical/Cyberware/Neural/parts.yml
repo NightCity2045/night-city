@@ -85,34 +85,6 @@
   quality: NCCyberwareQualityPremium
 
 - type: ncCyberwarePartSlot
-  id: NCNeuralConnectorSlot
-  name: nc-neural-slot-connector
-
-- type: ncCyberwarePart
-  id: NCNeuralConnectorStandardPart
-  slot: NCNeuralConnectorSlot
-  maximumIntegrity: 60
-  quality: NCCyberwareQualityStandard
-
-- type: ncCyberwarePart
-  id: NCNeuralConnectorImprovisedPart
-  slot: NCNeuralConnectorSlot
-  maximumIntegrity: 40
-  quality: NCCyberwareQualityImprovised
-
-- type: ncCyberwarePart
-  id: NCNeuralConnectorImprovedPart
-  slot: NCNeuralConnectorSlot
-  maximumIntegrity: 80
-  quality: NCCyberwareQualityImproved
-
-- type: ncCyberwarePart
-  id: NCNeuralConnectorPremiumPart
-  slot: NCNeuralConnectorSlot
-  maximumIntegrity: 100
-  quality: NCCyberwareQualityPremium
-
-- type: ncCyberwarePartSlot
   id: NCNeuralReaderSlot
   name: nc-neural-slot-reader
 
@@ -221,14 +193,6 @@
     NCNeuralElectrodeSlot: NCNeuralElectrodeStandard
     NCNeuralPulseSlot: NCNeuralPulseStandard
     NCNeuralCoolingSlot: NCNeuralCoolingStandard
-
-- type: ncCyberwareAssembly
-  id: NCNeuralInterfaceAssembly
-  defaultParts:
-    NCNeuralControllerSlot: NCNeuralControllerBasicStandard
-    NCOpticPowerSlot: NCOpticPowerStandard
-    NCNeuralConnectorSlot: NCNeuralConnectorStandard
-    NCNeuralElectrodeSlot: NCNeuralElectrodeStandard
 
 - type: ncCyberwareAssembly
   id: NCNeuralChipSocketAssembly

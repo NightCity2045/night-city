@@ -137,6 +137,7 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
     {
         if (!TryMigrateSnapshot(snapshot, out var current) ||
             !TryGetBodyContext(character, out var medical, out _, out var initial) ||
+            !DropRemovedCyberware(character, current) ||
             !CompleteLegacyOrganIdentity(initial, current, snapshot.Version) ||
             snapshot.Version < NCMedicalSnapshotVersions.Humanity && !_humanity.TryPrepareLegacyState(character, current) ||
             !PrepareAbilityMigration(character, snapshot.Version, current) ||

@@ -6,18 +6,16 @@ nc-neural-enable = Включить: { $name }
 nc-neural-reading = { $name }: нагрев { $heat }%, восстановление { $cooldown } с.
 nc-neural-socket-empty = Чиповый разъём пуст. Доступных чипов пока нет.
 nc-neural-dodged = { $user } уклоняется благодаря керензикову!
+nc-neural-sandevistan-cutoff = Сандевистан отключён на 85% нагрева.
 nc-neural-hud = САНДЕВИСТАН: { $state } | Нагрев { $heat }% | Восстановление { $cooldown } с
 nc-neural-active = АКТИВЕН
 nc-neural-idle = ОЖИДАНИЕ
 nc-neural-slot-controller = контроллер нейросистемы
 nc-neural-slot-processor = нейронный сопроцессор
 nc-neural-slot-electrode = электродная матрица
-nc-neural-slot-connector = герметичная контактная группа
 nc-neural-slot-reader = считыватель нейрочипов
 nc-neural-slot-pulse = импульсный силовой блок
 nc-neural-slot-cooling = теплоотвод нейроускорителя
-nc-neural-profile-interface = нейроинтерфейсный разъём
-nc-neural-bay-interface = нейроинтерфейсный разъём
 nc-neural-profile-chipsocket = чиповый разъём
 nc-neural-bay-chipsocket = чиповый разъём
 
@@ -85,22 +83,6 @@ ent-NCNeuralChipSocketImplantQualityPremiumEmpty = чиповый разъём
     .desc = Пустой имплантируемый разъём для будущих чипов навыков. Требует нейролинк.
     .suffix = Премиальное, пустой корпус
 
-ent-NCNeuralConnectorImproved = герметичная контактная группа
-    .desc = Деталь модульной нейросистемы. Обслуживается на верстаке кибернетики.
-    .suffix = Улучшенное
-
-ent-NCNeuralConnectorImprovised = герметичная контактная группа
-    .desc = Деталь модульной нейросистемы. Обслуживается на верстаке кибернетики.
-    .suffix = Кустарное
-
-ent-NCNeuralConnectorPremium = герметичная контактная группа
-    .desc = Деталь модульной нейросистемы. Обслуживается на верстаке кибернетики.
-    .suffix = Премиальное
-
-ent-NCNeuralConnectorStandard = герметичная контактная группа
-    .desc = Деталь модульной нейросистемы. Обслуживается на верстаке кибернетики.
-    .suffix = Стандартное
-
 ent-NCNeuralControllerBasicImproved = контроллер нейросистемы с базовым ПО
     .desc = Деталь модульной нейросистемы. Обслуживается на верстаке кибернетики.
     .suffix = Улучшенное
@@ -164,38 +146,6 @@ ent-NCNeuralElectrodePremium = электродная матрица
 ent-NCNeuralElectrodeStandard = электродная матрица
     .desc = Деталь модульной нейросистемы. Обслуживается на верстаке кибернетики.
     .suffix = Стандартное
-
-ent-NCNeuralInterfaceImplant = нейроинтерфейсный разъём
-    .desc = Проводной нейроразъём. Требует нейролинк.
-    .suffix = Стандартное
-
-ent-NCNeuralInterfaceImplantEmpty = нейроинтерфейсный разъём
-    .desc = Проводной нейроразъём. Требует нейролинк.
-    .suffix = Стандартное, пустой корпус
-
-ent-NCNeuralInterfaceImplantQualityImproved = нейроинтерфейсный разъём
-    .desc = Проводной нейроразъём. Требует нейролинк.
-    .suffix = Улучшенное
-
-ent-NCNeuralInterfaceImplantQualityImprovedEmpty = нейроинтерфейсный разъём
-    .desc = Проводной нейроразъём. Требует нейролинк.
-    .suffix = Улучшенное, пустой корпус
-
-ent-NCNeuralInterfaceImplantQualityImprovised = нейроинтерфейсный разъём
-    .desc = Проводной нейроразъём. Требует нейролинк.
-    .suffix = Кустарное
-
-ent-NCNeuralInterfaceImplantQualityImprovisedEmpty = нейроинтерфейсный разъём
-    .desc = Проводной нейроразъём. Требует нейролинк.
-    .suffix = Кустарное, пустой корпус
-
-ent-NCNeuralInterfaceImplantQualityPremium = нейроинтерфейсный разъём
-    .desc = Проводной нейроразъём. Требует нейролинк.
-    .suffix = Премиальное
-
-ent-NCNeuralInterfaceImplantQualityPremiumEmpty = нейроинтерфейсный разъём
-    .desc = Проводной нейроразъём. Требует нейролинк.
-    .suffix = Премиальное, пустой корпус
 
 ent-NCNeuralProcessorImproved = нейронный сопроцессор
     .desc = Деталь модульной нейросистемы. Обслуживается на верстаке кибернетики.

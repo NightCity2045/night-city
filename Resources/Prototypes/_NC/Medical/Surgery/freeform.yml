@@ -117,7 +117,6 @@
     TendonSetLeftLeg: { position: "0.75, 0.5", size: "0.14, 0.78", minimumDepth: 0.42, visual: Tendon, zones: [ NCZoneLegLeft, NCZoneFootLeft ] }
     TendonSetRightLeg: { position: "0.75, 0.5", size: "0.14, 0.78", minimumDepth: 0.42, visual: Tendon, zones: [ NCZoneLegRight, NCZoneFootRight ] }
   cyberwareSlots:
-    NCSlotNeuralInterface: { position: "0.16, 0.66", size: "0.2, 0.2", minimumDepth: 0.55, visual: Cyberware, zones: [ NCZoneHead ] }
     NCSlotChipSocket: { position: "0.84, 0.3", size: "0.2, 0.2", minimumDepth: 0.5, visual: Cyberware, zones: [ NCZoneHead ] }
     NCSlotMuscleBoneLacePrimary: { position: "0.12, 0.4", size: "0.18, 0.26", minimumDepth: 0.68, visual: Cyberware, zones: [ NCZoneChest ] }
     NCSlotMuscleBoneLaceSecondary: { position: "0.88, 0.4", size: "0.18, 0.26", minimumDepth: 0.68, visual: Cyberware, zones: [ NCZoneChest ] }

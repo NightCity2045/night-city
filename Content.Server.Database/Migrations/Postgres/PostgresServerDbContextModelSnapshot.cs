@@ -1466,38 +1466,6 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.ToTable("nc_character_bank_account", (string)null);
                 });
 
-            modelBuilder.Entity("Content.Server.Database.NCCharacterEmployment", b =>
-                {
-                    b.Property<int>("ProfileId")
-                        .HasColumnType("integer")
-                        .HasColumnName("profile_id");
-
-                    b.Property<string>("JobPrototypeId")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
-                        .HasColumnName("job_prototype_id");
-
-                    b.Property<DateTime>("StartedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("started_at");
-
-                    b.Property<byte>("State")
-                        .HasColumnType("smallint")
-                        .HasColumnName("state");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("ProfileId")
-                        .HasName("PK_nc_character_employment");
-
-                    b.HasIndex("JobPrototypeId");
-
-                    b.ToTable("nc_character_employment", (string)null);
-                });
-
             modelBuilder.Entity("Content.Server.Database.NCCharacterSkillProgress", b =>
                 {
                     b.Property<int>("ProfileId")
@@ -1834,69 +1802,6 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.HasIndex("DungeonSlotId", "State");
 
                     b.ToTable("nc_dungeon_run", (string)null);
-                });
-
-            modelBuilder.Entity("Content.Server.Database.NCEmploymentEvent", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("nc_employment_event_id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("ActorName")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)")
-                        .HasColumnName("actor_name");
-
-                    b.Property<int?>("ActorProfileId")
-                        .HasColumnType("integer")
-                        .HasColumnName("actor_profile_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<byte>("EventType")
-                        .HasColumnType("smallint")
-                        .HasColumnName("event_type");
-
-                    b.Property<string>("NewJobPrototypeId")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
-                        .HasColumnName("new_job_prototype_id");
-
-                    b.Property<byte>("NewState")
-                        .HasColumnType("smallint")
-                        .HasColumnName("new_state");
-
-                    b.Property<string>("PreviousJobPrototypeId")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
-                        .HasColumnName("previous_job_prototype_id");
-
-                    b.Property<byte?>("PreviousState")
-                        .HasColumnType("smallint")
-                        .HasColumnName("previous_state");
-
-                    b.Property<int>("ProfileId")
-                        .HasColumnType("integer")
-                        .HasColumnName("profile_id");
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
-                        .HasColumnName("reason");
-
-                    b.HasKey("Id")
-                        .HasName("PK_nc_employment_event");
-
-                    b.HasIndex("ProfileId", "CreatedAt");
-
-                    b.ToTable("nc_employment_event", (string)null);
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCEventJournalEntry", b =>
@@ -3465,10 +3370,6 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasColumnType("jsonb")
                         .HasColumnName("markings");
 
-                    b.Property<string>("NCDepartmentPreference")
-                        .HasColumnType("text")
-                        .HasColumnName("ncdepartment_preference");
-
                     b.Property<JsonDocument>("OrganMarkings")
                         .HasColumnType("jsonb")
                         .HasColumnName("organ_markings");
@@ -4470,18 +4371,6 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasConstraintName("FK_nc_character_bank_account_profile_profile_id");
                 });
 
-            modelBuilder.Entity("Content.Server.Database.NCCharacterEmployment", b =>
-                {
-                    b.HasOne("Content.Server.Database.Profile", "Profile")
-                        .WithOne("NCEmployment")
-                        .HasForeignKey("Content.Server.Database.NCCharacterEmployment", "ProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_nc_character_employment_profile_profile_id");
-
-                    b.Navigation("Profile");
-                });
-
             modelBuilder.Entity("Content.Server.Database.NCCharacterSkillProgress", b =>
                 {
                     b.HasOne("Content.Server.Database.Profile", "Profile")
@@ -4595,18 +4484,6 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasConstraintName("FK_nc_dungeon_run_participant_nc_dungeon_run_run_temp_id2");
 
                     b.Navigation("Run");
-                });
-
-            modelBuilder.Entity("Content.Server.Database.NCEmploymentEvent", b =>
-                {
-                    b.HasOne("Content.Server.Database.NCCharacterEmployment", "Employment")
-                        .WithMany("Events")
-                        .HasForeignKey("ProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_nc_employment_event_nc_character_employment_employment_profi~");
-
-                    b.Navigation("Employment");
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCMedicalCharacterSnapshot", b =>
@@ -5069,11 +4946,6 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.Navigation("Contacts");
                 });
 
-            modelBuilder.Entity("Content.Server.Database.NCCharacterEmployment", b =>
-                {
-                    b.Navigation("Events");
-                });
-
             modelBuilder.Entity("Content.Server.Database.NCCitiNetPost", b =>
                 {
                     b.Navigation("Comments");
@@ -5172,8 +5044,6 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.Navigation("Jobs");
 
                     b.Navigation("Loadouts");
-
-                    b.Navigation("NCEmployment");
 
                     b.Navigation("Traits");
                 });

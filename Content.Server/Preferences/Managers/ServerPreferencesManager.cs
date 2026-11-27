@@ -354,7 +354,7 @@ namespace Content.Server.Preferences.Managers
                     await _db.SaveCharacterSlotAsync(userId, null, slot);
                 }
 
-                // NC - Remove the deleted character identity and employment from the runtime cache.
+                // NC - Remove the deleted character identity from the runtime cache.
                 await RefreshNCCharacterData(userId);
             }
         }

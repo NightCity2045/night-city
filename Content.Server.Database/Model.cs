@@ -352,14 +352,9 @@ namespace Content.Server.Database
         public string EyeColor { get; set; } = null!;
         public string SkinColor { get; set; } = null!;
         public int SpawnPriority { get; set; } = 0;
-        // NC - The initial department choice belongs to the character, not the account.
-        public string? NCDepartmentPreference { get; set; }
         public List<Job> Jobs { get; } = new();
         public List<Antag> Antags { get; } = new();
         public List<Trait> Traits { get; } = new();
-
-        // NC - Optional one-to-one employment record for this character.
-        public NCCharacterEmployment? NCEmployment { get; set; }
 
         public List<ProfileRoleLoadout> Loadouts { get; } = new();
 

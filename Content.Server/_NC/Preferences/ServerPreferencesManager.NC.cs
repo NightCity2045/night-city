@@ -30,7 +30,7 @@ public sealed partial class ServerPreferencesManager
 
     private async Task RefreshNCCharacterData(NetUserId userId)
     {
-        var rows = await _db.GetNCCharacterEmploymentDataAsync(userId);
+        var rows = await _db.GetNCCharacterSlotsAsync(userId);
         var characters = new Dictionary<int, NCCharacterId>();
         foreach (var row in rows)
             characters[row.Slot] = new NCCharacterId(row.ProfileId);

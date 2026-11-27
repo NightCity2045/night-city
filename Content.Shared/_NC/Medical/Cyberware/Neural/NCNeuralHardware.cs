@@ -3,6 +3,7 @@ using Robust.Shared.GameStates;
 
 namespace Content.Shared._NC.Medical.Cyberware.Neural;
 
+// Interface (the removed META jack) keeps its slot so the numeric values of later kinds stay stable.
 public enum NCNeuralKind : byte { Link, Interface, ChipSocket, Kerenzikov, Sandevistan }
 
 [RegisterComponent]

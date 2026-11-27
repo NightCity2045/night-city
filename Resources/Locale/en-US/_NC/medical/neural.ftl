@@ -6,18 +6,16 @@ nc-neural-enable = Enable: { $name }
 nc-neural-reading = { $name }: heat { $heat }%, recovery { $cooldown } s.
 nc-neural-socket-empty = Chip socket empty. No chips are currently available.
 nc-neural-dodged = { $user } evades with Kerenzikov!
+nc-neural-sandevistan-cutoff = Sandevistan cut off at 85% heat.
 nc-neural-hud = SANDEVISTAN: { $state } | Heat { $heat }% | Recovery { $cooldown } s
 nc-neural-active = ACTIVE
 nc-neural-idle = IDLE
 nc-neural-slot-controller = neural controller
 nc-neural-slot-processor = neural coprocessor
 nc-neural-slot-electrode = electrode matrix
-nc-neural-slot-connector = sealed contact assembly
 nc-neural-slot-reader = neural chip reader
 nc-neural-slot-pulse = pulse power block
 nc-neural-slot-cooling = neural accelerator heat sink
-nc-neural-profile-interface = neural interface jack
-nc-neural-bay-interface = neural interface jack
 nc-neural-profile-chipsocket = neural chip socket
 nc-neural-bay-chipsocket = neural chip socket
 
@@ -85,22 +83,6 @@ ent-NCNeuralChipSocketImplantQualityPremiumEmpty = neural chip socket
     .desc = An implantable socket for future skill chips. Requires a neural link.
     .suffix = Premium, empty frame
 
-ent-NCNeuralConnectorImproved = sealed contact assembly
-    .desc = Modular neural hardware. Serviced on a cyberware workbench.
-    .suffix = Improved
-
-ent-NCNeuralConnectorImprovised = sealed contact assembly
-    .desc = Modular neural hardware. Serviced on a cyberware workbench.
-    .suffix = Improvised
-
-ent-NCNeuralConnectorPremium = sealed contact assembly
-    .desc = Modular neural hardware. Serviced on a cyberware workbench.
-    .suffix = Premium
-
-ent-NCNeuralConnectorStandard = sealed contact assembly
-    .desc = Modular neural hardware. Serviced on a cyberware workbench.
-    .suffix = Standard
-
 ent-NCNeuralControllerBasicImproved = neural controller with basic software
     .desc = Modular neural hardware. Serviced on a cyberware workbench.
     .suffix = Improved
@@ -164,38 +146,6 @@ ent-NCNeuralElectrodePremium = electrode matrix
 ent-NCNeuralElectrodeStandard = electrode matrix
     .desc = Modular neural hardware. Serviced on a cyberware workbench.
     .suffix = Standard
-
-ent-NCNeuralInterfaceImplant = neural interface jack
-    .desc = Wired neural port. Requires a neural link.
-    .suffix = Standard
-
-ent-NCNeuralInterfaceImplantEmpty = neural interface jack
-    .desc = Wired neural port. Requires a neural link.
-    .suffix = Standard, empty frame
-
-ent-NCNeuralInterfaceImplantQualityImproved = neural interface jack
-    .desc = Wired neural port. Requires a neural link.
-    .suffix = Improved
-
-ent-NCNeuralInterfaceImplantQualityImprovedEmpty = neural interface jack
-    .desc = Wired neural port. Requires a neural link.
-    .suffix = Improved, empty frame
-
-ent-NCNeuralInterfaceImplantQualityImprovised = neural interface jack
-    .desc = Wired neural port. Requires a neural link.
-    .suffix = Improvised
-
-ent-NCNeuralInterfaceImplantQualityImprovisedEmpty = neural interface jack
-    .desc = Wired neural port. Requires a neural link.
-    .suffix = Improvised, empty frame
-
-ent-NCNeuralInterfaceImplantQualityPremium = neural interface jack
-    .desc = Wired neural port. Requires a neural link.
-    .suffix = Premium
-
-ent-NCNeuralInterfaceImplantQualityPremiumEmpty = neural interface jack
-    .desc = Wired neural port. Requires a neural link.
-    .suffix = Premium, empty frame
 
 ent-NCNeuralProcessorImproved = neural coprocessor
     .desc = Modular neural hardware. Serviced on a cyberware workbench.

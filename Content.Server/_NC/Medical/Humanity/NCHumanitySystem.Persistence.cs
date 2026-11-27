@@ -26,6 +26,21 @@ public sealed partial class NCHumanitySystem
         return true;
     }
 
+    /// <summary>Sets the stored burden to the packages the snapshot still carries, after hardware was dropped.</summary>
+    public bool TryRebaseBurden(EntityUid body, NCMedicalStateSnapshot snapshot)
+    {
+        if (snapshot.Humanity is not { } state)
+            return true;
+        if (!TryCollectSnapshotPackages(body, snapshot, out var packages))
+            return false;
+        var burden = 0f;
+        foreach (var package in packages.Values)
+            burden += package.Burden;
+        state.Burden = burden;
+        state.Current = MathF.Min(state.Current, NCHumanityMath.Maximum(burden));
+        return true;
+    }
+
     public bool ValidatePersistentState(EntityUid body, NCMedicalStateSnapshot snapshot)
     {
         if (!snapshot.Organs.ContainsKey("Brain")) return snapshot.Humanity == null;
