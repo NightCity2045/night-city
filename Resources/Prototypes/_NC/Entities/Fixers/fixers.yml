@@ -1,46 +1,51 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 
+# John "Insider" Doe never shows up in person: players talk to him through this net terminal.
 - type: entity
   parent: NCFixerBase
-  id: NCFixerAlpha
+  id: NCFixerInsider
   components:
   - type: Sprite
-    sprite: _NC/Structures/Fixers/fixer_alpha.rsi
+    sprite: _NC/Structures/Fixers/insider_terminal.rsi
+    layers:
+    - state: fixer
+    - state: fixer-unshaded
+      shader: unshaded
+  - type: PointLight
+    radius: 1.5
+    energy: 0.6
+    color: "#7affd8"
+  - type: NCFixer
+    fixer: NCFixerInsider
+
+- type: entity
+  parent: NCFixerBase
+  id: NCFixerVlad
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Fixers/fixer_vlad.rsi
     layers:
     - state: fixer
     - state: fixer-unshaded
       shader: unshaded
   - type: NCFixer
-    fixer: NCFixerAlpha
-
-- type: entity
-  parent: NCFixerBase
-  id: NCFixerBeta
-  components:
-  - type: Sprite
-    sprite: _NC/Structures/Fixers/fixer_beta.rsi
-    layers:
-    - state: fixer
-    - state: fixer-unshaded
-      shader: unshaded
-  - type: NCFixer
-    fixer: NCFixerBeta
+    fixer: NCFixerVlad
 
 - type: entity
   parent: NCFixerDeadDropBase
-  id: NCFixerDeadDropAlpha
-  suffix: NCFixerAlpha
+  id: NCFixerDeadDropInsider
+  suffix: NCFixerInsider
   components:
   - type: NCFixerDeadDrop
-    fixer: NCFixerAlpha
+    fixer: NCFixerInsider
 
 - type: entity
   parent: NCFixerDeadDropBase
-  id: NCFixerDeadDropBeta
-  suffix: NCFixerBeta
+  id: NCFixerDeadDropVlad
+  suffix: NCFixerVlad
   components:
   - type: NCFixerDeadDrop
-    fixer: NCFixerBeta
+    fixer: NCFixerVlad
 
 # Spawned at a dead drop marker for deliveries that do not end at the fixer; removed after the mission.
 - type: entity

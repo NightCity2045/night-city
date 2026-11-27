@@ -22,6 +22,9 @@ public enum NCFixerMissionKind : byte
 
     /// <summary>Bring a set of goods to the fixer's dead drop.</summary>
     Collection,
+
+    /// <summary>Beat up an NPC at the objective: down but alive. Killing them fails the job.</summary>
+    Beating,
 }
 
 public enum NCFixerPayment : byte
@@ -172,6 +175,16 @@ public sealed partial class NCFixerMissionPrototype : IPrototype
     /// <summary>Package, valuable item, sabotage target or NPC target spawned at the objective.</summary>
     [DataField]
     public EntProtoId? Item;
+
+    /// <summary>
+    /// Retrieval only: a terminal spawned at the objective instead of the item. Hacking it produces the item.
+    /// </summary>
+    [DataField]
+    public EntProtoId? Terminal;
+
+    /// <summary>Deliveries only: the fixer hands the item to the taker instead of it waiting at an objective.</summary>
+    [DataField]
+    public bool ItemFromFixer;
 
     /// <summary>Deliveries only: true sends the package to a dead drop marker instead of the fixer's drop.</summary>
     [DataField]

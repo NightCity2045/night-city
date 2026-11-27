@@ -37,3 +37,7 @@
 - type: npcFaction
   id: NCBiotechnicaSecurity
   friendly: [NCBiotechnicaSecurity]
+
+- type: npcFaction
+  id: NCCivilian
+  friendly: [NCCivilian]

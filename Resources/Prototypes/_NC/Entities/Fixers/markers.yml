@@ -37,6 +37,17 @@
 
 - type: entity
   parent: NCMissionMarkerBase
+  id: NCMissionMarkerObjectiveNCPD
+  suffix: Objective, NCPD
+  components:
+  - type: Sprite
+    state: objective
+  - type: NCMissionMarker
+    kind: Objective
+    owner: NCPD
+
+- type: entity
+  parent: NCMissionMarkerBase
   id: NCMissionMarkerObjectiveSixthStreet
   suffix: Objective, SixthStreet
   components:
@@ -147,6 +158,17 @@
 
 - type: entity
   parent: NCMissionMarkerBase
+  id: NCMissionMarkerDeadDropNCPD
+  suffix: DeadDrop, NCPD
+  components:
+  - type: Sprite
+    state: drop
+  - type: NCMissionMarker
+    kind: DeadDrop
+    owner: NCPD
+
+- type: entity
+  parent: NCMissionMarkerBase
   id: NCMissionMarkerDeadDropSixthStreet
   suffix: DeadDrop, SixthStreet
   components:
@@ -254,6 +276,17 @@
   - type: NCMissionMarker
     kind: Guard
     owner: Biotechnica
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerGuardNCPD
+  suffix: Guard, NCPD
+  components:
+  - type: Sprite
+    state: guard
+  - type: NCMissionMarker
+    kind: Guard
+    owner: NCPD
 
 - type: entity
   parent: NCMissionMarkerBase

@@ -1,121 +1,73 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 
-# Starter mission pools, one of each kind. A mission only shows up when the map has what it needs.
+# A mission only shows up when the map has what it needs: markers, the fixer's drop, or a player target.
+
+# ---- John "Insider" Doe: names, blueprints, leaks. Data goes into his drop, money comes by wire.
 
 - type: ncFixerMission
-  id: NCFixerAlphaDelivery
-  fixer: NCFixerAlpha
-  kind: Delivery
-  name: nc-fixer-mission-alpha-delivery
-  description: nc-fixer-mission-alpha-delivery-desc
-  owner: Neutral
-  item: NCMissionPackage
-  reward: 800
-  timeLimit: 1200
-
-- type: ncFixerMission
-  id: NCFixerAlphaCourier
-  fixer: NCFixerAlpha
-  kind: Delivery
-  name: nc-fixer-mission-alpha-courier
-  description: nc-fixer-mission-alpha-courier-desc
-  owner: Neutral
-  item: NCMissionPackage
-  dropAtMarker: true
-  reward: 1000
-  timeLimit: 1200
-
-- type: ncFixerMission
-  id: NCFixerAlphaCollection
-  fixer: NCFixerAlpha
-  kind: Collection
-  name: nc-fixer-mission-alpha-collection
-  description: nc-fixer-mission-alpha-collection-desc
-  reward: 1500
-  timeLimit: 2400
-  requirements:
-  - !type:NCCorpItemRequirement
-    item: NCWeaponPistolStreetmaster
-    amount: 3
-
-- type: ncFixerMission
-  id: NCFixerAlphaRetrieval
-  fixer: NCFixerAlpha
+  id: NCFixerInsiderLeak
+  fixer: NCFixerInsider
   kind: Retrieval
-  name: nc-fixer-mission-alpha-retrieval
-  description: nc-fixer-mission-alpha-retrieval-desc
-  minimumReputation: 10
-  owner: SixthStreet
+  name: nc-fixer-mission-insider-leak
+  description: nc-fixer-mission-insider-leak-desc
+  owner: Neutral
   item: NCMissionDataShard
-  encounter: SixthStreetPost
+  reward: 1200
+  timeLimit: 1200
+
+- type: ncFixerMission
+  id: NCFixerInsiderTygerNames
+  fixer: NCFixerInsider
+  kind: Retrieval
+  name: nc-fixer-mission-insider-tyger-names
+  description: nc-fixer-mission-insider-tyger-names-desc
+  minimumReputation: 10
+  owner: TygerClaws
+  terminal: NCMissionIntelTerminal
+  item: NCMissionDataShard
+  encounter: GangTygerClawsPost
   reward: 2500
   reputationGain: 4
   timeLimit: 1800
 
 - type: ncFixerMission
-  id: NCFixerBetaSabotage
-  fixer: NCFixerBeta
-  kind: Sabotage
-  name: nc-fixer-mission-beta-sabotage
-  description: nc-fixer-mission-beta-sabotage-desc
+  id: NCFixerInsiderMaelstromNames
+  fixer: NCFixerInsider
+  kind: Retrieval
+  name: nc-fixer-mission-insider-maelstrom-names
+  description: nc-fixer-mission-insider-maelstrom-names-desc
   minimumReputation: 10
-  owner: SixthStreet
-  item: NCMissionSabotageTarget
-  encounter: SixthStreetPost
+  owner: Maelstrom
+  terminal: NCMissionIntelTerminal
+  item: NCMissionDataShard
+  encounter: GangMaelstromPost
+  reward: 2500
+  reputationGain: 4
+  timeLimit: 1800
+
+- type: ncFixerMission
+  id: NCFixerInsiderArrests
+  fixer: NCFixerInsider
+  kind: Retrieval
+  name: nc-fixer-mission-insider-arrests
+  description: nc-fixer-mission-insider-arrests-desc
+  minimumReputation: 10
+  owner: NCPD
+  terminal: NCMissionIntelTerminal
+  item: NCMissionDataShard
   reward: 3000
   reputationGain: 4
   timeLimit: 1800
 
 - type: ncFixerMission
-  id: NCFixerBetaElimination
-  fixer: NCFixerBeta
-  kind: Elimination
-  name: nc-fixer-mission-beta-elimination
-  description: nc-fixer-mission-beta-elimination-desc
-  minimumReputation: 25
-  owner: SixthStreet
-  item: NCMobHumanSixthStreetVeteran
-  encounter: SixthStreetStronghold
-  reward: 5000
-  reputationGain: 6
-  reputationLoss: 5
-  timeLimit: 1800
-
-- type: ncFixerMission
-  id: NCFixerBetaCorporateHit
-  fixer: NCFixerBeta
-  kind: Elimination
-  name: nc-fixer-mission-beta-corporate-hit
-  description: nc-fixer-mission-beta-corporate-hit-desc
-  minimumReputation: 50
-  targetDepartments: [ Militech, Biotechnica ]
-  reward: 8000
-  reputationGain: 8
-  reputationLoss: 6
-  timeLimit: 2400
-
-- type: ncFixerMission
-  id: NCFixerBetaCorporatePda
-  fixer: NCFixerBeta
+  id: NCFixerInsiderMilitechOps
+  fixer: NCFixerInsider
   kind: Retrieval
-  name: nc-fixer-mission-beta-corporate-pda
-  description: nc-fixer-mission-beta-corporate-pda-desc
-  minimumReputation: 25
-  targetDepartments: [ Militech, Biotechnica ]
-  reward: 4000
-  reputationGain: 5
-  timeLimit: 2400
-
-# Gang and corporate jobs.
-
-- type: ncFixerMission
-  id: NCFixerAlphaMilitechCrate
-  fixer: NCFixerAlpha
-  kind: Retrieval
-  name: nc-fixer-mission-alpha-militech-crate
-  description: nc-fixer-mission-alpha-militech-crate-desc
+  name: nc-fixer-mission-insider-militech-ops
+  description: nc-fixer-mission-insider-militech-ops-desc
   minimumReputation: 25
   owner: Militech
+  terminal: NCMissionIntelTerminal
   item: NCMissionDataShard
   encounter: SecurityMilitechPost
   reward: 4000
@@ -123,28 +75,30 @@
   timeLimit: 2400
 
 - type: ncFixerMission
-  id: NCFixerAlphaValentinosDrop
-  fixer: NCFixerAlpha
-  kind: Delivery
-  name: nc-fixer-mission-alpha-valentinos-drop
-  description: nc-fixer-mission-alpha-valentinos-drop-desc
-  minimumReputation: 10
-  owner: Valentinos
-  item: NCMissionPackage
-  encounter: GangValentinosPost
-  reward: 2000
-  reputationGain: 3
-  timeLimit: 1800
+  id: NCFixerInsiderBiotechTrials
+  fixer: NCFixerInsider
+  kind: Retrieval
+  name: nc-fixer-mission-insider-biotech-trials
+  description: nc-fixer-mission-insider-biotech-trials-desc
+  minimumReputation: 25
+  owner: Biotechnica
+  terminal: NCMissionIntelTerminal
+  item: NCMissionDataShard
+  encounter: SecurityBiotechnicaPost
+  reward: 4000
+  reputationGain: 5
+  timeLimit: 2400
 
 - type: ncFixerMission
-  id: NCFixerBetaBiotechLab
-  fixer: NCFixerBeta
-  kind: Sabotage
-  name: nc-fixer-mission-beta-biotech-lab
-  description: nc-fixer-mission-beta-biotech-lab-desc
+  id: NCFixerInsiderBiotechLab
+  fixer: NCFixerInsider
+  kind: Retrieval
+  name: nc-fixer-mission-insider-biotech-lab
+  description: nc-fixer-mission-insider-biotech-lab-desc
   minimumReputation: 50
   owner: Biotechnica
-  item: NCMissionSabotageTarget
+  terminal: NCMissionIntelTerminal
+  item: NCMissionDataShard
   encounter: SecurityBiotechnicaStronghold
   reward: 7000
   reputationGain: 7
@@ -152,30 +106,132 @@
   timeLimit: 2400
 
 - type: ncFixerMission
-  id: NCFixerBetaMaelstromBoss
-  fixer: NCFixerBeta
-  kind: Elimination
-  name: nc-fixer-mission-beta-maelstrom-boss
-  description: nc-fixer-mission-beta-maelstrom-boss-desc
-  minimumReputation: 50
-  owner: Maelstrom
-  item: NCMobHumanGangMaelstromBoss
-  encounter: GangMaelstromStronghold
-  reward: 7500
-  reputationGain: 8
-  reputationLoss: 5
-  timeLimit: 2400
-
-- type: ncFixerMission
-  id: NCFixerBetaTygerServer
-  fixer: NCFixerBeta
-  kind: Sabotage
-  name: nc-fixer-mission-beta-tyger-server
-  description: nc-fixer-mission-beta-tyger-server-desc
+  id: NCFixerInsiderCorporatePda
+  fixer: NCFixerInsider
+  kind: Retrieval
+  name: nc-fixer-mission-insider-corporate-pda
+  description: nc-fixer-mission-insider-corporate-pda-desc
   minimumReputation: 25
-  owner: TygerClaws
-  item: NCMissionSabotageTarget
-  encounter: GangTygerClawsPost
+  targetDepartments: [ Militech, Biotechnica ]
   reward: 4000
   reputationGain: 5
+  timeLimit: 2400
+
+# ---- Vladimir "Vlad" Grigoriev: dope to push, goods to find, debts to collect. Pays cash in person.
+
+- type: ncFixerMission
+  id: NCFixerVladPush
+  fixer: NCFixerVlad
+  kind: Delivery
+  name: nc-fixer-mission-vlad-push
+  description: nc-fixer-mission-vlad-push-desc
+  itemFromFixer: true
+  dropAtMarker: true
+  owner: Neutral
+  item: NCMissionDrugBrick
+  reward: 1000
+  timeLimit: 1200
+
+- type: ncFixerMission
+  id: NCFixerVladPushMaelstrom
+  fixer: NCFixerVlad
+  kind: Delivery
+  name: nc-fixer-mission-vlad-push-maelstrom
+  description: nc-fixer-mission-vlad-push-maelstrom-desc
+  minimumReputation: 25
+  itemFromFixer: true
+  dropAtMarker: true
+  owner: Maelstrom
+  item: NCMissionDrugBrick
+  encounter: GangMaelstromPost
+  reward: 2500
+  reputationGain: 4
+  timeLimit: 1800
+
+- type: ncFixerMission
+  id: NCFixerVladGuns
+  fixer: NCFixerVlad
+  kind: Collection
+  name: nc-fixer-mission-vlad-guns
+  description: nc-fixer-mission-vlad-guns-desc
+  reward: 2000
+  timeLimit: 2400
+  requirements:
+  - !type:NCCorpItemRequirement
+    item: NCWeaponPistolStreetmaster
+    amount: 4
+
+- type: ncFixerMission
+  id: NCFixerVladAmmo
+  fixer: NCFixerVlad
+  kind: Collection
+  name: nc-fixer-mission-vlad-ammo
+  description: nc-fixer-mission-vlad-ammo-desc
+  reward: 900
+  timeLimit: 2400
+  requirements:
+  - !type:NCCorpItemRequirement
+    item: NCMagazine9x19Pistol
+    amount: 6
+
+- type: ncFixerMission
+  id: NCFixerVladDope
+  fixer: NCFixerVlad
+  kind: Collection
+  name: nc-fixer-mission-vlad-dope
+  description: nc-fixer-mission-vlad-dope-desc
+  minimumReputation: 10
+  reward: 1800
+  reputationGain: 3
+  timeLimit: 2400
+  requirements:
+  - !type:NCCorpDrugRequirement
+    formula: NCPharmaFormulaEuphoric
+    amount: 10
+    minimumGrade: Street
+    certified: false
+
+- type: ncFixerMission
+  id: NCFixerVladMeds
+  fixer: NCFixerVlad
+  kind: Collection
+  name: nc-fixer-mission-vlad-meds
+  description: nc-fixer-mission-vlad-meds-desc
+  minimumReputation: 10
+  reward: 2000
+  reputationGain: 3
+  timeLimit: 2400
+  requirements:
+  - !type:NCCorpDrugRequirement
+    formula: NCPharmaFormulaTraumaAnalgesic
+    amount: 10
+    minimumGrade: Street
+    certified: false
+
+- type: ncFixerMission
+  id: NCFixerVladDebtor
+  fixer: NCFixerVlad
+  kind: Beating
+  name: nc-fixer-mission-vlad-debtor
+  description: nc-fixer-mission-vlad-debtor-desc
+  owner: Neutral
+  item: NCMobHumanDebtor
+  reward: 1200
+  reputationGain: 3
+  reputationLoss: 4
+  timeLimit: 1200
+
+- type: ncFixerMission
+  id: NCFixerVladDebtorValentinos
+  fixer: NCFixerVlad
+  kind: Beating
+  name: nc-fixer-mission-vlad-debtor-valentinos
+  description: nc-fixer-mission-vlad-debtor-valentinos-desc
+  minimumReputation: 25
+  owner: Valentinos
+  item: NCMobHumanDebtor
+  encounter: GangValentinosPost
+  reward: 3000
+  reputationGain: 5
+  reputationLoss: 5
   timeLimit: 1800

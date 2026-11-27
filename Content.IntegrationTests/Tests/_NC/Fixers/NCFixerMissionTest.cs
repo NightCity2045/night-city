@@ -9,8 +9,6 @@ using Content.Shared._NC.Fixers;
 using Content.Shared._NC.Identity;
 using Content.Shared.Mind;
 using Content.Shared.Mind.Components;
-using Content.Shared.Stacks;
-using Content.Shared.Storage.Components;
 using Content.Shared.Storage.EntitySystems;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
@@ -22,6 +20,28 @@ namespace Content.IntegrationTests.Tests._NC.Fixers;
 [NonParallelizable]
 public sealed class NCFixerMissionTest : GameTest
 {
+    // A beating job on a bare mob without NC medicine, so the test can set the outcome directly.
+    [TestPrototypes]
+    private const string Prototypes = @"
+- type: ncFixerMission
+  id: NCTestFixerVladBeating
+  fixer: NCFixerVlad
+  kind: Beating
+  name: nc-fixer-mission-vlad-debtor
+  owner: Neutral
+  item: NCTestBeatingDummy
+  reward: 100
+  reputationGain: 3
+  reputationLoss: 4
+  weight: 0
+
+- type: entity
+  id: NCTestBeatingDummy
+  components:
+  - type: MobState
+    allowedStates: [ Alive, Critical, Dead ]
+";
+
     public override PoolSettings PoolSettings => new()
     {
         Connected = false,
@@ -41,6 +61,11 @@ public sealed class NCFixerMissionTest : GameTest
                     Assert.That(mission.Requirements, Is.Not.Empty, mission.ID);
                 else if (mission.TargetDepartments.Count == 0)
                     Assert.That(mission.Item, Is.Not.Null, mission.ID);
+
+                if (mission.Terminal != null)
+                    Assert.That(mission.Kind, Is.EqualTo(NCFixerMissionKind.Retrieval), mission.ID);
+                if (mission.ItemFromFixer)
+                    Assert.That(mission.Kind == NCFixerMissionKind.Delivery && mission.DropAtMarker, mission.ID);
             }
         });
     }
@@ -57,60 +82,15 @@ public sealed class NCFixerMissionTest : GameTest
     }
 
     /// <summary>
-    /// A delivery: the package appears at the objective marker, goes into the fixer's dead drop, and the fixer
-    /// pays cash into the drop and raises the taker's street reputation.
+    /// Vlad's push: the brick goes straight into the courier's hands, the buyer's drop appears at a dead drop
+    /// marker, and Vlad pays cash in person when the courier comes back.
     /// </summary>
     [Test]
-    public async Task DeliveryPaysIntoTheDeadDrop()
+    public async Task PushPaysInPerson()
     {
         var missions = Server.System<NCFixerMissionSystem>();
         var reputation = Server.System<NCStreetReputationSystem>();
-        var map = await Pair.CreateTestMap();
-        EntityUid drop = default;
-        EntityUid package = default;
-        var profile = 0;
-
-        await Server.WaitAssertion(() =>
-        {
-            var coords = map.GridCoords;
-            var fixerUid = SEntMan.SpawnEntity("NCFixerAlpha", coords);
-            drop = SEntMan.SpawnEntity("NCFixerDeadDropAlpha", coords.Offset(new System.Numerics.Vector2(1, 0)));
-            SEntMan.SpawnEntity("NCMissionMarkerObjectiveNeutral", coords.Offset(new System.Numerics.Vector2(3, 0)));
-            (var worker, profile) = SpawnWorker(coords, 900001);
-            var fixer = new Entity<NCFixerComponent>(fixerUid, SEntMan.GetComponent<NCFixerComponent>(fixerUid));
-
-            Assert.That(missions.TrySetOffer("NCFixerAlpha", 0, "NCFixerAlphaDelivery"), Is.True);
-            Assert.That(missions.TryAccept(fixer, 0, worker), Is.True);
-            Assert.That(missions.TryAccept(fixer, 1, worker), Is.False, "One job at a time.");
-
-            package = missions.GetMissionEntities(profile).First();
-            Assert.That(SEntMan.GetComponent<MetaDataComponent>(package).EntityPrototype?.ID, Is.EqualTo("NCMissionPackage"));
-            Assert.That(Server.System<SharedEntityStorageSystem>().Insert(package, drop), Is.True);
-        });
-
-        await Pair.RunSeconds(2);
-
-        await Server.WaitAssertion(() =>
-        {
-            Assert.That(missions.TryGetActiveMission(profile, out _, out _), Is.False, "The delivery is complete.");
-            Assert.That(reputation.GetReputation(profile), Is.EqualTo(2));
-            var contents = SEntMan.GetComponent<EntityStorageComponent>(drop).Contents.ContainedEntities;
-            var cash = contents.Where(uid => SEntMan.TryGetComponent<StackComponent>(uid, out var stack) && stack.StackTypeId == "Credit")
-                .Sum(uid => SEntMan.GetComponent<StackComponent>(uid).Count);
-            Assert.That(cash, Is.EqualTo(800), "The reward waits in the dead drop.");
-            Assert.That(SEntMan.Deleted(package) || SEntMan.IsQueuedForDeletion(package), "The package is taken.");
-        });
-    }
-
-    /// <summary>
-    /// A sabotage behind a reputation gate: the target and its guards appear, wrecking the target completes the
-    /// job, and an in-person fixer pays when the taker comes back.
-    /// </summary>
-    [Test]
-    public async Task SabotagePaysInPerson()
-    {
-        var missions = Server.System<NCFixerMissionSystem>();
-        var reputation = Server.System<NCStreetReputationSystem>();
+        var hands = Server.System<Content.Shared.Hands.EntitySystems.SharedHandsSystem>();
         var map = await Pair.CreateTestMap();
         Entity<NCFixerComponent> fixer = default;
         EntityUid worker = default;
@@ -119,19 +99,20 @@ public sealed class NCFixerMissionTest : GameTest
         await Server.WaitAssertion(() =>
         {
             var coords = map.GridCoords;
-            var fixerUid = SEntMan.SpawnEntity("NCFixerBeta", coords);
-            SEntMan.SpawnEntity("NCMissionMarkerObjectiveSixthStreet", coords.Offset(new System.Numerics.Vector2(6, 0)));
-            (worker, profile) = SpawnWorker(coords, 900002);
+            var fixerUid = SEntMan.SpawnEntity("NCFixerVlad", coords);
+            SEntMan.SpawnEntity("NCMissionMarkerDeadDropNeutral", coords.Offset(new System.Numerics.Vector2(4, 0)));
+            (worker, profile) = SpawnWorker(coords, 900001);
             fixer = new Entity<NCFixerComponent>(fixerUid, SEntMan.GetComponent<NCFixerComponent>(fixerUid));
 
-            Assert.That(missions.TrySetOffer("NCFixerBeta", 0, "NCFixerBetaSabotage"), Is.True);
-            Assert.That(missions.TryAccept(fixer, 0, worker), Is.False, "Not trusted without street reputation.");
-            reputation.AddReputation(profile, 10);
+            Assert.That(missions.TrySetOffer("NCFixerVlad", 0, "NCFixerVladPush"), Is.True);
             Assert.That(missions.TryAccept(fixer, 0, worker), Is.True);
+            Assert.That(missions.TryAccept(fixer, 1, worker), Is.False, "One job at a time.");
 
             var spawned = missions.GetMissionEntities(profile);
-            Assert.That(spawned.Count, Is.GreaterThan(1), "The target comes with guards.");
-            SEntMan.DeleteEntity(spawned[0]);
+            var brick = spawned.First(uid => SEntMan.GetComponent<MetaDataComponent>(uid).EntityPrototype?.ID == "NCMissionDrugBrick");
+            Assert.That(hands.IsHolding(worker, brick), "Vlad hands the brick over.");
+            var drop = spawned.First(uid => SEntMan.HasComponent<NCFixerDeadDropComponent>(uid));
+            Assert.That(Server.System<SharedEntityStorageSystem>().Insert(brick, drop), Is.True);
         });
 
         await Pair.RunSeconds(2);
@@ -142,7 +123,121 @@ public sealed class NCFixerMissionTest : GameTest
             Assert.That(status, Is.EqualTo(NCFixerMissionStatus.AwaitingPayment));
             Assert.That(missions.TryCollectPayment(fixer, worker), Is.True);
             Assert.That(missions.TryGetActiveMission(profile, out _, out _), Is.False);
+            Assert.That(reputation.GetReputation(profile), Is.EqualTo(2));
+        });
+    }
+
+    /// <summary>
+    /// An Insider hacking job behind a reputation gate: a terminal and its guards appear, hacking gives the
+    /// shard, and the shard in the Insider's drop completes the job.
+    /// </summary>
+    [Test]
+    public async Task HackedShardCompletesRetrieval()
+    {
+        var missions = Server.System<NCFixerMissionSystem>();
+        var reputation = Server.System<NCStreetReputationSystem>();
+        var map = await Pair.CreateTestMap();
+        EntityUid drop = default;
+        EntityUid shard = default;
+        var profile = 0;
+
+        await Server.WaitAssertion(() =>
+        {
+            var coords = map.GridCoords;
+            var fixerUid = SEntMan.SpawnEntity("NCFixerInsider", coords);
+            drop = SEntMan.SpawnEntity("NCFixerDeadDropInsider", coords.Offset(new System.Numerics.Vector2(1, 0)));
+            SEntMan.SpawnEntity("NCMissionMarkerObjectiveTygerClaws", coords.Offset(new System.Numerics.Vector2(6, 0)));
+            (var worker, profile) = SpawnWorker(coords, 900002);
+            var fixer = new Entity<NCFixerComponent>(fixerUid, SEntMan.GetComponent<NCFixerComponent>(fixerUid));
+
+            Assert.That(missions.TrySetOffer("NCFixerInsider", 0, "NCFixerInsiderTygerNames"), Is.True);
+            Assert.That(missions.TryAccept(fixer, 0, worker), Is.False, "Not trusted without street reputation.");
+            reputation.AddReputation(profile, 10);
+            Assert.That(missions.TryAccept(fixer, 0, worker), Is.True);
+
+            var spawned = missions.GetMissionEntities(profile);
+            Assert.That(spawned.Count(uid => SEntMan.HasComponent<NCMissionGuardComponent>(uid)), Is.GreaterThan(0), "The terminal is guarded.");
+            var terminal = spawned.First(uid => SEntMan.HasComponent<NCMissionTerminalComponent>(uid));
+            var terminalEnt = new Entity<NCMissionTerminalComponent>(terminal, SEntMan.GetComponent<NCMissionTerminalComponent>(terminal));
+            Assert.That(missions.CompleteHack(terminalEnt, worker), Is.True);
+            Assert.That(missions.CompleteHack(terminalEnt, worker), Is.False, "A terminal gives one shard.");
+
+            shard = missions.GetMissionEntities(profile).First(uid => SEntMan.GetComponent<MetaDataComponent>(uid).EntityPrototype?.ID == "NCMissionDataShard");
+            Assert.That(Server.System<SharedEntityStorageSystem>().Insert(shard, drop), Is.True);
+        });
+
+        await Pair.RunSeconds(2);
+
+        await Server.WaitAssertion(() =>
+        {
+            // No bank account in a test: the wire fails and the Insider owes the money until it can be collected.
+            Assert.That(missions.TryGetActiveMission(profile, out _, out var status), Is.True);
+            Assert.That(status, Is.EqualTo(NCFixerMissionStatus.AwaitingPayment));
             Assert.That(reputation.GetReputation(profile), Is.EqualTo(14));
+            Assert.That(SEntMan.Deleted(shard) || SEntMan.IsQueuedForDeletion(shard), "The shard is taken.");
+        });
+    }
+
+    /// <summary>A beating counts when the debtor is down but alive; killing the debtor fails the job.</summary>
+    [Test]
+    public async Task BeatingNeedsTheDebtorAlive()
+    {
+        var missions = Server.System<NCFixerMissionSystem>();
+        var reputation = Server.System<NCStreetReputationSystem>();
+        var mobState = Server.System<Content.Shared.Mobs.Systems.MobStateSystem>();
+        var map = await Pair.CreateTestMap();
+        var profiles = new int[2];
+
+        await Server.WaitAssertion(() =>
+        {
+            var coords = map.GridCoords;
+            var fixerUid = SEntMan.SpawnEntity("NCFixerVlad", coords);
+            SEntMan.SpawnEntity("NCMissionMarkerObjectiveNeutral", coords.Offset(new System.Numerics.Vector2(8, 0)));
+            var fixer = new Entity<NCFixerComponent>(fixerUid, SEntMan.GetComponent<NCFixerComponent>(fixerUid));
+
+            for (var i = 0; i < 2; i++)
+            {
+                var (worker, profile) = SpawnWorker(coords, 900010 + i);
+                profiles[i] = profile;
+                reputation.AddReputation(profile, 10);
+                Assert.That(missions.TrySetOffer("NCFixerVlad", 0, "NCTestFixerVladBeating"), Is.True);
+                Assert.That(missions.TryAccept(fixer, 0, worker), Is.True);
+                mobState.ChangeMobState(missions.GetMissionEntities(profile).First(), i == 0
+                    ? Content.Shared.Mobs.MobState.Critical
+                    : Content.Shared.Mobs.MobState.Dead);
+            }
+        });
+
+        await Pair.RunSeconds(2);
+
+        await Server.WaitAssertion(() =>
+        {
+            Assert.That(missions.TryGetActiveMission(profiles[0], out _, out var status), Is.True);
+            Assert.That(status, Is.EqualTo(NCFixerMissionStatus.AwaitingPayment), "Down but alive: done.");
+            Assert.That(reputation.GetReputation(profiles[0]), Is.EqualTo(13));
+            Assert.That(missions.TryGetActiveMission(profiles[1], out _, out _), Is.False, "Dead debtor: the job failed.");
+            Assert.That(reputation.GetReputation(profiles[1]), Is.EqualTo(6));
+        });
+    }
+
+    /// <summary>The debtor itself is a human whose state NC medicine drives; it must at least spawn as a guard.</summary>
+    [Test]
+    public async Task DebtorSpawnsAsTarget()
+    {
+        var missions = Server.System<NCFixerMissionSystem>();
+        var map = await Pair.CreateTestMap();
+        await Server.WaitAssertion(() =>
+        {
+            var coords = map.GridCoords;
+            var fixerUid = SEntMan.SpawnEntity("NCFixerVlad", coords);
+            SEntMan.SpawnEntity("NCMissionMarkerObjectiveNeutral", coords.Offset(new System.Numerics.Vector2(8, 0)));
+            var (worker, profile) = SpawnWorker(coords, 900020);
+            var fixer = new Entity<NCFixerComponent>(fixerUid, SEntMan.GetComponent<NCFixerComponent>(fixerUid));
+            Assert.That(missions.TrySetOffer("NCFixerVlad", 0, "NCFixerVladDebtor"), Is.True);
+            Assert.That(missions.TryAccept(fixer, 0, worker), Is.True);
+            var debtor = missions.GetMissionEntities(profile).First();
+            Assert.That(SEntMan.GetComponent<MetaDataComponent>(debtor).EntityPrototype?.ID, Is.EqualTo("NCMobHumanDebtor"));
+            Assert.That(SEntMan.HasComponent<NCMissionGuardComponent>(debtor), "The debtor fights back when beaten.");
         });
     }
 
@@ -161,12 +256,13 @@ public sealed class NCFixerMissionTest : GameTest
         await Server.WaitAssertion(() =>
         {
             var coords = map.GridCoords;
-            var fixerUid = SEntMan.SpawnEntity("NCFixerBeta", coords);
-            SEntMan.SpawnEntity("NCMissionMarkerObjectiveSixthStreet", coords.Offset(new System.Numerics.Vector2(10, 0)));
+            var fixerUid = SEntMan.SpawnEntity("NCFixerInsider", coords);
+            SEntMan.SpawnEntity("NCFixerDeadDropInsider", coords.Offset(new System.Numerics.Vector2(1, 0)));
+            SEntMan.SpawnEntity("NCMissionMarkerObjectiveTygerClaws", coords.Offset(new System.Numerics.Vector2(10, 0)));
             var (worker, profile) = SpawnWorker(coords, 900003);
             reputation.AddReputation(profile, 10);
             var fixer = new Entity<NCFixerComponent>(fixerUid, SEntMan.GetComponent<NCFixerComponent>(fixerUid));
-            Assert.That(missions.TrySetOffer("NCFixerBeta", 0, "NCFixerBetaSabotage"), Is.True);
+            Assert.That(missions.TrySetOffer("NCFixerInsider", 0, "NCFixerInsiderTygerNames"), Is.True);
             Assert.That(missions.TryAccept(fixer, 0, worker), Is.True);
             guards = missions.GetMissionEntities(profile).Where(uid => SEntMan.HasComponent<NCMissionGuardComponent>(uid)).ToList();
             Assert.That(guards, Is.Not.Empty);

@@ -47,3 +47,35 @@
       behaviors:
       - !type:DoActsBehavior
         acts: [ "Destruction" ]
+
+# Vlad's merchandise, handed to the courier for the buyer.
+- type: entity
+  parent: BaseItem
+  id: NCMissionDrugBrick
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Fixers/drug_brick.rsi
+    state: icon
+  - type: Item
+    size: Small
+  - type: StaticPrice
+    price: 0
+
+# A terminal spawned for a hacking job. Hacking it takes a while and gives the mission's data shard.
+- type: entity
+  parent: BaseStructure
+  id: NCMissionIntelTerminal
+  components:
+  - type: Transform
+    anchored: true
+  - type: Physics
+    bodyType: Static
+  - type: Sprite
+    sprite: Structures/Machines/computers.rsi
+    layers:
+    - state: computer
+    - state: generic_keyboard
+    - state: generic
+      shader: unshaded
+  - type: InteractionOutline
+  - type: NCMissionTerminal

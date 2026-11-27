@@ -9,7 +9,10 @@ using Content.Server.GameTicking;
 using Content.Shared._NC.City.Map;
 using Content.Shared._NC.Coordinates.Systems;
 using Content.Shared._NC.Fixers;
+using Content.Shared.DoAfter;
 using Content.Shared.GameTicking;
+using Content.Shared.Hands.EntitySystems;
+using Content.Shared.Interaction;
 using Content.Shared.Humanoid;
 using Content.Shared.Inventory;
 using Content.Shared.Mind;
@@ -57,6 +60,8 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
     [Dependency] private InventorySystem _inventory = default!;
     [Dependency] private SharedEntityStorageSystem _entityStorage = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
+    [Dependency] private SharedHandsSystem _hands = default!;
+    [Dependency] private SharedDoAfterSystem _doAfter = default!;
     [Dependency] private NCMapCoordinatesSystem _mapCoordinates = default!;
     [Dependency] private NCCityAtlasSystem _atlas = default!;
     [Dependency] private NCBankSystem _bank = default!;
@@ -86,6 +91,7 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
         public EntityUid? Item;
         public EntityUid? Drop;
         public EntityUid? Target;
+        public EntityUid? Terminal;
         public string? TargetName;
         public readonly List<EntityUid> Spawned = new();
     }
@@ -98,6 +104,8 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
         SubscribeLocalEvent<NCFixerComponent, NCFixerAbandonMessage>(OnAbandon);
         SubscribeLocalEvent<NCFixerComponent, NCFixerCollectPaymentMessage>(OnCollectPayment);
         SubscribeLocalEvent<MobStateComponent, NCCityMapCollectMarkersEvent>(OnCollectMarkers);
+        SubscribeLocalEvent<NCMissionTerminalComponent, ActivateInWorldEvent>(OnTerminalActivated);
+        SubscribeLocalEvent<NCMissionTerminalComponent, NCMissionHackDoAfterEvent>(OnTerminalHacked);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundRestart);
     }
 
@@ -199,6 +207,11 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
             if (PickPlayerTarget(mission, taker) == null)
                 return false;
         }
+        else if (mission.Kind == NCFixerMissionKind.Delivery && mission.ItemFromFixer)
+        {
+            if (mission.Item == null)
+                return false;
+        }
         else if (mission.Kind != NCFixerMissionKind.Collection &&
                  (mission.Item == null || PickMarker(NCMissionMarkerKind.Objective, mission.Owner, null) == null))
         {
@@ -207,7 +220,7 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
 
         return mission.Kind switch
         {
-            NCFixerMissionKind.Delivery when mission.DropAtMarker => PickMarker(NCMissionMarkerKind.DeadDrop, null, null) != null,
+            NCFixerMissionKind.Delivery when mission.DropAtMarker => PickMarker(NCMissionMarkerKind.DeadDrop, DropOwner(mission), null) != null,
             NCFixerMissionKind.Delivery or NCFixerMissionKind.Retrieval or NCFixerMissionKind.Collection =>
                 FindFixerDrop(mission.Fixer) != null,
             _ => true,
@@ -229,6 +242,12 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
         }
 
         return candidates.Count == 0 ? null : _random.Pick(candidates);
+    }
+
+    /// <summary>Goods the fixer hands over go to a buyer on the mission owner's ground; other drops are anyone's.</summary>
+    private static ProtoId<NCMissionOwnerPrototype>? DropOwner(NCFixerMissionPrototype mission)
+    {
+        return mission.ItemFromFixer ? mission.Owner : null;
     }
 
     private EntityUid? FindFixerDrop(ProtoId<NCFixerPrototype> fixer)
@@ -362,6 +381,25 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
             if (mission.Kind == NCFixerMissionKind.Retrieval)
                 active.Item = GetPda(target);
         }
+        else if (mission.Kind == NCFixerMissionKind.Delivery && mission.ItemFromFixer)
+        {
+            // The fixer hands the goods over: straight into the taker's hands, or at their feet.
+            if (mission.Item is not { } cargo)
+                return false;
+
+            active.Item = SpawnMissionEntity(active, cargo, Transform(taker).Coordinates);
+            _hands.TryPickupAnyHand(taker, active.Item.Value);
+        }
+        else if (mission.Kind == NCFixerMissionKind.Retrieval && mission.Terminal is { } terminal)
+        {
+            // The item does not exist yet: it comes out of the terminal once someone hacks it.
+            if (PickMarker(NCMissionMarkerKind.Objective, mission.Owner, null) is not { } objective)
+                return false;
+
+            active.Objective = objective;
+            active.Terminal = SpawnMissionEntity(active, terminal, Transform(objective).Coordinates);
+            EnsureComp<NCMissionTerminalComponent>(active.Terminal.Value);
+        }
         else if (mission.Kind != NCFixerMissionKind.Collection)
         {
             if (mission.Item is not { } item ||
@@ -372,7 +410,7 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
 
             active.Objective = objective;
             active.Item = SpawnMissionEntity(active, item, Transform(objective).Coordinates);
-            if (mission.Kind == NCFixerMissionKind.Elimination)
+            if (mission.Kind is NCFixerMissionKind.Elimination or NCFixerMissionKind.Beating)
             {
                 active.Target = active.Item;
                 _guards.MakeGuard(active.Item.Value, active.Id,
@@ -383,9 +421,12 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
         switch (mission.Kind)
         {
             case NCFixerMissionKind.Delivery when mission.DropAtMarker:
-                if (PickMarker(NCMissionMarkerKind.DeadDrop, null, active.Objective) is not { } dropMarker)
+                if (PickMarker(NCMissionMarkerKind.DeadDrop, DropOwner(mission), active.Objective) is not { } dropMarker)
                     return false;
                 active.Drop = SpawnMissionEntity(active, "NCFixerMissionDeadDrop", Transform(dropMarker).Coordinates);
+                // Goods handed over by the fixer have no objective: the buyers wait around the drop.
+                if (mission.ItemFromFixer && mission.Encounter is { } buyers)
+                    SpawnEncounter(active, buyers, dropMarker, taker);
                 break;
             case NCFixerMissionKind.Delivery or NCFixerMissionKind.Retrieval or NCFixerMissionKind.Collection:
                 active.Drop = FindFixerDrop(mission.Fixer);
@@ -497,7 +538,8 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
                     QueueDel(item);
                     Complete(active, mission);
                 }
-                else if (active.Item is { } lost && Deleted(lost))
+                else if (active.Item is { } lost && Deleted(lost) ||
+                         active.Item == null && active.Terminal is { } terminal && TerminatingOrDeleted(terminal))
                 {
                     Fail(active, mission, Loc.GetString("nc-fixer-mission-item-lost", ("mission", Loc.GetString(mission.Name))));
                 }
@@ -508,6 +550,12 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
                 break;
             case NCFixerMissionKind.Elimination:
                 if (active.Target is not { } target || TerminatingOrDeleted(target) || _mobState.IsDead(target))
+                    Complete(active, mission);
+                break;
+            case NCFixerMissionKind.Beating:
+                if (active.Target is not { } victim || TerminatingOrDeleted(victim) || _mobState.IsDead(victim))
+                    Fail(active, mission, Loc.GetString("nc-fixer-mission-target-killed", ("mission", Loc.GetString(mission.Name))));
+                else if (_mobState.IsCritical(victim))
                     Complete(active, mission);
                 break;
             case NCFixerMissionKind.Collection:
@@ -651,6 +699,78 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
         {
             _chat.DispatchServerMessage(session, message);
         }
+    }
+
+    #endregion
+
+    #region Terminals
+
+    private void OnTerminalActivated(Entity<NCMissionTerminalComponent> ent, ref ActivateInWorldEvent args)
+    {
+        if (args.Handled || !args.Complex)
+            return;
+
+        args.Handled = true;
+        TryStartHack(ent, args.User);
+    }
+
+    /// <summary>Starts hacking a mission terminal. Anyone can do it; the shard goes to whoever finishes.</summary>
+    public bool TryStartHack(Entity<NCMissionTerminalComponent> ent, EntityUid user)
+    {
+        if (ent.Comp.Hacked || FindMissionByTerminal(ent) == null)
+        {
+            _popup.PopupEntity(Loc.GetString("nc-mission-terminal-empty"), ent, user);
+            return false;
+        }
+
+        if (!_doAfter.TryStartDoAfter(new DoAfterArgs(EntityManager, user, ent.Comp.HackTime, new NCMissionHackDoAfterEvent(), ent, ent)
+            {
+                BreakOnMove = true,
+                BreakOnDamage = true,
+                NeedHand = true,
+            }))
+        {
+            return false;
+        }
+
+        _popup.PopupEntity(Loc.GetString("nc-mission-terminal-hacking"), ent, user);
+        return true;
+    }
+
+    private void OnTerminalHacked(Entity<NCMissionTerminalComponent> ent, ref NCMissionHackDoAfterEvent args)
+    {
+        if (args.Handled || args.Cancelled)
+            return;
+
+        args.Handled = true;
+        CompleteHack(ent, args.User);
+    }
+
+    /// <summary>Finishes a hack: the mission's item comes out of the terminal into the hacker's hands.</summary>
+    public bool CompleteHack(Entity<NCMissionTerminalComponent> ent, EntityUid user)
+    {
+        if (ent.Comp.Hacked || FindMissionByTerminal(ent) is not { } active ||
+            !_prototypes.TryIndex(active.Mission, out var mission) || mission.Item is not { } item)
+        {
+            return false;
+        }
+
+        ent.Comp.Hacked = true;
+        active.Item = SpawnMissionEntity(active, item, Transform(ent).Coordinates);
+        _hands.TryPickupAnyHand(user, active.Item.Value);
+        _popup.PopupEntity(Loc.GetString("nc-mission-terminal-hacked"), ent, user);
+        return true;
+    }
+
+    private ActiveMission? FindMissionByTerminal(EntityUid terminal)
+    {
+        foreach (var active in _active.Values)
+        {
+            if (active.Terminal == terminal && active.Status == NCFixerMissionStatus.Active)
+                return active;
+        }
+
+        return null;
     }
 
     #endregion

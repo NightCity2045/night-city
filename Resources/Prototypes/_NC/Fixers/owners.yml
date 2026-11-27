@@ -15,6 +15,10 @@
   name: nc-mission-owner-biotechnica
 
 - type: ncMissionOwner
+  id: NCPD
+  name: nc-mission-owner-ncpd
+
+- type: ncMissionOwner
   id: SixthStreet
   name: nc-mission-owner-sixth-street
 

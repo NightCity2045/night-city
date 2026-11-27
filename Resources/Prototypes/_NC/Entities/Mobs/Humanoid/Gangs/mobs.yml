@@ -282,3 +282,21 @@
   components:
   - type: Loadout
     prototypes: [ NCSecurityBiotechnicaHeavyGear ]
+
+# Someone who owes money to the wrong people. Fights back when beaten.
+- type: entity
+  parent: MobHuman
+  id: NCMobHumanDebtor
+  components:
+  - type: RandomHumanoidAppearance
+    randomizeName: false
+    allowedMarkingLayers: [ Hair, FacialHair, UndergarmentTop, UndergarmentBottom ]
+  - type: NpcFactionMember
+    factions: [ NCCivilian ]
+  - type: FactionException
+  - type: NPCRetaliation
+  - type: HTN
+    rootTask:
+      task: SimpleHumanoidHostileCompound
+  - type: Loadout
+    prototypes: [ NCDebtorGear ]

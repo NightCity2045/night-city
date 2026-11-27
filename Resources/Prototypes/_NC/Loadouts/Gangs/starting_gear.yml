@@ -260,3 +260,11 @@
     gloves: ClothingHandsGlovesFingerless
   inhand:
   - NCWeaponSMGSaratoga
+
+- type: startingGear
+  id: NCDebtorGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorGrey
+    shoes: ClothingShoesColorBlack
+  inhand:
+  - KitchenKnife

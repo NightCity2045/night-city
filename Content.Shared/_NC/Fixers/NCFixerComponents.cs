@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 
+using Content.Shared.DoAfter;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Serialization;
 
 namespace Content.Shared._NC.Fixers;
 
@@ -70,3 +72,17 @@ public sealed partial class NCMissionGuardComponent : Component
     [ViewVariables]
     public HashSet<EntityUid> Hostile = new();
 }
+
+/// <summary>A terminal spawned for a fixer mission. Hacking it produces the mission's data shard once.</summary>
+[RegisterComponent]
+public sealed partial class NCMissionTerminalComponent : Component
+{
+    [DataField]
+    public TimeSpan HackTime = TimeSpan.FromSeconds(15);
+
+    [ViewVariables]
+    public bool Hacked;
+}
+
+[Serializable, NetSerializable]
+public sealed partial class NCMissionHackDoAfterEvent : SimpleDoAfterEvent;

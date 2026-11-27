@@ -1,23 +1,23 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 
-# The two starting fixers. Names, lines and payment are placeholders until their write-ups land.
-
+# John "Insider" Doe: an anonymous underground journalist. Works through a net terminal, pays by wire.
 - type: ncFixer
-  id: NCFixerAlpha
-  name: nc-fixer-alpha-name
-  description: nc-fixer-alpha-desc
-  payment: DeadDrop
+  id: NCFixerInsider
+  name: nc-fixer-insider-name
+  description: nc-fixer-insider-desc
+  payment: Transfer
   greetings:
-  - nc-fixer-alpha-greeting-1
-  - nc-fixer-alpha-greeting-2
-  - nc-fixer-alpha-greeting-3
+  - nc-fixer-insider-greeting-1
+  - nc-fixer-insider-greeting-2
+  - nc-fixer-insider-greeting-3
 
+# Vladimir "Vlad" Grigoriev: an Eastern European ex-mobster running drugs and stolen goods out of the docks.
 - type: ncFixer
-  id: NCFixerBeta
-  name: nc-fixer-beta-name
-  description: nc-fixer-beta-desc
+  id: NCFixerVlad
+  name: nc-fixer-vlad-name
+  description: nc-fixer-vlad-desc
   payment: InPerson
   greetings:
-  - nc-fixer-beta-greeting-1
-  - nc-fixer-beta-greeting-2
-  - nc-fixer-beta-greeting-3
+  - nc-fixer-vlad-greeting-1
+  - nc-fixer-vlad-greeting-2
+  - nc-fixer-vlad-greeting-3
