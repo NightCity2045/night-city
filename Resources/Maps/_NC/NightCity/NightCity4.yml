@@ -818,81 +818,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 138.5,56.5
-  - uid: 1213
-    components:
-    - type: Transform
-      parent: 1
-      pos: -49.5,71.5
-  - uid: 1214
-    components:
-    - type: Transform
-      parent: 1
-      pos: -46.5,72.5
-  - uid: 1215
-    components:
-    - type: Transform
-      parent: 1
-      pos: -47.5,75.5
-  - uid: 1216
-    components:
-    - type: Transform
-      parent: 1
-      pos: -47.5,71.5
-  - uid: 1217
-    components:
-    - type: Transform
-      parent: 1
-      pos: -50.5,72.5
-  - uid: 1218
-    components:
-    - type: Transform
-      parent: 1
-      pos: -48.5,75.5
-  - uid: 1219
-    components:
-    - type: Transform
-      parent: 1
-      pos: -46.5,75.5
-  - uid: 1220
-    components:
-    - type: Transform
-      parent: 1
-      pos: -50.5,75.5
-  - uid: 1221
-    components:
-    - type: Transform
-      parent: 1
-      pos: -46.5,71.5
-  - uid: 1222
-    components:
-    - type: Transform
-      parent: 1
-      pos: -50.5,71.5
-  - uid: 1223
-    components:
-    - type: Transform
-      parent: 1
-      pos: -46.5,74.5
-  - uid: 1224
-    components:
-    - type: Transform
-      parent: 1
-      pos: -50.5,74.5
-  - uid: 1225
-    components:
-    - type: Transform
-      parent: 1
-      pos: -48.5,71.5
-  - uid: 1226
-    components:
-    - type: Transform
-      parent: 1
-      pos: -46.5,73.5
-  - uid: 1228
-    components:
-    - type: Transform
-      parent: 1
-      pos: -49.5,75.5
 - proto: NCWallMetals
   entities:
   - uid: 776
@@ -4715,4 +4640,79 @@ entities:
     - type: Transform
       parent: 1
       pos: -97.5,11.5
+  - uid: 1213
+    components:
+    - type: Transform
+      parent: 1
+      pos: -49.5,71.5
+  - uid: 1214
+    components:
+    - type: Transform
+      parent: 1
+      pos: -46.5,72.5
+  - uid: 1215
+    components:
+    - type: Transform
+      parent: 1
+      pos: -47.5,75.5
+  - uid: 1216
+    components:
+    - type: Transform
+      parent: 1
+      pos: -47.5,71.5
+  - uid: 1217
+    components:
+    - type: Transform
+      parent: 1
+      pos: -50.5,72.5
+  - uid: 1218
+    components:
+    - type: Transform
+      parent: 1
+      pos: -48.5,75.5
+  - uid: 1219
+    components:
+    - type: Transform
+      parent: 1
+      pos: -46.5,75.5
+  - uid: 1220
+    components:
+    - type: Transform
+      parent: 1
+      pos: -50.5,75.5
+  - uid: 1221
+    components:
+    - type: Transform
+      parent: 1
+      pos: -46.5,71.5
+  - uid: 1222
+    components:
+    - type: Transform
+      parent: 1
+      pos: -50.5,71.5
+  - uid: 1223
+    components:
+    - type: Transform
+      parent: 1
+      pos: -46.5,74.5
+  - uid: 1224
+    components:
+    - type: Transform
+      parent: 1
+      pos: -50.5,74.5
+  - uid: 1225
+    components:
+    - type: Transform
+      parent: 1
+      pos: -48.5,71.5
+  - uid: 1226
+    components:
+    - type: Transform
+      parent: 1
+      pos: -46.5,73.5
+  - uid: 1228
+    components:
+    - type: Transform
+      parent: 1
+      pos: -49.5,75.5
 ...
