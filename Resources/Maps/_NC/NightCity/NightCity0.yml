@@ -5,7 +5,7 @@ meta:
   forkId: EchoCyber
   forkVersion: be524da4b41781c61399952aad42f92f7e1b6dd0
   time: 11/26/2026 07:14:57
-  entityCount: 17024
+  entityCount: 17011
 maps:
 - 1
 grids:
@@ -92498,11 +92498,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -120.5,42.5
-  - uid: 15949
-    components:
-    - type: Transform
-      parent: 1
-      pos: -119.5,42.5
   - uid: 15950
     components:
     - type: Transform
@@ -92533,11 +92528,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -77.5,43.5
-  - uid: 16005
-    components:
-    - type: Transform
-      parent: 1
-      pos: -76.5,43.5
   - uid: 16006
     components:
     - type: Transform
@@ -92588,11 +92578,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -49.5,62.5
-  - uid: 16112
-    components:
-    - type: Transform
-      parent: 1
-      pos: -49.5,63.5
   - uid: 16113
     components:
     - type: Transform
@@ -92633,11 +92618,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -73.5,64.5
-  - uid: 16207
-    components:
-    - type: Transform
-      parent: 1
-      pos: -73.5,65.5
   - uid: 16208
     components:
     - type: Transform
@@ -93233,11 +93213,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -99.5,86.5
-  - uid: 16927
-    components:
-    - type: Transform
-      parent: 1
-      pos: -98.5,86.5
   - uid: 16928
     components:
     - type: Transform
@@ -93438,11 +93413,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 180.5,31.5
-  - uid: 17022
-    components:
-    - type: Transform
-      parent: 1
-      pos: 180.5,32.5
   - uid: 17023
     components:
     - type: Transform
@@ -93458,16 +93428,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 180.5,35.5
-  - uid: 17160
-    components:
-    - type: Transform
-      parent: 1
-      pos: 137.5,24.5
-  - uid: 17161
-    components:
-    - type: Transform
-      parent: 1
-      pos: 141.5,24.5
   - uid: 17162
     components:
     - type: Transform
@@ -93488,16 +93448,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 141.5,26.5
-  - uid: 17166
-    components:
-    - type: Transform
-      parent: 1
-      pos: 137.5,27.5
-  - uid: 17167
-    components:
-    - type: Transform
-      parent: 1
-      pos: 141.5,27.5
   - uid: 17168
     components:
     - type: Transform
@@ -93518,16 +93468,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 141.5,29.5
-  - uid: 17172
-    components:
-    - type: Transform
-      parent: 1
-      pos: 137.5,30.5
-  - uid: 17173
-    components:
-    - type: Transform
-      parent: 1
-      pos: 141.5,30.5
   - uid: 17174
     components:
     - type: Transform
@@ -93688,11 +93628,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 72.5,37.5
-  - uid: 17331
-    components:
-    - type: Transform
-      parent: 1
-      pos: 72.5,38.5
   - uid: 17332
     components:
     - type: Transform

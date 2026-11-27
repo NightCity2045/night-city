@@ -5,7 +5,7 @@ meta:
   forkId: EchoCyber
   forkVersion: be524da4b41781c61399952aad42f92f7e1b6dd0
   time: 11/26/2026 07:14:57
-  entityCount: 4514
+  entityCount: 4513
 maps:
 - 1
 grids:
@@ -18261,11 +18261,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -96.5,-19.5
-  - uid: 939
-    components:
-    - type: Transform
-      parent: 1
-      pos: -93.5,-13.5
   - uid: 940
     components:
     - type: Transform
