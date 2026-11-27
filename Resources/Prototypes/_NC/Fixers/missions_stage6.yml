@@ -451,3 +451,66 @@
   reputationGain: 7
   reputationLoss: 5
   timeLimit: 2400
+
+# ---- South Night City: 6th Street warehouses and the Maelstrom chop den.
+
+- type: ncFixerMission
+  id: NCFixerVanceManifests
+  fixer: NCFixerVance
+  kind: Retrieval
+  name: nc-fixer-mission-vance-manifests
+  description: nc-fixer-mission-vance-manifests-desc
+  minimumReputation: 10
+  owner: SixthStreet
+  terminal: NCMissionIntelTerminal
+  item: NCMissionDataShard
+  encounter: SixthStreetPost
+  reward: 3000
+  reputationGain: 4
+  timeLimit: 1800
+
+- type: ncFixerMission
+  id: NCFixerBothaLostContainer
+  fixer: NCFixerBotha
+  kind: Retrieval
+  name: nc-fixer-mission-botha-lost-container
+  description: nc-fixer-mission-botha-lost-container-desc
+  minimumReputation: 25
+  owner: SixthStreet
+  item: NCMissionMilitaryPrototype
+  encounter: SixthStreetStronghold
+  reward: 4000
+  reputationGain: 5
+  reputationLoss: 5
+  timeLimit: 2400
+
+- type: ncFixerMission
+  id: NCFixerFengBadChrome
+  fixer: NCFixerFeng
+  kind: Elimination
+  name: nc-fixer-mission-feng-bad-chrome
+  description: nc-fixer-mission-feng-bad-chrome-desc
+  minimumReputation: 25
+  owner: Maelstrom
+  item: NCMobHumanGangMaelstromBoss
+  encounter: GangMaelstromPost
+  reward: 3500
+  reputationGain: 5
+  reputationLoss: 5
+  timeLimit: 2400
+
+- type: ncFixerMission
+  id: NCFixerVladPushSixthStreet
+  fixer: NCFixerVlad
+  kind: Delivery
+  name: nc-fixer-mission-vlad-push-sixth-street
+  description: nc-fixer-mission-vlad-push-sixth-street-desc
+  minimumReputation: 10
+  itemFromFixer: true
+  dropAtMarker: true
+  owner: SixthStreet
+  item: NCMissionDrugBrick
+  encounter: SixthStreetPost
+  reward: 2000
+  reputationGain: 3
+  timeLimit: 1800

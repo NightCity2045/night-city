@@ -266,3 +266,12 @@ ent-NCMissionClubSoundSystem = club sound system
     .desc = Towers of speakers and a mixing desk.
 ent-NCMissionLedgerCabinet = ledger cabinet
     .desc = A cabinet full of paper ledgers. Very flammable.
+
+nc-fixer-mission-vance-manifests = Doctored manifests
+nc-fixer-mission-vance-manifests-desc = Containers vanish between the ship and the customs shed, and the paperwork says they never existed. 6th Street keeps the real manifests on a terminal in the basement of W 22nd Street 02, South Night City. Copy them for me.
+nc-fixer-mission-botha-lost-container = Lost container
+nc-fixer-mission-botha-lost-container-desc = A military prototype fell off a ship in the port, straight into a 6th Street warehouse under W 22nd Street 02. Their soldiers guard it like family silver. Bring it to me.
+nc-fixer-mission-feng-bad-chrome = Bad chrome
+nc-fixer-mission-feng-bad-chrome-desc = A Maelstrom ripperdoc in a South Night City back alley fits cheap chrome to my clubs' regulars, and they come back to me in body bags. Close his practice. Permanently.
+nc-fixer-mission-vlad-push-sixth-street = Goods for 6th Street
+nc-fixer-mission-vlad-push-sixth-street-desc = 6th Street buys from Vlad and sells at the port. Take the brick to their drop in South Night City. Their boys will be waiting, do not make them nervous.

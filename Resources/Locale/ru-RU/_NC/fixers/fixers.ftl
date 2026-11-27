@@ -266,3 +266,12 @@ ent-NCMissionClubSoundSystem = звуковая система клуба
     .desc = Башни колонок и пульт.
 ent-NCMissionLedgerCabinet = шкаф с бухгалтерией
     .desc = Шкаф, полный бумажных книг учёта. Очень горючий.
+
+nc-fixer-mission-vance-manifests = Липовые накладные
+nc-fixer-mission-vance-manifests-desc = Контейнеры пропадают между кораблём и таможней, а по бумагам их никогда не было. Настоящие накладные 6th Street держит на терминале в подвале W 22nd Street 02, South Night City. Скопируй их для меня.
+nc-fixer-mission-botha-lost-container = Потерянный контейнер
+nc-fixer-mission-botha-lost-container-desc = Военный образец «выпал» с корабля в порту — прямо на склад 6th Street под W 22nd Street 02. Их солдаты стерегут его как фамильное серебро. Принеси его мне.
+nc-fixer-mission-feng-bad-chrome = Плохой хром
+nc-fixer-mission-feng-bad-chrome-desc = Рипердок Maelstrom в подворотне South Night City ставит дешёвый хром завсегдатаям моих клубов, а возвращаются они ко мне в мешках. Закрой его практику. Навсегда.
+nc-fixer-mission-vlad-push-sixth-street = Товар для Шестой
+nc-fixer-mission-vlad-push-sixth-street-desc = 6th Street берёт у Влада и продаёт в порту. Отнеси брикет к их тайнику в South Night City. Их ребята будут ждать, не нервируй их.
