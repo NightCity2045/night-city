@@ -1006,41 +1006,6 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.ToTable("nc_aggregate_snapshot", (string)null);
                 });
 
-            modelBuilder.Entity("Content.Server.Database.NCCharacterBankAccount", b =>
-                {
-                    b.Property<int>("ProfileId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("profile_id");
-
-                    b.Property<string>("AccountNumber")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("TEXT")
-                        .HasColumnName("account_number");
-
-                    b.Property<int>("Balance")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("balance");
-
-                    b.Property<string>("Pin")
-                        .IsRequired()
-                        .HasMaxLength(8)
-                        .HasColumnType("TEXT")
-                        .HasColumnName("pin");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("ProfileId")
-                        .HasName("PK_nc_character_bank_account");
-
-                    b.HasIndex("AccountNumber")
-                        .IsUnique();
-
-                    b.ToTable("nc_character_bank_account", (string)null);
-                });
-
             modelBuilder.Entity("Content.Server.Database.NCCharacterSkillProgress", b =>
                 {
                     b.Property<int>("ProfileId")
@@ -1250,80 +1215,6 @@ namespace Content.Server.Database.Migrations.Sqlite
 
                             t.HasCheckConstraint("CK_nc_medical_snapshot_version", "snapshot_version > 0");
                         });
-                });
-
-            modelBuilder.Entity("Content.Server.Database.NCOrganizationBankAccount", b =>
-                {
-                    b.Property<string>("OrganizationPrototypeId")
-                        .HasMaxLength(64)
-                        .HasColumnType("TEXT")
-                        .HasColumnName("organization_prototype_id");
-
-                    b.Property<int>("Balance")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("balance");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("OrganizationPrototypeId")
-                        .HasName("PK_nc_organization_bank_account");
-
-                    b.ToTable("nc_organization_bank_account", (string)null);
-                });
-
-            modelBuilder.Entity("Content.Server.Database.NCOrganizationBankTransaction", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("nc_organization_bank_transaction_id");
-
-                    b.Property<string>("ActorName")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("TEXT")
-                        .HasColumnName("actor_name");
-
-                    b.Property<int?>("ActorProfileId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("actor_profile_id");
-
-                    b.Property<int>("Amount")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("amount");
-
-                    b.Property<int>("BalanceAfter")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("balance_after");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("OrganizationPrototypeId")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("TEXT")
-                        .HasColumnName("organization_prototype_id");
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("TEXT")
-                        .HasColumnName("reason");
-
-                    b.Property<byte>("Type")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("type");
-
-                    b.HasKey("Id")
-                        .HasName("PK_nc_organization_bank_transaction");
-
-                    b.HasIndex("OrganizationPrototypeId", "CreatedAt");
-
-                    b.ToTable("nc_organization_bank_transaction", (string)null);
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCOutboxMessage", b =>
@@ -2868,16 +2759,6 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.Navigation("Profile");
                 });
 
-            modelBuilder.Entity("Content.Server.Database.NCCharacterBankAccount", b =>
-                {
-                    b.HasOne("Content.Server.Database.Profile", null)
-                        .WithOne()
-                        .HasForeignKey("Content.Server.Database.NCCharacterBankAccount", "ProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_nc_character_bank_account_profile_profile_id");
-                });
-
             modelBuilder.Entity("Content.Server.Database.NCCharacterSkillProgress", b =>
                 {
                     b.HasOne("Content.Server.Database.Profile", "Profile")
@@ -2900,18 +2781,6 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .HasConstraintName("FK_nc_medical_character_snapshot_profile_profile_id");
 
                     b.Navigation("Profile");
-                });
-
-            modelBuilder.Entity("Content.Server.Database.NCOrganizationBankTransaction", b =>
-                {
-                    b.HasOne("Content.Server.Database.NCOrganizationBankAccount", "Organization")
-                        .WithMany("Transactions")
-                        .HasForeignKey("OrganizationPrototypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_nc_organization_bank_transaction_nc_organization_bank_account_organization_prototype_id1");
-
-                    b.Navigation("Organization");
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCOutboxMessage", b =>
@@ -3211,11 +3080,6 @@ namespace Content.Server.Database.Migrations.Sqlite
             modelBuilder.Entity("Content.Server.Database.CustomVoteLog", b =>
                 {
                     b.Navigation("Options");
-                });
-
-            modelBuilder.Entity("Content.Server.Database.NCOrganizationBankAccount", b =>
-                {
-                    b.Navigation("Transactions");
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCPoliceCase", b =>

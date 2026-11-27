@@ -15,7 +15,7 @@ Do not copy an inherited subsystem into `_NC` merely to change one behavior. Pre
 ## Current Night City Anchors
 
 - `Content.Shared/_NC/`: shared contracts, components, events, network state, BUI messages, and predicted NC behavior.
-- `Content.Server/_NC/`: authoritative simulation, persistence orchestration, world infrastructure (former Living City), police records, medical, economy, mapping, and game rules.
+- `Content.Server/_NC/`: authoritative simulation, persistence orchestration, world infrastructure (former Living City), police records, medical, mapping, and game rules.
 - `Content.Client/_NC/`: NC UI, overlays, visual presentation, lobby, medical, mapping, and police.
 - `Resources/Prototypes/_NC/`: NC access, bank, catalog, city, combat, entities, game rules, Living City, maps, medical, recipes, shaders, skills, tiles, vehicles, and test data.
 - `Resources/Locale/en-US/_NC/` and `Resources/Locale/ru-RU/_NC/`: NC localization.

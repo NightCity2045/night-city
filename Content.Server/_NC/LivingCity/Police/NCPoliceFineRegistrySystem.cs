@@ -8,10 +8,8 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Content.Server.Database;
-using Content.Server._NC.LivingCity.Economy;
 using Content.Server._NC.LivingCity.Identity;
 using Content.Server._NC.LivingCity.Time;
-using Content.Shared._NC.LivingCity.Economy;
 using Content.Shared._NC.LivingCity.Police;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
@@ -41,11 +39,8 @@ public sealed record NCPoliceFineMutationResult(
     NCPoliceFineRecord? Fine,
     string? Error);
 
-public sealed record NCPoliceFinePaymentData(NCPoliceFinePaymentResult Result, long? Balance);
-
 /// <summary>
-/// Canonical fine authority. Fine state uses active-world time, and payment commits the Paid snapshot in the same
-/// database transaction as the double-entry transfer to NCPD.
+/// Canonical fine authority. Fine state uses active-world time. Paying fines returns with the new economy.
 /// </summary>
 public sealed partial class NCPoliceFineRegistrySystem : EntitySystem
 {
@@ -67,8 +62,6 @@ public sealed partial class NCPoliceFineRegistrySystem : EntitySystem
     [Dependency] private IServerDbManager _database = default!;
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
     [Dependency] private NCPartyResolverSystem _parties = default!;
-    [Dependency] private NCPartyFinanceAdapterSystem _finance = default!;
-    [Dependency] private NCEconomyLedgerSystem _ledger = default!;
 
     private readonly ConcurrentDictionary<NCPoliceFineId, NCPoliceFineRecord> _cache = [];
     private readonly SemaphoreSlim[] _gates = CreateGates();
@@ -275,142 +268,6 @@ public sealed partial class NCPoliceFineRegistrySystem : EntitySystem
         }
     }
 
-    public async Task<NCPoliceFinePaymentData> PayAsync(NCPoliceFineId fineId, NCPartyRef payer)
-    {
-        if (!fineId.IsValid || !payer.IsValid)
-            return new(NCPoliceFinePaymentResult.FineNotFound, null);
-
-        var gate = Gate(fineId);
-        await gate.WaitAsync();
-        try
-        {
-            var current = await GetAsync(fineId, true);
-            if (current == null)
-                return new(NCPoliceFinePaymentResult.FineNotFound, null);
-            if (current.Snapshot.Target != payer)
-                return new(NCPoliceFinePaymentResult.NotOwner, null);
-            var stableKey = $"{fineId}/{payer}";
-            var paymentTransactionId = NCPersistentIdentity.Transaction("police-fine", "payment", stableKey);
-            if (current.Snapshot.Status == NCPoliceFineStatus.Paid)
-            {
-                if (current.Snapshot.PaymentTransactionId != paymentTransactionId ||
-                    await _ledger.GetTransactionAsync(paymentTransactionId, true) == null)
-                    return new(NCPoliceFinePaymentResult.NotPayable, null);
-                var replayBalance = await _finance.GetPrimaryAccountAsync(payer, true);
-                return new(NCPoliceFinePaymentResult.Success, replayBalance?.Snapshot.Balance);
-            }
-            if (current.Snapshot.Status is not (NCPoliceFineStatus.Issued or NCPoliceFineStatus.Overdue))
-                return new(NCPoliceFinePaymentResult.NotPayable, null);
-            if (!_clock.TryGetCurrentTime(out _, out var now))
-                return new(NCPoliceFinePaymentResult.NotPayable, null);
-
-            NCEconomyMutationResult? transaction = null;
-            long? latestPayerBalance = null;
-            for (var attempt = 0; attempt < 4; attempt++)
-            {
-                var payerAccount = await _finance.EnsurePrimaryAccountAsync(payer, "police-fine-payment");
-                var ncpdAccount = await _finance.EnsureOrganizationAsync(
-                    NcpdOrganizationId,
-                    NcpdDisplayName,
-                    "police-fine-payment");
-                latestPayerBalance = payerAccount.Account?.Snapshot.Balance;
-                if (!payerAccount.IsResolved || !ncpdAccount.IsResolved)
-                    return new(NCPoliceFinePaymentResult.AccountNotFound, latestPayerBalance);
-                var payerRecord = payerAccount.Account!;
-                var ncpdRecord = ncpdAccount.Account!;
-
-                var eventId = Guid.NewGuid();
-                var next = current.Snapshot with
-                {
-                    Status = NCPoliceFineStatus.Paid,
-                    UpdatedAt = now,
-                    PaidAt = now,
-                    PaymentTransactionId = paymentTransactionId,
-                    DataVersion = current.Snapshot.DataVersion + 1,
-                    LastAppliedEventId = eventId,
-                };
-                var commandId = attempt == 0
-                    ? NCPersistentIdentity.Command("police-fine", "payment", stableKey)
-                    : NCPersistentIdentity.Command(
-                        "police-fine",
-                        "payment-attempt",
-                        $"{stableKey}/{current.AggregateVersion}/{payerRecord.AggregateVersion}/" +
-                        ncpdRecord.AggregateVersion);
-                transaction = await _ledger.PostTransactionAsync(new NCPostLedgerTransactionRequest(
-                    commandId,
-                    paymentTransactionId,
-                    NCLedgerTransactionKind.Fee,
-                    $"police fine {fineId}",
-                    [
-                        new NCLedgerLegRequest(
-                            payerAccount.AccountId,
-                            payerRecord.AggregateVersion,
-                            -current.Snapshot.Amount),
-                        new NCLedgerLegRequest(
-                            ncpdAccount.AccountId,
-                            ncpdRecord.AggregateVersion,
-                            current.Snapshot.Amount),
-                    ],
-                    payer,
-                    NCPersistentIdentity.Correlation("police-fine", "payment", stableKey),
-                    AuditSource: "police-fine-payment",
-                    ParticipantWrites:
-                    [
-                        new NCAtomicLedgerParticipantWrite(
-                            eventId,
-                            "living-city.police-fine.paid",
-                            AggregateType,
-                            Key(fineId),
-                            current.AggregateVersion,
-                            SnapshotFormatVersion,
-                            JsonSerializer.Serialize(next, JsonOptions),
-                            JsonSerializer.Serialize(new FinePaymentEvent(
-                                fineId,
-                                payer,
-                                current.Snapshot.Amount,
-                                "police-fine-payment"), JsonOptions)),
-                    ]));
-
-                if (transaction.Status != NCEconomyMutationStatus.VersionConflict)
-                    break;
-
-                // The fine itself is an atomic participant. If another attempt completed it, validate the stable
-                // transaction before reporting success; otherwise rebuild the request from current account versions.
-                current = await GetAsync(fineId, true);
-                if (current == null || current.Snapshot.Target != payer)
-                    return new(NCPoliceFinePaymentResult.NotPayable, latestPayerBalance);
-                if (current.Snapshot.Status == NCPoliceFineStatus.Paid)
-                {
-                    if (current.Snapshot.PaymentTransactionId != paymentTransactionId ||
-                        await _ledger.GetTransactionAsync(paymentTransactionId, true) == null)
-                    {
-                        return new(NCPoliceFinePaymentResult.NotPayable, latestPayerBalance);
-                    }
-
-                    var replayBalance = await _finance.GetPrimaryAccountAsync(payer, true);
-                    return new(NCPoliceFinePaymentResult.Success, replayBalance?.Snapshot.Balance);
-                }
-                if (current.Snapshot.Status is not (NCPoliceFineStatus.Issued or NCPoliceFineStatus.Overdue))
-                    return new(NCPoliceFinePaymentResult.NotPayable, latestPayerBalance);
-            }
-
-            if (transaction?.Status == NCEconomyMutationStatus.InsufficientFunds)
-                return new(NCPoliceFinePaymentResult.InsufficientFunds, latestPayerBalance);
-            if (transaction?.Status is not (NCEconomyMutationStatus.Applied or NCEconomyMutationStatus.Duplicate))
-                return new(NCPoliceFinePaymentResult.NotPayable, latestPayerBalance);
-
-            var paid = await GetAsync(fineId, true);
-            if (paid?.Snapshot.Status != NCPoliceFineStatus.Paid || paid.Snapshot.Target != payer)
-                return new(NCPoliceFinePaymentResult.NotPayable, null);
-            var balance = await _finance.GetPrimaryAccountAsync(payer, true);
-            return new(NCPoliceFinePaymentResult.Success, balance?.Snapshot.Balance);
-        }
-        finally
-        {
-            gate.Release();
-        }
-    }
-
     public NCPoliceFineStatus EffectiveStatus(NCPoliceFineSnapshot snapshot, NCActiveWorldTime now)
     {
         return snapshot.Status == NCPoliceFineStatus.Issued && snapshot.DueAt <= now
@@ -546,11 +403,6 @@ public sealed partial class NCPoliceFineRegistrySystem : EntitySystem
         string Reason,
         string AuditSource);
 
-    private sealed record FinePaymentEvent(
-        NCPoliceFineId FineId,
-        NCPartyRef Payer,
-        long Amount,
-        string AuditSource);
 
     private sealed record FineReceipt(
         NCPoliceFineSnapshot Snapshot,

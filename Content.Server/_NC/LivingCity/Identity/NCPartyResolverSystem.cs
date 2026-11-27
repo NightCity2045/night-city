@@ -8,67 +8,31 @@ using System.Threading.Tasks;
 
 namespace Content.Server._NC.LivingCity.Identity;
 
+/// <summary>Result of resolving a party reference. Only characters resolve; other party kinds were removed.</summary>
+public sealed record NCPartyResolution(NCPartyRef Party, string DisplayName, string? Error)
+{
+    public bool IsResolved => Error == null;
+}
+
 /// <summary>
-/// Resolves every persistent party without consulting ECS bindings. Materialization is irrelevant to legal identity.
+/// Resolves a party reference to a stored character without consulting ECS bindings.
 /// </summary>
 public sealed partial class NCPartyResolverSystem : EntitySystem
 {
     [Dependency] private IServerDbManager _database = default!;
-    [Dependency] private NCPartyDirectorySystem _directory = default!;
 
     public async Task<NCPartyResolution> ResolveAsync(NCPartyRef party, bool requireActive = false)
     {
         if (!party.IsValid)
-            return Reject(party, NCPartyResolutionStatus.Invalid, "The party reference is invalid.");
+            return new NCPartyResolution(party, string.Empty, "The party reference is invalid.");
 
-        NCPartyResolution resolution;
-        switch (party.Kind)
-        {
-            case NCPartyKind.Character:
-            {
-                var character = await _database.GetNCCharacterPartyProjectionAsync(party.CharacterId);
-                resolution = character == null
-                    ? Reject(party, NCPartyResolutionStatus.NotFound, "The character party does not exist.")
-                    : new NCPartyResolution(
-                        NCPartyResolutionStatus.Resolved,
-                        party,
-                        character.DisplayName,
-                        NCPartyLifecycle.Active,
-                        0,
-                        null);
-                break;
-            }
-            case NCPartyKind.Actor:
-                // NC: Persistent city NPC actors were removed; old actor references no longer resolve.
-                resolution = Reject(party, NCPartyResolutionStatus.NotFound, "Persistent city actors were removed.");
-                break;
-            default:
-            {
-                var record = await _directory.GetAsync(party);
-                resolution = record == null
-                    ? Reject(party, NCPartyResolutionStatus.NotFound, "The directory party does not exist.")
-                    : new NCPartyResolution(
-                        NCPartyResolutionStatus.Resolved,
-                        party,
-                        record.Snapshot.DisplayName,
-                        record.Snapshot.Lifecycle,
-                        record.AggregateVersion,
-                        null);
-                break;
-            }
-        }
+        // NC: Organizations, actors and the party directory were removed; only characters remain.
+        if (party.Kind != NCPartyKind.Character)
+            return new NCPartyResolution(party, string.Empty, "Only character parties resolve.");
 
-        return requireActive && resolution.IsResolved && resolution.Lifecycle != NCPartyLifecycle.Active
-            ? resolution with
-            {
-                Status = NCPartyResolutionStatus.Inactive,
-                Error = "The party is not active.",
-            }
-            : resolution;
-    }
-
-    private static NCPartyResolution Reject(NCPartyRef party, NCPartyResolutionStatus status, string error)
-    {
-        return new NCPartyResolution(status, party, string.Empty, NCPartyLifecycle.Archived, 0, error);
+        var character = await _database.GetNCCharacterPartyProjectionAsync(party.CharacterId);
+        return character == null
+            ? new NCPartyResolution(party, string.Empty, "The character party does not exist.")
+            : new NCPartyResolution(party, character.DisplayName, null);
     }
 }

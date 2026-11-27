@@ -83,13 +83,3 @@ public enum NCPoliceFineEventType : byte
     Paid,
     StatusChanged,
 }
-
-public enum NCPoliceFinePaymentResult : byte
-{
-    Success,
-    FineNotFound,
-    NotOwner,
-    NotPayable,
-    AccountNotFound,
-    InsufficientFunds,
-}
