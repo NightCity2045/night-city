@@ -87,7 +87,10 @@
   components:
   - type: Sprite
     sprite: _NC/Objects/Fixers/peace_offering.rsi
-    state: icon
+    layers:
+    - state: icon
+    - state: icon-unshaded
+      shader: unshaded
   - type: Item
     size: Small
   - type: StaticPrice
@@ -99,7 +102,10 @@
   components:
   - type: Sprite
     sprite: _NC/Objects/Fixers/party_crate.rsi
-    state: icon
+    layers:
+    - state: icon
+    - state: icon-unshaded
+      shader: unshaded
   - type: Item
     size: Normal
   - type: StaticPrice
@@ -111,7 +117,10 @@
   components:
   - type: Sprite
     sprite: _NC/Objects/Fixers/cash_envelope.rsi
-    state: icon
+    layers:
+    - state: icon
+    - state: icon-unshaded
+      shader: unshaded
   - type: Item
     size: Tiny
   - type: StaticPrice
@@ -124,7 +133,10 @@
   components:
   - type: Sprite
     sprite: _NC/Objects/Fixers/tech_crate.rsi
-    state: icon
+    layers:
+    - state: icon
+    - state: icon-unshaded
+      shader: unshaded
   - type: Item
     size: Normal
   - type: StaticPrice
@@ -136,7 +148,10 @@
   components:
   - type: Sprite
     sprite: _NC/Objects/Fixers/military_prototype.rsi
-    state: icon
+    layers:
+    - state: icon
+    - state: icon-unshaded
+      shader: unshaded
   - type: Item
     size: Normal
   - type: StaticPrice
@@ -148,7 +163,10 @@
   components:
   - type: Sprite
     sprite: _NC/Objects/Fixers/corporate_files.rsi
-    state: icon
+    layers:
+    - state: icon
+    - state: icon-unshaded
+      shader: unshaded
   - type: Item
     size: Small
   - type: StaticPrice
