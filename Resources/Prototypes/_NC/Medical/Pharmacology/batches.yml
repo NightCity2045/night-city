@@ -424,11 +424,17 @@
   - type: ContainerContainer
     containers:
       source: !type:ContainerSlot
+      secondSource: !type:ContainerSlot
       additive: !type:ContainerSlot
   - type: ItemSlots
     slots:
       source:
         name: nc-pharma-station-source-slot
+        whitelist:
+          components:
+          - NCPharmaSource
+      secondSource:
+        name: nc-pharma-station-second-source-slot
         whitelist:
           components:
           - NCPharmaSource
@@ -729,11 +735,17 @@
   - type: ContainerContainer
     containers:
       source: !type:ContainerSlot
+      secondSource: !type:ContainerSlot
       catalyst: !type:ContainerSlot
   - type: ItemSlots
     slots:
       source:
         name: nc-pharma-station-source-slot
+        whitelist:
+          components:
+          - NCPharmaSource
+      secondSource:
+        name: nc-pharma-station-second-source-slot
         whitelist:
           components:
           - NCPharmaSource

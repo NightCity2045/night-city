@@ -47,31 +47,30 @@ public sealed partial class NCPharmaBatchSystem
         var query = EntityQueryEnumerator<NCPharmaContainerComponent>();
         while (query.MoveNext(out var uid, out var container))
         {
-            if (container.Doses > 0 && !IsInColdStorage(uid))
-                _exposed.Add(container.BatchId);
-        }
-
-        foreach (var batchId in _exposed)
-        {
-            if (!_batches.TryGetValue(batchId, out var batch))
+            // Each pack keeps its own cold chain: one left out spoils, the rest of its batch in the cold does not.
+            if (container.Doses < 1 || IsInColdStorage(uid) || !_batches.TryGetValue(container.BatchId, out var batch))
                 continue;
 
-            var purity = NCPharmaBatchMath.ResolveDegradedPurity(
-                tuning, batch.Actual.Stability, batch.Actual.Purity, seconds);
-            if (purity >= batch.Actual.Purity)
+            var before = PackQuality(batch, container).Purity;
+            var purity = NCPharmaBatchMath.ResolveDegradedPurity(tuning, batch.Actual.Stability, before, seconds);
+            if (purity >= before)
                 continue;
 
-            batch.Actual = batch.Actual with { Purity = purity };
-            if (float.IsNaN(batch.LoggedPurity))
-                batch.LoggedPurity = purity + AuditPurityStep;
+            container.PurityLoss = MathF.Max(0f, batch.Actual.Purity - purity);
+            if (_exposed.Add(batch.BatchId))
+                batch.LoggedPurity = float.IsNaN(batch.LoggedPurity) ? before : batch.LoggedPurity;
             if (batch.LoggedPurity - purity >= AuditPurityStep)
             {
                 batch.LoggedPurity = purity;
                 AddAudit(batch, tuning, NCPharmaAuditKind.Degraded, "cold chain",
-                    $"purity fell to {purity:P1} (stability {batch.Actual.Stability:P0})");
+                    $"a pack left out of cold storage fell to purity {purity:P1} (stability {batch.Actual.Stability:P0})");
             }
         }
     }
+
+    /// <summary>What a pack really holds: its batch, less what the pack itself lost to warmth.</summary>
+    public NCPharmaQuality PackQuality(NCPharmaBatchRecord batch, NCPharmaContainerComponent pack) =>
+        batch.Actual with { Purity = Math.Clamp(batch.Actual.Purity - MathF.Max(0f, pack.PurityLoss), 0f, 1f) };
 
     /// <summary>True when the entity sits, at any depth, inside a cold storage that is working.</summary>
     public bool IsInColdStorage(EntityUid entity)

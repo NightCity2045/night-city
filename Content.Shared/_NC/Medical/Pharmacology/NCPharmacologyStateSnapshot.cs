@@ -34,6 +34,10 @@ public sealed partial class NCPharmacologyStateSnapshot
 
     [DataField]
     public int StrainEpisode;
+
+    /// <summary>The body's own seed for its infection strains. Zero in saves made before it was kept.</summary>
+    [DataField]
+    public int StrainSeed;
 }
 
 /// <summary>One dose that is still arriving: what remains and how fast.</summary>
@@ -91,6 +95,17 @@ public sealed partial class NCDrugDependenceSnapshot
 
     [DataField]
     public float Comedown;
+
+    /// <summary>Tolerance the last dose earned but not yet applied. Zero in older saves.</summary>
+    [DataField]
+    public float PendingTolerance;
+
+    /// <summary>The phase last announced and the concentration it followed, so a restart does not announce it again.</summary>
+    [DataField]
+    public NCDrugPhase Phase;
+
+    [DataField]
+    public float LastConcentration;
 }
 
 /// <summary>

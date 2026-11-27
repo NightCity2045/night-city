@@ -219,17 +219,21 @@ public sealed partial class NCLabSystem : EntitySystem
         {
             title = Loc.GetString("nc-lab-report-sample", ("source", sample.Source));
             if (machine.Comp.Method == NCLabMethod.Metabolic)
-                ReportMetabolic(report, sample, data);
+                ReportMetabolic(report, sample, data, machine.Owner);
             else
                 ReportCulture(report, machine.Comp, sample, data);
         }
         else if (machine.Comp.Method == NCLabMethod.Culture &&
                  TryComp<NCPharmaContainerComponent>(loaded, out var pack) &&
-                 _batches.TryGetPackCompound(pack, out var compound))
+                 _batches.TryGetPackCompounds(pack, out var compounds))
         {
             title = Loc.GetString("nc-lab-report-compound");
-            _batches.RecordAnalysis(compound, NCAnalysisTier.InVitro);
-            AppendDossier(report, compound);
+            // A formula with two cores holds two compounds, and the culture studies both.
+            foreach (var compound in compounds)
+            {
+                _batches.RecordAnalysis(compound, NCAnalysisTier.InVitro, machine.Owner);
+                AppendDossier(report, compound);
+            }
             if (_batches.GetPackMasking(pack) > 0.05f)
                 report.AppendLine(Loc.GetString("nc-lab-masking-detected"));
             if (_batches.GetPackContaminants(pack) > 0.03f)
@@ -273,7 +277,7 @@ public sealed partial class NCLabSystem : EntitySystem
         }
     }
 
-    private void ReportMetabolic(StringBuilder report, NCLabSampleComponent sample, NCLabSampleDataComponent data)
+    private void ReportMetabolic(StringBuilder report, NCLabSampleComponent sample, NCLabSampleDataComponent data, EntityUid machine)
     {
         if (sample.Kind != NCLabSampleKind.Blood)
         {
@@ -297,7 +301,7 @@ public sealed partial class NCLabSystem : EntitySystem
                 continue;
 
             // A living organism's response is the deepest method: it confirms everything about the compound.
-            _batches.RecordAnalysis(drugId, NCAnalysisTier.InVivo);
+            _batches.RecordAnalysis(drugId, NCAnalysisTier.InVivo, machine);
             var state = concentration > drug.ToxicConcentration ? "nc-lab-level-toxic"
                 : concentration >= drug.MinimumEffectiveConcentration ? "nc-lab-level-therapeutic"
                 : "nc-lab-level-trace";

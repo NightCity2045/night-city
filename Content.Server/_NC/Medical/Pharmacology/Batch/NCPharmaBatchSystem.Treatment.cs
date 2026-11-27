@@ -95,6 +95,7 @@ public sealed partial class NCPharmaBatchSystem
 
         var prototype = ResolvePack(batch.Formula, MetaData(source).EntityPrototype?.ID ?? "NCPharmaAutoinjector");
         var total = pack.Doses;
+        var loss = pack.PurityLoss;
         // Release the doses first so the new packs may claim them from the batch again.
         batch.DosesPacked -= total;
         var remaining = total;
@@ -102,8 +103,11 @@ public sealed partial class NCPharmaBatchSystem
         while (remaining > 0)
         {
             var doses = Math.Min(dosesPerPack, remaining);
-            if (TrySpawnContainer(prototype, coordinates, batch.BatchId, doses, actor) == null)
+            if (TrySpawnContainer(prototype, coordinates, batch.BatchId, doses, actor) is not { } made)
                 break;
+            // The doses keep what they already lost to warmth; a new pack does not make them fresh.
+            if (TryComp<NCPharmaContainerComponent>(made, out var split))
+                split.PurityLoss = loss;
 
             remaining -= doses;
             packs++;

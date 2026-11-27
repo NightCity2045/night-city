@@ -178,6 +178,7 @@ nc-pharma-isolated = A compound is isolated and named {$name}. It still has to b
 nc-pharma-isolation-failed = The compound could not be isolated.
 nc-pharma-treated = The batch is treated.
 nc-pharma-filled = The doses are repacked into {$count} packs.
+nc-pharma-fill-spilled = A dose was spilled while repacking.
 nc-pharma-waste-full = Put a waste canister with room in it into the waste slot.
 nc-pharma-waste-nothing = There is no waste in the canister.
 nc-pharma-waste-disposed = The incinerator burns the waste.
@@ -396,7 +397,8 @@ nc-pharma-feedstock-examine = Material kind: {$type}.
 nc-pharma-feedstock-none = unknown
 nc-pharma-station-feedstock-line = Made from: {$types}.
 nc-pharma-station-feedstock-alternative = {$type} ({$yield} of the doses)
-nc-pharma-station-notice-wrong-feedstock = This material cannot make that formula.
+nc-pharma-station-feedstock-compound-line = {$compound} is made from: {$types}.
+nc-pharma-station-notice-wrong-feedstock = The inserted material cannot make every compound of that formula.
 
 # --- Process consumables ------------------------------------------------------------------------------------
 reagent-name-nc-pharma-catalyst = reaction catalyst

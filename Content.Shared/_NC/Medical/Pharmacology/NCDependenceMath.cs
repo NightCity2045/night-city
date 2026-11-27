@@ -72,7 +72,7 @@ public sealed partial class NCDrugDependenceState
     [DataField]
     public float Comedown;
 
-    /// <summary>Phase last announced. Runtime only: it is recomputed on the first tick after a restore.</summary>
+    /// <summary>Phase last announced. It is saved, so a restart does not announce the same phase again.</summary>
     [ViewVariables]
     public NCDrugPhase Phase;
 

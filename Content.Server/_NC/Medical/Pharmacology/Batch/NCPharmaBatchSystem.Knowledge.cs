@@ -47,14 +47,14 @@ public sealed partial class NCPharmaBatchSystem
                (GetKnowledge(compound) & NCAnalysisTier.Chemical) != 0;
     }
 
-    /// <summary>The compound of the batch a pack holds. False for a pack of an unknown or recalled batch.</summary>
-    public bool TryGetPackCompound(NCPharmaContainerComponent pack, out ProtoId<NCDrugProfilePrototype> compound)
+    /// <summary>The compounds of the batch a pack holds, the main one first. False for a pack of an unknown batch.</summary>
+    public bool TryGetPackCompounds(NCPharmaContainerComponent pack, out List<ProtoId<NCDrugProfilePrototype>> compounds)
     {
-        compound = default;
+        compounds = [];
         if (!_batches.TryGetValue(pack.BatchId, out var batch) || !TryGetFormula(batch.Formula, out var formula))
             return false;
 
-        compound = formula.Compound;
+        compounds.AddRange(Cores(formula));
         return true;
     }
 
@@ -71,14 +71,14 @@ public sealed partial class NCPharmaBatchSystem
     }
 
     /// <summary>Records a finished analysis and returns the knowledge after it.</summary>
-    public NCAnalysisTier RecordAnalysis(ProtoId<NCDrugProfilePrototype> compound, NCAnalysisTier performed)
+    public NCAnalysisTier RecordAnalysis(ProtoId<NCDrugProfilePrototype> compound, NCAnalysisTier performed, EntityUid? site = null)
     {
         if (!_prototypes.HasIndex(compound))
             return NCAnalysisTier.None;
 
         var updated = NCCompoundDossierMath.Include(GetKnowledge(compound), performed);
         _knowledge[compound] = updated;
-        RaiseResearch([NCPharmaNodeIds.Core(compound.Id)]);
+        RaiseResearch([NCPharmaNodeIds.Core(compound.Id)], site);
         return updated;
     }
 
@@ -236,7 +236,8 @@ public sealed partial class NCPharmaBatchSystem
             return true;
         }
 
-        if (_derived.Count >= tuning.MaximumDerivedFormulas)
+        // A compound of its own starts a line of its own.
+        if (!TryMakeRoomForFormula(tuning, true))
             return false;
 
         formula = NCPharmaFormulaPrototype.Create(

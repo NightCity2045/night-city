@@ -66,7 +66,9 @@ public sealed class NCPharmaReactorState(
     float sourcePurity,
     NCReactorWarnings warnings,
     NCPharmaReactorNotice notice,
-    NCPharmaFormulaSummary[] formulas) : BoundUserInterfaceState
+    NCPharmaFormulaSummary[] formulas,
+    string? sourceFeedstock = null,
+    NCPharmaSourceSummary? secondSource = null) : BoundUserInterfaceState
 {
     public readonly bool Running = running;
     public readonly string Formula = formula;
@@ -92,6 +94,12 @@ public sealed class NCPharmaReactorState(
 
     /// <summary>Experimental formulas that may be made here by hand.</summary>
     public readonly NCPharmaFormulaSummary[] Formulas = formulas;
+
+    /// <summary>The kind of raw material in the first canister, if any.</summary>
+    public readonly string? SourceFeedstock = sourceFeedstock;
+
+    /// <summary>The second raw-material canister, if one is inserted.</summary>
+    public readonly NCPharmaSourceSummary? SecondSource = secondSource;
 }
 
 [Serializable, NetSerializable]

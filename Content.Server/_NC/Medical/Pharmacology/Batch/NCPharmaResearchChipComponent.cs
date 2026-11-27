@@ -21,6 +21,10 @@ public sealed partial class NCPharmaResearchChipComponent : Component
     public bool Stock;
 }
 
-/// <summary>Raised when the laboratory learns something about nodes of the formula tree. Chips in consoles record it.</summary>
+/// <summary>
+/// Raised when a laboratory learns something about nodes of the formula tree. The chips in the consoles of that
+/// laboratory record it: those near the machine where the work was done. Without a site (an administrator's edit) every
+/// chip in a console records it.
+/// </summary>
 [ByRefEvent]
-public readonly record struct NCPharmaResearchEvent(string[] Nodes);
+public readonly record struct NCPharmaResearchEvent(string[] Nodes, EntityUid? Site = null);

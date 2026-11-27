@@ -18,6 +18,12 @@ public sealed partial class NCPharmaReactorComponent : Component
     [DataField]
     public string SourceSlot = "source";
 
+    /// <summary>
+    /// A second raw-material canister. A formula of two compounds can take each of them from its own material.
+    /// </summary>
+    [DataField]
+    public string SecondSourceSlot = "secondSource";
+
     /// <summary>Where a vial of catalyst is put. The run draws its catalyst from the vial when it starts.</summary>
     [DataField]
     public string CatalystSlot = "catalyst";

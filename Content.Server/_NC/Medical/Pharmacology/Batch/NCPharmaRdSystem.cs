@@ -10,6 +10,7 @@ using Content.Shared.Examine;
 using Content.Shared.Popups;
 using Robust.Server.GameObjects;
 using Robust.Shared.Containers;
+using Robust.Shared.Map;
 
 namespace Content.Server._NC.Medical.Pharmacology.Batch;
 
@@ -21,10 +22,14 @@ public sealed partial class NCPharmaRdSystem : EntitySystem
 {
     private const int JournalLimit = 24;
 
+    /// <summary>How far from the machine where the work was done a console still belongs to that laboratory.</summary>
+    private const float LaboratoryRange = 15f;
+
     [Dependency] private UserInterfaceSystem _ui = default!;
     [Dependency] private NCPharmaBatchSystem _batches = default!;
     [Dependency] private ItemSlotsSystem _slots = default!;
     [Dependency] private SharedSolutionContainerSystem _solutions = default!;
+    [Dependency] private SharedTransformSystem _transform = default!;
 
     public override void Initialize()
     {
@@ -75,7 +80,8 @@ public sealed partial class NCPharmaRdSystem : EntitySystem
                 args.Profile,
                 out var composed,
                 out notice,
-                chip.Comp.Researched))
+                chip.Comp.Researched,
+                console.Owner))
         {
             console.Comp.Selected = composed.ID;
         }
@@ -108,13 +114,19 @@ public sealed partial class NCPharmaRdSystem : EntitySystem
         return true;
     }
 
-    /// <summary>The laboratory learnt about nodes: every chip that stands in a console records them.</summary>
+    /// <summary>A laboratory learnt about nodes: the chips in the consoles of that laboratory record them.</summary>
     private void OnResearch(ref NCPharmaResearchEvent args)
     {
+        MapCoordinates? site = args.Site is { } origin && Exists(origin) ? _transform.GetMapCoordinates(origin) : null;
+        if (args.Site != null && site == null)
+            return;
+
         var query = EntityQueryEnumerator<NCPharmaRdConsoleComponent>();
         while (query.MoveNext(out var uid, out var comp))
         {
             var console = new Entity<NCPharmaRdConsoleComponent>(uid, comp);
+            if (site is { } where && !_transform.GetMapCoordinates(uid).InRange(where, LaboratoryRange))
+                continue;
             if (!TryGetChip(console, out var chip))
                 continue;
 
@@ -215,7 +227,7 @@ public sealed partial class NCPharmaRdSystem : EntitySystem
                 TryGetBeaker(console, out var beaker),
                 BeakerContents(beaker),
                 hasChip,
-                hasChip ? chip.Comp.Researched.Count : 0));
+                hasChip ? chip.Comp.Researched.Count(NCPharmaNodeIds.IsCore) : 0));
     }
 
     private NCPharmaReagentAmount[] BeakerContents(Entity<Content.Shared.Chemistry.Components.SolutionComponent> beaker)
@@ -240,14 +252,17 @@ public sealed partial class NCPharmaRdSystem : EntitySystem
             .ToArray();
     }
 
-    /// <summary>What is known about each node: only what the chip has studied. Everything else is unstudied.</summary>
+    /// <summary>
+    /// What is known about each node. A compound is known only once the chip has studied it; delivery forms, modifiers and
+    /// production modes are open to every laboratory, so the chip does not limit them.
+    /// </summary>
     private NCPharmaNodeKnowledge[] ResearchedKnowledge(Entity<NCPharmaResearchChipComponent> chip)
     {
         if (chip.Comp == null)
             return [];
 
         return _batches.BuildNodeKnowledge()
-            .Where(node => chip.Comp.Researched.Contains(node.Id))
+            .Where(node => !NCPharmaNodeIds.IsCore(node.Id) || chip.Comp.Researched.Contains(node.Id))
             .ToArray();
     }
 }

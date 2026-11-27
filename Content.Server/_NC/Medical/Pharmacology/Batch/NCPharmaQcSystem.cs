@@ -22,6 +22,7 @@ public sealed partial class NCPharmaQcSystem : EntitySystem
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private UserInterfaceSystem _ui = default!;
     [Dependency] private NCPharmaBatchSystem _batches = default!;
+    [Dependency] private Content.Shared.Power.EntitySystems.SharedPowerReceiverSystem _power = default!;
     [Dependency] private Content.Server._NC.Medical.Pharmacology.Lab.NCBiotechActionSystem _actions = default!;
 
     public override void Initialize()
@@ -39,8 +40,17 @@ public sealed partial class NCPharmaQcSystem : EntitySystem
         base.Update(frameTime);
 
         var query = EntityQueryEnumerator<NCPharmaQcRunComponent, NCPharmaQcAnalyzerComponent>();
+        var lost = TimeSpan.FromSeconds(frameTime);
         while (query.MoveNext(out var uid, out var run, out var analyzer))
         {
+            // Without power the analysis stands still and resumes where it stopped.
+            if (!_power.IsPowered(uid))
+            {
+                run.StartedAt += lost;
+                run.FinishAt += lost;
+                continue;
+            }
+
             if (_timing.CurTime < run.FinishAt)
                 continue;
 
@@ -87,9 +97,11 @@ public sealed partial class NCPharmaQcSystem : EntitySystem
 
         pack.Doses--;
         Dirty(packUid, pack);
+        _batches.RecordQcSample(pack.BatchId, ToPrettyString(user));
 
         var run = EnsureComp<NCPharmaQcRunComponent>(analyzer);
         run.BatchId = pack.BatchId;
+        run.PurityLoss = pack.PurityLoss;
         run.Tests = tests;
         run.Operator = ToPrettyString(user);
         run.OperatorEntity = user;
@@ -103,12 +115,13 @@ public sealed partial class NCPharmaQcSystem : EntitySystem
         var batchId = run.BatchId;
         var tests = run.Tests;
         var operatorRef = run.Operator;
+        var purityLoss = run.PurityLoss;
         var quality = run.OperatorEntity.Valid
             ? _actions.Resolve(run.OperatorEntity, "NCBiotechQc", analyzer.Owner, [batchId]).Quality
             : 1f;
         RemComp<NCPharmaQcRunComponent>(analyzer);
 
-        if (!_batches.TryPerformQc(batchId, operatorRef, tests, out var report, quality) ||
+        if (!_batches.TryPerformQc(batchId, operatorRef, tests, out var report, quality, analyzer.Owner, purityLoss) ||
             !_batches.TryGetBatch(batchId, out var batch))
         {
             UpdateUi(analyzer, NCPharmaQcNotice.UnknownBatch);
@@ -143,6 +156,9 @@ public sealed partial class NCPharmaQcSystem : EntitySystem
 
     private void UpdateUi(Entity<NCPharmaQcAnalyzerComponent> analyzer, NCPharmaQcNotice notice)
     {
+        if (!_ui.IsUiOpen(analyzer.Owner, NCPharmaQcUiKey.Key))
+            return;
+
         var hasSample = TryGetSample(analyzer, out _, out var pack);
         NCPharmaLabel? label = null;
         var batchState = NCPharmaQcState.Untested;
