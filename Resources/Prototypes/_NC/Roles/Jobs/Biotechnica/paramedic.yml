@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: job
+  id: BiotechnicaParamedic
+  name: job-name-biotechnica-paramedic
+  description: job-description-biotechnica-paramedic
+  playTimeTracker: NCJobBiotechnicaParamedic
+  supervisors: nc-job-supervisors-biotechnica-management
+  weight: 60
+  startingGear: BiotechnicaParamedicGear
+  icon: JobIconParamedic
+  accessGroups: [ BiotechBasic ]
+  access: [ Biotech_MedTech, Biotech_Operative ]
+
+- type: startingGear
+  id: BiotechnicaParamedicGear
+  equipment:
+    jumpsuit: ClothingUniformBiotech
+    back: ClothingBackpackBiotechnica
+    shoes: ClothingShoesBiotechnica
+    head: ClothingHeadHatBiotechnicaSterile
+    eyes: ClothingEyesHudMedical
+    mask: ClothingMaskBiotechnicaMedtech
+    gloves: ClothingHandsGlovesBiotechnica
+    id: ParamedicPDA
+    belt: ClothingBeltMedicalFilled
+    armor: ClothingOuterArmorBiotechBulletproof
+    outerClothing: ClothingOuterCoatBiotechnicaMedtechAdvanced
+  storage:
+    back:
+    - MedTekCartridge

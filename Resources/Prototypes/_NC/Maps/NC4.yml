@@ -15,51 +15,49 @@
       - type: StationNameSetup
         mapNameTemplate: "NC4"
       - type: StationJobs
-        availableJobs: # NC: vanilla roles; NC organizations and employment were removed.
-          #Command (7)
-          Captain: [ 1, 1 ]
-          HeadOfPersonnel: [ 1, 1 ]
-          HeadOfSecurity: [ 1, 1 ]
-          ChiefMedicalOfficer: [ 1, 1 ]
-          ChiefEngineer: [ 1, 1 ]
-          ResearchDirector: [ 1, 1 ]
-          Quartermaster: [ 1, 1 ]
-          #Service (14)
-          Bartender: [ 2, 2 ]
-          Botanist: [ 3, 3 ]
-          Chef: [ 2, 2 ]
-          Janitor: [ 2, 2 ]
-          Chaplain: [ 1, 1 ]
-          Librarian: [ 1, 1 ]
-          Reporter: [ 1, 1 ]
-          ServiceWorker: [ 2, 2 ]
-          #Engineering (8)
-          AtmosphericTechnician: [ 3, 3 ]
-          StationEngineer: [ 5, 5 ]
-          TechnicalAssistant: [ 4, 4 ] #intern, exclude from dept count
-          #Medical (8)
-          Chemist: [ 2, 2 ]
-          MedicalDoctor: [ 4, 4 ]
-          Paramedic: [ 1, 1 ]
-          MedicalIntern: [ 4, 4 ] #intern, exclude from dept count
-          Psychologist: [ 1, 1 ]
-          #Science (5)
-          Scientist: [ 5, 5 ]
-          ResearchAssistant: [ 4, 4 ] #intern, exclude from dept count
-          #Security (9 - 11)
-          Warden: [ 1, 1 ]
-          SecurityOfficer: [ 5, 7 ]
-          Detective: [ 1, 1 ]
-          SecurityCadet: [ 2, 4 ] #intern, exclude from dept count
-          Lawyer: [ 2, 2 ]
-          #Supply (6)
-          SalvageSpecialist: [ 3, 3 ]
-          CargoTechnician: [ 3, 3 ]
-          #Civilian (3+)
-          Passenger: [ -1, -1 ] #infinite, not counted
-          Clown: [ 1, 1 ]
-          Mime: [ 1, 1 ]
-          Musician: [ 1, 1 ]
+        availableJobs: # NC: Night City organizations; residents are Passenger.
+          #NCPD
+          NCPDChief: [ 1, 1 ]
+          NCPDCommander: [ 2, 2 ]
+          NCPDLieutenant: [ 4, 4 ]
+          NCPDInspector: [ 6, 6 ]
+          NCPDSergeant: [ 8, 8 ]
+          NCPDOfficer: [ 20, 20 ]
+          NCPDCadet: [ 20, 20 ]
+          #MedCenter
+          NCMedicalChief: [ 1, 1 ]
+          NCMedicalDoctor: [ 12, 12 ]
+          NCMedicalCoroner: [ 4, 4 ]
+          NCMedicalPsychologist: [ 4, 4 ]
+          NCMedicalTechnician: [ 6, 6 ]
+          NCMedicalIntern: [ 12, 12 ]
+          #Trauma Team
+          TraumaTeamOperative: [ 10, 10 ]
+          TraumaTeamParamedic: [ 20, 20 ]
+          #Militech
+          MilitechChief: [ 1, 1 ]
+          MilitechOperativeLead: [ 4, 4 ]
+          MilitechOperative: [ 20, 20 ]
+          MilitechSecuritySpecialist: [ 12, 12 ]
+          MilitechNetrunner: [ 6, 6 ]
+          MilitechRigger: [ 8, 8 ]
+          MilitechCombatMedic: [ 8, 8 ]
+          MilitechTech: [ 8, 8 ]
+          MilitechQuartermaster: [ 6, 6 ]
+          #Biotechnica
+          BiotechnicaChief: [ 1, 1 ]
+          BiotechnicaOperativeLead: [ 4, 4 ]
+          BiotechnicaOperative: [ 12, 12 ]
+          BiotechnicaNetrunner: [ 6, 6 ]
+          BiotechnicaRigger: [ 8, 8 ]
+          BiotechnicaMedTech: [ 8, 8 ]
+          BiotechnicaParamedic: [ 8, 8 ]
+          BiotechnicaTech: [ 8, 8 ]
+          BiotechnicaBotanist: [ 12, 12 ]
+          #Zhirafa
+          ZhirafaJanitor: [ 12, 12 ]
+          #Residents
+          Passenger: [ -1, -1 ] #infinite
       - type: NCStationZLevels
         networkId: f7466602-81be-4ad9-9338-9c181a31e552
         mapsAbove:

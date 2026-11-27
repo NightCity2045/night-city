@@ -1,0 +1,34 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: job
+  id: MilitechOperativeLead
+  name: job-name-militech-operative-lead
+  description: job-description-militech-operative-lead
+  playTimeTracker: NCJobMilitechOperativeLead
+  supervisors: nc-job-supervisors-militech-command
+  weight: 80
+  startingGear: MilitechOperativeLeadGear
+  icon: JobIconWarden
+  accessGroups: [ MilitechBasic ]
+  access: [ Militech_Command, Militech_Operative, Militech_Armory ]
+
+- type: startingGear
+  id: MilitechOperativeLeadGear
+  equipment:
+    jumpsuit: ClothingUniformMilitech
+    back: ClothingBackpackSecurity
+    shoes: ClothingShoesBootsJack
+    head: ClothingHeadHatMilitechCap
+    eyes: ClothingEyesGlassesSecurity
+    gloves: ClothingHandsGlovesCombat
+    id: WardenPDA
+    belt: ClothingBeltSecurity
+    armor: ClothingOuterArmorMilitechBulletproof
+  storage:
+    belt:
+    - Handcuffs
+    - Handcuffs
+    - HoloprojectorSecurity
+    - RadioHandheldSecurity

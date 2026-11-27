@@ -5,7 +5,7 @@ meta:
   forkId: EchoCyber
   forkVersion: 563c9eb8025bea660287a2666b38234d281ec1bb
   time: 11/18/2026 20:45:02
-  entityCount: 13799
+  entityCount: 13798
 maps:
 - 1
 grids:
@@ -43990,247 +43990,240 @@ entities:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointCaptain
+- proto: SpawnPointBiotechnicaBotanist
   entities:
   - uid: 13777
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointHeadOfPersonnel
+- proto: SpawnPointBiotechnicaChief
   entities:
   - uid: 13778
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointHeadOfSecurity
+- proto: SpawnPointBiotechnicaMedTech
   entities:
   - uid: 13779
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointChiefMedicalOfficer
+- proto: SpawnPointBiotechnicaNetrunner
   entities:
   - uid: 13780
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointChiefEngineer
+- proto: SpawnPointBiotechnicaOperative
   entities:
   - uid: 13781
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointResearchDirector
+- proto: SpawnPointBiotechnicaOperativeLead
   entities:
   - uid: 13782
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointQuartermaster
+- proto: SpawnPointBiotechnicaParamedic
   entities:
   - uid: 13783
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointBartender
+- proto: SpawnPointBiotechnicaRigger
   entities:
   - uid: 13784
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointBotanist
+- proto: SpawnPointBiotechnicaTech
   entities:
   - uid: 13785
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointChef
+- proto: SpawnPointNCMedicalChief
   entities:
   - uid: 13786
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointJanitor
+- proto: SpawnPointNCMedicalCoroner
   entities:
   - uid: 13787
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointChaplain
+- proto: SpawnPointNCMedicalDoctor
   entities:
   - uid: 13788
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointLibrarian
+- proto: SpawnPointNCMedicalIntern
   entities:
   - uid: 13789
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointReporter
+- proto: SpawnPointNCMedicalPsychologist
   entities:
   - uid: 13790
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointServiceWorker
+- proto: SpawnPointNCMedicalTechnician
   entities:
   - uid: 13791
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointAtmos
+- proto: SpawnPointMilitechChief
   entities:
   - uid: 13792
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointStationEngineer
+- proto: SpawnPointMilitechCombatMedic
   entities:
   - uid: 13793
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointTechnicalAssistant
+- proto: SpawnPointMilitechNetrunner
   entities:
   - uid: 13794
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointChemist
+- proto: SpawnPointMilitechOperative
   entities:
   - uid: 13795
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointMedicalDoctor
+- proto: SpawnPointMilitechOperativeLead
   entities:
   - uid: 13796
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointParamedic
+- proto: SpawnPointMilitechQuartermaster
   entities:
   - uid: 13797
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointMedicalIntern
+- proto: SpawnPointMilitechRigger
   entities:
   - uid: 13798
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointPsychologist
+- proto: SpawnPointMilitechSecuritySpecialist
   entities:
   - uid: 13799
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointScientist
+- proto: SpawnPointMilitechTech
   entities:
   - uid: 13800
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointResearchAssistant
+- proto: SpawnPointNCPDCadet
   entities:
   - uid: 13801
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointWarden
+- proto: SpawnPointNCPDChief
   entities:
   - uid: 13802
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointSecurityOfficer
+- proto: SpawnPointNCPDCommander
   entities:
   - uid: 13803
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointDetective
+- proto: SpawnPointNCPDInspector
   entities:
   - uid: 13804
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointSecurityCadet
+- proto: SpawnPointNCPDLieutenant
   entities:
   - uid: 13805
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointLawyer
+- proto: SpawnPointNCPDOfficer
   entities:
   - uid: 13806
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointSalvageSpecialist
+- proto: SpawnPointNCPDSergeant
   entities:
   - uid: 13807
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointCargoTechnician
+- proto: SpawnPointTraumaTeamOperative
   entities:
   - uid: 13808
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointClown
+- proto: SpawnPointTraumaTeamParamedic
   entities:
   - uid: 13809
     components:
     - type: Transform
       parent: 1
       pos: 0.5,0.5
-- proto: SpawnPointMime
+- proto: SpawnPointZhirafaJanitor
   entities:
   - uid: 13810
-    components:
-    - type: Transform
-      parent: 1
-      pos: 0.5,0.5
-- proto: SpawnPointMusician
-  entities:
-  - uid: 13811
     components:
     - type: Transform
       parent: 1

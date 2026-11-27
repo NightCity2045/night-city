@@ -1,0 +1,409 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointBiotechnicaBotanist
+  name: BiotechnicaBotanist spawn point
+  components:
+  - type: SpawnPoint
+    job_id: BiotechnicaBotanist
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointBiotechnicaChief
+  name: BiotechnicaChief spawn point
+  components:
+  - type: SpawnPoint
+    job_id: BiotechnicaChief
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointBiotechnicaMedTech
+  name: BiotechnicaMedTech spawn point
+  components:
+  - type: SpawnPoint
+    job_id: BiotechnicaMedTech
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointBiotechnicaNetrunner
+  name: BiotechnicaNetrunner spawn point
+  components:
+  - type: SpawnPoint
+    job_id: BiotechnicaNetrunner
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointBiotechnicaOperative
+  name: BiotechnicaOperative spawn point
+  components:
+  - type: SpawnPoint
+    job_id: BiotechnicaOperative
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointBiotechnicaOperativeLead
+  name: BiotechnicaOperativeLead spawn point
+  components:
+  - type: SpawnPoint
+    job_id: BiotechnicaOperativeLead
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointBiotechnicaParamedic
+  name: BiotechnicaParamedic spawn point
+  components:
+  - type: SpawnPoint
+    job_id: BiotechnicaParamedic
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointBiotechnicaRigger
+  name: BiotechnicaRigger spawn point
+  components:
+  - type: SpawnPoint
+    job_id: BiotechnicaRigger
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointBiotechnicaTech
+  name: BiotechnicaTech spawn point
+  components:
+  - type: SpawnPoint
+    job_id: BiotechnicaTech
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointNCMedicalChief
+  name: NCMedicalChief spawn point
+  components:
+  - type: SpawnPoint
+    job_id: NCMedicalChief
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointNCMedicalCoroner
+  name: NCMedicalCoroner spawn point
+  components:
+  - type: SpawnPoint
+    job_id: NCMedicalCoroner
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointNCMedicalDoctor
+  name: NCMedicalDoctor spawn point
+  components:
+  - type: SpawnPoint
+    job_id: NCMedicalDoctor
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointNCMedicalIntern
+  name: NCMedicalIntern spawn point
+  components:
+  - type: SpawnPoint
+    job_id: NCMedicalIntern
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointNCMedicalPsychologist
+  name: NCMedicalPsychologist spawn point
+  components:
+  - type: SpawnPoint
+    job_id: NCMedicalPsychologist
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointNCMedicalTechnician
+  name: NCMedicalTechnician spawn point
+  components:
+  - type: SpawnPoint
+    job_id: NCMedicalTechnician
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointMilitechChief
+  name: MilitechChief spawn point
+  components:
+  - type: SpawnPoint
+    job_id: MilitechChief
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointMilitechCombatMedic
+  name: MilitechCombatMedic spawn point
+  components:
+  - type: SpawnPoint
+    job_id: MilitechCombatMedic
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointMilitechNetrunner
+  name: MilitechNetrunner spawn point
+  components:
+  - type: SpawnPoint
+    job_id: MilitechNetrunner
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointMilitechOperative
+  name: MilitechOperative spawn point
+  components:
+  - type: SpawnPoint
+    job_id: MilitechOperative
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointMilitechOperativeLead
+  name: MilitechOperativeLead spawn point
+  components:
+  - type: SpawnPoint
+    job_id: MilitechOperativeLead
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointMilitechQuartermaster
+  name: MilitechQuartermaster spawn point
+  components:
+  - type: SpawnPoint
+    job_id: MilitechQuartermaster
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointMilitechRigger
+  name: MilitechRigger spawn point
+  components:
+  - type: SpawnPoint
+    job_id: MilitechRigger
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointMilitechSecuritySpecialist
+  name: MilitechSecuritySpecialist spawn point
+  components:
+  - type: SpawnPoint
+    job_id: MilitechSecuritySpecialist
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointMilitechTech
+  name: MilitechTech spawn point
+  components:
+  - type: SpawnPoint
+    job_id: MilitechTech
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointNCPDCadet
+  name: NCPDCadet spawn point
+  components:
+  - type: SpawnPoint
+    job_id: NCPDCadet
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointNCPDChief
+  name: NCPDChief spawn point
+  components:
+  - type: SpawnPoint
+    job_id: NCPDChief
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointNCPDCommander
+  name: NCPDCommander spawn point
+  components:
+  - type: SpawnPoint
+    job_id: NCPDCommander
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointNCPDInspector
+  name: NCPDInspector spawn point
+  components:
+  - type: SpawnPoint
+    job_id: NCPDInspector
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointNCPDLieutenant
+  name: NCPDLieutenant spawn point
+  components:
+  - type: SpawnPoint
+    job_id: NCPDLieutenant
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointNCPDOfficer
+  name: NCPDOfficer spawn point
+  components:
+  - type: SpawnPoint
+    job_id: NCPDOfficer
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointNCPDSergeant
+  name: NCPDSergeant spawn point
+  components:
+  - type: SpawnPoint
+    job_id: NCPDSergeant
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointTraumaTeamOperative
+  name: TraumaTeamOperative spawn point
+  components:
+  - type: SpawnPoint
+    job_id: TraumaTeamOperative
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointTraumaTeamParamedic
+  name: TraumaTeamParamedic spawn point
+  components:
+  - type: SpawnPoint
+    job_id: TraumaTeamParamedic
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: SpawnPointZhirafaJanitor
+  name: ZhirafaJanitor spawn point
+  components:
+  - type: SpawnPoint
+    job_id: ZhirafaJanitor
+  - type: Sprite
+    layers:
+    - state: green
+    - state: passenger
