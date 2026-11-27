@@ -5,7 +5,7 @@ meta:
   forkId: EchoCyber
   forkVersion: be524da4b41781c61399952aad42f92f7e1b6dd0
   time: 11/26/2026 07:14:56
-  entityCount: 1640
+  entityCount: 1749
 maps:
 - 1
 grids:
@@ -1618,6 +1618,20 @@ entities:
     - type: Transform
       parent: 1
       pos: 18.645697,28.141466
+- proto: ClosetEmergencyFilledRandom
+  entities:
+  - uid: 1744
+    components:
+    - type: Transform
+      parent: 1
+      pos: -153.5,57.5
+- proto: ClosetFireFilled
+  entities:
+  - uid: 1745
+    components:
+    - type: Transform
+      parent: 1
+      pos: -161.5,46.5
 - proto: ClosetMaintenance
   entities:
   - uid: 211
@@ -1687,6 +1701,11 @@ entities:
     - type: Transform
       parent: 1
       pos: -161.5,57.5
+  - uid: 1746
+    components:
+    - type: Transform
+      parent: 1
+      pos: -156.5,57.5
 - proto: ClothingBackpackDuffelSurgeryFilled
   entities:
   - uid: 528
@@ -1707,6 +1726,18 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: -108.5,123.5
+- proto: CrateScienceSecure
+  entities:
+  - uid: 1724
+    components:
+    - type: Transform
+      parent: 1
+      pos: -171.5,44.5
+  - uid: 1725
+    components:
+    - type: Transform
+      parent: 1
+      pos: -163.5,66.5
 - proto: computerBodyScanner
   entities:
   - uid: 559
@@ -1782,6 +1813,36 @@ entities:
     - type: Transform
       parent: 1
       pos: -171.5,47.5
+  - uid: 1748
+    components:
+    - type: Transform
+      parent: 1
+      pos: -158.5,50.5
+  - uid: 1749
+    components:
+    - type: Transform
+      parent: 1
+      pos: -158.5,51.5
+  - uid: 1750
+    components:
+    - type: Transform
+      parent: 1
+      pos: -158.5,52.5
+  - uid: 1751
+    components:
+    - type: Transform
+      parent: 1
+      pos: -157.5,50.5
+  - uid: 1752
+    components:
+    - type: Transform
+      parent: 1
+      pos: -157.5,51.5
+  - uid: 1753
+    components:
+    - type: Transform
+      parent: 1
+      pos: -157.5,52.5
 - proto: CratePlastic
   entities:
   - uid: 1405
@@ -1839,6 +1900,23 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 116.5,10.5
+- proto: CrewMonitoringServer
+  entities:
+  - uid: 1721
+    components:
+    - type: Transform
+      parent: 1
+      pos: -163.5,49.5
+  - uid: 1722
+    components:
+    - type: Transform
+      parent: 1
+      pos: -168.5,69.5
+  - uid: 1723
+    components:
+    - type: Transform
+      parent: 1
+      pos: -163.5,58.5
 - proto: DefibrillatorCabinetFilled
   entities:
   - uid: 552
@@ -1884,6 +1962,14 @@ entities:
     - type: Transform
       parent: 1
       pos: -109.60739,130.38266
+- proto: GasCanisterBrokenBase
+  entities:
+  - uid: 1747
+    components:
+    - type: Transform
+      parent: 1
+      rot: -1.5707963267948966 rad
+      pos: -153.5,48.5
 - proto: filingCabinet
   entities:
   - uid: 1096
@@ -4734,6 +4820,96 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: -161.5,43.5
+  - uid: 1726
+    components:
+    - type: Transform
+      parent: 1
+      pos: -159.5,37.5
+  - uid: 1727
+    components:
+    - type: Transform
+      parent: 1
+      pos: -159.5,38.5
+  - uid: 1728
+    components:
+    - type: Transform
+      parent: 1
+      pos: -159.5,39.5
+  - uid: 1729
+    components:
+    - type: Transform
+      parent: 1
+      pos: -159.5,40.5
+  - uid: 1730
+    components:
+    - type: Transform
+      parent: 1
+      pos: -159.5,41.5
+  - uid: 1731
+    components:
+    - type: Transform
+      parent: 1
+      pos: -159.5,42.5
+  - uid: 1732
+    components:
+    - type: Transform
+      parent: 1
+      pos: -157.5,37.5
+  - uid: 1733
+    components:
+    - type: Transform
+      parent: 1
+      pos: -157.5,38.5
+  - uid: 1734
+    components:
+    - type: Transform
+      parent: 1
+      pos: -157.5,39.5
+  - uid: 1735
+    components:
+    - type: Transform
+      parent: 1
+      pos: -157.5,40.5
+  - uid: 1736
+    components:
+    - type: Transform
+      parent: 1
+      pos: -157.5,41.5
+  - uid: 1737
+    components:
+    - type: Transform
+      parent: 1
+      pos: -157.5,42.5
+  - uid: 1738
+    components:
+    - type: Transform
+      parent: 1
+      pos: -155.5,37.5
+  - uid: 1739
+    components:
+    - type: Transform
+      parent: 1
+      pos: -155.5,38.5
+  - uid: 1740
+    components:
+    - type: Transform
+      parent: 1
+      pos: -155.5,39.5
+  - uid: 1741
+    components:
+    - type: Transform
+      parent: 1
+      pos: -155.5,40.5
+  - uid: 1742
+    components:
+    - type: Transform
+      parent: 1
+      pos: -155.5,41.5
+  - uid: 1743
+    components:
+    - type: Transform
+      parent: 1
+      pos: -155.5,42.5
 - proto: Railing
   entities:
   - uid: 418
@@ -4933,6 +5109,196 @@ entities:
     - type: Transform
       parent: 1
       pos: -163.5,69.5
+  - uid: 1645
+    components:
+    - type: Transform
+      parent: 1
+      pos: -169.5,37.5
+  - uid: 1646
+    components:
+    - type: Transform
+      parent: 1
+      pos: -169.5,38.5
+  - uid: 1647
+    components:
+    - type: Transform
+      parent: 1
+      pos: -169.5,39.5
+  - uid: 1648
+    components:
+    - type: Transform
+      parent: 1
+      pos: -169.5,40.5
+  - uid: 1649
+    components:
+    - type: Transform
+      parent: 1
+      pos: -169.5,41.5
+  - uid: 1650
+    components:
+    - type: Transform
+      parent: 1
+      pos: -169.5,42.5
+  - uid: 1651
+    components:
+    - type: Transform
+      parent: 1
+      pos: -169.5,43.5
+  - uid: 1652
+    components:
+    - type: Transform
+      parent: 1
+      pos: -169.5,44.5
+  - uid: 1653
+    components:
+    - type: Transform
+      parent: 1
+      pos: -169.5,45.5
+  - uid: 1654
+    components:
+    - type: Transform
+      parent: 1
+      pos: -169.5,46.5
+  - uid: 1655
+    components:
+    - type: Transform
+      parent: 1
+      pos: -169.5,47.5
+  - uid: 1656
+    components:
+    - type: Transform
+      parent: 1
+      pos: -169.5,48.5
+  - uid: 1657
+    components:
+    - type: Transform
+      parent: 1
+      pos: -169.5,49.5
+  - uid: 1658
+    components:
+    - type: Transform
+      parent: 1
+      pos: -169.5,50.5
+  - uid: 1659
+    components:
+    - type: Transform
+      parent: 1
+      pos: -169.5,51.5
+  - uid: 1660
+    components:
+    - type: Transform
+      parent: 1
+      pos: -169.5,52.5
+  - uid: 1661
+    components:
+    - type: Transform
+      parent: 1
+      pos: -169.5,53.5
+  - uid: 1662
+    components:
+    - type: Transform
+      parent: 1
+      pos: -169.5,54.5
+  - uid: 1663
+    components:
+    - type: Transform
+      parent: 1
+      pos: -169.5,55.5
+  - uid: 1664
+    components:
+    - type: Transform
+      parent: 1
+      pos: -168.5,37.5
+  - uid: 1665
+    components:
+    - type: Transform
+      parent: 1
+      pos: -168.5,38.5
+  - uid: 1666
+    components:
+    - type: Transform
+      parent: 1
+      pos: -168.5,39.5
+  - uid: 1667
+    components:
+    - type: Transform
+      parent: 1
+      pos: -168.5,40.5
+  - uid: 1668
+    components:
+    - type: Transform
+      parent: 1
+      pos: -168.5,41.5
+  - uid: 1669
+    components:
+    - type: Transform
+      parent: 1
+      pos: -168.5,42.5
+  - uid: 1670
+    components:
+    - type: Transform
+      parent: 1
+      pos: -168.5,43.5
+  - uid: 1671
+    components:
+    - type: Transform
+      parent: 1
+      pos: -168.5,44.5
+  - uid: 1672
+    components:
+    - type: Transform
+      parent: 1
+      pos: -168.5,45.5
+  - uid: 1673
+    components:
+    - type: Transform
+      parent: 1
+      pos: -168.5,46.5
+  - uid: 1674
+    components:
+    - type: Transform
+      parent: 1
+      pos: -168.5,47.5
+  - uid: 1675
+    components:
+    - type: Transform
+      parent: 1
+      pos: -168.5,48.5
+  - uid: 1676
+    components:
+    - type: Transform
+      parent: 1
+      pos: -168.5,49.5
+  - uid: 1677
+    components:
+    - type: Transform
+      parent: 1
+      pos: -168.5,50.5
+  - uid: 1678
+    components:
+    - type: Transform
+      parent: 1
+      pos: -168.5,51.5
+  - uid: 1679
+    components:
+    - type: Transform
+      parent: 1
+      pos: -168.5,52.5
+  - uid: 1680
+    components:
+    - type: Transform
+      parent: 1
+      pos: -168.5,53.5
+  - uid: 1681
+    components:
+    - type: Transform
+      parent: 1
+      pos: -168.5,54.5
+  - uid: 1682
+    components:
+    - type: Transform
+      parent: 1
+      pos: -168.5,55.5
 - proto: Retractor
   entities:
   - uid: 554
@@ -5687,6 +6053,198 @@ entities:
     - type: Transform
       parent: 1
       pos: -19.5,21.5
+- proto: TelecomServer
+  entities:
+  - uid: 1683
+    components:
+    - type: Transform
+      parent: 1
+      pos: -166.5,37.5
+  - uid: 1684
+    components:
+    - type: Transform
+      parent: 1
+      pos: -166.5,38.5
+  - uid: 1685
+    components:
+    - type: Transform
+      parent: 1
+      pos: -166.5,39.5
+  - uid: 1686
+    components:
+    - type: Transform
+      parent: 1
+      pos: -166.5,40.5
+  - uid: 1687
+    components:
+    - type: Transform
+      parent: 1
+      pos: -166.5,41.5
+  - uid: 1688
+    components:
+    - type: Transform
+      parent: 1
+      pos: -166.5,42.5
+  - uid: 1689
+    components:
+    - type: Transform
+      parent: 1
+      pos: -166.5,43.5
+  - uid: 1690
+    components:
+    - type: Transform
+      parent: 1
+      pos: -166.5,44.5
+  - uid: 1691
+    components:
+    - type: Transform
+      parent: 1
+      pos: -166.5,45.5
+  - uid: 1692
+    components:
+    - type: Transform
+      parent: 1
+      pos: -166.5,46.5
+  - uid: 1693
+    components:
+    - type: Transform
+      parent: 1
+      pos: -166.5,47.5
+  - uid: 1694
+    components:
+    - type: Transform
+      parent: 1
+      pos: -166.5,48.5
+  - uid: 1695
+    components:
+    - type: Transform
+      parent: 1
+      pos: -166.5,49.5
+  - uid: 1696
+    components:
+    - type: Transform
+      parent: 1
+      pos: -166.5,50.5
+  - uid: 1697
+    components:
+    - type: Transform
+      parent: 1
+      pos: -166.5,51.5
+  - uid: 1698
+    components:
+    - type: Transform
+      parent: 1
+      pos: -166.5,52.5
+  - uid: 1699
+    components:
+    - type: Transform
+      parent: 1
+      pos: -166.5,53.5
+  - uid: 1700
+    components:
+    - type: Transform
+      parent: 1
+      pos: -166.5,54.5
+  - uid: 1701
+    components:
+    - type: Transform
+      parent: 1
+      pos: -166.5,55.5
+  - uid: 1702
+    components:
+    - type: Transform
+      parent: 1
+      pos: -165.5,37.5
+  - uid: 1703
+    components:
+    - type: Transform
+      parent: 1
+      pos: -165.5,38.5
+  - uid: 1704
+    components:
+    - type: Transform
+      parent: 1
+      pos: -165.5,39.5
+  - uid: 1705
+    components:
+    - type: Transform
+      parent: 1
+      pos: -165.5,40.5
+  - uid: 1706
+    components:
+    - type: Transform
+      parent: 1
+      pos: -165.5,41.5
+  - uid: 1707
+    components:
+    - type: Transform
+      parent: 1
+      pos: -165.5,42.5
+  - uid: 1708
+    components:
+    - type: Transform
+      parent: 1
+      pos: -165.5,43.5
+  - uid: 1709
+    components:
+    - type: Transform
+      parent: 1
+      pos: -165.5,44.5
+  - uid: 1710
+    components:
+    - type: Transform
+      parent: 1
+      pos: -165.5,45.5
+  - uid: 1711
+    components:
+    - type: Transform
+      parent: 1
+      pos: -165.5,46.5
+  - uid: 1712
+    components:
+    - type: Transform
+      parent: 1
+      pos: -165.5,47.5
+  - uid: 1713
+    components:
+    - type: Transform
+      parent: 1
+      pos: -165.5,48.5
+  - uid: 1714
+    components:
+    - type: Transform
+      parent: 1
+      pos: -165.5,49.5
+  - uid: 1715
+    components:
+    - type: Transform
+      parent: 1
+      pos: -165.5,50.5
+  - uid: 1716
+    components:
+    - type: Transform
+      parent: 1
+      pos: -165.5,51.5
+  - uid: 1717
+    components:
+    - type: Transform
+      parent: 1
+      pos: -165.5,52.5
+  - uid: 1718
+    components:
+    - type: Transform
+      parent: 1
+      pos: -165.5,53.5
+  - uid: 1719
+    components:
+    - type: Transform
+      parent: 1
+      pos: -165.5,54.5
+  - uid: 1720
+    components:
+    - type: Transform
+      parent: 1
+      pos: -165.5,55.5
 - proto: ToiletDirtyWater
   entities:
   - uid: 274

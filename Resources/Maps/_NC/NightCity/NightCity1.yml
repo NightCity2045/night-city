@@ -5,7 +5,7 @@ meta:
   forkId: EchoCyber
   forkVersion: be524da4b41781c61399952aad42f92f7e1b6dd0
   time: 11/26/2026 07:14:57
-  entityCount: 5975
+  entityCount: 6039
 maps:
 - 1
 grids:
@@ -2708,6 +2708,13 @@ entities:
     - type: Transform
       parent: 1
       pos: -107.56419,-67.572876
+- proto: Autolathe
+  entities:
+  - uid: 6096
+    components:
+    - type: Transform
+      parent: 1
+      pos: -177.5,41.5
 - proto: BaseComputer
   entities:
   - uid: 2088
@@ -3255,6 +3262,18 @@ entities:
       parent: 1
       rot: -1.5707963267948966 rad
       pos: -89.5,-17.5
+  - uid: 6113
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: -157.5,50.5
+  - uid: 6114
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: -157.5,52.5
 - proto: BookRandom
   entities:
   - uid: 4169
@@ -4384,6 +4403,21 @@ entities:
       needsPower: False
     - type: AlwaysPoweredReceiverState
       needsPower: True
+  - uid: 6084
+    components:
+    - type: Transform
+      parent: 1
+      pos: -168.5,50.5
+  - uid: 6089
+    components:
+    - type: Transform
+      parent: 1
+      pos: -167.5,50.5
+  - uid: 6091
+    components:
+    - type: Transform
+      parent: 1
+      pos: -167.5,51.5
 - proto: Cigarette
   entities:
   - uid: 4452
@@ -4501,6 +4535,13 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: -18.293087,21.353262
+- proto: CircuitImprinter
+  entities:
+  - uid: 6079
+    components:
+    - type: Transform
+      parent: 1
+      pos: -163.5,62.5
 - proto: ClearPDA
   entities:
   - uid: 4201
@@ -5423,6 +5464,51 @@ entities:
     - type: Transform
       parent: 1
       pos: -6.5,21.5
+  - uid: 6059
+    components:
+    - type: Transform
+      parent: 1
+      pos: -169.5,62.5
+  - uid: 6065
+    components:
+    - type: Transform
+      parent: 1
+      pos: -173.5,67.5
+  - uid: 6067
+    components:
+    - type: Transform
+      parent: 1
+      pos: -171.5,66.5
+  - uid: 6069
+    components:
+    - type: Transform
+      parent: 1
+      pos: -171.5,67.5
+  - uid: 6073
+    components:
+    - type: Transform
+      parent: 1
+      pos: -167.5,66.5
+  - uid: 6075
+    components:
+    - type: Transform
+      parent: 1
+      pos: -167.5,67.5
+  - uid: 6104
+    components:
+    - type: Transform
+      parent: 1
+      pos: -166.5,38.5
+  - uid: 6106
+    components:
+    - type: Transform
+      parent: 1
+      pos: -166.5,39.5
+  - uid: 6108
+    components:
+    - type: Transform
+      parent: 1
+      pos: -166.5,40.5
 - proto: ComputerResearchAndDevelopment
   entities:
   - uid: 5477
@@ -5543,6 +5629,20 @@ entities:
           ent: null
           showEnts: False
           occludes: True
+- proto: CrateMedicalSecure
+  entities:
+  - uid: 6092
+    components:
+    - type: Transform
+      parent: 1
+      pos: -165.5,46.5
+- proto: CrateScienceSecure
+  entities:
+  - uid: 6080
+    components:
+    - type: Transform
+      parent: 1
+      pos: -169.5,69.5
 - proto: CrewManifestCartridge
   entities:
   - uid: 4196
@@ -5805,6 +5905,13 @@ entities:
     - type: Transform
       parent: 1
       pos: 23.387405,-49.835255
+- proto: ExosuitFabricator
+  entities:
+  - uid: 6097
+    components:
+    - type: Transform
+      parent: 1
+      pos: -171.5,35.5
 - proto: ExtinguisherCabinetFilled
   entities:
   - uid: 3408
@@ -6113,6 +6220,11 @@ entities:
       pos: 37.5,13.5
     - type: Fixtures
       fixtures: {}
+  - uid: 6095
+    components:
+    - type: Transform
+      parent: 1
+      pos: -165.5,54.5
 - proto: FoodBowlBig
   entities:
   - uid: 2077
@@ -7046,6 +7158,11 @@ entities:
     - type: Transform
       parent: 1
       pos: -69.5,96.5
+  - uid: 6094
+    components:
+    - type: Transform
+      parent: 1
+      pos: -163.5,49.5
 - proto: KitchenReagentGrinder
   entities:
   - uid: 3379
@@ -7057,6 +7174,16 @@ entities:
       needsPower: False
     - type: AlwaysPoweredReceiverState
       needsPower: True
+  - uid: 6082
+    components:
+    - type: Transform
+      parent: 1
+      pos: -168.5,49.5
+  - uid: 6087
+    components:
+    - type: Transform
+      parent: 1
+      pos: -167.5,49.5
 - proto: KnifePlastic
   entities:
   - uid: 2068
@@ -7448,6 +7575,11 @@ entities:
     - type: Transform
       parent: 1
       pos: -168.5,56.5
+  - uid: 6093
+    components:
+    - type: Transform
+      parent: 1
+      pos: -163.5,50.5
 - proto: LockerSecurity
   entities:
   - uid: 3801
@@ -7559,6 +7691,43 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: -100.57133,-52.21796
+- proto: MachineFrame
+  entities:
+  - uid: 6053
+    components:
+    - type: Transform
+      parent: 1
+      pos: -173.5,62.5
+  - uid: 6056
+    components:
+    - type: Transform
+      parent: 1
+      pos: -171.5,62.5
+  - uid: 6062
+    components:
+    - type: Transform
+      parent: 1
+      pos: -167.5,62.5
+  - uid: 6099
+    components:
+    - type: Transform
+      parent: 1
+      pos: -171.5,39.5
+  - uid: 6100
+    components:
+    - type: Transform
+      parent: 1
+      pos: -171.5,40.5
+  - uid: 6101
+    components:
+    - type: Transform
+      parent: 1
+      pos: -169.5,39.5
+  - uid: 6102
+    components:
+    - type: Transform
+      parent: 1
+      pos: -169.5,40.5
 - proto: MaintenanceWeaponSpawner
   entities:
   - uid: 4240
@@ -14868,6 +15037,11 @@ entities:
     - type: Transform
       parent: 1
       pos: -49.5,87.5
+  - uid: 6111
+    components:
+    - type: Transform
+      parent: 1
+      pos: -153.5,48.5
 - proto: PottedPlant14
   entities:
   - uid: 2706
@@ -14933,6 +15107,11 @@ entities:
     - type: Transform
       parent: 1
       pos: -45.5,100.5
+  - uid: 6112
+    components:
+    - type: Transform
+      parent: 1
+      pos: -160.5,57.5
 - proto: PottedPlant29
   entities:
   - uid: 2705
@@ -17302,6 +17481,20 @@ entities:
       locked: False
     - type: Openable
       opened: True
+- proto: ShowcaseRobot
+  entities:
+  - uid: 6078
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: -178.5,63.5
+  - uid: 6098
+    components:
+    - type: Transform
+      parent: 1
+      rot: 3.141592653589793 rad
+      pos: -178.5,42.5
 - proto: SignLibrary
   entities:
   - uid: 2721
@@ -17780,6 +17973,18 @@ entities:
     - type: Transform
       parent: 1
       pos: -94.5,-57.5
+- proto: StasisBed
+  entities:
+  - uid: 6076
+    components:
+    - type: Transform
+      parent: 1
+      pos: -172.5,69.5
+  - uid: 6077
+    components:
+    - type: Transform
+      parent: 1
+      pos: -166.5,58.5
 - proto: StationMapBroken
   entities:
   - uid: 4195
@@ -19101,6 +19306,136 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: -163.5,35.5
+  - uid: 6051
+    components:
+    - type: Transform
+      parent: 1
+      pos: -173.5,61.5
+  - uid: 6052
+    components:
+    - type: Transform
+      parent: 1
+      pos: -173.5,62.5
+  - uid: 6054
+    components:
+    - type: Transform
+      parent: 1
+      pos: -171.5,61.5
+  - uid: 6055
+    components:
+    - type: Transform
+      parent: 1
+      pos: -171.5,62.5
+  - uid: 6057
+    components:
+    - type: Transform
+      parent: 1
+      pos: -169.5,61.5
+  - uid: 6058
+    components:
+    - type: Transform
+      parent: 1
+      pos: -169.5,62.5
+  - uid: 6060
+    components:
+    - type: Transform
+      parent: 1
+      pos: -167.5,61.5
+  - uid: 6061
+    components:
+    - type: Transform
+      parent: 1
+      pos: -167.5,62.5
+  - uid: 6063
+    components:
+    - type: Transform
+      parent: 1
+      pos: -173.5,66.5
+  - uid: 6064
+    components:
+    - type: Transform
+      parent: 1
+      pos: -173.5,67.5
+  - uid: 6066
+    components:
+    - type: Transform
+      parent: 1
+      pos: -171.5,66.5
+  - uid: 6068
+    components:
+    - type: Transform
+      parent: 1
+      pos: -171.5,67.5
+  - uid: 6070
+    components:
+    - type: Transform
+      parent: 1
+      pos: -169.5,66.5
+  - uid: 6071
+    components:
+    - type: Transform
+      parent: 1
+      pos: -169.5,67.5
+  - uid: 6072
+    components:
+    - type: Transform
+      parent: 1
+      pos: -167.5,66.5
+  - uid: 6074
+    components:
+    - type: Transform
+      parent: 1
+      pos: -167.5,67.5
+  - uid: 6081
+    components:
+    - type: Transform
+      parent: 1
+      pos: -168.5,49.5
+  - uid: 6083
+    components:
+    - type: Transform
+      parent: 1
+      pos: -168.5,50.5
+  - uid: 6085
+    components:
+    - type: Transform
+      parent: 1
+      pos: -168.5,51.5
+  - uid: 6086
+    components:
+    - type: Transform
+      parent: 1
+      pos: -167.5,49.5
+  - uid: 6088
+    components:
+    - type: Transform
+      parent: 1
+      pos: -167.5,50.5
+  - uid: 6090
+    components:
+    - type: Transform
+      parent: 1
+      pos: -167.5,51.5
+  - uid: 6103
+    components:
+    - type: Transform
+      parent: 1
+      pos: -166.5,38.5
+  - uid: 6105
+    components:
+    - type: Transform
+      parent: 1
+      pos: -166.5,39.5
+  - uid: 6107
+    components:
+    - type: Transform
+      parent: 1
+      pos: -166.5,40.5
+  - uid: 6109
+    components:
+    - type: Transform
+      parent: 1
+      pos: -166.5,41.5
 - proto: TableReinforcedGlass
   entities:
   - uid: 2125
@@ -19916,6 +20251,11 @@ entities:
       needsPower: False
     - type: AlwaysPoweredReceiverState
       needsPower: True
+  - uid: 6110
+    components:
+    - type: Transform
+      parent: 1
+      pos: -161.5,57.5
 - proto: VendingMachineColaRed
   entities:
   - uid: 4476
