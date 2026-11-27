@@ -635,3 +635,48 @@
   reward: 1500
   reputationGain: 3
   timeLimit: 1800
+
+# Old Japantown: the Tyger Claws' pachinko house and the Maelstrom garage pushing into their streets.
+- type: ncFixerMission
+  id: NCFixerFengRiggedPachinko
+  fixer: NCFixerFeng
+  kind: Sabotage
+  name: nc-fixer-mission-feng-rigged-pachinko
+  description: nc-fixer-mission-feng-rigged-pachinko-desc
+  minimumReputation: 25
+  owner: TygerClaws
+  item: NCMissionSabotageTarget
+  encounter: GangTygerClawsStronghold
+  reward: 3500
+  reputationGain: 5
+  reputationLoss: 4
+  timeLimit: 2400
+
+- type: ncFixerMission
+  id: NCFixerInsiderMaelstromNeighbours
+  fixer: NCFixerInsider
+  kind: Recon
+  name: nc-fixer-mission-insider-maelstrom-neighbours
+  description: nc-fixer-mission-insider-maelstrom-neighbours-desc
+  minimumReputation: 10
+  owner: Maelstrom
+  reconPoints: 3
+  reward: 2000
+  reputationGain: 3
+  timeLimit: 1800
+
+- type: ncFixerMission
+  id: NCFixerVladChromeParcel
+  fixer: NCFixerVlad
+  kind: Delivery
+  name: nc-fixer-mission-vlad-chrome-parcel
+  description: nc-fixer-mission-vlad-chrome-parcel-desc
+  minimumReputation: 10
+  itemFromFixer: true
+  dropAtMarker: true
+  owner: Maelstrom
+  item: NCMissionDrugBrick
+  encounter: GangMaelstromPost
+  reward: 2000
+  reputationGain: 3
+  timeLimit: 1800

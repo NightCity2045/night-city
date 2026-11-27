@@ -264,24 +264,30 @@
     position: 109.8,-73.5
   - name: "OJT 18th Street Building 01"
     position: 140,51
-  - name: "OJT 19th Street Building 01"
+  - name: "OJT Japantown Ripperdoc"
     position: 71,39
   - name: "OJT 19th Street Building 02"
     position: 155.5,31
-  - name: "OJT 19th Street Building 03"
+  - name: "OJT Teahouse"
     position: 120.3,31.9
-  - name: "OJT 19th Street Building 04"
+  - name: "OJT Japantown Capsules"
     position: 139.5,30.5
-  - name: "OJT 19th Street Building 05"
+  - name: "OJT Maelstrom Garage"
+    position: 63.5,-5.5
+  - name: "OJT Bike Parts"
+    position: 90.5,36.5
+  - name: "OJT Shrine"
+    position: 183.5,59.5
+  - name: "OJT Tyger Claws Pachinko"
     position: 177.5,23.5
-  - name: "OJT 26th Street Building 01"
+  - name: "OJT Japantown Market"
     position: 176.7,0.5
-  - name: "OJT 26th Street Building 02"
+  - name: "OJT Ramen Bar"
     position: 152.2,-3.5
   - name: "OJT 26th Street Building 03"
     position: 103.3,-7.1
-  - name: "OJT 29th Street Building 01"
-    position: 180.5,66
+  - name: "OJT 29th Street Apartments"
+    position: 181.5,71.5
   - name: "PNC W 25th Street Building 01"
     position: -134,-15.4
   - name: "PNC W 25th Street Building 02"

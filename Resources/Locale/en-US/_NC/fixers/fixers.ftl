@@ -304,3 +304,10 @@ nc-fixer-mission-insider-n54-footage = Hot material
 nc-fixer-mission-insider-n54-footage-desc = Network 54 sat on footage someone paid them to bury. It is still on the bureau's servers on 14th Street. Get into the bureau, copy it onto a shard and get out before their security works out you are not a guest.
 nc-fixer-mission-vlad-room-service = Room service
 nc-fixer-mission-vlad-room-service-desc = A guest of mine is waiting for a package. Take it, leave it where I tell you and walk away like you were never there.
+
+nc-fixer-mission-feng-rigged-pachinko = Rigged drum
+nc-fixer-mission-feng-rigged-pachinko-desc = The Tyger Claws' pachinko house in Old Japantown pays out only when they want it to, and my regulars lose their rent there every week. The machines run off one server in the back. Wreck it.
+nc-fixer-mission-insider-maelstrom-neighbours = New neighbours
+nc-fixer-mission-insider-maelstrom-neighbours-desc = Maelstrom opened a garage on the Tyger Claws' doorstep in Old Japantown. Somebody wants to know what they keep in there. Walk their ground, stand where it matters and leave before they notice.
+nc-fixer-mission-vlad-chrome-parcel = Parcel for the chrome
+nc-fixer-mission-vlad-chrome-parcel-desc = Maelstrom pays well and pays on time, which is more than most. Take this to their garage drop. Do not stare at their faces.

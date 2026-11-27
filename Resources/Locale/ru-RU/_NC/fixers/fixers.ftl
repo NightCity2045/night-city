@@ -304,3 +304,10 @@ nc-fixer-mission-insider-n54-footage = Горячий материал
 nc-fixer-mission-insider-n54-footage-desc = Network 54 придержали запись, которую им заплатили похоронить. Она всё ещё на серверах бюро на 14-й улице. Проникни в бюро, скопируй её на шард и уходи, пока охрана не поняла, что ты не гость.
 nc-fixer-mission-vlad-room-service = Обслуживание номеров
 nc-fixer-mission-vlad-room-service-desc = Мой гость ждёт посылку. Возьми её, оставь там, где я скажу, и уходи так, будто тебя здесь не было.
+
+nc-fixer-mission-feng-rigged-pachinko = Подкрученный барабан
+nc-fixer-mission-feng-rigged-pachinko-desc = Пачинко Tyger Claws в Old Japantown платит, только когда им самим хочется, и мои постоянные гости каждую неделю спускают там квартплату. Все автоматы работают от одного сервера в подсобке. Разнеси его.
+nc-fixer-mission-insider-maelstrom-neighbours = Новые соседи
+nc-fixer-mission-insider-maelstrom-neighbours-desc = Maelstrom открыли гараж прямо на пороге Tyger Claws в Old Japantown. Кое-кто хочет знать, что они там держат. Пройдись по их территории, постой где надо и уйди, пока не заметили.
+nc-fixer-mission-vlad-chrome-parcel = Посылка для хрома
+nc-fixer-mission-vlad-chrome-parcel-desc = Maelstrom платят хорошо и вовремя, а это больше, чем умеет большинство. Отнеси это в их тайник у гаража. И не пялься им в лица.
