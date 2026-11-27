@@ -60,6 +60,45 @@ public static class NCPharmaBatchMath
     }
 
     /// <summary>
+    /// Decides which of up to two canisters each core of a formula is made from. Every core takes the canister that
+    /// gives it the larger share of doses, the first on a tie; the run gives the share of its worst core. The yield is 0
+    /// when some core can be made from neither canister.
+    /// </summary>
+    public static NCPharmaSourcePlan PlanSources(
+        IEnumerable<NCDrugProfilePrototype> cores,
+        string? firstFeedstock,
+        bool firstPresent,
+        string? secondFeedstock,
+        bool secondPresent)
+    {
+        var yield = 1f;
+        var usesFirst = false;
+        var usesSecond = false;
+        var any = false;
+        foreach (var core in cores)
+        {
+            any = true;
+            var first = firstPresent ? FeedstockYield(core, firstFeedstock) : 0f;
+            var second = secondPresent ? FeedstockYield(core, secondFeedstock) : 0f;
+            if (first <= 0f && second <= 0f)
+                return default;
+
+            if (first >= second)
+            {
+                usesFirst = true;
+                yield = MathF.Min(yield, first);
+            }
+            else
+            {
+                usesSecond = true;
+                yield = MathF.Min(yield, second);
+            }
+        }
+
+        return any ? new NCPharmaSourcePlan(yield, usesFirst, usesSecond) : default;
+    }
+
+    /// <summary>
     /// Turns a formula, a production mode and the quality of inputs and equipment into a physical batch.
     /// Quality is a product of its inputs, so a better result must be paid for with yield, time or money.
     /// </summary>
@@ -483,3 +522,6 @@ public static class NCPharmaBatchMath
     private static bool IsFiniteRange(float value, float minimum, float maximum) =>
         float.IsFinite(value) && value >= minimum && value <= maximum;
 }
+
+/// <summary>The share of doses a run gives and which canisters its cores are made from.</summary>
+public readonly record struct NCPharmaSourcePlan(float Yield, bool UsesFirst, bool UsesSecond);

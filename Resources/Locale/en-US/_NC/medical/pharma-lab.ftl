@@ -397,7 +397,8 @@ nc-pharma-feedstock-examine = Material kind: {$type}.
 nc-pharma-feedstock-none = unknown
 nc-pharma-station-feedstock-line = Made from: {$types}.
 nc-pharma-station-feedstock-alternative = {$type} ({$yield} of the doses)
-nc-pharma-station-notice-wrong-feedstock = This material cannot make that formula.
+nc-pharma-station-feedstock-compound-line = {$compound} is made from: {$types}.
+nc-pharma-station-notice-wrong-feedstock = The inserted material cannot make every compound of that formula.
 
 # --- Process consumables ------------------------------------------------------------------------------------
 reagent-name-nc-pharma-catalyst = reaction catalyst

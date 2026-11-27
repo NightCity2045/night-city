@@ -25,8 +25,8 @@ public sealed partial class NCPharmaReactorWindow : FancyWindow
     private NCPharmaFormulaSummary[] _formulas = [];
     private int _units = 3;
     private bool _running;
-    private bool _sourcePresent;
-    private float _sourceUnits;
+    private NCPharmaSourceSummary? _source;
+    private NCPharmaSourceSummary? _secondSource;
     private int _heater;
     private int _cooler;
     private bool _updating;
@@ -59,8 +59,10 @@ public sealed partial class NCPharmaReactorWindow : FancyWindow
     {
         _updating = true;
         _running = state.Running;
-        _sourcePresent = state.SourcePresent;
-        _sourceUnits = state.SourceUnits;
+        _source = state.SourcePresent
+            ? new NCPharmaSourceSummary(state.SourceUnits, state.SourcePurity, state.SourceFeedstock ?? string.Empty)
+            : null;
+        _secondSource = state.SecondSource;
         _heater = state.Heater;
         _cooler = state.Cooler;
         StirringCheck.Pressed = state.Stirring;
@@ -68,11 +70,8 @@ public sealed partial class NCPharmaReactorWindow : FancyWindow
         VentilationCheck.Pressed = state.Ventilation;
         UpdateFormulas(state.Formulas);
 
-        SourceLabel.Text = state.SourcePresent
-            ? Loc.GetString("nc-pharma-station-source-present",
-                ("units", state.SourceUnits.ToString("0.#")),
-                ("purity", state.SourcePurity.ToString("P0")))
-            : Loc.GetString("nc-pharma-station-source-missing");
+        SourceLabel.Text = NCPharmaSourceView.Describe(_prototypes, _source, false);
+        SecondSourceLabel.Text = NCPharmaSourceView.Describe(_prototypes, _secondSource, true);
 
         _prototypes.TryIndex<NCPharmaReactionProfilePrototype>(state.Reaction, out var profile);
         var arrow = state.TemperatureRate > 0.3f ? "↑" : state.TemperatureRate < -0.3f ? "↓" : "→";
@@ -163,7 +162,8 @@ public sealed partial class NCPharmaReactorWindow : FancyWindow
         UnitsValue.Text = _units.ToString();
         HeaterValue.Text = _heater.ToString();
         CoolerValue.Text = _cooler.ToString();
-        StartButton.Disabled = _running || !_sourcePresent || _sourceUnits < _units || SelectedFormula() == null;
+        StartButton.Disabled = _running || SelectedFormula() is not { } formula ||
+                               NCPharmaSourceView.Plan(_prototypes, formula, _source, _secondSource, _units).Yield <= 0f;
         foreach (var control in new Robust.Client.UserInterface.Controls.BaseButton[]
                  {
                      HeaterDown, HeaterUp, CoolerDown, CoolerUp, StirringCheck, VentingCheck, VentilationCheck,

@@ -362,6 +362,20 @@ public sealed partial class NCPharmaBatchSystem
             .ToArray();
     }
 
+    /// <summary>The compound of every core of a formula; false when one of them is not a known compound.</summary>
+    public bool TryGetCoreProfiles(NCPharmaFormulaPrototype formula, out List<NCDrugProfilePrototype> cores)
+    {
+        cores = [];
+        foreach (var core in Cores(formula))
+        {
+            if (!_prototypes.TryIndex(core, out var compound))
+                return false;
+            cores.Add(compound);
+        }
+
+        return cores.Count > 0;
+    }
+
     /// <summary>The share of doses a raw material gives for a formula: the worst of its cores, 0 when one cannot use it.</summary>
     public float ResolveFeedstockYield(NCPharmaFormulaPrototype formula, string? feedstock)
     {

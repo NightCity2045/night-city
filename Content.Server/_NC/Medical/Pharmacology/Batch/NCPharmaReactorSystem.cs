@@ -149,8 +149,11 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
     {
         if (HasComp<NCPharmaReactorRunComponent>(reactor))
             return NCPharmaReactorNotice.Busy;
-        if (!TryGetSource(reactor, out var sourceUid, out var source))
+        if (!_sources.TryReadSlot(reactor, reactor.Comp.SourceSlot, out _) &&
+            !_sources.TryReadSlot(reactor, reactor.Comp.SecondSourceSlot, out _))
+        {
             return NCPharmaReactorNotice.NoSource;
+        }
         if (!_batches.TryGetTuning(out var tuning) ||
             !_batches.TryGetFormula(formulaId, out var formula))
         {
@@ -161,18 +164,25 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
             return NCPharmaReactorNotice.NotExperimental;
         if (units < 1 || units > tuning.MaximumReactorUnits)
             return NCPharmaReactorNotice.UnitsLimit;
-        if (source.Units < units)
-            return NCPharmaReactorNotice.NotEnoughSource;
-        // NC: the compound can only be made from the raw material it accepts.
-        var yield = _batches.ResolveFeedstockYield(formula, source.Feedstock);
-        if (yield <= 0f)
-            return NCPharmaReactorNotice.WrongFeedstock;
+        // NC: each compound can only be made from the raw material it accepts, a formula of two compounds may take
+        // each of them from its own canister.
+        if (!_batches.TryGetCoreProfiles(formula, out var cores))
+            return NCPharmaReactorNotice.InvalidRequest;
+        switch (_sources.TryPlanDraw(cores, reactor, reactor.Comp.SourceSlot, reactor.Comp.SecondSourceSlot, units, out var draw))
+        {
+            case NCPharmaDrawResult.NoSource:
+                return NCPharmaReactorNotice.NoSource;
+            case NCPharmaDrawResult.NotEnoughSource:
+                return NCPharmaReactorNotice.NotEnoughSource;
+            case NCPharmaDrawResult.WrongFeedstock:
+                return NCPharmaReactorNotice.WrongFeedstock;
+        }
 
         var reactionId = formula.Reaction ?? tuning.DefaultReaction;
         if (!_prototypes.TryIndex(reactionId, out var profile))
             return NCPharmaReactorNotice.InvalidRequest;
 
-        _sources.Consume(source, units);
+        _sources.Consume(draw, units);
 
         var run = EnsureComp<NCPharmaReactorRunComponent>(reactor);
         run.Formula = formula.ID;
@@ -197,10 +207,10 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
             }
         }
 
-        run.SourcePurity = source.Purity;
-        run.SourceContaminants = source.Contaminants; // NC
+        run.SourcePurity = draw.Purity;
+        run.SourceContaminants = draw.Contaminants; // NC
         run.Units = units;
-        run.FeedstockYield = yield;
+        run.FeedstockYield = draw.Plan.Yield;
         run.Operator = ToPrettyString(user);
         run.NextStep = _timing.CurTime + Step;
         run.Warned = false;
@@ -371,32 +381,14 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
         UpdateUi(reactor, degraded ? NCPharmaReactorNotice.Degraded : notice);
     }
 
-    private bool TryGetSource(
-        Entity<NCPharmaReactorComponent> reactor,
-        out EntityUid sourceUid,
-        out NCPharmaSourceReading source)
-    {
-        sourceUid = default;
-        source = default;
-        if (!_itemSlots.TryGetSlot(reactor, reactor.Comp.SourceSlot, out var slot) ||
-            slot.Item is not { } item ||
-            !HasComp<NCPharmaSourceComponent>(item) ||
-            !_sources.TryRead(item, out source))
-        {
-            return false;
-        }
-
-        sourceUid = item;
-        return true;
-    }
-
     private void UpdateUi(Entity<NCPharmaReactorComponent> reactor, NCPharmaReactorNotice notice)
     {
         // A run steps every second; the window is only rebuilt for someone looking at it.
         if (!_ui.IsUiOpen(reactor.Owner, NCPharmaReactorUiKey.Key))
             return;
 
-        var hasSource = TryGetSource(reactor, out _, out var source);
+        var hasSource = _sources.TryReadSlot(reactor, reactor.Comp.SourceSlot, out var source);
+        var hasSecond = _sources.TryReadSlot(reactor, reactor.Comp.SecondSourceSlot, out var second);
         var formulas = _batches.BuildFormulaSummaries(false)
             .Where(formula => formula.Status == NCPharmaRegulatoryStatus.Experimental)
             .ToArray();
@@ -431,6 +423,8 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
                 hasSource ? source.Purity : 0f,
                 warnings,
                 notice,
-                formulas));
+                formulas,
+                hasSource ? source.Feedstock : null,
+                hasSecond ? new NCPharmaSourceSummary(second.Units, second.Purity, second.Feedstock) : null));
     }
 }

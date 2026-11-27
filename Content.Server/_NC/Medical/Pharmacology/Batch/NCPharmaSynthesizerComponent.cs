@@ -17,6 +17,12 @@ public sealed partial class NCPharmaSynthesizerComponent : Component
     [DataField]
     public string SourceSlot = "source";
 
+    /// <summary>
+    /// A second raw-material canister. A formula of two compounds can take each of them from its own material.
+    /// </summary>
+    [DataField]
+    public string SecondSourceSlot = "secondSource";
+
     /// <summary>Where a process additive such as a stabilizer vial is put.</summary>
     [DataField]
     public string AdditiveSlot = "additive";

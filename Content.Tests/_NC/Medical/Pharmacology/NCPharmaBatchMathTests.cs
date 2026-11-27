@@ -2,7 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Content.Shared._NC.Medical.Pharmacology;
 using Content.Shared._NC.Medical.Pharmacology.Batch;
+using Content.Shared._NC.Medical.Pharmacology.Lab;
+using Robust.Shared.Prototypes;
 using NUnit.Framework;
 
 namespace Content.Tests._NC.Medical.Pharmacology;
@@ -517,5 +520,49 @@ public sealed class NCPharmaBatchMathTests
         Assert.That(label.Concentration, Is.EqualTo(4f * strength).Within(0.0001f));
         var report = NCPharmaBatchMath.RunQc(Tuning(), Guid.NewGuid(), outcome.Quality, label, NCPharmaQcTests.Concentration);
         Assert.That(report.Failed, Is.EqualTo(NCPharmaQcTests.None));
+    }
+
+    private static NCDrugProfilePrototype Core(string feedstock, string? alternate = null, float share = 0.5f)
+    {
+        var alternates = new Dictionary<ProtoId<NCPharmaFeedstockPrototype>, float>();
+        if (alternate != null)
+            alternates[alternate] = share;
+        return Make<NCDrugProfilePrototype>(
+            (nameof(NCDrugProfilePrototype.Feedstock), (ProtoId<NCPharmaFeedstockPrototype>?) feedstock),
+            (nameof(NCDrugProfilePrototype.AlternateFeedstocks), alternates));
+    }
+
+    [Test]
+    public void EachCoreTakesTheCanisterThatGivesItMore()
+    {
+        var neuro = Core("Neuro");
+        var cardio = Core("Cardio", "Neuro", 0.4f);
+
+        var single = NCPharmaBatchMath.PlanSources([neuro, cardio], "Neuro", true, null, false);
+        Assert.That(single, Is.EqualTo(new NCPharmaSourcePlan(0.4f, true, false)), "one canister: the alternative share");
+
+        var split = NCPharmaBatchMath.PlanSources([neuro, cardio], "Neuro", true, "Cardio", true);
+        Assert.That(split, Is.EqualTo(new NCPharmaSourcePlan(1f, true, true)), "two canisters: each core its main material");
+
+        var swapped = NCPharmaBatchMath.PlanSources([neuro, cardio], "Cardio", true, "Neuro", true);
+        Assert.That(swapped, Is.EqualTo(new NCPharmaSourcePlan(1f, true, true)), "the slot order does not matter");
+    }
+
+    [Test]
+    public void ACoreNeitherCanisterMakesStopsTheRun()
+    {
+        var plan = NCPharmaBatchMath.PlanSources([Core("Neuro"), Core("Immune")], "Neuro", true, "Cardio", true);
+        Assert.That(plan.Yield, Is.Zero);
+        Assert.That(NCPharmaBatchMath.PlanSources([Core("Neuro")], "Neuro", false, null, false).Yield, Is.Zero,
+            "an absent canister makes nothing");
+    }
+
+    [Test]
+    public void OnATieTheFirstCanisterServesAndTheSecondIsLeftAlone()
+    {
+        var plan = NCPharmaBatchMath.PlanSources([Core("Neuro")], "Neuro", true, "Neuro", true);
+        Assert.That(plan, Is.EqualTo(new NCPharmaSourcePlan(1f, true, false)));
+        var second = NCPharmaBatchMath.PlanSources([Core("Neuro")], "Neuro", false, "Neuro", true);
+        Assert.That(second, Is.EqualTo(new NCPharmaSourcePlan(1f, false, true)), "the second slot alone serves too");
     }
 }

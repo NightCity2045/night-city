@@ -397,7 +397,8 @@ nc-pharma-feedstock-examine = Вид сырья: {$type}.
 nc-pharma-feedstock-none = неизвестно
 nc-pharma-station-feedstock-line = Делается из: {$types}.
 nc-pharma-station-feedstock-alternative = {$type} ({$yield} доз)
-nc-pharma-station-notice-wrong-feedstock = Из этого сырья такую формулу не сделать.
+nc-pharma-station-feedstock-compound-line = {$compound} делается из: {$types}.
+nc-pharma-station-notice-wrong-feedstock = Из вставленного сырья не сделать все вещества этой формулы.
 
 # --- Расходники процесса ------------------------------------------------------------------------------------
 reagent-name-nc-pharma-catalyst = катализатор реакции

@@ -10,6 +10,7 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
     <BoxContainer Orientation="Vertical" Margin="10" SeparationOverride="6">
         <Label Text="{Loc 'nc-pharma-reactor-section-run'}" StyleClasses="LabelHeading" />
         <Label Name="SourceLabel" />
+        <Label Name="SecondSourceLabel" />
         <OptionButton Name="FormulaSelector" HorizontalExpand="True" />
         <BoxContainer Orientation="Horizontal" SeparationOverride="6">
             <Label Text="{Loc 'nc-pharma-station-units'}" />

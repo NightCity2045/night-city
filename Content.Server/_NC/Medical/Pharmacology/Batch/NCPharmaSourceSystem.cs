@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using Content.Shared._NC.Medical.Pharmacology;
 using Content.Shared._NC.Medical.Pharmacology.Batch;
 using Content.Shared._NC.Medical.Pharmacology.Lab;
 using Content.Shared.Chemistry.Components;
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Chemistry.Reagent;
+using Content.Shared.Containers.ItemSlots;
 using Content.Shared.Examine;
 using Content.Shared.FixedPoint;
 using Robust.Shared.Prototypes;
@@ -20,6 +22,26 @@ public readonly record struct NCPharmaSourceReading(
     float Contaminants,
     string Feedstock,
     Entity<SolutionComponent> Solution);
+
+/// <summary>Why a machine cannot draw material for a run, or that it can.</summary>
+public enum NCPharmaDrawResult : byte
+{
+    Ready,
+    NoSource,
+    NotEnoughSource,
+    WrongFeedstock,
+}
+
+/// <summary>
+/// What a run takes from the two canisters of a machine: which of them its cores are made from and the material they
+/// make together. The worse canister sets the purity and the dirtier one the contamination.
+/// </summary>
+public readonly record struct NCPharmaSourceDraw(
+    NCPharmaSourcePlan Plan,
+    NCPharmaSourceReading First,
+    NCPharmaSourceReading Second,
+    float Purity,
+    float Contaminants);
 
 /// <summary>
 /// Source material is a liquid in a canister. This system is the one place that turns the canister's composition
@@ -35,6 +57,7 @@ public sealed partial class NCPharmaSourceSystem : EntitySystem
 
     [Dependency] private SharedSolutionContainerSystem _solutions = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
+    [Dependency] private ItemSlotsSystem _itemSlots = default!;
 
     public override void Initialize()
     {
@@ -92,6 +115,74 @@ public sealed partial class NCPharmaSourceSystem : EntitySystem
             best.ID,
             soln.Value);
         return true;
+    }
+
+    /// <summary>Reads the canister in a slot of a machine.</summary>
+    public bool TryReadSlot(EntityUid machine, string slot, out NCPharmaSourceReading reading)
+    {
+        reading = default;
+        return _itemSlots.TryGetSlot(machine, slot, out var itemSlot) &&
+               itemSlot.Item is { } item &&
+               HasComp<NCPharmaSourceComponent>(item) &&
+               TryRead(item, out reading);
+    }
+
+    /// <summary>
+    /// Works out what a run of the given units takes from the two canisters of a machine. Each core is made from the
+    /// canister that gives it more doses; a canister without enough material for the run is passed over while the
+    /// other can serve, and every canister in use gives the full units of the run.
+    /// </summary>
+    public NCPharmaDrawResult TryPlanDraw(
+        IReadOnlyList<NCDrugProfilePrototype> cores,
+        EntityUid machine,
+        string firstSlot,
+        string secondSlot,
+        int units,
+        out NCPharmaSourceDraw draw)
+    {
+        draw = default;
+        var hasFirst = TryReadSlot(machine, firstSlot, out var first);
+        var hasSecond = TryReadSlot(machine, secondSlot, out var second);
+        if (!hasFirst && !hasSecond)
+            return NCPharmaDrawResult.NoSource;
+
+        var plan = NCPharmaBatchMath.PlanSources(
+            cores,
+            first.Feedstock,
+            hasFirst && first.Units >= units,
+            second.Feedstock,
+            hasSecond && second.Units >= units);
+        if (plan.Yield <= 0f)
+        {
+            var fit = NCPharmaBatchMath.PlanSources(cores, first.Feedstock, hasFirst, second.Feedstock, hasSecond);
+            return fit.Yield > 0f ? NCPharmaDrawResult.NotEnoughSource : NCPharmaDrawResult.WrongFeedstock;
+        }
+
+        var purity = 1f;
+        var contaminants = 0f;
+        if (plan.UsesFirst)
+        {
+            purity = MathF.Min(purity, first.Purity);
+            contaminants = MathF.Max(contaminants, first.Contaminants);
+        }
+
+        if (plan.UsesSecond)
+        {
+            purity = MathF.Min(purity, second.Purity);
+            contaminants = MathF.Max(contaminants, second.Contaminants);
+        }
+
+        draw = new NCPharmaSourceDraw(plan, first, second, purity, contaminants);
+        return NCPharmaDrawResult.Ready;
+    }
+
+    /// <summary>Takes the units of a run from every canister the run is made from.</summary>
+    public void Consume(NCPharmaSourceDraw draw, float units)
+    {
+        if (draw.Plan.UsesFirst)
+            Consume(draw.First, units);
+        if (draw.Plan.UsesSecond)
+            Consume(draw.Second, units);
     }
 
     /// <summary>
