@@ -4,20 +4,22 @@
 - type: startingGear
   id: NCGangTygerClawsGangerGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitColorBlack
-    shoes: ClothingShoesColorBlack
-    outerClothing: NCGangTygerClawsOuter
+    jumpsuit: NCGangTygerClawsTop
+    pants: NCGangTygerClawsPants
+    outerClothing: NCGangTygerClawsJacket
     mask: NCGangTygerClawsMask
+    shoes: ClothingShoesColorBlack
   inhand:
   - NCWeaponSMGShingen
 
 - type: startingGear
   id: NCGangTygerClawsEnforcerGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitColorBlack
-    shoes: ClothingShoesColorBlack
-    outerClothing: NCGangTygerClawsOuter
+    jumpsuit: NCGangTygerClawsTop
+    pants: NCGangTygerClawsPants
+    armor: NCGangTygerClawsVest
     mask: NCGangTygerClawsMask
+    shoes: ClothingShoesColorBlack
     gloves: ClothingHandsGlovesFingerless
   inhand:
   - Katana
@@ -25,10 +27,12 @@
 - type: startingGear
   id: NCGangTygerClawsBossGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitColorBlack
-    shoes: ClothingShoesColorBlack
-    outerClothing: NCGangTygerClawsOuter
+    jumpsuit: NCGangTygerClawsTop
+    pants: NCGangTygerClawsPants
+    armor: NCGangTygerClawsVest
+    outerClothing: NCGangTygerClawsJacket
     mask: NCGangTygerClawsMask
+    shoes: ClothingShoesColorBlack
     gloves: ClothingHandsGlovesFingerless
   inhand:
   - NCWeaponPistolOverlord
@@ -36,20 +40,22 @@
 - type: startingGear
   id: NCGangMaelstromGangerGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitColorBlack
-    shoes: ClothingShoesBootsJack
-    outerClothing: NCGangMaelstromOuter
+    jumpsuit: NCGangMaelstromTop
+    pants: NCGangMaelstromPants
+    outerClothing: NCGangMaelstromJacket
     mask: NCGangMaelstromMask
+    shoes: ClothingShoesBootsJack
   inhand:
   - NCWeaponPistolBoomerBuster
 
 - type: startingGear
   id: NCGangMaelstromEnforcerGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitColorBlack
-    shoes: ClothingShoesBootsJack
-    outerClothing: NCGangMaelstromOuter
+    jumpsuit: NCGangMaelstromTop
+    pants: NCGangMaelstromPants
+    armor: NCGangMaelstromVest
     mask: NCGangMaelstromMask
+    shoes: ClothingShoesBootsJack
     gloves: ClothingHandsGlovesFingerless
   inhand:
   - NCWeaponShotgunCrusher
@@ -57,10 +63,12 @@
 - type: startingGear
   id: NCGangMaelstromBossGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitColorBlack
-    shoes: ClothingShoesBootsJack
-    outerClothing: NCGangMaelstromOuter
+    jumpsuit: NCGangMaelstromTop
+    pants: NCGangMaelstromPants
+    armor: NCGangMaelstromVest
+    outerClothing: NCGangMaelstromJacket
     mask: NCGangMaelstromMask
+    shoes: ClothingShoesBootsJack
     gloves: ClothingHandsGlovesFingerless
   inhand:
   - NCWeaponRifleCopperhead
@@ -68,20 +76,22 @@
 - type: startingGear
   id: NCGangValentinosGangerGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitColorWhite
-    shoes: ClothingShoesColorWhite
-    outerClothing: NCGangValentinosOuter
+    jumpsuit: NCGangValentinosTop
+    pants: NCGangValentinosPants
+    outerClothing: NCGangValentinosJacket
     mask: NCGangValentinosMask
+    shoes: ClothingShoesColorWhite
   inhand:
   - NCWeaponPistolCheesemaker
 
 - type: startingGear
   id: NCGangValentinosEnforcerGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitColorWhite
-    shoes: ClothingShoesColorWhite
-    outerClothing: NCGangValentinosOuter
+    jumpsuit: NCGangValentinosTop
+    pants: NCGangValentinosPants
+    armor: NCGangValentinosVest
     mask: NCGangValentinosMask
+    shoes: ClothingShoesColorWhite
     gloves: ClothingHandsGlovesFingerless
   inhand:
   - NCWeaponSMGSaratoga
@@ -89,10 +99,12 @@
 - type: startingGear
   id: NCGangValentinosBossGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitColorWhite
-    shoes: ClothingShoesColorWhite
-    outerClothing: NCGangValentinosOuter
+    jumpsuit: NCGangValentinosTop
+    pants: NCGangValentinosPants
+    armor: NCGangValentinosVest
+    outerClothing: NCGangValentinosJacket
     mask: NCGangValentinosMask
+    shoes: ClothingShoesColorWhite
     gloves: ClothingHandsGlovesFingerless
   inhand:
   - NCWeaponPistolMarkIII
@@ -100,20 +112,22 @@
 - type: startingGear
   id: NCGangBozosGangerGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitColorPurple
-    shoes: ClothingShoesColorBlack
-    outerClothing: NCGangBozosOuter
+    jumpsuit: NCGangBozosTop
+    pants: NCGangBozosPants
+    outerClothing: NCGangBozosJacket
     mask: NCGangBozosMask
+    shoes: ClothingShoesColorBlack
   inhand:
   - BaseBallBat
 
 - type: startingGear
   id: NCGangBozosEnforcerGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitColorPurple
-    shoes: ClothingShoesColorBlack
-    outerClothing: NCGangBozosOuter
+    jumpsuit: NCGangBozosTop
+    pants: NCGangBozosPants
+    armor: NCGangBozosVest
     mask: NCGangBozosMask
+    shoes: ClothingShoesColorBlack
     gloves: ClothingHandsGlovesFingerless
   inhand:
   - NCWeaponPistolStreetmaster
@@ -121,10 +135,12 @@
 - type: startingGear
   id: NCGangBozosBossGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitColorPurple
-    shoes: ClothingShoesColorBlack
-    outerClothing: NCGangBozosOuter
+    jumpsuit: NCGangBozosTop
+    pants: NCGangBozosPants
+    armor: NCGangBozosVest
+    outerClothing: NCGangBozosJacket
     mask: NCGangBozosMask
+    shoes: ClothingShoesColorBlack
     gloves: ClothingHandsGlovesFingerless
   inhand:
   - NCWeaponShotgunCrusher
@@ -132,20 +148,22 @@
 - type: startingGear
   id: NCGangInquisitorsGangerGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitColorGrey
-    shoes: ClothingShoesBootsJack
-    outerClothing: NCGangInquisitorsOuter
+    jumpsuit: NCGangInquisitorsTop
+    pants: NCGangInquisitorsPants
+    outerClothing: NCGangInquisitorsJacket
     mask: NCGangInquisitorsMask
+    shoes: ClothingShoesBootsJack
   inhand:
   - Machete
 
 - type: startingGear
   id: NCGangInquisitorsEnforcerGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitColorGrey
-    shoes: ClothingShoesBootsJack
-    outerClothing: NCGangInquisitorsOuter
+    jumpsuit: NCGangInquisitorsTop
+    pants: NCGangInquisitorsPants
+    armor: NCGangInquisitorsVest
     mask: NCGangInquisitorsMask
+    shoes: ClothingShoesBootsJack
     gloves: ClothingHandsGlovesFingerless
   inhand:
   - NCWeaponShotgunCrusher
@@ -153,10 +171,12 @@
 - type: startingGear
   id: NCGangInquisitorsBossGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitColorGrey
-    shoes: ClothingShoesBootsJack
-    outerClothing: NCGangInquisitorsOuter
+    jumpsuit: NCGangInquisitorsTop
+    pants: NCGangInquisitorsPants
+    armor: NCGangInquisitorsVest
+    outerClothing: NCGangInquisitorsJacket
     mask: NCGangInquisitorsMask
+    shoes: ClothingShoesBootsJack
     gloves: ClothingHandsGlovesFingerless
   inhand:
   - NCWeaponRifleCopperhead
@@ -164,20 +184,22 @@
 - type: startingGear
   id: NCGangPhilharmonicVampyresGangerGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitColorBlack
-    shoes: ClothingShoesColorBlack
-    outerClothing: NCGangPhilharmonicVampyresOuter
+    jumpsuit: NCGangPhilharmonicVampyresTop
+    pants: NCGangPhilharmonicVampyresPants
+    outerClothing: NCGangPhilharmonicVampyresJacket
     mask: NCGangPhilharmonicVampyresMask
+    shoes: ClothingShoesColorBlack
   inhand:
   - NCWeaponPistolHelloCutie
 
 - type: startingGear
   id: NCGangPhilharmonicVampyresEnforcerGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitColorBlack
-    shoes: ClothingShoesColorBlack
-    outerClothing: NCGangPhilharmonicVampyresOuter
+    jumpsuit: NCGangPhilharmonicVampyresTop
+    pants: NCGangPhilharmonicVampyresPants
+    armor: NCGangPhilharmonicVampyresVest
     mask: NCGangPhilharmonicVampyresMask
+    shoes: ClothingShoesColorBlack
     gloves: ClothingHandsGlovesFingerless
   inhand:
   - NCWeaponSMGShingen
@@ -185,10 +207,12 @@
 - type: startingGear
   id: NCGangPhilharmonicVampyresBossGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitColorBlack
-    shoes: ClothingShoesColorBlack
-    outerClothing: NCGangPhilharmonicVampyresOuter
+    jumpsuit: NCGangPhilharmonicVampyresTop
+    pants: NCGangPhilharmonicVampyresPants
+    armor: NCGangPhilharmonicVampyresVest
+    outerClothing: NCGangPhilharmonicVampyresJacket
     mask: NCGangPhilharmonicVampyresMask
+    shoes: ClothingShoesColorBlack
     gloves: ClothingHandsGlovesFingerless
   inhand:
   - NCWeaponPistolAvenger
