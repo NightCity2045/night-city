@@ -11,11 +11,11 @@
             "name": "icon"
         },
         {
-            "name": "icon-unshaded"
-        },
-        {
             "name": "equipped-MASK",
             "directions": 4
+        },
+        {
+            "name": "icon-unshaded"
         },
         {
             "name": "equipped-MASK-unshaded",

@@ -11,33 +11,8 @@
             "name": "icon"
         },
         {
-            "name": "icon-unshaded"
-        },
-        {
             "name": "equipped-MASK",
             "directions": 4
-        },
-        {
-            "name": "equipped-MASK-unshaded",
-            "directions": 4,
-            "delays": [
-                [
-                    2.2,
-                    0.12
-                ],
-                [
-                    2.2,
-                    0.12
-                ],
-                [
-                    2.2,
-                    0.12
-                ],
-                [
-                    2.2,
-                    0.12
-                ]
-            ]
         }
     ]
 }

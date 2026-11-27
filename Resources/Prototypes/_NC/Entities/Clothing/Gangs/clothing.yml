@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 
 # Gang wear, one set per gang split over the NC slots: top (jumpsuit), pants, armor vest, jacket and mask.
-# Every piece has a glowing (unshaded) neon layer that flickers on the mob.
+# Only Maelstrom (red optics) and Tyger Claws (Japantown neon) wear glowing pieces: their sets carry a flickering
+# unshaded layer. The other gangs' accents are painted into the base sprite.
 
 - type: entity
   parent: ClothingOuterBase
@@ -208,17 +209,9 @@
   components:
   - type: Sprite
     sprite: _NC/Clothing/Gangs/Valentinos/jacket.rsi
-    layers:
-    - state: icon
-    - state: icon-unshaded
-      shader: unshaded
+    state: icon
   - type: Clothing
     sprite: _NC/Clothing/Gangs/Valentinos/jacket.rsi
-    clothingVisuals:
-      outerClothing:
-      - state: equipped-OUTERCLOTHING
-      - state: equipped-OUTERCLOTHING-unshaded
-        shader: unshaded
 
 - type: entity
   parent: UnsensoredClothingUniformBase
@@ -226,17 +219,9 @@
   components:
   - type: Sprite
     sprite: _NC/Clothing/Gangs/Valentinos/top.rsi
-    layers:
-    - state: icon
-    - state: icon-unshaded
-      shader: unshaded
+    state: icon
   - type: Clothing
     sprite: _NC/Clothing/Gangs/Valentinos/top.rsi
-    clothingVisuals:
-      jumpsuit:
-      - state: equipped-INNERCLOTHING
-      - state: equipped-INNERCLOTHING-unshaded
-        shader: unshaded
 
 - type: entity
   parent: UnsensoredClothingUniformBase
@@ -244,17 +229,9 @@
   components:
   - type: Sprite
     sprite: _NC/Clothing/Gangs/Valentinos/pants.rsi
-    layers:
-    - state: icon
-    - state: icon-unshaded
-      shader: unshaded
+    state: icon
   - type: Clothing
     sprite: _NC/Clothing/Gangs/Valentinos/pants.rsi
-    clothingVisuals:
-      pants:
-      - state: equipped-LEGS
-      - state: equipped-LEGS-unshaded
-        shader: unshaded
     slots:
     - legs
 
@@ -266,17 +243,9 @@
   components:
   - type: Sprite
     sprite: _NC/Clothing/Gangs/Valentinos/vest.rsi
-    layers:
-    - state: icon
-    - state: icon-unshaded
-      shader: unshaded
+    state: icon
   - type: Clothing
     sprite: _NC/Clothing/Gangs/Valentinos/vest.rsi
-    clothingVisuals:
-      armor:
-      - state: equipped-OUTERCLOTHING
-      - state: equipped-OUTERCLOTHING-unshaded
-        shader: unshaded
     slots:
     - armor
   - type: NCArmor
@@ -288,17 +257,9 @@
   components:
   - type: Sprite
     sprite: _NC/Clothing/Gangs/Valentinos/mask.rsi
-    layers:
-    - state: icon
-    - state: icon-unshaded
-      shader: unshaded
+    state: icon
   - type: Clothing
     sprite: _NC/Clothing/Gangs/Valentinos/mask.rsi
-    clothingVisuals:
-      mask:
-      - state: equipped-MASK
-      - state: equipped-MASK-unshaded
-        shader: unshaded
 
 - type: entity
   parent: ClothingOuterBase
@@ -306,17 +267,9 @@
   components:
   - type: Sprite
     sprite: _NC/Clothing/Gangs/Bozos/jacket.rsi
-    layers:
-    - state: icon
-    - state: icon-unshaded
-      shader: unshaded
+    state: icon
   - type: Clothing
     sprite: _NC/Clothing/Gangs/Bozos/jacket.rsi
-    clothingVisuals:
-      outerClothing:
-      - state: equipped-OUTERCLOTHING
-      - state: equipped-OUTERCLOTHING-unshaded
-        shader: unshaded
 
 - type: entity
   parent: UnsensoredClothingUniformBase
@@ -324,17 +277,9 @@
   components:
   - type: Sprite
     sprite: _NC/Clothing/Gangs/Bozos/top.rsi
-    layers:
-    - state: icon
-    - state: icon-unshaded
-      shader: unshaded
+    state: icon
   - type: Clothing
     sprite: _NC/Clothing/Gangs/Bozos/top.rsi
-    clothingVisuals:
-      jumpsuit:
-      - state: equipped-INNERCLOTHING
-      - state: equipped-INNERCLOTHING-unshaded
-        shader: unshaded
 
 - type: entity
   parent: UnsensoredClothingUniformBase
@@ -342,17 +287,9 @@
   components:
   - type: Sprite
     sprite: _NC/Clothing/Gangs/Bozos/pants.rsi
-    layers:
-    - state: icon
-    - state: icon-unshaded
-      shader: unshaded
+    state: icon
   - type: Clothing
     sprite: _NC/Clothing/Gangs/Bozos/pants.rsi
-    clothingVisuals:
-      pants:
-      - state: equipped-LEGS
-      - state: equipped-LEGS-unshaded
-        shader: unshaded
     slots:
     - legs
 
@@ -364,17 +301,9 @@
   components:
   - type: Sprite
     sprite: _NC/Clothing/Gangs/Bozos/vest.rsi
-    layers:
-    - state: icon
-    - state: icon-unshaded
-      shader: unshaded
+    state: icon
   - type: Clothing
     sprite: _NC/Clothing/Gangs/Bozos/vest.rsi
-    clothingVisuals:
-      armor:
-      - state: equipped-OUTERCLOTHING
-      - state: equipped-OUTERCLOTHING-unshaded
-        shader: unshaded
     slots:
     - armor
   - type: NCArmor
@@ -386,17 +315,9 @@
   components:
   - type: Sprite
     sprite: _NC/Clothing/Gangs/Bozos/mask.rsi
-    layers:
-    - state: icon
-    - state: icon-unshaded
-      shader: unshaded
+    state: icon
   - type: Clothing
     sprite: _NC/Clothing/Gangs/Bozos/mask.rsi
-    clothingVisuals:
-      mask:
-      - state: equipped-MASK
-      - state: equipped-MASK-unshaded
-        shader: unshaded
 
 - type: entity
   parent: ClothingOuterBase
@@ -404,17 +325,9 @@
   components:
   - type: Sprite
     sprite: _NC/Clothing/Gangs/Inquisitors/jacket.rsi
-    layers:
-    - state: icon
-    - state: icon-unshaded
-      shader: unshaded
+    state: icon
   - type: Clothing
     sprite: _NC/Clothing/Gangs/Inquisitors/jacket.rsi
-    clothingVisuals:
-      outerClothing:
-      - state: equipped-OUTERCLOTHING
-      - state: equipped-OUTERCLOTHING-unshaded
-        shader: unshaded
 
 - type: entity
   parent: UnsensoredClothingUniformBase
@@ -422,17 +335,9 @@
   components:
   - type: Sprite
     sprite: _NC/Clothing/Gangs/Inquisitors/top.rsi
-    layers:
-    - state: icon
-    - state: icon-unshaded
-      shader: unshaded
+    state: icon
   - type: Clothing
     sprite: _NC/Clothing/Gangs/Inquisitors/top.rsi
-    clothingVisuals:
-      jumpsuit:
-      - state: equipped-INNERCLOTHING
-      - state: equipped-INNERCLOTHING-unshaded
-        shader: unshaded
 
 - type: entity
   parent: UnsensoredClothingUniformBase
@@ -440,17 +345,9 @@
   components:
   - type: Sprite
     sprite: _NC/Clothing/Gangs/Inquisitors/pants.rsi
-    layers:
-    - state: icon
-    - state: icon-unshaded
-      shader: unshaded
+    state: icon
   - type: Clothing
     sprite: _NC/Clothing/Gangs/Inquisitors/pants.rsi
-    clothingVisuals:
-      pants:
-      - state: equipped-LEGS
-      - state: equipped-LEGS-unshaded
-        shader: unshaded
     slots:
     - legs
 
@@ -462,17 +359,9 @@
   components:
   - type: Sprite
     sprite: _NC/Clothing/Gangs/Inquisitors/vest.rsi
-    layers:
-    - state: icon
-    - state: icon-unshaded
-      shader: unshaded
+    state: icon
   - type: Clothing
     sprite: _NC/Clothing/Gangs/Inquisitors/vest.rsi
-    clothingVisuals:
-      armor:
-      - state: equipped-OUTERCLOTHING
-      - state: equipped-OUTERCLOTHING-unshaded
-        shader: unshaded
     slots:
     - armor
   - type: NCArmor
@@ -487,17 +376,9 @@
   components:
   - type: Sprite
     sprite: _NC/Clothing/Gangs/Inquisitors/mask.rsi
-    layers:
-    - state: icon
-    - state: icon-unshaded
-      shader: unshaded
+    state: icon
   - type: Clothing
     sprite: _NC/Clothing/Gangs/Inquisitors/mask.rsi
-    clothingVisuals:
-      mask:
-      - state: equipped-MASK
-      - state: equipped-MASK-unshaded
-        shader: unshaded
 
 - type: entity
   parent: ClothingOuterBase
@@ -505,17 +386,9 @@
   components:
   - type: Sprite
     sprite: _NC/Clothing/Gangs/PhilharmonicVampyres/jacket.rsi
-    layers:
-    - state: icon
-    - state: icon-unshaded
-      shader: unshaded
+    state: icon
   - type: Clothing
     sprite: _NC/Clothing/Gangs/PhilharmonicVampyres/jacket.rsi
-    clothingVisuals:
-      outerClothing:
-      - state: equipped-OUTERCLOTHING
-      - state: equipped-OUTERCLOTHING-unshaded
-        shader: unshaded
 
 - type: entity
   parent: UnsensoredClothingUniformBase
@@ -523,17 +396,9 @@
   components:
   - type: Sprite
     sprite: _NC/Clothing/Gangs/PhilharmonicVampyres/top.rsi
-    layers:
-    - state: icon
-    - state: icon-unshaded
-      shader: unshaded
+    state: icon
   - type: Clothing
     sprite: _NC/Clothing/Gangs/PhilharmonicVampyres/top.rsi
-    clothingVisuals:
-      jumpsuit:
-      - state: equipped-INNERCLOTHING
-      - state: equipped-INNERCLOTHING-unshaded
-        shader: unshaded
 
 - type: entity
   parent: UnsensoredClothingUniformBase
@@ -541,17 +406,9 @@
   components:
   - type: Sprite
     sprite: _NC/Clothing/Gangs/PhilharmonicVampyres/pants.rsi
-    layers:
-    - state: icon
-    - state: icon-unshaded
-      shader: unshaded
+    state: icon
   - type: Clothing
     sprite: _NC/Clothing/Gangs/PhilharmonicVampyres/pants.rsi
-    clothingVisuals:
-      pants:
-      - state: equipped-LEGS
-      - state: equipped-LEGS-unshaded
-        shader: unshaded
     slots:
     - legs
 
@@ -563,17 +420,9 @@
   components:
   - type: Sprite
     sprite: _NC/Clothing/Gangs/PhilharmonicVampyres/vest.rsi
-    layers:
-    - state: icon
-    - state: icon-unshaded
-      shader: unshaded
+    state: icon
   - type: Clothing
     sprite: _NC/Clothing/Gangs/PhilharmonicVampyres/vest.rsi
-    clothingVisuals:
-      armor:
-      - state: equipped-OUTERCLOTHING
-      - state: equipped-OUTERCLOTHING-unshaded
-        shader: unshaded
     slots:
     - armor
   - type: NCArmor
@@ -585,14 +434,6 @@
   components:
   - type: Sprite
     sprite: _NC/Clothing/Gangs/PhilharmonicVampyres/mask.rsi
-    layers:
-    - state: icon
-    - state: icon-unshaded
-      shader: unshaded
+    state: icon
   - type: Clothing
     sprite: _NC/Clothing/Gangs/PhilharmonicVampyres/mask.rsi
-    clothingVisuals:
-      mask:
-      - state: equipped-MASK
-      - state: equipped-MASK-unshaded
-        shader: unshaded
