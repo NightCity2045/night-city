@@ -5,7 +5,7 @@ meta:
   forkId: EchoCyber
   forkVersion: 563c9eb8025bea660287a2666b38234d281ec1bb
   time: 11/18/2026 20:45:02
-  entityCount: 13798
+  entityCount: 13804
 maps:
 - 1
 grids:
@@ -8541,6 +8541,131 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: -8.5,-26.5
+- proto: NCATM
+  entities:
+  - uid: 9641
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: -4.5,11.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: ContainerContainer
+      containers:
+        board: !type:Container
+          ents: []
+          showEnts: False
+          occludes: True
+        nc_bank_cash: !type:ContainerSlot
+          ent: null
+          showEnts: False
+          occludes: True
+    - type: ItemSlots
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
+  - uid: 9644
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: -4.5,-11.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: ContainerContainer
+      containers:
+        board: !type:Container
+          ents: []
+          showEnts: False
+          occludes: True
+        nc_bank_cash: !type:ContainerSlot
+          ent: null
+          showEnts: False
+          occludes: True
+    - type: ItemSlots
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
+  - uid: 9645
+    components:
+    - type: Transform
+      parent: 1
+      pos: 6.5,-40.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: ContainerContainer
+      containers:
+        board: !type:Container
+          ents: []
+          showEnts: False
+          occludes: True
+        nc_bank_cash: !type:ContainerSlot
+          ent: null
+          showEnts: False
+          occludes: True
+    - type: ItemSlots
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
+  - uid: 9646
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: -13.5,-61.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: ContainerContainer
+      containers:
+        board: !type:Container
+          ents: []
+          showEnts: False
+          occludes: True
+        nc_bank_cash: !type:ContainerSlot
+          ent: null
+          showEnts: False
+          occludes: True
+    - type: ItemSlots
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
+  - uid: 9647
+    components:
+    - type: Transform
+      parent: 1
+      pos: -1.5,32.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: ContainerContainer
+      containers:
+        board: !type:Container
+          ents: []
+          showEnts: False
+          occludes: True
+        nc_bank_cash: !type:ContainerSlot
+          ent: null
+          showEnts: False
+          occludes: True
+    - type: ItemSlots
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
+  - uid: 9648
+    components:
+    - type: Transform
+      parent: 1
+      pos: -120.5,116.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: ContainerContainer
+      containers:
+        board: !type:Container
+          ents: []
+          showEnts: False
+          occludes: True
+        nc_bank_cash: !type:ContainerSlot
+          ent: null
+          showEnts: False
+          occludes: True
+    - type: ItemSlots
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: computerBodyScanner
   entities:
   - uid: 12032

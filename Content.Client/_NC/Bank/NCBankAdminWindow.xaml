@@ -1,0 +1,34 @@
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<controls:FancyWindow xmlns="https://spacestation14.io"
+                      xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      x:Class="Content.Client._NC.Bank.NCBankAdminWindow"
+                      Title="{Loc 'nc-bank-admin-title'}"
+                      SetSize="620 640"
+                      MinSize="520 520">
+    <BoxContainer Margin="10" Orientation="Vertical" SeparationOverride="8">
+        <Label Name="StatusLabel" FontColorOverride="#FFD66B" />
+        <Label Text="{Loc 'nc-bank-admin-departments'}" StyleClasses="LabelHeading" />
+        <BoxContainer Name="DepartmentsContainer" Orientation="Vertical" SeparationOverride="2" />
+        <PanelContainer StyleClasses="LowDivider" />
+        <Label Text="{Loc 'nc-bank-admin-adjust-title'}" StyleClasses="LabelHeading" />
+        <BoxContainer Orientation="Horizontal" SeparationOverride="5">
+            <LineEdit Name="NumberEdit" PlaceHolder="{Loc 'nc-bank-target-placeholder'}" HorizontalExpand="True" />
+            <Button Name="LookupButton" Text="{Loc 'nc-bank-admin-lookup'}" />
+        </BoxContainer>
+        <Label Name="LookupLabel" />
+        <BoxContainer Orientation="Horizontal" SeparationOverride="5">
+            <LineEdit Name="AmountEdit" PlaceHolder="{Loc 'nc-bank-admin-amount-placeholder'}" MinWidth="140" />
+            <LineEdit Name="ReasonEdit" PlaceHolder="{Loc 'nc-bank-admin-reason-placeholder'}" HorizontalExpand="True" />
+        </BoxContainer>
+        <BoxContainer Orientation="Horizontal" SeparationOverride="5">
+            <Button Name="GrantButton" Text="{Loc 'nc-bank-admin-grant'}" HorizontalExpand="True" />
+            <Button Name="TakeButton" Text="{Loc 'nc-bank-admin-take'}" HorizontalExpand="True" />
+        </BoxContainer>
+        <PanelContainer StyleClasses="LowDivider" />
+        <Label Text="{Loc 'nc-bank-admin-fees-title'}" StyleClasses="LabelHeading" />
+        <ScrollContainer VerticalExpand="True" HScrollEnabled="False">
+            <BoxContainer Name="FeesContainer" Orientation="Vertical" SeparationOverride="4" />
+        </ScrollContainer>
+    </BoxContainer>
+</controls:FancyWindow>

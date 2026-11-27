@@ -1,0 +1,113 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: entity
+  parent: BaseComputer
+  id: NCATM
+  components:
+  - type: NCAtm
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Bank/atm.rsi
+    layers:
+    - map: [ "computerLayerBody" ]
+      state: atm
+    - map: [ "computerLayerScreen" ]
+      state: atm-screen
+    - map: [ "computerLayerKeys" ]
+      state: atm-keys
+    - map: [ "enum.WiresVisualLayers.MaintenancePanel" ]
+      state: atm-panel
+  - type: PointLight
+    color: "#3FF0FF"
+  - type: ItemSlots
+  - type: ContainerContainer
+    containers:
+      board: !type:Container
+      nc_bank_cash: !type:ContainerSlot
+  - type: ActivatableUI
+    key: enum.NCBankUiKey.Atm
+    singleUser: true
+  - type: UserInterface
+    interfaces:
+      enum.NCBankUiKey.Atm:
+        type: NCAtmBoundUserInterface
+
+- type: entity
+  abstract: true
+  parent: BaseComputer
+  id: NCBankTerminalBase
+  components:
+  - type: Sprite
+    layers:
+    - map: [ "computerLayerBody" ]
+      state: computer
+    - map: [ "computerLayerKeyboard" ]
+      state: generic_keyboard
+    - map: [ "computerLayerScreen" ]
+      sprite: _NC/Structures/Machines/Bank/finance_terminal.rsi
+      state: finance
+    - map: [ "computerLayerKeys" ]
+      state: generic_keys
+    - map: [ "enum.WiresVisualLayers.MaintenancePanel" ]
+      state: generic_panel_open
+  - type: PointLight
+    color: "#FFB21F"
+  - type: ItemSlots
+  - type: ContainerContainer
+    containers:
+      board: !type:Container
+      nc_bank_cash: !type:ContainerSlot
+  - type: ActivatableUI
+    key: enum.NCBankUiKey.Terminal
+    singleUser: true
+  - type: UserInterface
+    interfaces:
+      enum.NCBankUiKey.Terminal:
+        type: NCBankTerminalBoundUserInterface
+
+- type: entity
+  parent: NCBankTerminalBase
+  id: NCBankTerminalNCPD
+  suffix: NCPD
+  components:
+  - type: NCBankTerminal
+    department: NCPD
+
+- type: entity
+  parent: NCBankTerminalBase
+  id: NCBankTerminalMedicalNC
+  suffix: MedCenter
+  components:
+  - type: NCBankTerminal
+    department: MedicalNC
+
+- type: entity
+  parent: NCBankTerminalBase
+  id: NCBankTerminalTraumaTeam
+  suffix: Trauma Team
+  components:
+  - type: NCBankTerminal
+    department: TraumaTeam
+
+- type: entity
+  parent: NCBankTerminalBase
+  id: NCBankTerminalMilitech
+  suffix: Militech
+  components:
+  - type: NCBankTerminal
+    department: Militech
+
+- type: entity
+  parent: NCBankTerminalBase
+  id: NCBankTerminalBiotechnica
+  suffix: Biotechnica
+  components:
+  - type: NCBankTerminal
+    department: Biotechnica
+
+- type: entity
+  parent: NCBankTerminalBase
+  id: NCBankTerminalZhirafa
+  suffix: Zhirafa
+  components:
+  - type: NCBankTerminal
+    department: Zhirafa

@@ -1006,6 +1006,136 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.ToTable("nc_aggregate_snapshot", (string)null);
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCBankAccount", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("nc_bank_account_id");
+
+                    b.Property<long>("Balance")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("balance");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("DepartmentId")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("department_id");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("number");
+
+                    b.Property<int?>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_bank_account");
+
+                    b.HasIndex("DepartmentId")
+                        .IsUnique();
+
+                    b.HasIndex("Number")
+                        .IsUnique();
+
+                    b.HasIndex("ProfileId")
+                        .IsUnique();
+
+                    b.ToTable("nc_bank_account", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCBankFeeRate", b =>
+                {
+                    b.Property<string>("Category")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("category");
+
+                    b.Property<int>("BasisPoints")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("basis_points");
+
+                    b.HasKey("Category")
+                        .HasName("PK_nc_bank_fee_rate");
+
+                    b.ToTable("nc_bank_fee_rate", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCBankSalary", b =>
+                {
+                    b.Property<string>("DepartmentId")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("department_id");
+
+                    b.Property<string>("JobId")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("job_id");
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("amount");
+
+                    b.HasKey("DepartmentId", "JobId")
+                        .HasName("PK_nc_bank_salary");
+
+                    b.ToTable("nc_bank_salary", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCBankTransaction", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("nc_bank_transaction_id");
+
+                    b.Property<int>("AccountId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("account_id");
+
+                    b.Property<long>("Amount")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("amount");
+
+                    b.Property<string>("Counterparty")
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("counterparty");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<long>("Fee")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("fee");
+
+                    b.Property<byte>("Kind")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("kind");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("note");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_bank_transaction");
+
+                    b.HasIndex("AccountId", "Id");
+
+                    b.ToTable("nc_bank_transaction", (string)null);
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCCharacterSkillProgress", b =>
                 {
                     b.Property<int>("ProfileId")
@@ -2757,6 +2887,25 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .HasConstraintName("FK_job_profile_profile_id");
 
                     b.Navigation("Profile");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCBankAccount", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", null)
+                        .WithOne()
+                        .HasForeignKey("Content.Server.Database.NCBankAccount", "ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("FK_nc_bank_account_profile_profile_id");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCBankTransaction", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCBankAccount", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_bank_transaction_nc_bank_account_ncbank_account_id");
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCCharacterSkillProgress", b =>

@@ -12,6 +12,7 @@ public abstract partial class ServerDbContext
     {
         ConfigureNCPersistenceModels(modelBuilder);
         ConfigureNCPoliceModels(modelBuilder);
+        ConfigureNCBankModels(modelBuilder);
         ConfigureNCMedicalModels(modelBuilder);
         ConfigureNCSkillModels(modelBuilder);
     }

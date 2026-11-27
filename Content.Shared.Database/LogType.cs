@@ -488,4 +488,11 @@ public enum LogType
     /// Silicon law changes.
     /// </summary>
     SiliconLaw = 105,
+
+    // NC-Edit-Start
+    /// <summary>
+    /// Night City bank: deposits, withdrawals, transfers, salaries and admin adjustments.
+    /// </summary>
+    NCBank = 1000,
+    // NC-Edit-End
 }

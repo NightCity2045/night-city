@@ -1,0 +1,49 @@
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<controls:FancyWindow xmlns="https://spacestation14.io"
+                      xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      x:Class="Content.Client._NC.Bank.NCBankTerminalWindow"
+                      Title="{Loc 'nc-bank-terminal-title'}"
+                      SetSize="640 640"
+                      MinSize="520 480">
+    <BoxContainer Margin="10" Orientation="Vertical" SeparationOverride="8">
+        <Label Name="MessageLabel" Align="Center" Visible="False" />
+        <BoxContainer Name="AccountContainer" Orientation="Vertical" SeparationOverride="6" VerticalExpand="True">
+            <Label Name="DepartmentLabel" StyleClasses="LabelHeading" />
+            <BoxContainer Orientation="Horizontal" SeparationOverride="12">
+                <BoxContainer Orientation="Horizontal">
+                    <Label Text="{Loc 'nc-bank-account-label'}" StyleClasses="LabelKeyText" />
+                    <Label Name="NumberLabel" />
+                </BoxContainer>
+                <BoxContainer Orientation="Horizontal">
+                    <Label Text="{Loc 'nc-bank-balance-label'}" StyleClasses="LabelKeyText" />
+                    <Label Name="BalanceLabel" />
+                </BoxContainer>
+                <BoxContainer Orientation="Horizontal">
+                    <Label Text="{Loc 'nc-bank-fee-label'}" StyleClasses="LabelKeyText" />
+                    <Label Name="FeeLabel" FontColorOverride="#AAAAAA" />
+                </BoxContainer>
+            </BoxContainer>
+            <PanelContainer StyleClasses="LowDivider" />
+            <BoxContainer Orientation="Horizontal" SeparationOverride="6">
+                <Label Text="{Loc 'nc-bank-cash-label'}" StyleClasses="LabelKeyText" />
+                <Label Name="CashLabel" HorizontalExpand="True" />
+                <Button Name="DepositButton" Text="{Loc 'nc-bank-deposit'}" />
+            </BoxContainer>
+            <BoxContainer Orientation="Horizontal" SeparationOverride="6">
+                <LineEdit Name="WithdrawEdit" PlaceHolder="{Loc 'nc-bank-amount-placeholder'}" HorizontalExpand="True" />
+                <Button Name="WithdrawButton" Text="{Loc 'nc-bank-withdraw'}" />
+            </BoxContainer>
+            <PanelContainer StyleClasses="LowDivider" />
+            <Label Text="{Loc 'nc-bank-salaries-title'}" StyleClasses="LabelHeading" />
+            <ScrollContainer MinHeight="150" HScrollEnabled="False">
+                <BoxContainer Name="SalariesContainer" Orientation="Vertical" SeparationOverride="4" />
+            </ScrollContainer>
+            <PanelContainer StyleClasses="LowDivider" />
+            <Label Text="{Loc 'nc-bank-history-title'}" StyleClasses="LabelHeading" />
+            <ScrollContainer VerticalExpand="True" HScrollEnabled="False">
+                <BoxContainer Name="HistoryContainer" Orientation="Vertical" />
+            </ScrollContainer>
+        </BoxContainer>
+    </BoxContainer>
+</controls:FancyWindow>

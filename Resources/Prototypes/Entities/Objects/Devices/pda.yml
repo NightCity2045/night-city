@@ -97,6 +97,7 @@
         - id: NotekeeperCartridge
         - id: NewsReaderCartridge
         - id: NanoTaskCartridge
+        - id: NCBankCartridge # NC
   - type: ActivatableUI
     key: enum.PdaUiKey.Key
     singleUser: true
@@ -162,6 +163,7 @@
         - id: NotekeeperCartridge
         - id: NewsReaderCartridge
         - id: NanoTaskCartridge
+        - id: NCBankCartridge # NC
         - id: WantedListCartridge
 
 - type: entity
@@ -177,6 +179,7 @@
         - id: NotekeeperCartridge
         - id: NewsReaderCartridge
         - id: NanoTaskCartridge
+        - id: NCBankCartridge # NC
         - id: MedTekCartridge
 
 - type: entity
@@ -441,6 +444,7 @@
         - id: NotekeeperCartridge
         - id: NewsReaderCartridge
         - id: NanoTaskCartridge
+        - id: NCBankCartridge # NC
 
 - type: entity
   name: chaplain PDA
@@ -497,6 +501,7 @@
         - id: NotekeeperCartridge
         - id: NewsReaderCartridge
         - id: NanoTaskCartridge
+        - id: NCBankCartridge # NC
 
 - type: entity
   parent: BasePDA
@@ -542,6 +547,7 @@
         - id: NotekeeperCartridge
         - id: NewsReaderCartridge
         - id: NanoTaskCartridge
+        - id: NCBankCartridge # NC
         - id: AstroNavCartridge
 
 - type: entity
@@ -893,6 +899,7 @@
         - id: NotekeeperCartridge
         - id: NewsReaderCartridge
         - id: NanoTaskCartridge
+        - id: NCBankCartridge # NC
         - id: WantedListCartridge
 
 - type: entity
@@ -963,6 +970,7 @@
         - id: NotekeeperCartridge
         - id: NewsReaderCartridge
         - id: NanoTaskCartridge
+        - id: NCBankCartridge # NC
         - id: MedTekCartridge
         - id: WantedListCartridge
         - id: LogProbeCartridge
@@ -992,6 +1000,7 @@
         - id: NotekeeperCartridge
         - id: NewsReaderCartridge
         - id: NanoTaskCartridge
+        - id: NCBankCartridge # NC
         - id: MedTekCartridge
         - id: WantedListCartridge
         - id: LogProbeCartridge
@@ -1116,6 +1125,7 @@
         children:
         - id: NotekeeperCartridge
         - id: NanoTaskCartridge
+        - id: NCBankCartridge # NC
 
 - type: entity
   parent: [ SyndiPDA, BaseSyndicateContraband ]
@@ -1156,6 +1166,7 @@
         - id: NotekeeperCartridge
         - id: NewsReaderCartridge
         - id: NanoTaskCartridge
+        - id: NCBankCartridge # NC
         - id: MedTekCartridge
 
 - type: entity
@@ -1202,6 +1213,7 @@
         - id: NotekeeperCartridge
         - id: NewsReaderCartridge
         - id: NanoTaskCartridge
+        - id: NCBankCartridge # NC
         - id: WantedListCartridge
 
 - type: entity
@@ -1372,6 +1384,7 @@
         - id: NotekeeperCartridge
         - id: NewsReaderCartridge
         - id: NanoTaskCartridge
+        - id: NCBankCartridge # NC
         - id: WantedListCartridge
         - id: LogProbeCartridge
 
@@ -1402,6 +1415,7 @@
         - id: NotekeeperCartridge
         - id: NewsReaderCartridge
         - id: NanoTaskCartridge
+        - id: NCBankCartridge # NC
         - id: WantedListCartridge
         - id: MedTekCartridge
 

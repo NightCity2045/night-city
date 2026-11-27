@@ -1,0 +1,107 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Fee rates are in basis points: 4000 = 40%. Admins change rates and the department managers change salaries in
+# game; those changes are stored in the database and override the values here.
+- type: ncBankConfiguration
+  id: Default
+  paydayInterval: 1800
+  residentFeeBasisPoints: 4000
+  characterOpeningBalance: 1000
+  characterOpeningCash: 200
+
+- type: ncBankDepartment
+  id: NCPD
+  department: NCPD
+  managers: [ NCPDChief ]
+  feeBasisPoints: 2000
+  openingBalance: 50000
+  salaries:
+    NCPDChief: 800
+    NCPDCommander: 500
+    NCPDLieutenant: 500
+    NCPDInspector: 350
+    NCPDSergeant: 350
+    NCPDOfficer: 250
+    NCPDCadet: 100
+
+- type: ncBankDepartment
+  id: MedicalNC
+  department: MedicalNC
+  managers: [ NCMedicalChief ]
+  feeBasisPoints: 2000
+  openingBalance: 100000
+  salaries:
+    NCMedicalChief: 800
+    NCMedicalDoctor: 250
+    NCMedicalCoroner: 250
+    NCMedicalPsychologist: 350
+    NCMedicalTechnician: 250
+    NCMedicalIntern: 100
+
+- type: ncBankDepartment
+  id: TraumaTeam
+  department: TraumaTeam
+  managers: [ TraumaTeamOperative ]
+  feeBasisPoints: 1000
+  openingBalance: 100000
+  salaries:
+    TraumaTeamOperative: 500
+    TraumaTeamParamedic: 350
+
+- type: ncBankDepartment
+  id: Militech
+  department: Militech
+  managers: [ MilitechChief ]
+  feeBasisPoints: 1000
+  openingBalance: 250000
+  salaries:
+    MilitechChief: 800
+    MilitechOperativeLead: 500
+    MilitechOperative: 250
+    MilitechSecuritySpecialist: 350
+    MilitechNetrunner: 350
+    MilitechRigger: 350
+    MilitechCombatMedic: 250
+    MilitechTech: 250
+    MilitechQuartermaster: 250
+
+- type: ncBankDepartment
+  id: Biotechnica
+  department: Biotechnica
+  managers: [ BiotechnicaChief ]
+  feeBasisPoints: 1000
+  openingBalance: 150000
+  salaries:
+    BiotechnicaChief: 800
+    BiotechnicaOperativeLead: 500
+    BiotechnicaOperative: 250
+    BiotechnicaNetrunner: 350
+    BiotechnicaRigger: 350
+    BiotechnicaMedTech: 250
+    BiotechnicaParamedic: 250
+    BiotechnicaTech: 250
+    BiotechnicaBotanist: 250
+
+- type: ncBankDepartment
+  id: Zhirafa
+  department: Zhirafa
+  managers: [ ZhirafaJanitor ]
+  feeBasisPoints: 1000
+  openingBalance: 5000
+  salaries:
+    ZhirafaJanitor: 100
+
+- type: entity
+  parent: BasePDACartridge
+  id: NCBankCartridge
+  components:
+  - type: Sprite
+    state: cart-y
+  - type: UIFragment
+    ui: !type:NCBankCartridgeUi
+  - type: Cartridge
+    programName: nc-bank-program-name
+    icon:
+      sprite: _NC/Interface/Misc/bank_program.rsi
+      state: bank
+  - type: NCBankCartridge

@@ -1,0 +1,36 @@
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<cartridges:NCBankCartridgeUiFragment xmlns="https://spacestation14.io"
+                                      xmlns:cartridges="clr-namespace:Content.Client._NC.Bank"
+                                      Margin="5"
+                                      VerticalExpand="True">
+    <BoxContainer Orientation="Vertical" SeparationOverride="6" VerticalExpand="True">
+        <Label Name="UnavailableLabel" Text="{Loc 'nc-bank-no-account'}" Align="Center" Visible="False" />
+        <BoxContainer Name="AccountContainer" Orientation="Vertical" SeparationOverride="6" VerticalExpand="True">
+            <BoxContainer Orientation="Horizontal">
+                <Label Text="{Loc 'nc-bank-account-label'}" StyleClasses="LabelKeyText" />
+                <Label Name="NumberLabel" />
+            </BoxContainer>
+            <BoxContainer Orientation="Horizontal">
+                <Label Text="{Loc 'nc-bank-balance-label'}" StyleClasses="LabelKeyText" />
+                <Label Name="BalanceLabel" />
+            </BoxContainer>
+            <BoxContainer Orientation="Horizontal">
+                <Label Text="{Loc 'nc-bank-fee-label'}" StyleClasses="LabelKeyText" />
+                <Label Name="FeeLabel" FontColorOverride="#AAAAAA" />
+            </BoxContainer>
+            <PanelContainer StyleClasses="LowDivider" />
+            <Label Text="{Loc 'nc-bank-transfer-title'}" StyleClasses="LabelHeading" />
+            <LineEdit Name="TargetEdit" PlaceHolder="{Loc 'nc-bank-target-placeholder'}" />
+            <BoxContainer Orientation="Horizontal" SeparationOverride="5">
+                <LineEdit Name="AmountEdit" PlaceHolder="{Loc 'nc-bank-amount-placeholder'}" HorizontalExpand="True" />
+                <Button Name="TransferButton" Text="{Loc 'nc-bank-transfer'}" />
+            </BoxContainer>
+            <Label Name="TotalLabel" FontColorOverride="#888888" />
+            <PanelContainer StyleClasses="LowDivider" />
+            <Label Text="{Loc 'nc-bank-history-title'}" StyleClasses="LabelHeading" />
+            <ScrollContainer VerticalExpand="True" HScrollEnabled="False">
+                <BoxContainer Name="HistoryContainer" Orientation="Vertical" />
+            </ScrollContainer>
+        </BoxContainer>
+    </BoxContainer>
+</cartridges:NCBankCartridgeUiFragment>
