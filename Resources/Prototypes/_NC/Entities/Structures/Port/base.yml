@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Port of Night City dressing: heavy decorative structures with no damage model, like statues.
+
+- type: entity
+  abstract: true
+  parent: BaseStructure
+  id: NCPortStructureBase
+  components:
+  - type: Sprite
+    noRot: false
+  - type: InteractionOutline
+
+# A 20-foot shipping container, 2 x 4 tiles. The entity stands on the bottom-left tile of the
+# footprint, which extends one tile east and three tiles north; rotating it keeps it on the grid.
+- type: entity
+  abstract: true
+  parent: NCPortStructureBase
+  id: NCShippingContainerBase
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Port/shipping_container.rsi
+    drawdepth: Walls
+    offset: "0.5,1.5"
+  - type: Icon
+    sprite: _NC/Structures/Port/shipping_container.rsi
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.48,-0.48,1.48,3.48"
+        density: 1000
+        mask:
+        - FullTileMask
+        layer:
+        - WallLayer
+  - type: Occluder
+    boundingBox: "-0.5,-0.5,1.5,3.5"
