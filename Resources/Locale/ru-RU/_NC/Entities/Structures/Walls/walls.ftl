@@ -7,6 +7,9 @@ ent-NCWallMetalsa = стена из метала
 ent-NCWallbeton = стена из бетона
     .desc = { ent-BaseWall.desc }
 
+ent-NCWallMegablock = бетонная стена мегаблока
+    .desc = Сборная бетонная панель мегабилдинга, серая, в подтёках от десятилетий кислотных дождей.
+
 ent-NCWallproflista = профлист
     .desc = { ent-BaseWall.desc }
 

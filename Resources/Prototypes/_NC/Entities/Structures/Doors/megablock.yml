@@ -1,0 +1,12 @@
+- type: entity
+  parent: Airlock
+  id: NCAirlockMegablock
+  name: megablock door
+  description: A steel double door in a precast concrete facade, hazard paint scuffed by a thousand boots.
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Doors/megablock.rsi
+  # Walls run on through the door instead of ending in caps; the door keeps its own sprite.
+  - type: IconSmooth
+    key: walls
+    mode: NoSprite
