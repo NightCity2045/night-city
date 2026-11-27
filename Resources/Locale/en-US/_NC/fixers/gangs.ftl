@@ -201,3 +201,23 @@ ent-NCMobHumanSecurityNetwork54Responder = Network 54 response officer
     .desc = Armoured, with a submachine gun. Called when someone goes after the footage.
 ent-NCMobHumanSecurityNetwork54Chief = Network 54 head of security
     .desc = Keeps the bureau's secrets off the air and out of other people's hands.
+
+nc-arasaka-warning-1 = Unregistered contact. Leave the sector.
+nc-arasaka-warning-2 = This facility does not exist. Neither will you.
+nc-arasaka-alarm-1 = Containment breach. Sanitise.
+nc-arasaka-alarm-2 = For the Company!
+
+ent-NCMobHumanArasakaRemnantSleeper = Arasaka sleeper
+    .desc = Kept on station under ground zero for twenty years, still following orders nobody remembers giving.
+ent-NCMobHumanArasakaRemnantNinja = Arasaka blade
+    .desc = Silent, fast and very sharp.
+ent-NCMobHumanArasakaRemnantNetrunner = Arasaka vault netrunner
+    .desc = Guards the vault's subnet from the inside.
+ent-NCMobHumanArasakaRemnantCommander = Black Vault commander
+    .desc = The last officer of a facility that was never built.
+ent-NCArasakaRemnantTurret = Black Vault turret
+    .desc = An old Arasaka sentry gun. It still works.
+ent-NCHotZoneFalloutWeak = fallout
+    .desc = Low background radiation from the 2023 blast.
+ent-NCHotZoneFalloutStrong = heavy fallout
+    .desc = Dangerous radiation from the 2023 blast.

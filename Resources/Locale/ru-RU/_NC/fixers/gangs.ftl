@@ -201,3 +201,23 @@ ent-NCMobHumanSecurityNetwork54Responder = боец группы реагиро�
     .desc = Броня и пистолет-пулемёт. Его зовут, когда кто-то лезет за записями.
 ent-NCMobHumanSecurityNetwork54Chief = начальник охраны (Network 54)
     .desc = Держит секреты бюро подальше от эфира и чужих рук.
+
+nc-arasaka-warning-1 = Незарегистрированный контакт. Покиньте сектор.
+nc-arasaka-warning-2 = Этого объекта не существует. Скоро не будет и тебя.
+nc-arasaka-alarm-1 = Нарушение периметра. Зачистить.
+nc-arasaka-alarm-2 = За Компанию!
+
+ent-NCMobHumanArasakaRemnantSleeper = спящий Arasaka
+    .desc = Двадцать лет на посту под эпицентром и всё ещё выполняет приказы, которых никто не помнит.
+ent-NCMobHumanArasakaRemnantNinja = клинок Arasaka
+    .desc = Тихий, быстрый и очень острый.
+ent-NCMobHumanArasakaRemnantNetrunner = нетраннер хранилища Arasaka
+    .desc = Охраняет подсеть хранилища изнутри.
+ent-NCMobHumanArasakaRemnantCommander = командир Чёрного хранилища
+    .desc = Последний офицер объекта, которого никогда не строили.
+ent-NCArasakaRemnantTurret = турель Чёрного хранилища
+    .desc = Старая сторожевая пушка Arasaka. Всё ещё работает.
+ent-NCHotZoneFalloutWeak = радиоактивные осадки
+    .desc = Слабый радиационный фон от взрыва 2023 года.
+ent-NCHotZoneFalloutStrong = сильные радиоактивные осадки
+    .desc = Опасная радиация от взрыва 2023 года.

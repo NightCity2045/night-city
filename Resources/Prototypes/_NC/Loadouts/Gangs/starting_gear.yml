@@ -433,3 +433,48 @@
     eyes: ClothingEyesGlassesSunglasses
   inhand:
   - NCWeaponPistolOverlord
+
+- type: startingGear
+  id: NCArasakaRemnantSleeperGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorBlack
+    shoes: ClothingShoesBootsCombat
+    gloves: ClothingHandsGlovesCombat
+    outerClothing: ClothingOuterArmorBulletproof
+    head: ClothingHeadHelmetSwat
+    mask: ClothingMaskGasSwat
+  inhand:
+  - NCWeaponSMGShingen
+
+- type: startingGear
+  id: NCArasakaRemnantNinjaGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorBlack
+    shoes: ClothingShoesBootsCombat
+    gloves: ClothingHandsGlovesCombat
+    outerClothing: ClothingOuterArmorBasicSlim
+    mask: ClothingMaskGasSwat
+  inhand:
+  - Katana
+
+- type: startingGear
+  id: NCArasakaRemnantNetrunnerGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorBlack
+    shoes: ClothingShoesBootsCombat
+    gloves: ClothingHandsGlovesCombat
+    outerClothing: ClothingOuterArmorBasicSlim
+    eyes: ClothingEyesGlassesSunglasses
+  inhand:
+  - NCWeaponPistolOverlord
+
+- type: startingGear
+  id: NCArasakaRemnantCommanderGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorBlack
+    shoes: ClothingShoesBootsCombat
+    gloves: ClothingHandsGlovesCombat
+    outerClothing: ClothingOuterArmorHeavy
+    head: ClothingHeadHelmetSwat
+  inhand:
+  - NCWeaponRifleArasakaPrototype

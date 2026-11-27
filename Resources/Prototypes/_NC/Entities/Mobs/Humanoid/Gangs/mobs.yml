@@ -482,3 +482,57 @@
   components:
   - type: Loadout
     prototypes: [ NCSecurityNetwork54ChiefGear ]
+
+# Arasaka remnant: the sleepers who never left the Black Vault under ground zero.
+- type: entity
+  abstract: true
+  parent: MobHuman
+  id: NCMobHumanArasakaRemnantBase
+  components:
+  - type: RandomHumanoidAppearance
+    randomizeName: false
+    allowedMarkingLayers: [ Hair, FacialHair, UndergarmentTop, UndergarmentBottom ]
+  - type: NpcFactionMember
+    factions: [ NCArasakaRemnant ]
+  - type: FactionException
+  - type: NPCRetaliation
+  - type: HTN
+    rootTask:
+      task: SimpleHumanoidHostileCompound
+
+- type: entity
+  parent: NCMobHumanArasakaRemnantBase
+  id: NCMobHumanArasakaRemnantSleeper
+  components:
+  - type: Loadout
+    prototypes: [ NCArasakaRemnantSleeperGear ]
+
+- type: entity
+  parent: NCMobHumanArasakaRemnantBase
+  id: NCMobHumanArasakaRemnantNinja
+  components:
+  - type: Loadout
+    prototypes: [ NCArasakaRemnantNinjaGear ]
+
+- type: entity
+  parent: NCMobHumanArasakaRemnantBase
+  id: NCMobHumanArasakaRemnantNetrunner
+  components:
+  - type: Loadout
+    prototypes: [ NCArasakaRemnantNetrunnerGear ]
+
+- type: entity
+  parent: NCMobHumanArasakaRemnantBase
+  id: NCMobHumanArasakaRemnantCommander
+  components:
+  - type: Loadout
+    prototypes: [ NCArasakaRemnantCommanderGear ]
+
+# Vault defence turret. Neutral until the vault's guards are alarmed, then it fires at the intruder.
+- type: entity
+  parent: WeaponTurretHostile
+  id: NCArasakaRemnantTurret
+  components:
+  - type: NpcFactionMember
+    factions: [ NCArasakaRemnant ]
+  - type: FactionException

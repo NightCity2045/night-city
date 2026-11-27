@@ -65,3 +65,7 @@
 - type: ncMissionOwner
   id: Network54
   name: nc-mission-owner-network-54
+
+- type: ncMissionOwner
+  id: ArasakaRemnant
+  name: nc-mission-owner-arasaka-remnant

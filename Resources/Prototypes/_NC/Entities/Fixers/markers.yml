@@ -529,3 +529,36 @@
   - type: NCMissionMarker
     kind: Guard
     owner: Network54
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerObjectiveArasakaRemnant
+  suffix: Objective, Arasaka remnant
+  components:
+  - type: Sprite
+    state: objective
+  - type: NCMissionMarker
+    kind: Objective
+    owner: ArasakaRemnant
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerDeadDropArasakaRemnant
+  suffix: DeadDrop, Arasaka remnant
+  components:
+  - type: Sprite
+    state: drop
+  - type: NCMissionMarker
+    kind: DeadDrop
+    owner: ArasakaRemnant
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerGuardArasakaRemnant
+  suffix: Guard, Arasaka remnant
+  components:
+  - type: Sprite
+    state: guard
+  - type: NCMissionMarker
+    kind: Guard
+    owner: ArasakaRemnant

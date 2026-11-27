@@ -341,6 +341,42 @@
     position: -128.5,18.5
   - name: "SNC W 22nd Street Building 02"
     position: -92,11.5
+  - name: "OCC Arasaka Tower Ruins"
+    position: 46.5,112.5
+    z: 0
+  - name: "OCC Hot Warehouse"
+    position: -20.5,64.5
+    z: 0
+  - name: "OCC Scavenger Camp"
+    position: 38.5,67.5
+    z: 0
+  - name: "OCC Metro Entrance"
+    position: -13.5,90.5
+    z: 0
+  - name: "OCC Stalker Outpost"
+    position: 9.5,80.5
+    z: 0
+  - name: "OCC Scavenger Chop Shop"
+    position: 9.5,110.5
+    z: 0
+  - name: "OCC Collapsed Offices"
+    position: -20.5,135.5
+    z: 0
+  - name: "OCC Metro Platform"
+    position: -13.5,95.5
+    z: -1
+  - name: "OCC Scavenger Workshop"
+    position: 38.5,67.5
+    z: -1
+  - name: "OCC Arasaka Data Center"
+    position: 28.5,119.5
+    z: -2
+  - name: "OCC Arasaka Black Vault"
+    position: 47.5,118.5
+    z: -3
+  - name: "OCC Black Vault Core"
+    position: 47.5,118.5
+    z: -4
   - name: "SNC Gun Shop"
     position: -137.5,5.5
     z: 0
