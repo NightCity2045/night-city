@@ -99,3 +99,8 @@ ent-NCMissionDataShard = data shard
     .desc = An encrypted data shard.
 ent-NCMissionSabotageTarget = server rack
     .desc = Humming hardware. Somebody wants it gone.
+
+nc-mission-guard-warning-1 = Hey. Private business here. Walk away.
+nc-mission-guard-warning-2 = You lost? Keep moving, choom.
+nc-mission-guard-alarm-1 = That's it, light 'em up!
+nc-mission-guard-alarm-2 = Intruder! Take them down!

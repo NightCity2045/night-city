@@ -62,6 +62,7 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
     [Dependency] private NCBankSystem _bank = default!;
     [Dependency] private NCCorpContractSystem _goods = default!;
     [Dependency] private NCStreetReputationSystem _reputation = default!;
+    [Dependency] private NCMissionGuardSystem _guards = default!;
 
     private readonly Dictionary<string, List<ProtoId<NCFixerMissionPrototype>?>> _offers = new();
     private readonly Dictionary<string, TimeSpan> _nextRefresh = new();
@@ -372,7 +373,11 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
             active.Objective = objective;
             active.Item = SpawnMissionEntity(active, item, Transform(objective).Coordinates);
             if (mission.Kind == NCFixerMissionKind.Elimination)
+            {
                 active.Target = active.Item;
+                _guards.MakeGuard(active.Item.Value, active.Id,
+                    mission.Encounter is { } targetEncounter ? _prototypes.Index(targetEncounter) : null);
+            }
         }
 
         switch (mission.Kind)
@@ -437,7 +442,7 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
             var at = posts.Count > 0
                 ? Transform(posts[count++ % posts.Count]).Coordinates
                 : Transform(objective).Coordinates.Offset(new System.Numerics.Vector2(_random.Next(-2, 3), _random.Next(-2, 3)));
-            SpawnMissionEntity(active, mob, at);
+            _guards.MakeGuard(SpawnMissionEntity(active, mob, at), active.Id, encounter);
         }
     }
 

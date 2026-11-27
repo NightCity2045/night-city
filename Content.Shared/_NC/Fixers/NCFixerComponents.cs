@@ -39,3 +39,34 @@ public sealed partial class NCMissionEntityComponent : Component
     [ViewVariables]
     public int Mission;
 }
+
+/// <summary>A mission defender: neutral until provoked, then hostile together with its group.</summary>
+[RegisterComponent]
+public sealed partial class NCMissionGuardComponent : Component
+{
+    [ViewVariables]
+    public int Mission;
+
+    /// <summary>Players inside this range are noticed and warned.</summary>
+    [DataField]
+    public float WarnRange = 6f;
+
+    /// <summary>Players still this close after <see cref="Patience"/> are attacked.</summary>
+    [DataField]
+    public float CloseRange = 2.5f;
+
+    [DataField]
+    public TimeSpan Patience = TimeSpan.FromSeconds(6);
+
+    [DataField]
+    public List<LocId> Warnings = new();
+
+    [DataField]
+    public List<LocId> Alarms = new();
+
+    [ViewVariables]
+    public Dictionary<EntityUid, TimeSpan> Warned = new();
+
+    [ViewVariables]
+    public HashSet<EntityUid> Hostile = new();
+}

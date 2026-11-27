@@ -99,3 +99,8 @@ ent-NCMissionDataShard = дата-шард
     .desc = Зашифрованный дата-шард.
 ent-NCMissionSabotageTarget = серверная стойка
     .desc = Гудящее железо. Кто-то хочет, чтобы его не стало.
+
+nc-mission-guard-warning-1 = Эй. Тут частные дела. Проходи мимо.
+nc-mission-guard-warning-2 = Заблудился? Двигай дальше, чумба.
+nc-mission-guard-alarm-1 = Всё, вали его!
+nc-mission-guard-alarm-2 = Чужой! Положить его!

@@ -72,6 +72,14 @@ public sealed partial class NCFixerEncounterPrototype : IPrototype
     /// <summary>Extra defenders per street reputation level of the taker.</summary>
     [DataField]
     public float ExtraPerLevel = 0.5f;
+
+    /// <summary>What a guard says to someone walking into the post.</summary>
+    [DataField]
+    public List<LocId> Warnings = new() { "nc-mission-guard-warning-1", "nc-mission-guard-warning-2" };
+
+    /// <summary>What a guard shouts when the group turns hostile.</summary>
+    [DataField]
+    public List<LocId> Alarms = new() { "nc-mission-guard-alarm-1", "nc-mission-guard-alarm-2" };
 }
 
 [DataDefinition]

@@ -1,0 +1,170 @@
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+using System.Linq;
+using Content.Server.Chat.Systems;
+using Content.Shared._NC.Fixers;
+using Content.Shared.Chat;
+using Content.Shared.Damage.Systems;
+using Content.Shared.Examine;
+using Content.Shared.Hands;
+using Content.Shared.Hands.EntitySystems;
+using Content.Shared.Mobs.Systems;
+using Content.Shared.NPC.Components;
+using Content.Shared.NPC.Systems;
+using Content.Shared.Weapons.Melee;
+using Content.Shared.Weapons.Ranged.Components;
+using Content.Shared.Mind.Components;
+using Robust.Shared.Prototypes;
+using Robust.Shared.Random;
+using Robust.Shared.Timing;
+
+namespace Content.Server._NC.Fixers;
+
+/// <summary>
+/// Mission defenders are neutral until provoked. Someone walking into a post is warned; drawing a weapon there,
+/// lingering close after the warning, hurting anyone or anything of the mission, or taking a mission item in
+/// view of a guard turns the whole group hostile to that person.
+/// </summary>
+public sealed class NCMissionGuardSystem : EntitySystem
+{
+    private static readonly TimeSpan ScanInterval = TimeSpan.FromSeconds(0.5);
+
+    [Dependency] private IGameTiming _timing = default!;
+    [Dependency] private EntityLookupSystem _lookup = default!;
+    [Dependency] private IRobustRandom _random = default!;
+    [Dependency] private IPrototypeManager _prototypes = default!;
+    [Dependency] private ChatSystem _chat = default!;
+    [Dependency] private ExamineSystemShared _examine = default!;
+    [Dependency] private SharedHandsSystem _hands = default!;
+    [Dependency] private MobStateSystem _mobState = default!;
+    [Dependency] private NpcFactionSystem _factions = default!;
+
+    private TimeSpan _nextScan;
+    private readonly HashSet<Entity<MindContainerComponent>> _nearby = new();
+
+    public override void Initialize()
+    {
+        base.Initialize();
+        SubscribeLocalEvent<NCMissionEntityComponent, DamageDealtEvent>(OnDamaged);
+        SubscribeLocalEvent<NCMissionEntityComponent, GotEquippedHandEvent>(OnPickedUp);
+    }
+
+    /// <summary>Makes a spawned mob a guard of the mission with the encounter's lines.</summary>
+    public void MakeGuard(EntityUid mob, int mission, NCFixerEncounterPrototype? encounter)
+    {
+        var guard = EnsureComp<NCMissionGuardComponent>(mob);
+        guard.Mission = mission;
+        if (encounter != null)
+        {
+            guard.Warnings = encounter.Warnings.ToList();
+            guard.Alarms = encounter.Alarms.ToList();
+        }
+
+        EnsureComp<FactionExceptionComponent>(mob);
+    }
+
+    public override void Update(float frameTime)
+    {
+        base.Update(frameTime);
+        var now = _timing.CurTime;
+        if (now < _nextScan)
+            return;
+
+        _nextScan = now + ScanInterval;
+        var query = EntityQueryEnumerator<NCMissionGuardComponent>();
+        while (query.MoveNext(out var guardUid, out var guard))
+        {
+            if (_mobState.IsIncapacitated(guardUid))
+                continue;
+
+            _nearby.Clear();
+            _lookup.GetEntitiesInRange(Transform(guardUid).Coordinates, guard.WarnRange, _nearby);
+            foreach (var (player, mindContainer) in _nearby)
+            {
+                if (!mindContainer.HasMind || HasComp<NCMissionGuardComponent>(player) ||
+                    _mobState.IsIncapacitated(player) ||
+                    guard.Hostile.Contains(player) ||
+                    !_examine.InRangeUnOccluded(guardUid, player, guard.WarnRange))
+                {
+                    continue;
+                }
+
+                if (HoldsWeapon(player))
+                {
+                    Alarm(guard.Mission, player);
+                    continue;
+                }
+
+                if (!guard.Warned.TryGetValue(player, out var warnedAt))
+                {
+                    guard.Warned[player] = now;
+                    Say(guardUid, guard.Warnings);
+                    continue;
+                }
+
+                if (now - warnedAt > guard.Patience && _examine.InRangeUnOccluded(guardUid, player, guard.CloseRange))
+                    Alarm(guard.Mission, player);
+            }
+        }
+    }
+
+    private bool HoldsWeapon(EntityUid player)
+    {
+        foreach (var held in _hands.EnumerateHeld(player))
+        {
+            if (HasComp<GunComponent>(held) || HasComp<MeleeWeaponComponent>(held))
+                return true;
+        }
+
+        return false;
+    }
+
+    private void OnDamaged(Entity<NCMissionEntityComponent> ent, ref DamageDealtEvent args)
+    {
+        if (args.Origin is { } origin && origin != ent.Owner &&
+            TryComp<MindContainerComponent>(origin, out var mind) && mind.HasMind)
+            Alarm(ent.Comp.Mission, origin);
+    }
+
+    /// <summary>Taking a mission item in front of a guard is theft.</summary>
+    private void OnPickedUp(Entity<NCMissionEntityComponent> ent, ref GotEquippedHandEvent args)
+    {
+        var query = EntityQueryEnumerator<NCMissionGuardComponent>();
+        while (query.MoveNext(out var guardUid, out var guard))
+        {
+            if (guard.Mission == ent.Comp.Mission && !_mobState.IsIncapacitated(guardUid) &&
+                _examine.InRangeUnOccluded(guardUid, args.User, guard.WarnRange))
+            {
+                Alarm(ent.Comp.Mission, args.User);
+                return;
+            }
+        }
+    }
+
+    /// <summary>Turns every guard of the mission hostile to the player.</summary>
+    public void Alarm(int mission, EntityUid player)
+    {
+        var shouted = false;
+        var query = EntityQueryEnumerator<NCMissionGuardComponent>();
+        while (query.MoveNext(out var guardUid, out var guard))
+        {
+            if (guard.Mission != mission || !guard.Hostile.Add(player))
+                continue;
+
+            _factions.AggroEntity(guardUid, player);
+            if (!shouted && !_mobState.IsIncapacitated(guardUid))
+            {
+                Say(guardUid, guard.Alarms);
+                shouted = true;
+            }
+        }
+    }
+
+    private void Say(EntityUid guard, List<LocId> lines)
+    {
+        if (lines.Count == 0)
+            return;
+
+        _chat.TrySendInGameICMessage(guard, Loc.GetString(_random.Pick(lines)), InGameICChatType.Speak, false);
+    }
+}

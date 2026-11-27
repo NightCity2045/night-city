@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 
+using System.Collections.Generic;
 using System.Linq;
 using Content.IntegrationTests.Fixtures;
 using Content.Server._NC.Fixers;
@@ -142,6 +143,50 @@ public sealed class NCFixerMissionTest : GameTest
             Assert.That(missions.TryCollectPayment(fixer, worker), Is.True);
             Assert.That(missions.TryGetActiveMission(profile, out _, out _), Is.False);
             Assert.That(reputation.GetReputation(profile), Is.EqualTo(14));
+        });
+    }
+
+    /// <summary>Guards warn an unarmed visitor and turn hostile, as a group, on someone holding a weapon.</summary>
+    [Test]
+    public async Task GuardsWarnFirstAndFightArmedVisitors()
+    {
+        var missions = Server.System<NCFixerMissionSystem>();
+        var reputation = Server.System<NCStreetReputationSystem>();
+        var hands = Server.System<Content.Shared.Hands.EntitySystems.SharedHandsSystem>();
+        var map = await Pair.CreateTestMap();
+        EntityUid visitor = default;
+        EntityUid armed = default;
+        List<EntityUid> guards = new();
+
+        await Server.WaitAssertion(() =>
+        {
+            var coords = map.GridCoords;
+            var fixerUid = SEntMan.SpawnEntity("NCFixerBeta", coords);
+            SEntMan.SpawnEntity("NCMissionMarkerObjectiveSixthStreet", coords.Offset(new System.Numerics.Vector2(10, 0)));
+            var (worker, profile) = SpawnWorker(coords, 900003);
+            reputation.AddReputation(profile, 10);
+            var fixer = new Entity<NCFixerComponent>(fixerUid, SEntMan.GetComponent<NCFixerComponent>(fixerUid));
+            Assert.That(missions.TrySetOffer("NCFixerBeta", 0, "NCFixerBetaSabotage"), Is.True);
+            Assert.That(missions.TryAccept(fixer, 0, worker), Is.True);
+            guards = missions.GetMissionEntities(profile).Where(uid => SEntMan.HasComponent<NCMissionGuardComponent>(uid)).ToList();
+            Assert.That(guards, Is.Not.Empty);
+
+            var post = SEntMan.GetComponent<TransformComponent>(guards[0]).Coordinates;
+            (visitor, _) = SpawnWorker(post.Offset(new System.Numerics.Vector2(0, 3)), 900004);
+            (armed, _) = SpawnWorker(post.Offset(new System.Numerics.Vector2(0, -3)), 900005);
+            var gun = SEntMan.SpawnEntity("NCWeaponPistolStreetmaster", SEntMan.GetComponent<TransformComponent>(armed).Coordinates);
+            Assert.That(hands.TryPickupAnyHand(armed, gun), Is.True);
+        });
+
+        await Pair.RunSeconds(1);
+
+        await Server.WaitAssertion(() =>
+        {
+            var guard = SEntMan.GetComponent<NCMissionGuardComponent>(guards[0]);
+            Assert.That(guard.Warned.ContainsKey(visitor), "The unarmed visitor is warned.");
+            Assert.That(guard.Hostile.Contains(visitor), Is.False, "Not attacked yet.");
+            foreach (var uid in guards)
+                Assert.That(SEntMan.GetComponent<NCMissionGuardComponent>(uid).Hostile.Contains(armed), "The whole group turns on the armed visitor.");
         });
     }
 }
