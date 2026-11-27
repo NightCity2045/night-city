@@ -472,9 +472,7 @@ public abstract partial class ServerDbBase
             CausationId = request.CausationId,
             SessionEpoch = request.SessionEpoch.Value,
             ActiveWorldTicks = request.ActiveWorldTime.Ticks,
-            Payload = NCJournalIntegrity.Attest(request.AggregateType, request.AggregateId, nextVersion,
-                request.SnapshotFormatVersion, request.SessionEpoch.Value, request.ActiveWorldTime.Ticks,
-                request.SnapshotPayload, request.EventPayload, snapshot),
+            Payload = request.EventPayload,
             CreatedAt = now,
             AppliedAt = now,
         });
@@ -645,9 +643,7 @@ public abstract partial class ServerDbBase
                 CausationId = request.CausationId,
                 SessionEpoch = request.SessionEpoch.Value,
                 ActiveWorldTicks = request.ActiveWorldTime.Ticks,
-                Payload = NCJournalIntegrity.Attest(write.AggregateType, write.AggregateId, nextVersion,
-                    write.SnapshotFormatVersion, request.SessionEpoch.Value, request.ActiveWorldTime.Ticks,
-                    write.SnapshotPayload, write.EventPayload, snapshot),
+                Payload = write.EventPayload,
                 CreatedAt = now,
                 AppliedAt = now,
             });

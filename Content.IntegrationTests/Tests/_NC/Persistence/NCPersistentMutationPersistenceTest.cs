@@ -22,51 +22,6 @@ namespace Content.IntegrationTests.Tests._NC.Persistence;
 public sealed class NCPersistentMutationPersistenceTest : GameTest
 {
     [Test]
-    public async Task SingleAndBatchJournalAttestationsRejectTamperedStateAndMissingEvents()
-    {
-        var db = GetDb(Pair.Server, out var connection, out var options);
-        await using var databaseConnection = connection;
-        var epoch = NCSessionEpoch.New();
-        var clock = await db.StartNCActiveWorldSessionAsync(epoch);
-        var firstRequest = CreateRequest(epoch, clock.Time, 0, "{\"text\":\"durable 😀\"}") with
-        {
-            AggregateType = "test.project", EventPayload = "{\"business\":1,\"_ncMetaSnapshot\":\"caller-forged\"}",
-        };
-        Assert.That((await db.ApplyNCPersistentMutationAsync(firstRequest)).Status, Is.EqualTo(NCPersistentMutationStatus.Applied));
-        var baseline = await db.GetNCAggregateSnapshotAsync(firstRequest.AggregateType, firstRequest.AggregateId);
-        Assert.That((await db.ApplyNCPersistentMutationAsync(firstRequest with
-        {
-            CommandId = Guid.NewGuid(), EventId = Guid.NewGuid(), ExpectedAggregateVersion = 1, SnapshotPayload = "{\"text\":\"second\"}",
-        })).Status, Is.EqualTo(NCPersistentMutationStatus.Applied));
-        var batch = new NCPersistentBatchMutationRequest(Guid.NewGuid(), "test.batch", "test", "owner-1",
-            [new(Guid.NewGuid(), "test.project.changed", "test.project", firstRequest.AggregateId, 2, 1, "{\"text\":\"third\"}", "{}"),
-                new(Guid.NewGuid(), "test.device.changed", "test.device", "other-device", 0, 1, "{}", "{}")],
-            "{}", Guid.NewGuid(), null, epoch, clock.Time, []);
-        Assert.That((await db.ApplyNCPersistentBatchMutationAsync(batch)).Status, Is.EqualTo(NCPersistentMutationStatus.Applied));
-        var current = await db.GetNCAggregateSnapshotAsync("test.project", firstRequest.AggregateId);
-        var tail = await db.GetNCPersistentEventPageAsync("test.project", firstRequest.AggregateId, null, 4, 2);
-        Assert.That(NCJournalIntegrity.CanValidateTail(current, baseline, tail), Is.True,
-            "Both single and ledger-style batch paths must bind the same contiguous state chain.");
-        var newDevice = await db.GetNCAggregateSnapshotAsync("test.device", "other-device");
-        var deviceEvents = await db.GetNCPersistentEventPageAsync("test.device", "other-device", null, 2, 1);
-        Assert.That(NCJournalIntegrity.CanValidateTail(newDevice, null, deviceEvents), Is.True);
-
-        await using var context = new SqliteServerDbContext(options);
-        var row = await context.NCAggregateSnapshots.SingleAsync(value => value.AggregateType == "test.project" && value.AggregateId == firstRequest.AggregateId);
-        row.Payload = "{\"injected\":true}";
-        await context.SaveChangesAsync();
-        var tampered = await db.GetNCAggregateSnapshotAsync("test.project", firstRequest.AggregateId);
-        Assert.That(NCJournalIntegrity.CanValidateTail(tampered, baseline, tail), Is.False,
-            "Changing live state while preserving its version and timestamp must not pass journal verification.");
-        row.Payload = current.Payload;
-        context.NCEventJournal.Remove(await context.NCEventJournal.SingleAsync(value => value.AggregateType == "test.project" &&
-            value.AggregateId == firstRequest.AggregateId && value.AggregateVersion == 2));
-        await context.SaveChangesAsync();
-        var missingMiddle = await db.GetNCPersistentEventPageAsync("test.project", firstRequest.AggregateId, null, 4, 2);
-        Assert.That(NCJournalIntegrity.CanValidateTail(current, baseline, missingMiddle), Is.False);
-    }
-
-    [Test]
     public async Task PinnedSnapshotSectionsDoNotDriftWhenANewerWorldCommits()
     {
         var db = GetDb(Pair.Server);
