@@ -5,7 +5,7 @@ meta:
   forkId: EchoCyber
   forkVersion: 9834d7d198ecf296a2092e3b069ebf862b24409d
   time: 11/22/2026 08:05:40
-  entityCount: 14776
+  entityCount: 14778
 maps:
 - 1
 grids:
@@ -5421,6 +5421,11 @@ entities:
     - type: Transform
       parent: 1
       pos: -115.5,-19.5
+  - uid: 14857
+    components:
+    - type: Transform
+      parent: 1
+      pos: -117.5,-67.5
 - proto: AirlockArmoryGlassLocked
   entities:
   - uid: 5946
@@ -13397,6 +13402,14 @@ entities:
       pos: -116.5,-20.5
     - type: NCElevatorCallButton
       elevatorId: pncTowerA
+  - uid: 14858
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: -117.5,-66.5
+    - type: NCElevatorCallButton
+      elevatorId: pncTowerD
 - proto: NCElevatorPanel
   entities:
   - uid: 2428
@@ -13592,6 +13605,20 @@ entities:
       pos: -113.5,-19.5
     - type: NCElevatorSpawner
       elevatorId: pncTowerA
+      settings:
+        stops:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 4
+  - uid: 14841
+    components:
+    - type: Transform
+      parent: 1
+      pos: -119.5,-67.5
+    - type: NCElevatorSpawner
+      elevatorId: pncTowerD
       settings:
         stops:
         - 0
@@ -67136,31 +67163,11 @@ entities:
     - type: Transform
       parent: 1
       pos: -115.5,-69.5
-  - uid: 6560
-    components:
-    - type: Transform
-      parent: 1
-      pos: -117.5,-69.5
-  - uid: 6561
-    components:
-    - type: Transform
-      parent: 1
-      pos: -118.5,-69.5
-  - uid: 6562
-    components:
-    - type: Transform
-      parent: 1
-      pos: -119.5,-69.5
   - uid: 6563
     components:
     - type: Transform
       parent: 1
       pos: -116.5,-69.5
-  - uid: 6564
-    components:
-    - type: Transform
-      parent: 1
-      pos: -120.5,-69.5
   - uid: 6565
     components:
     - type: Transform
@@ -67171,41 +67178,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -116.5,-65.5
-  - uid: 6567
-    components:
-    - type: Transform
-      parent: 1
-      pos: -117.5,-65.5
-  - uid: 6568
-    components:
-    - type: Transform
-      parent: 1
-      pos: -118.5,-65.5
-  - uid: 6569
-    components:
-    - type: Transform
-      parent: 1
-      pos: -119.5,-65.5
-  - uid: 6570
-    components:
-    - type: Transform
-      parent: 1
-      pos: -120.5,-65.5
-  - uid: 6571
-    components:
-    - type: Transform
-      parent: 1
-      pos: -120.5,-66.5
-  - uid: 6572
-    components:
-    - type: Transform
-      parent: 1
-      pos: -120.5,-67.5
-  - uid: 6573
-    components:
-    - type: Transform
-      parent: 1
-      pos: -120.5,-68.5
   - uid: 6576
     components:
     - type: Transform
@@ -67301,31 +67273,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -120.5,-64.5
-  - uid: 6602
-    components:
-    - type: Transform
-      parent: 1
-      pos: -121.5,-69.5
-  - uid: 6603
-    components:
-    - type: Transform
-      parent: 1
-      pos: -121.5,-67.5
-  - uid: 6604
-    components:
-    - type: Transform
-      parent: 1
-      pos: -121.5,-66.5
-  - uid: 6605
-    components:
-    - type: Transform
-      parent: 1
-      pos: -121.5,-65.5
-  - uid: 6606
-    components:
-    - type: Transform
-      parent: 1
-      pos: -121.5,-68.5
   - uid: 6607
     components:
     - type: Transform
@@ -81473,6 +81420,81 @@ entities:
     - type: Transform
       parent: 1
       pos: -111.5,-21.5
+  - uid: 14842
+    components:
+    - type: Transform
+      parent: 1
+      pos: -117.5,-68.5
+  - uid: 14843
+    components:
+    - type: Transform
+      parent: 1
+      pos: -117.5,-66.5
+  - uid: 14844
+    components:
+    - type: Transform
+      parent: 1
+      pos: -121.5,-68.5
+  - uid: 14845
+    components:
+    - type: Transform
+      parent: 1
+      pos: -121.5,-67.5
+  - uid: 14846
+    components:
+    - type: Transform
+      parent: 1
+      pos: -121.5,-66.5
+  - uid: 14847
+    components:
+    - type: Transform
+      parent: 1
+      pos: -121.5,-65.5
+  - uid: 14848
+    components:
+    - type: Transform
+      parent: 1
+      pos: -120.5,-65.5
+  - uid: 14849
+    components:
+    - type: Transform
+      parent: 1
+      pos: -119.5,-65.5
+  - uid: 14850
+    components:
+    - type: Transform
+      parent: 1
+      pos: -118.5,-65.5
+  - uid: 14851
+    components:
+    - type: Transform
+      parent: 1
+      pos: -117.5,-65.5
+  - uid: 14852
+    components:
+    - type: Transform
+      parent: 1
+      pos: -121.5,-69.5
+  - uid: 14853
+    components:
+    - type: Transform
+      parent: 1
+      pos: -120.5,-69.5
+  - uid: 14854
+    components:
+    - type: Transform
+      parent: 1
+      pos: -119.5,-69.5
+  - uid: 14855
+    components:
+    - type: Transform
+      parent: 1
+      pos: -118.5,-69.5
+  - uid: 14856
+    components:
+    - type: Transform
+      parent: 1
+      pos: -117.5,-69.5
 - proto: WallSolidDiagonal
   entities:
   - uid: 12174
