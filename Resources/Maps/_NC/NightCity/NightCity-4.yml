@@ -14,12 +14,12 @@ orphans: []
 nullspace: []
 tilemap:
   0: Space
-  1: FloorBar
-  2: FloorConcrete
-  3: FloorGrayConcrete
-  4: FloorMiningLight
+  4: FloorBar
+  1: FloorConcrete
+  2: FloorGrayConcrete
+  6: FloorMiningLight
   5: FloorSteelCheckerDark
-  6: FloorTechMaint3
+  3: FloorTechMaint3
 entities:
 - proto: ""
   entities:
@@ -35,7 +35,7 @@ entities:
     - type: Broadphase
     - type: OccluderTree
     - type: MapGrid
-      chunks:
+      chunks: {}
     - type: SpreaderGrid
       updateAccumulator: 0.93349075
     - type: GridPathfinding
