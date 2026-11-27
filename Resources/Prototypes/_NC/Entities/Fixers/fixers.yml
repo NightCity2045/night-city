@@ -4,6 +4,12 @@
   parent: NCFixerBase
   id: NCFixerAlpha
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Fixers/fixer_alpha.rsi
+    layers:
+    - state: fixer
+    - state: fixer-unshaded
+      shader: unshaded
   - type: NCFixer
     fixer: NCFixerAlpha
 
@@ -11,6 +17,12 @@
   parent: NCFixerBase
   id: NCFixerBeta
   components:
+  - type: Sprite
+    sprite: _NC/Structures/Fixers/fixer_beta.rsi
+    layers:
+    - state: fixer
+    - state: fixer-unshaded
+      shader: unshaded
   - type: NCFixer
     fixer: NCFixerBeta
 

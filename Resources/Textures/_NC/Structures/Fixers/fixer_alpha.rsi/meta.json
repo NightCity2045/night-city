@@ -1,0 +1,19 @@
+{
+    "version": 1,
+    "license": "CC-BY-SA-3.0",
+    "copyright": "Night City 2045; composed from SS14 human, clothing and hair sprites (tgstation lineage, CC-BY-SA-3.0).",
+    "size": {
+        "x": 32,
+        "y": 32
+    },
+    "states": [
+        {
+            "name": "fixer",
+            "directions": 4
+        },
+        {
+            "name": "fixer-unshaded",
+            "directions": 4
+        }
+    ]
+}

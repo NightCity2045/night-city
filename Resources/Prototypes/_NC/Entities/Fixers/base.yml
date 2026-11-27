@@ -25,9 +25,7 @@
         layer:
         - MidImpassable
   - type: Sprite
-    noRot: true
-    sprite: Structures/Decoration/mannequin.rsi
-    state: mannequin
+    noRot: false
   - type: ActivatableUI
     key: enum.NCFixerUiKey.Key
   - type: UserInterface
@@ -44,6 +42,10 @@
     anchored: true
   - type: Physics
     bodyType: Static
+  - type: Sprite
+    sprite: _NC/Structures/Fixers/dead_drop.rsi
+  - type: Icon
+    sprite: _NC/Structures/Fixers/dead_drop.rsi
 
 - type: entity
   abstract: true
@@ -52,5 +54,5 @@
   suffix: Mission marker
   components:
   - type: Sprite
-    sprite: Markers/cross.rsi
-    state: pink
+    sprite: _NC/Markers/mission_markers.rsi
+    state: objective

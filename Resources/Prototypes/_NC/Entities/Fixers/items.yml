@@ -3,11 +3,26 @@
 - type: entity
   parent: BoxCardboard
   id: NCMissionPackage
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Fixers/mission_package.rsi
+    layers:
+    - state: icon
+    - state: icon-unshaded
+      shader: unshaded
+  - type: Item
+    sprite: Objects/Storage/boxes.rsi
 
 - type: entity
   parent: ResearchDisk
   id: NCMissionDataShard
   components:
+  - type: Sprite
+    sprite: _NC/Objects/Fixers/data_shard.rsi
+    layers:
+    - state: icon
+    - state: icon-unshaded
+      shader: unshaded
   - type: StaticPrice
     price: 0
 

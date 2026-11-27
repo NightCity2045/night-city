@@ -8,7 +8,7 @@
   suffix: Objective, Neutral
   components:
   - type: Sprite
-    state: pink
+    state: objective
   - type: NCMissionMarker
     kind: Objective
     owner: Neutral
@@ -19,7 +19,7 @@
   suffix: Objective, Militech
   components:
   - type: Sprite
-    state: pink
+    state: objective
   - type: NCMissionMarker
     kind: Objective
     owner: Militech
@@ -30,7 +30,7 @@
   suffix: Objective, Biotechnica
   components:
   - type: Sprite
-    state: pink
+    state: objective
   - type: NCMissionMarker
     kind: Objective
     owner: Biotechnica
@@ -41,7 +41,7 @@
   suffix: Objective, SixthStreet
   components:
   - type: Sprite
-    state: pink
+    state: objective
   - type: NCMissionMarker
     kind: Objective
     owner: SixthStreet
@@ -52,7 +52,7 @@
   suffix: Objective, TygerClaws
   components:
   - type: Sprite
-    state: pink
+    state: objective
   - type: NCMissionMarker
     kind: Objective
     owner: TygerClaws
@@ -63,7 +63,7 @@
   suffix: Objective, Maelstrom
   components:
   - type: Sprite
-    state: pink
+    state: objective
   - type: NCMissionMarker
     kind: Objective
     owner: Maelstrom
@@ -74,7 +74,7 @@
   suffix: Objective, Valentinos
   components:
   - type: Sprite
-    state: pink
+    state: objective
   - type: NCMissionMarker
     kind: Objective
     owner: Valentinos
@@ -85,7 +85,7 @@
   suffix: Objective, Bozos
   components:
   - type: Sprite
-    state: pink
+    state: objective
   - type: NCMissionMarker
     kind: Objective
     owner: Bozos
@@ -96,7 +96,7 @@
   suffix: Objective, Inquisitors
   components:
   - type: Sprite
-    state: pink
+    state: objective
   - type: NCMissionMarker
     kind: Objective
     owner: Inquisitors
@@ -107,7 +107,7 @@
   suffix: Objective, PhilharmonicVampyres
   components:
   - type: Sprite
-    state: pink
+    state: objective
   - type: NCMissionMarker
     kind: Objective
     owner: PhilharmonicVampyres
@@ -118,7 +118,7 @@
   suffix: DeadDrop, Neutral
   components:
   - type: Sprite
-    state: green
+    state: drop
   - type: NCMissionMarker
     kind: DeadDrop
     owner: Neutral
@@ -129,7 +129,7 @@
   suffix: DeadDrop, Militech
   components:
   - type: Sprite
-    state: green
+    state: drop
   - type: NCMissionMarker
     kind: DeadDrop
     owner: Militech
@@ -140,7 +140,7 @@
   suffix: DeadDrop, Biotechnica
   components:
   - type: Sprite
-    state: green
+    state: drop
   - type: NCMissionMarker
     kind: DeadDrop
     owner: Biotechnica
@@ -151,7 +151,7 @@
   suffix: DeadDrop, SixthStreet
   components:
   - type: Sprite
-    state: green
+    state: drop
   - type: NCMissionMarker
     kind: DeadDrop
     owner: SixthStreet
@@ -162,7 +162,7 @@
   suffix: DeadDrop, TygerClaws
   components:
   - type: Sprite
-    state: green
+    state: drop
   - type: NCMissionMarker
     kind: DeadDrop
     owner: TygerClaws
@@ -173,7 +173,7 @@
   suffix: DeadDrop, Maelstrom
   components:
   - type: Sprite
-    state: green
+    state: drop
   - type: NCMissionMarker
     kind: DeadDrop
     owner: Maelstrom
@@ -184,7 +184,7 @@
   suffix: DeadDrop, Valentinos
   components:
   - type: Sprite
-    state: green
+    state: drop
   - type: NCMissionMarker
     kind: DeadDrop
     owner: Valentinos
@@ -195,7 +195,7 @@
   suffix: DeadDrop, Bozos
   components:
   - type: Sprite
-    state: green
+    state: drop
   - type: NCMissionMarker
     kind: DeadDrop
     owner: Bozos
@@ -206,7 +206,7 @@
   suffix: DeadDrop, Inquisitors
   components:
   - type: Sprite
-    state: green
+    state: drop
   - type: NCMissionMarker
     kind: DeadDrop
     owner: Inquisitors
@@ -217,7 +217,7 @@
   suffix: DeadDrop, PhilharmonicVampyres
   components:
   - type: Sprite
-    state: green
+    state: drop
   - type: NCMissionMarker
     kind: DeadDrop
     owner: PhilharmonicVampyres
@@ -228,7 +228,7 @@
   suffix: Guard, Neutral
   components:
   - type: Sprite
-    state: red
+    state: guard
   - type: NCMissionMarker
     kind: Guard
     owner: Neutral
@@ -239,7 +239,7 @@
   suffix: Guard, Militech
   components:
   - type: Sprite
-    state: red
+    state: guard
   - type: NCMissionMarker
     kind: Guard
     owner: Militech
@@ -250,7 +250,7 @@
   suffix: Guard, Biotechnica
   components:
   - type: Sprite
-    state: red
+    state: guard
   - type: NCMissionMarker
     kind: Guard
     owner: Biotechnica
@@ -261,7 +261,7 @@
   suffix: Guard, SixthStreet
   components:
   - type: Sprite
-    state: red
+    state: guard
   - type: NCMissionMarker
     kind: Guard
     owner: SixthStreet
@@ -272,7 +272,7 @@
   suffix: Guard, TygerClaws
   components:
   - type: Sprite
-    state: red
+    state: guard
   - type: NCMissionMarker
     kind: Guard
     owner: TygerClaws
@@ -283,7 +283,7 @@
   suffix: Guard, Maelstrom
   components:
   - type: Sprite
-    state: red
+    state: guard
   - type: NCMissionMarker
     kind: Guard
     owner: Maelstrom
@@ -294,7 +294,7 @@
   suffix: Guard, Valentinos
   components:
   - type: Sprite
-    state: red
+    state: guard
   - type: NCMissionMarker
     kind: Guard
     owner: Valentinos
@@ -305,7 +305,7 @@
   suffix: Guard, Bozos
   components:
   - type: Sprite
-    state: red
+    state: guard
   - type: NCMissionMarker
     kind: Guard
     owner: Bozos
@@ -316,7 +316,7 @@
   suffix: Guard, Inquisitors
   components:
   - type: Sprite
-    state: red
+    state: guard
   - type: NCMissionMarker
     kind: Guard
     owner: Inquisitors
@@ -327,7 +327,7 @@
   suffix: Guard, PhilharmonicVampyres
   components:
   - type: Sprite
-    state: red
+    state: guard
   - type: NCMissionMarker
     kind: Guard
     owner: PhilharmonicVampyres
