@@ -47,5 +47,13 @@
   name: nc-mission-owner-philharmonic-vampyres
 
 - type: ncMissionOwner
+  id: HotZone
+  name: nc-mission-owner-hot-zone
+
+- type: ncMissionOwner
+  id: Scavengers
+  name: nc-mission-owner-scavengers
+
+- type: ncMissionOwner
   id: MedicalTechnologies
   name: nc-mission-owner-medical-technologies

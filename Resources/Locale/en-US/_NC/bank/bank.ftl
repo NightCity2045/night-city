@@ -50,6 +50,8 @@ nc-bank-kind-admin-withdrawal = Budget withdrawal
 nc-bank-kind-salary-missed = Salary not paid
 nc-bank-kind-contract = Contract reward
 nc-bank-kind-fixer = Fixer payment
+nc-bank-kind-rent = Rent
+nc-bank-kind-purchase = Purchase
 nc-bank-kind-unknown = Operation
 
 nc-bank-atm-title = Night City Bank ATM
@@ -88,3 +90,4 @@ ent-NCBankCartridge = bank cartridge
 
 nc-bank-account-militech-hq = Militech (corporation)
 nc-bank-account-biotechnica-hq = Biotechnica (corporation)
+nc-bank-account-vance-shell = Vance & Partners Consulting

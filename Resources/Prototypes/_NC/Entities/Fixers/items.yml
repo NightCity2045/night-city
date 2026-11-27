@@ -79,3 +79,137 @@
       shader: unshaded
   - type: InteractionOutline
   - type: NCMissionTerminal
+
+# Goods a fixer hands over: a peace offering for a gang boss and a crate for a club party.
+- type: entity
+  parent: BaseItem
+  id: NCMissionPeaceOffering
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Fixers/peace_offering.rsi
+    layers:
+    - state: icon
+    - state: icon-unshaded
+      shader: unshaded
+  - type: Item
+    size: Small
+  - type: StaticPrice
+    price: 0
+
+- type: entity
+  parent: BaseItem
+  id: NCMissionPartyCrate
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Fixers/party_crate.rsi
+    layers:
+    - state: icon
+    - state: icon-unshaded
+      shader: unshaded
+  - type: Item
+    size: Normal
+  - type: StaticPrice
+    price: 0
+
+- type: entity
+  parent: BaseItem
+  id: NCMissionCashEnvelope
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Fixers/cash_envelope.rsi
+    layers:
+    - state: icon
+    - state: icon-unshaded
+      shader: unshaded
+  - type: Item
+    size: Tiny
+  - type: StaticPrice
+    price: 0
+
+# Finds from the Hot Zone ruins.
+- type: entity
+  parent: BaseItem
+  id: NCMissionHotZoneTechCrate
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Fixers/tech_crate.rsi
+    layers:
+    - state: icon
+    - state: icon-unshaded
+      shader: unshaded
+  - type: Item
+    size: Normal
+  - type: StaticPrice
+    price: 0
+
+- type: entity
+  parent: BaseItem
+  id: NCMissionMilitaryPrototype
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Fixers/military_prototype.rsi
+    layers:
+    - state: icon
+    - state: icon-unshaded
+      shader: unshaded
+  - type: Item
+    size: Normal
+  - type: StaticPrice
+    price: 0
+
+- type: entity
+  parent: BaseItem
+  id: NCMissionCorporateFiles
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Fixers/corporate_files.rsi
+    layers:
+    - state: icon
+    - state: icon-unshaded
+      shader: unshaded
+  - type: Item
+    size: Small
+  - type: StaticPrice
+    price: 0
+
+# A pre-war terminal of the old Net, hacked for what is left on it.
+- type: entity
+  parent: NCMissionIntelTerminal
+  id: NCMissionOldNetTerminal
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Fixers/old_terminal.rsi
+    layers:
+    - state: terminal
+    - state: terminal-unshaded
+      shader: unshaded
+
+# Sabotage targets: a rival club's sound system and a competitor's books.
+- type: entity
+  parent: NCMissionSabotageTarget
+  id: NCMissionClubSoundSystem
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Fixers/club_sound_system.rsi
+    layers:
+    - state: speakers
+    - state: speakers-unshaded
+      shader: unshaded
+
+- type: entity
+  parent: NCMissionSabotageTarget
+  id: NCMissionLedgerCabinet
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Fixers/ledger_cabinet.rsi
+    layers:
+    - state: cabinet
+  - type: Flammable
+    fireSpread: true
+    damage:
+      types:
+        Heat: 5
+  - type: Appearance
+  - type: FireVisuals
+    sprite: Effects/fire.rsi
+    normalState: 1

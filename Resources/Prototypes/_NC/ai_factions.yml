@@ -43,5 +43,9 @@
   friendly: [NCCivilian]
 
 - type: npcFaction
+  id: NCScavengers
+  friendly: [NCScavengers]
+
+- type: npcFaction
   id: NCMedicalTechnologiesSecurity
   friendly: [NCMedicalTechnologiesSecurity]

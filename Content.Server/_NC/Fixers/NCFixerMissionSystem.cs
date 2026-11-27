@@ -2,6 +2,7 @@
 
 using System.Linq;
 using Content.Server._NC.Bank;
+using Content.Shared.Mind.Components;
 using Content.Server._NC.City.Atlas;
 using Content.Server._NC.Corporations;
 using Content.Server.Chat.Managers;
@@ -46,6 +47,7 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
     private const float CleanupPlayerRange = 12f;
     private const float GuardMarkerRange = 24f;
     private const int GuardFloorRange = 2;
+    private const float ReconRange = 2f;
 
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IRobustRandom _random = default!;
@@ -62,6 +64,7 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private SharedHandsSystem _hands = default!;
     [Dependency] private SharedDoAfterSystem _doAfter = default!;
+    [Dependency] private EntityLookupSystem _lookup = default!;
     [Dependency] private NCMapCoordinatesSystem _mapCoordinates = default!;
     [Dependency] private NCCityAtlasSystem _atlas = default!;
     [Dependency] private NCBankSystem _bank = default!;
@@ -93,6 +96,10 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
         public EntityUid? Target;
         public EntityUid? Terminal;
         public string? TargetName;
+        public readonly List<EntityUid> ReconTargets = new();
+        public readonly HashSet<EntityUid> ReconVisited = new();
+        public string? LaunderTarget;
+        public long Laundered;
         public readonly List<EntityUid> Spawned = new();
     }
 
@@ -106,6 +113,7 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
         SubscribeLocalEvent<MobStateComponent, NCCityMapCollectMarkersEvent>(OnCollectMarkers);
         SubscribeLocalEvent<NCMissionTerminalComponent, ActivateInWorldEvent>(OnTerminalActivated);
         SubscribeLocalEvent<NCMissionTerminalComponent, NCMissionHackDoAfterEvent>(OnTerminalHacked);
+        SubscribeLocalEvent<NCBankTransferredEvent>(OnBankTransferred);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundRestart);
     }
 
@@ -210,6 +218,16 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
         else if (mission.Kind == NCFixerMissionKind.Delivery && mission.ItemFromFixer)
         {
             if (mission.Item == null)
+                return false;
+        }
+        else if (mission.Kind == NCFixerMissionKind.Recon)
+        {
+            if (PickMarker(NCMissionMarkerKind.Objective, mission.Owner, null) == null)
+                return false;
+        }
+        else if (mission.Kind == NCFixerMissionKind.Laundering)
+        {
+            if (mission.LaunderAmount <= 0 || mission.LaunderAccount is not { } shell || !_bank.TryGetDepartmentAccount(shell, out _))
                 return false;
         }
         else if (mission.Kind != NCFixerMissionKind.Collection &&
@@ -390,6 +408,16 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
             active.Item = SpawnMissionEntity(active, cargo, Transform(taker).Coordinates);
             _hands.TryPickupAnyHand(taker, active.Item.Value);
         }
+        else if (mission.Kind == NCFixerMissionKind.Recon)
+        {
+            if (!TryStartRecon(active, mission, taker))
+                return false;
+        }
+        else if (mission.Kind == NCFixerMissionKind.Laundering)
+        {
+            if (!TryStartLaundering(active, mission))
+                return false;
+        }
         else if (mission.Kind == NCFixerMissionKind.Retrieval && mission.Terminal is { } terminal)
         {
             // The item does not exist yet: it comes out of the terminal once someone hacks it.
@@ -435,7 +463,7 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
                 break;
         }
 
-        if (mission.Encounter is { } encounter && active.Objective is { } place)
+        if (mission.Kind != NCFixerMissionKind.Recon && mission.Encounter is { } encounter && active.Objective is { } place)
             SpawnEncounter(active, encounter, place, taker);
 
         return true;
@@ -529,8 +557,17 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
             return;
         }
 
+        if (mission.FailOnHostile && AnyGuardHostile(active))
+        {
+            Fail(active, mission, Loc.GetString("nc-fixer-mission-hostile", ("mission", Loc.GetString(mission.Name))));
+            return;
+        }
+
         switch (mission.Kind)
         {
+            case NCFixerMissionKind.Recon:
+                CheckRecon(active, mission);
+                break;
             case NCFixerMissionKind.Delivery:
             case NCFixerMissionKind.Retrieval:
                 if (active.Item is { } item && active.Drop is { } drop && !Deleted(drop) && IsInside(item, drop))
@@ -623,6 +660,9 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
     {
         _reputation.AddReputation(active.ProfileId, -mission.ReputationLoss);
         Notify(active, message);
+        if (mission.Kind == NCFixerMissionKind.Laundering && active.LaunderTarget != null)
+            TakeBackLaundering(active, mission);
+
         Finish(active);
     }
 
@@ -892,7 +932,19 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
         }
 
         // Player targets are hunted, not tracked: only mapped places get a marker.
-        AddMarker(args.Markers, active.Objective, "nc-fixer-map-objective");
+        if (active.ReconTargets.Count > 0)
+        {
+            foreach (var point in active.ReconTargets)
+            {
+                if (!active.ReconVisited.Contains(point))
+                    AddMarker(args.Markers, point, "nc-fixer-map-recon");
+            }
+        }
+        else
+        {
+            AddMarker(args.Markers, active.Objective, "nc-fixer-map-objective");
+        }
+
         AddMarker(args.Markers, active.Drop, "nc-fixer-map-drop");
     }
 

@@ -301,6 +301,53 @@
   - type: Loadout
     prototypes: [ NCDebtorGear ]
 
+# Scavengers: scrap-armoured looters of the Hot Zone ruins who strip tech and people for parts.
+- type: entity
+  abstract: true
+  parent: MobHuman
+  id: NCMobHumanGangScavengersBase
+  components:
+  - type: RandomHumanoidAppearance
+    randomizeName: false
+    allowedMarkingLayers: [ Hair, FacialHair, UndergarmentTop, UndergarmentBottom ]
+  - type: NpcFactionMember
+    factions: [ NCScavengers ]
+  - type: FactionException
+  - type: NPCRetaliation
+  - type: HTN
+    rootTask:
+      task: SimpleHumanoidHostileCompound
+
+- type: entity
+  parent: NCMobHumanGangScavengersBase
+  id: NCMobHumanGangScavengersGanger
+  components:
+  - type: Loadout
+    prototypes: [ NCGangScavengersGangerGear ]
+
+- type: entity
+  parent: NCMobHumanGangScavengersBase
+  id: NCMobHumanGangScavengersEnforcer
+  components:
+  - type: Loadout
+    prototypes: [ NCGangScavengersEnforcerGear ]
+
+- type: entity
+  parent: NCMobHumanGangScavengersBase
+  id: NCMobHumanGangScavengersBoss
+  components:
+  - type: Loadout
+    prototypes: [ NCGangScavengersBossGear ]
+
+# Fixer targets: a snitch and a club troublemaker. Both fight back when cornered.
+- type: entity
+  parent: NCMobHumanDebtor
+  id: NCMobHumanSnitch
+
+- type: entity
+  parent: NCMobHumanDebtor
+  id: NCMobHumanTroublemaker
+
 # Medical Technologies: grows replacement limbs and quietly sells cyberware to boostergangs.
 - type: entity
   abstract: true

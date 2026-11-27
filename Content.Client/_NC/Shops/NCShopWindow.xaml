@@ -1,0 +1,16 @@
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<controls:FancyWindow xmlns="https://spacestation14.io"
+                      xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      x:Class="Content.Client._NC.Shops.NCShopWindow"
+                      SetSize="460 600"
+                      MinSize="380 360">
+    <BoxContainer Margin="10" Orientation="Vertical" SeparationOverride="8">
+        <Label Name="AccountLabel" />
+        <Label Text="{Loc 'nc-shop-hint'}" FontColorOverride="#888888" />
+        <PanelContainer StyleClasses="LowDivider" />
+        <ScrollContainer VerticalExpand="True" HScrollEnabled="False">
+            <BoxContainer Name="LinesContainer" Orientation="Vertical" SeparationOverride="4" />
+        </ScrollContainer>
+    </BoxContainer>
+</controls:FancyWindow>

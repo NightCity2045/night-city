@@ -50,6 +50,8 @@ nc-bank-kind-admin-withdrawal = Изъятие из бюджета
 nc-bank-kind-salary-missed = Зарплата не выплачена
 nc-bank-kind-contract = Оплата контракта
 nc-bank-kind-fixer = Оплата фиксера
+nc-bank-kind-rent = Аренда
+nc-bank-kind-purchase = Покупка
 nc-bank-kind-unknown = Операция
 
 nc-bank-atm-title = Банкомат Банка Найт-Сити
@@ -88,3 +90,4 @@ ent-NCBankCartridge = картридж «Банк»
 
 nc-bank-account-militech-hq = Милитех (корпорация)
 nc-bank-account-biotechnica-hq = Биотехника (корпорация)
+nc-bank-account-vance-shell = «Вэнс и партнёры», консалтинг

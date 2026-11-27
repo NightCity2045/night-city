@@ -437,3 +437,64 @@
     state: icon
   - type: Clothing
     sprite: _NC/Clothing/Gangs/PhilharmonicVampyres/mask.rsi
+
+- type: entity
+  parent: ClothingOuterBase
+  id: NCGangScavengersJacket
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Gangs/Scavengers/jacket.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Gangs/Scavengers/jacket.rsi
+
+- type: entity
+  parent: UnsensoredClothingUniformBase
+  id: NCGangScavengersTop
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Gangs/Scavengers/top.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Gangs/Scavengers/top.rsi
+
+- type: entity
+  parent: UnsensoredClothingUniformBase
+  id: NCGangScavengersPants
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Gangs/Scavengers/pants.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Gangs/Scavengers/pants.rsi
+    slots:
+    - legs
+
+- type: entity
+  parent:
+  - ClothingOuterArmorBase
+  - NCClothingArmorSlotBase
+  id: NCGangScavengersVest
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Gangs/Scavengers/vest.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Gangs/Scavengers/vest.rsi
+    slots:
+    - armor
+  - type: NCArmor
+    profile: NCArmorPlateCarrier
+  - type: ClothingSpeedModifier
+    walkModifier: 0.9
+    sprintModifier: 0.8
+
+- type: entity
+  parent: ClothingMaskBase
+  id: NCGangScavengersMask
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Gangs/Scavengers/mask.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Gangs/Scavengers/mask.rsi

@@ -1,0 +1,512 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# What each shop vending machine sells: price in €$ and stock per round. Retail prices stay above what corporate
+# contracts pay per unit, so nothing can be bought here and sold to a corporation at a profit.
+
+- type: ncShopCatalog
+  id: NCShopFurniture
+  name: nc-shop-furniture
+  entries:
+  - item: Bed
+    price: 200
+    stock: 4
+  - item: BedsheetBlue
+    price: 30
+    stock: 6
+  - item: BedsheetBlack
+    price: 30
+    stock: 6
+  - item: Chair
+    price: 40
+    stock: 8
+  - item: ChairWood
+    price: 50
+    stock: 8
+  - item: ChairOfficeDark
+    price: 90
+    stock: 4
+  - item: ComfyChair
+    price: 150
+    stock: 4
+  - item: StoolBar
+    price: 40
+    stock: 6
+  - item: Table
+    price: 80
+    stock: 4
+  - item: TableWood
+    price: 120
+    stock: 4
+  - item: TableGlass
+    price: 150
+    stock: 3
+  - item: TableFancyBlack
+    price: 220
+    stock: 2
+  - item: Dresser
+    price: 180
+    stock: 3
+  - item: Bookshelf
+    price: 150
+    stock: 3
+  - item: WardrobeBlack
+    price: 200
+    stock: 3
+  - item: Lamp
+    price: 40
+    stock: 5
+  - item: LampGold
+    price: 60
+    stock: 5
+  - item: PottedPlantRandom
+    price: 50
+    stock: 5
+  - item: Mirror
+    price: 70
+    stock: 3
+  - item: FloorCarpetItemBlack
+    price: 15
+    stock: 20
+  - item: KitchenMicrowave
+    price: 250
+    stock: 2
+  - item: LockerFreezer
+    price: 300
+    stock: 2
+  - item: ComputerTelevision
+    price: 300
+    stock: 2
+
+- type: ncShopCatalog
+  id: NCShopClothing
+  name: nc-shop-clothing
+  entries:
+  - item: ClothingUniformJumpsuitColorBlack
+    price: 40
+    stock: 5
+  - item: ClothingUniformJumpsuitColorWhite
+    price: 40
+    stock: 5
+  - item: ClothingUniformJumpsuitColorGrey
+    price: 40
+    stock: 5
+  - item: ClothingUniformJumpsuitColorBlue
+    price: 40
+    stock: 5
+  - item: ClothingUniformJumpsuitColorRed
+    price: 40
+    stock: 5
+  - item: ClothingUniformJumpskirtColorBlack
+    price: 40
+    stock: 5
+  - item: ClothingOuterHoodieBlack
+    price: 90
+    stock: 4
+  - item: ClothingOuterHoodieGrey
+    price: 90
+    stock: 4
+  - item: ClothingOuterFlannelRed
+    price: 80
+    stock: 4
+  - item: ClothingOuterCoatBomber
+    price: 150
+    stock: 3
+  - item: ClothingOuterCoatTrench
+    price: 180
+    stock: 3
+  - item: ClothingOuterCoatGentle
+    price: 200
+    stock: 3
+  - item: ClothingOuterCoatJensen
+    price: 220
+    stock: 2
+  - item: ClothingShoesColorBlack
+    price: 40
+    stock: 6
+  - item: ClothingShoesColorWhite
+    price: 40
+    stock: 6
+  - item: ClothingShoesColorBrown
+    price: 40
+    stock: 6
+  - item: ClothingShoesBootsWork
+    price: 70
+    stock: 4
+  - item: ClothingShoesBootsJack
+    price: 90
+    stock: 4
+  - item: ClothingHandsGlovesColorBlack
+    price: 25
+    stock: 6
+  - item: ClothingHandsGlovesFingerless
+    price: 30
+    stock: 6
+  - item: ClothingEyesGlassesSunglasses
+    price: 40
+    stock: 5
+  - item: ClothingEyesGlasses
+    price: 30
+    stock: 5
+  - item: ClothingHeadHatBeret
+    price: 30
+    stock: 4
+  - item: ClothingHeadHatGreyFlatcap
+    price: 30
+    stock: 4
+  - item: ClothingHeadHatBeaverHat
+    price: 60
+    stock: 2
+  - item: ClothingNeckScarfStripedRed
+    price: 25
+    stock: 4
+  - item: ClothingBeltStorageWaistbag
+    price: 40
+    stock: 4
+  - item: ClothingBackpack
+    price: 60
+    stock: 4
+  - item: ClothingBackpackSatchel
+    price: 70
+    stock: 3
+  - item: ClothingBackpackDuffel
+    price: 90
+    stock: 3
+
+- type: ncShopCatalog
+  id: NCShopGroceries
+  name: nc-shop-groceries
+  entries:
+  - item: FoodBreadPlain
+    price: 50
+    stock: 8
+  - item: FoodBurgerCheese
+    price: 75
+    stock: 6
+  - item: FoodBurgerBig
+    price: 95
+    stock: 4
+  - item: FoodPizzaMargherita
+    price: 120
+    stock: 4
+  - item: FoodSoupTomato
+    price: 85
+    stock: 5
+  - item: FoodNoodlesBoiled
+    price: 30
+    stock: 8
+  - item: FoodRiceBoiled
+    price: 25
+    stock: 8
+  - item: FoodEgg
+    price: 8
+    stock: 12
+  - item: FoodMeat
+    price: 35
+    stock: 8
+  - item: FoodCheese
+    price: 25
+    stock: 6
+  - item: FoodTomato
+    price: 20
+    stock: 10
+  - item: FoodPotato
+    price: 20
+    stock: 10
+  - item: FoodApple
+    price: 20
+    stock: 10
+  - item: FoodBanana
+    price: 15
+    stock: 10
+  - item: FoodSnackChips
+    price: 10
+    stock: 10
+  - item: FoodSnackRaisins
+    price: 10
+    stock: 10
+  - item: FoodSnackChocolate
+    price: 12
+    stock: 10
+  - item: FoodSnackPistachios
+    price: 15
+    stock: 8
+  - item: FoodSnackPopcorn
+    price: 10
+    stock: 8
+  - item: FoodSnackNutribrick
+    price: 12
+    stock: 10
+  - item: FoodDonutPlain
+    price: 12
+    stock: 8
+  - item: DrinkWaterBottleFull
+    price: 5
+    stock: 15
+  - item: DrinkColaCan
+    price: 8
+    stock: 12
+  - item: DrinkSpaceUpCan
+    price: 8
+    stock: 12
+  - item: DrinkEnergyDrinkCan
+    price: 15
+    stock: 10
+
+- type: ncShopCatalog
+  id: NCShopBar
+  name: nc-shop-bar
+  entries:
+  - item: DrinkBeerBottleFull
+    price: 15
+    stock: 10
+  - item: DrinkBeerCan
+    price: 10
+    stock: 12
+  - item: DrinkWineBottleFull
+    price: 70
+    stock: 4
+  - item: DrinkVodkaBottleFull
+    price: 80
+    stock: 4
+  - item: DrinkRumBottleFull
+    price: 90
+    stock: 3
+  - item: DrinkGinBottleFull
+    price: 90
+    stock: 3
+  - item: DrinkTequilaBottleFull
+    price: 100
+    stock: 3
+  - item: DrinkWhiskeyBottleFull
+    price: 120
+    stock: 3
+  - item: DrinkCoffee
+    price: 10
+    stock: 10
+  - item: DrinkTeacup
+    price: 8
+    stock: 10
+  - item: CigPackGreen
+    price: 25
+    stock: 8
+  - item: CigPackRed
+    price: 25
+    stock: 8
+  - item: CigPackBlack
+    price: 30
+    stock: 6
+  - item: CigarCase
+    price: 120
+    stock: 2
+  - item: Lighter
+    price: 20
+    stock: 6
+  - item: CheapLighter
+    price: 5
+    stock: 10
+  - item: Matchbox
+    price: 3
+    stock: 10
+
+- type: ncShopCatalog
+  id: NCShopTools
+  name: nc-shop-tools
+  entries:
+  - item: FlashlightLantern
+    price: 30
+    stock: 6
+  - item: Screwdriver
+    price: 25
+    stock: 6
+  - item: Wrench
+    price: 30
+    stock: 6
+  - item: Crowbar
+    price: 40
+    stock: 6
+  - item: Wirecutter
+    price: 30
+    stock: 6
+  - item: Multitool
+    price: 120
+    stock: 4
+  - item: WelderMini
+    price: 60
+    stock: 4
+  - item: Welder
+    price: 80
+    stock: 3
+  - item: ToolboxMechanicalFilled
+    price: 200
+    stock: 2
+  - item: ToolboxElectricalFilled
+    price: 250
+    stock: 2
+  - item: ClothingBeltUtilityFilled
+    price: 280
+    stock: 2
+  - item: RadioHandheld
+    price: 80
+    stock: 4
+  - item: HandheldGPSBasic
+    price: 100
+    stock: 3
+  - item: PowerCellSmall
+    price: 40
+    stock: 6
+  - item: PowerCellMedium
+    price: 80
+    stock: 4
+  - item: PowerCellHigh
+    price: 160
+    stock: 2
+  - item: CableApcStack10
+    price: 20
+    stock: 8
+  - item: SprayPainter
+    price: 90
+    stock: 2
+  - item: Paper
+    price: 2
+    stock: 20
+  - item: Pen
+    price: 5
+    stock: 10
+  - item: Bucket
+    price: 15
+    stock: 4
+  - item: TrashBag
+    price: 5
+    stock: 10
+  - item: Soap
+    price: 10
+    stock: 6
+
+- type: ncShopCatalog
+  id: NCShopPharmacy
+  name: nc-shop-pharmacy
+  entries:
+  - item: Gauze
+    price: 25
+    stock: 10
+  - item: Brutepack
+    price: 40
+    stock: 8
+  - item: Ointment
+    price: 40
+    stock: 8
+  - item: Tourniquet
+    price: 50
+    stock: 6
+  - item: MedicatedSuture
+    price: 80
+    stock: 5
+  - item: EmergencyMedipen
+    price: 150
+    stock: 4
+  - item: Syringe
+    price: 15
+    stock: 8
+  - item: MedkitFilled
+    price: 300
+    stock: 2
+  - item: BodyBag
+    price: 30
+    stock: 4
+
+- type: ncShopCatalog
+  id: NCShopGuns
+  name: nc-shop-guns
+  entries:
+  - item: NCWeaponPistolStreetmaster
+    price: 500
+    stock: 3
+  - item: NCWeaponPistolP35
+    price: 600
+    stock: 3
+  - item: NCWeaponPistolCheesemaker
+    price: 650
+    stock: 2
+  - item: NCWeaponPistolHelloCutie
+    price: 700
+    stock: 2
+  - item: NCWeaponPistolFederalX9
+    price: 900
+    stock: 2
+  - item: NCWeaponPistolMarkIII
+    price: 1000
+    stock: 2
+  - item: NCWeaponPistolAvenger
+    price: 1100
+    stock: 2
+  - item: NCWeaponPistolBoomerBuster
+    price: 1300
+    stock: 1
+  - item: NCWeaponPistolOverlord
+    price: 1400
+    stock: 1
+  - item: NCMagazine9x19Pistol
+    price: 60
+    stock: 8
+  - item: NCMagazine11mmPistol
+    price: 80
+    stock: 6
+  - item: NCMagazine12mmPistol
+    price: 100
+    stock: 4
+  - item: NCBox9x19
+    price: 150
+    stock: 5
+  - item: NCBox11mm
+    price: 180
+    stock: 4
+  - item: NCBox12mm
+    price: 220
+    stock: 3
+
+- type: ncShopCatalog
+  id: NCShopImplants
+  name: nc-shop-implants
+  entries:
+  - item: NCCyberEyesStandard
+    price: 3000
+    stock: 2
+  - item: NCImplantNeuralLinkMk1
+    price: 2500
+    stock: 2
+  - item: NCNeuralChipSocketImplant
+    price: 2000
+    stock: 2
+  - item: NCBiomonitorImplant
+    price: 1500
+    stock: 2
+  - item: NCAutoInjectorImplant
+    price: 2500
+    stock: 1
+  - item: NCImplantCirculatoryAssistMk1
+    price: 3000
+    stock: 1
+  - item: NCToolHandImplant
+    price: 2000
+    stock: 2
+  - item: NCArmMedicalImplant
+    price: 2500
+    stock: 1
+  - item: NCArmStorageImplant
+    price: 1800
+    stock: 2
+  - item: NCArmQuickSocketImplant
+    price: 1500
+    stock: 2
+  - item: NCOrganHumanCivilianCyberArmLeft
+    price: 4000
+    stock: 1
+  - item: NCOrganHumanCivilianCyberArmRight
+    price: 4000
+    stock: 1
+  - item: NCCyberwareSyntheticSkinKit
+    price: 800
+    stock: 2
+  - item: NCCyberwareChromeFinishKit
+    price: 600
+    stock: 2

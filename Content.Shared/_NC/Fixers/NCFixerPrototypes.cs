@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 
+using Content.Shared._NC.Bank;
 using Content.Shared._NC.Corporations;
 using Content.Shared.Roles;
 using Robust.Shared.Prototypes;
@@ -25,6 +26,12 @@ public enum NCFixerMissionKind : byte
 
     /// <summary>Beat up an NPC at the objective: down but alive. Killing them fails the job.</summary>
     Beating,
+
+    /// <summary>Scout several points on the owner's ground: someone has to stand at each of them.</summary>
+    Recon,
+
+    /// <summary>Dirty money lands on the taker's account and has to be wired on to a shell company in time.</summary>
+    Laundering,
 }
 
 public enum NCFixerPayment : byte
@@ -185,6 +192,22 @@ public sealed partial class NCFixerMissionPrototype : IPrototype
     /// <summary>Deliveries only: the fixer hands the item to the taker instead of it waiting at an objective.</summary>
     [DataField]
     public bool ItemFromFixer;
+
+    /// <summary>The job fails the moment its defenders turn hostile: talks, not a war.</summary>
+    [DataField]
+    public bool FailOnHostile;
+
+    /// <summary>Recon only: how many points of the owner's ground to scout.</summary>
+    [DataField]
+    public int ReconPoints = 3;
+
+    /// <summary>Laundering only: the dirty money put on the taker's account.</summary>
+    [DataField]
+    public long LaunderAmount;
+
+    /// <summary>Laundering only: the shell company account the money has to reach.</summary>
+    [DataField]
+    public ProtoId<NCBankDepartmentPrototype>? LaunderAccount;
 
     /// <summary>Deliveries only: true sends the package to a dead drop marker instead of the fixer's drop.</summary>
     [DataField]

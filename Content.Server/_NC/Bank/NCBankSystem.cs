@@ -410,7 +410,9 @@ public sealed partial class NCBankSystem : EntitySystem
         if (target == payer)
             return NCBankTransferResult.SameAccount;
 
-        var fee = NCBankFees.Calculate(amount, GetFeeBasisPoints(payer));
+        var feeFree = target.Department is { } department &&
+                      _prototypes.TryIndex(department, out var targetPrototype) && targetPrototype.FeeFree;
+        var fee = feeFree ? 0 : NCBankFees.Calculate(amount, GetFeeBasisPoints(payer));
         if (payer.Balance < amount + fee)
             return NCBankTransferResult.InsufficientFunds;
 
@@ -418,6 +420,8 @@ public sealed partial class NCBankSystem : EntitySystem
         Apply(target, NCBankTransactionKind.TransferIn, amount, 0, payer.Number, string.Empty);
         _adminLog.Add(LogType.NCBank, LogImpact.Medium,
             $"{ToPrettyString(actor):actor} transferred {amount} from {payer.Number} to {target.Number} ({fee} fee)");
+        var transferred = new NCBankTransferredEvent(payer, target, amount);
+        RaiseLocalEvent(ref transferred);
         return NCBankTransferResult.Success;
     }
 
@@ -465,6 +469,35 @@ public sealed partial class NCBankSystem : EntitySystem
         return true;
     }
 
+    /// <summary>The loaded account of a character, by profile.</summary>
+    public bool TryGetProfileAccount(int profileId, out NCBankAccountRecord account)
+    {
+        return _byProfile.TryGetValue(profileId, out account!);
+    }
+
+    /// <summary>Money from an unnamed sender lands on a character account (a fixer's dirty money).</summary>
+    public bool TryCreditAnonymous(NCBankAccountRecord account, long amount, string note)
+    {
+        if (amount <= 0)
+            return false;
+
+        Apply(account, NCBankTransactionKind.TransferIn, amount, 0, null, note);
+        _adminLog.Add(LogType.NCBank, LogImpact.Medium, $"{amount} anonymous money credited to {account.Number}: {note}");
+        return true;
+    }
+
+    /// <summary>Takes up to the given amount back from an account, never below zero. Returns what was taken.</summary>
+    public long TakeBack(NCBankAccountRecord account, long amount, string note)
+    {
+        var taken = Math.Min(Math.Max(0, amount), account.Balance);
+        if (taken <= 0)
+            return 0;
+
+        Apply(account, NCBankTransactionKind.TransferOut, -taken, 0, null, note);
+        _adminLog.Add(LogType.NCBank, LogImpact.Medium, $"{taken} taken back from {account.Number}: {note}");
+        return taken;
+    }
+
     /// <summary>Pays a fixer's reward to a loaded character account. No bank fee applies.</summary>
     public bool TryPayFixer(int profileId, long amount, string mission)
     {
@@ -473,6 +506,30 @@ public sealed partial class NCBankSystem : EntitySystem
 
         Apply(account, NCBankTransactionKind.FixerPayment, amount, 0, null, mission);
         _adminLog.Add(LogType.NCBank, LogImpact.Low, $"Fixer mission {mission} paid {amount} to {account.Number}");
+        return true;
+    }
+
+    /// <summary>Pays for a shop purchase from an account. No bank fee applies; the money leaves the economy.</summary>
+    public bool TryPayPurchase(NCBankAccountRecord account, long amount, string item, EntityUid? actor)
+    {
+        if (amount <= 0 || account.Balance < amount)
+            return false;
+
+        Apply(account, NCBankTransactionKind.Purchase, -amount, 0, null, item);
+        _adminLog.Add(LogType.NCBank, LogImpact.Low,
+            $"{ToPrettyString(actor):actor} paid {amount} for {item} from {account.Number}");
+        return true;
+    }
+
+    /// <summary>Charges rent to a character account. No bank fee applies; the money leaves the economy.</summary>
+    public bool TryPayRent(NCBankAccountRecord account, long amount, string property, EntityUid? actor)
+    {
+        if (amount <= 0 || account.Balance < amount)
+            return false;
+
+        Apply(account, NCBankTransactionKind.Rent, -amount, 0, null, property);
+        _adminLog.Add(LogType.NCBank, LogImpact.Low,
+            $"{ToPrettyString(actor):actor} paid {amount} rent for {property} from {account.Number}");
         return true;
     }
 

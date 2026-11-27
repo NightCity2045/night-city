@@ -143,6 +143,8 @@ public sealed partial class NCFixerWindow : FancyWindow
             NCFixerMissionKind.Sabotage => "nc-fixer-kind-sabotage",
             NCFixerMissionKind.Elimination => "nc-fixer-kind-elimination",
             NCFixerMissionKind.Beating => "nc-fixer-kind-beating",
+            NCFixerMissionKind.Recon => "nc-fixer-kind-recon",
+            NCFixerMissionKind.Laundering => "nc-fixer-kind-laundering",
             _ => "nc-fixer-kind-collection",
         };
     }

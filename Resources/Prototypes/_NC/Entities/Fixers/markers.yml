@@ -367,6 +367,72 @@
 
 - type: entity
   parent: NCMissionMarkerBase
+  id: NCMissionMarkerObjectiveHotZone
+  suffix: Objective, HotZone
+  components:
+  - type: Sprite
+    state: objective
+  - type: NCMissionMarker
+    kind: Objective
+    owner: HotZone
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerDeadDropHotZone
+  suffix: DeadDrop, HotZone
+  components:
+  - type: Sprite
+    state: drop
+  - type: NCMissionMarker
+    kind: DeadDrop
+    owner: HotZone
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerGuardHotZone
+  suffix: Guard, HotZone
+  components:
+  - type: Sprite
+    state: guard
+  - type: NCMissionMarker
+    kind: Guard
+    owner: HotZone
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerObjectiveScavengers
+  suffix: Objective, Scavengers
+  components:
+  - type: Sprite
+    state: objective
+  - type: NCMissionMarker
+    kind: Objective
+    owner: Scavengers
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerDeadDropScavengers
+  suffix: DeadDrop, Scavengers
+  components:
+  - type: Sprite
+    state: drop
+  - type: NCMissionMarker
+    kind: DeadDrop
+    owner: Scavengers
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerGuardScavengers
+  suffix: Guard, Scavengers
+  components:
+  - type: Sprite
+    state: guard
+  - type: NCMissionMarker
+    kind: Guard
+    owner: Scavengers
+
+- type: entity
+  parent: NCMissionMarkerBase
   id: NCMissionMarkerObjectiveMedicalTechnologies
   suffix: Objective, Medical Technologies
   components:

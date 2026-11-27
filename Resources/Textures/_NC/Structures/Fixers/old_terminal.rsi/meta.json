@@ -1,0 +1,24 @@
+{
+    "version": 1,
+    "license": "CC-BY-SA-3.0",
+    "copyright": "Night City 2045, original pixel art.",
+    "size": {
+        "x": 32,
+        "y": 32
+    },
+    "states": [
+        {
+            "name": "terminal"
+        },
+        {
+            "name": "terminal-unshaded",
+            "delays": [
+                [
+                    0.4,
+                    0.4,
+                    0.15
+                ]
+            ]
+        }
+    ]
+}

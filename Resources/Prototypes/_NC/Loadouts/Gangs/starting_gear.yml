@@ -270,6 +270,42 @@
   - KitchenKnife
 
 - type: startingGear
+  id: NCGangScavengersGangerGear
+  equipment:
+    jumpsuit: NCGangScavengersTop
+    pants: NCGangScavengersPants
+    outerClothing: NCGangScavengersJacket
+    mask: NCGangScavengersMask
+    shoes: ClothingShoesBootsWork
+  inhand:
+  - Machete
+
+- type: startingGear
+  id: NCGangScavengersEnforcerGear
+  equipment:
+    jumpsuit: NCGangScavengersTop
+    pants: NCGangScavengersPants
+    armor: NCGangScavengersVest
+    mask: NCGangScavengersMask
+    shoes: ClothingShoesBootsWork
+    gloves: ClothingHandsGlovesFingerless
+  inhand:
+  - NCWeaponShotgunCrusher
+
+- type: startingGear
+  id: NCGangScavengersBossGear
+  equipment:
+    jumpsuit: NCGangScavengersTop
+    pants: NCGangScavengersPants
+    armor: NCGangScavengersVest
+    outerClothing: NCGangScavengersJacket
+    mask: NCGangScavengersMask
+    shoes: ClothingShoesBootsWork
+    gloves: ClothingHandsGlovesFingerless
+  inhand:
+  - NCWeaponRifleCopperhead
+
+- type: startingGear
   id: NCSecurityMedicalTechnologiesGuardGear
   equipment:
     jumpsuit: ClothingUniformJumpsuitSecGrey
