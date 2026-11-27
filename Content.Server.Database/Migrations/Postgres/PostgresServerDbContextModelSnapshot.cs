@@ -1243,6 +1243,23 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.ToTable("nc_command_receipt", (string)null);
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCCyberwarePresetGrant", b =>
+                {
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("integer")
+                        .HasColumnName("profile_id");
+
+                    b.Property<string>("PresetId")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("preset_id");
+
+                    b.HasKey("ProfileId", "PresetId")
+                        .HasName("PK_nc_cyberware_preset_grant");
+
+                    b.ToTable("nc_cyberware_preset_grant", (string)null);
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCEventJournalEntry", b =>
                 {
                     b.Property<Guid>("EventId")
@@ -3020,6 +3037,16 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasConstraintName("FK_nc_character_skill_progress_profile_profile_id");
 
                     b.Navigation("Profile");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCCyberwarePresetGrant", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", null)
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_cyberware_preset_grant_profile_profile_id");
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCMedicalCharacterSnapshot", b =>

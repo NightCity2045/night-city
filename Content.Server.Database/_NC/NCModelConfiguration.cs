@@ -16,6 +16,7 @@ public abstract partial class ServerDbContext
         ConfigureNCFixerModels(modelBuilder);
         ConfigureNCHousingModels(modelBuilder);
         ConfigureNCMedicalModels(modelBuilder);
+        ConfigureNCCyberwarePresetModels(modelBuilder);
         ConfigureNCSkillModels(modelBuilder);
     }
 }

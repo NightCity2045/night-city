@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Admin-spawned event booth: pick any cyberware and it is fitted on the spot, ready to work.
+- type: entity
+  parent: BaseStructure
+  id: NCAutoImplanter
+  name: auto-implanter
+  suffix: Admin, Event
+  description: A sealed clinic booth. Sit down, pick the chrome, and the arm does the rest.
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Medical/auto_implanter.rsi
+    layers:
+    - state: off
+    - state: normal-unshaded
+      shader: unshaded
+  - type: InteractionOutline
+  - type: ActivatableUI
+    key: enum.NCAutoImplanterUiKey.Key
+  - type: UserInterface
+    interfaces:
+      enum.NCAutoImplanterUiKey.Key:
+        type: NCAutoImplanterBoundUserInterface
+  - type: PointLight
+    radius: 1.5
+    energy: 1.4
+    color: "#28FFD0"
+  - type: NCAutoImplanter

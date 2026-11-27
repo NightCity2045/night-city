@@ -13,6 +13,11 @@
   icon: NCJobIconTraumaTeamParamed
   accessGroups: [ TraumaBasic ]
   access: [ Trauma_Morgue ]
+  special:
+  - !type:AddComponentSpecial
+    components:
+    - type: NCCyberwarePreset
+      preset: NCPresetTraumaTeamFrame
 
 - type: startingGear
   id: TraumaTeamParamedicGear

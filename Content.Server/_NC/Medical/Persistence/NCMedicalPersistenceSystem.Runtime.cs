@@ -145,6 +145,7 @@ public sealed partial class NCMedicalPersistenceSystem
         if (stored == null)
         {
             _loadingBodies.Remove(body);
+            RaiseRestoreCompleted(body, binding);
             return;
         }
 
@@ -159,7 +160,18 @@ public sealed partial class NCMedicalPersistenceSystem
         var restored = TryRestoreStoredMedicalState(body, stored);
         _loadingBodies.Remove(body);
         if (!restored)
+        {
             FailClosed(body, binding, "stored payload is corrupt or incompatible with the materialized body");
+            return;
+        }
+
+        RaiseRestoreCompleted(body, binding);
+    }
+
+    private void RaiseRestoreCompleted(EntityUid body, PlayerBinding binding)
+    {
+        var completed = new NCMedicalRestoreCompletedEvent(binding.CharacterId);
+        RaiseLocalEvent(body, ref completed);
     }
 
     private void OnPlayerDetached(PlayerDetachedEvent args)
