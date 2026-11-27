@@ -1,0 +1,144 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: entity
+  parent: NCShippingContainerBase
+  id: NCShippingContainerRed
+  suffix: Red
+  components:
+  - type: Sprite
+    state: red
+  - type: Icon
+    state: red
+
+- type: entity
+  parent: NCShippingContainerBase
+  id: NCShippingContainerBlue
+  suffix: Blue
+  components:
+  - type: Sprite
+    state: blue
+  - type: Icon
+    state: blue
+
+- type: entity
+  parent: NCShippingContainerBase
+  id: NCShippingContainerGreen
+  suffix: Green
+  components:
+  - type: Sprite
+    state: green
+  - type: Icon
+    state: green
+
+- type: entity
+  parent: NCShippingContainerBase
+  id: NCShippingContainerOrange
+  suffix: Orange
+  components:
+  - type: Sprite
+    state: orange
+  - type: Icon
+    state: orange
+
+- type: entity
+  parent: NCShippingContainerBase
+  id: NCShippingContainerGray
+  suffix: Gray
+  components:
+  - type: Sprite
+    state: gray
+  - type: Icon
+    state: gray
+
+# Double mooring bollard for the pier edge.
+- type: entity
+  parent: NCPortStructureBase
+  id: NCPortBollard
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Port/bollard.rsi
+    state: bollard
+  - type: Icon
+    sprite: _NC/Structures/Port/bollard.rsi
+    state: bollard
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.35,-0.2,0.35,0.15"
+        density: 500
+        mask:
+        - MachineMask
+        layer:
+        - MidImpassable
+        - LowImpassable
+
+# Container gantry crane, 5 x 5 tiles centred on its tile. Only the four legs collide;
+# the girders, trolley and cab are drawn over everyone walking underneath.
+- type: entity
+  parent: NCPortStructureBase
+  id: NCPortGantryCrane
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Port/gantry_crane.rsi
+    drawdepth: Overdoors
+    layers:
+    - state: legs
+    - state: top
+    - state: lamp-unshaded
+      shader: unshaded
+  - type: Icon
+    sprite: _NC/Structures/Port/gantry_crane.rsi
+    state: top
+  - type: Fixtures
+    fixtures:
+      legSouthWest:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-2.35,-2.35,-1.8,-1.8"
+        density: 1000
+        mask:
+        - MachineMask
+        layer:
+        - MidImpassable
+        - LowImpassable
+        - HighImpassable
+      legSouthEast:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "1.8,-2.35,2.35,-1.8"
+        density: 1000
+        mask:
+        - MachineMask
+        layer:
+        - MidImpassable
+        - LowImpassable
+        - HighImpassable
+      legNorthWest:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-2.35,1.8,-1.8,2.35"
+        density: 1000
+        mask:
+        - MachineMask
+        layer:
+        - MidImpassable
+        - LowImpassable
+        - HighImpassable
+      legNorthEast:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "1.8,1.8,2.35,2.35"
+        density: 1000
+        mask:
+        - MachineMask
+        layer:
+        - MidImpassable
+        - LowImpassable
+        - HighImpassable
+  - type: PointLight
+    radius: 2
+    energy: 1.2
+    color: "#ff8a1f"
+    offset: "0.42,1.7"
