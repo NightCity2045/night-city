@@ -1,0 +1,161 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Night City firearms. Cost rises with caliber and class; corporate and experimental guns need precious metals.
+# Material value stays above the best pawn payout (45% of appraisal), so printing guns to sell is never profitable.
+
+- type: latheRecipe
+  parent: BaseWeaponRecipeSidearm
+  id: NCWeaponPistolStreetmaster
+  result: NCWeaponPistolStreetmaster
+  materials:
+    Steel: 1000
+    Plastic: 500
+
+- type: latheRecipe
+  parent: BaseWeaponRecipeSidearm
+  id: NCWeaponPistolCheesemaker
+  result: NCWeaponPistolCheesemaker
+  materials:
+    Steel: 1000
+    Plastic: 500
+
+- type: latheRecipe
+  parent: BaseWeaponRecipeSidearm
+  id: NCWeaponPistolHelloCutie
+  result: NCWeaponPistolHelloCutie
+  materials:
+    Steel: 1000
+    Plastic: 500
+
+- type: latheRecipe
+  parent: BaseWeaponRecipeSidearm
+  id: NCWeaponPistolP35
+  result: NCWeaponPistolP35
+  materials:
+    Steel: 1100
+    Plastic: 500
+
+- type: latheRecipe
+  parent: BaseWeaponRecipeSidearm
+  id: NCWeaponPistolFederalX9
+  result: NCWeaponPistolFederalX9
+  materials:
+    Steel: 1200
+    Plastic: 500
+
+- type: latheRecipe
+  parent: BaseWeaponRecipeSidearm
+  id: NCWeaponPistolAvenger
+  result: NCWeaponPistolAvenger
+  materials:
+    Steel: 1200
+    Plastic: 500
+
+- type: latheRecipe
+  parent: BaseWeaponRecipeSidearm
+  id: NCWeaponPistolMarkIII
+  result: NCWeaponPistolMarkIII
+  materials:
+    Steel: 1200
+    Plastic: 500
+
+- type: latheRecipe
+  parent: BaseWeaponRecipeSidearm
+  id: NCWeaponPistolOverlord
+  result: NCWeaponPistolOverlord
+  materials:
+    Steel: 1400
+    Plastic: 500
+
+- type: latheRecipe
+  parent: BaseWeaponRecipeSidearm
+  id: NCWeaponPistolBoomerBuster
+  result: NCWeaponPistolBoomerBuster
+  materials:
+    Steel: 1400
+    Plastic: 500
+
+- type: latheRecipe
+  parent: BaseWeaponRecipeSidearm
+  id: NCWeaponPistolMallorian
+  result: NCWeaponPistolMallorian
+  materials:
+    Steel: 1400
+    Plastic: 500
+    Gold: 100
+
+- type: latheRecipe
+  parent: BaseWeaponRecipeSidearm
+  id: NCWeaponPistolBurya
+  result: NCWeaponPistolBurya
+  materials:
+    Steel: 1600
+    Plastic: 500
+    Silver: 150
+
+- type: latheRecipe
+  parent: BaseWeaponRecipeLong
+  id: NCWeaponSMGSaratoga
+  result: NCWeaponSMGSaratoga
+  materials:
+    Steel: 1600
+    Plastic: 600
+
+- type: latheRecipe
+  parent: BaseWeaponRecipeLong
+  id: NCWeaponSMGShingen
+  result: NCWeaponSMGShingen
+  materials:
+    Steel: 1800
+    Plastic: 600
+    Gold: 100
+
+- type: latheRecipe
+  parent: BaseWeaponRecipeLong
+  id: NCWeaponRifleCopperhead
+  result: NCWeaponRifleCopperhead
+  materials:
+    Steel: 2000
+    Plastic: 700
+
+- type: latheRecipe
+  parent: BaseWeaponRecipeLong
+  id: NCWeaponRifleNowaki
+  result: NCWeaponRifleNowaki
+  materials:
+    Steel: 2200
+    Plastic: 700
+    Gold: 150
+
+- type: latheRecipe
+  parent: BaseWeaponRecipeLong
+  id: NCWeaponRifleArasakaPrototype
+  result: NCWeaponRifleArasakaPrototype
+  materials:
+    Steel: 2500
+    Plastic: 800
+    Gold: 300
+    Silver: 200
+
+- type: latheRecipe
+  parent: BaseWeaponRecipeLong
+  id: NCWeaponRifleNomadSniper
+  result: NCWeaponRifleNomadSniper
+  materials:
+    Steel: 2400
+    Plastic: 600
+    Silver: 150
+
+- type: latheRecipe
+  parent: BaseWeaponRecipeLong
+  id: NCWeaponShotgunCrusher
+  result: NCWeaponShotgunCrusher
+  materials:
+    Steel: 2200
+    Plastic: 800
+    Silver: 100
+
+- type: latheRecipe
+  parent: [ BaseCircuitboardRecipe, BaseGeneralMachineRecipeCategory ]
+  id: NCWeaponFabricatorMachineCircuitboard
+  result: NCWeaponFabricatorMachineCircuitboard

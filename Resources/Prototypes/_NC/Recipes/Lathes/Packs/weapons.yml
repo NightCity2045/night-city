@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: latheRecipePack
+  id: NCWeaponsStatic
+  recipes:
+  - NCWeaponPistolStreetmaster
+  - NCWeaponPistolCheesemaker
+  - NCWeaponPistolHelloCutie
+  - NCWeaponPistolP35
+  - NCWeaponPistolFederalX9
+  - NCWeaponPistolAvenger
+  - NCWeaponPistolMarkIII
+  - NCWeaponPistolOverlord
+  - NCWeaponPistolBoomerBuster
+  - NCWeaponPistolMallorian
+  - NCWeaponPistolBurya
+  - NCWeaponSMGSaratoga
+  - NCWeaponSMGShingen
+  - NCWeaponRifleCopperhead
+  - NCWeaponRifleNowaki
+  - NCWeaponRifleArasakaPrototype
+  - NCWeaponRifleNomadSniper
+  - NCWeaponShotgunCrusher
+
+- type: latheRecipePack
+  id: NCWeaponBoardsStatic
+  recipes:
+  - NCWeaponFabricatorMachineCircuitboard

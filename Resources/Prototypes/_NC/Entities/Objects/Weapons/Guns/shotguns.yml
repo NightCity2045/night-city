@@ -16,6 +16,8 @@
       map: [ "enum.GunVisualLayers.Base" ]
     - state: mag-0
       map: [ "enum.GunVisualLayers.Mag" ]
+  - type: StaticPrice
+    price: 1000 # NC: a street shotgun, not the syndicate Bulldog it is built on.
   - type: Item
     sprite: _NC/Objects/Weapons/Guns/Shotguns/Militech_Crusher/tiny.rsi
   - type: Clothing

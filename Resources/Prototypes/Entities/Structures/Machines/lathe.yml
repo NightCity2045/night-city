@@ -255,6 +255,7 @@
     runningState: building
     staticPacks:
     - NCImplantBoardsStatic # NC: the implant fabricator board.
+    - NCWeaponBoardsStatic # NC: the weapon fabricator board.
     - ScienceBoardsStatic
     - ServiceBoardsStatic
     - CargoBoardsStatic
