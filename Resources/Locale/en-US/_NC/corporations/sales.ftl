@@ -34,6 +34,18 @@ nc-corp-contract-militech-optics = Cybereye components
 nc-corp-contract-militech-optics-desc = Optic controllers and matrices for the implant line.
 nc-corp-contract-militech-neural = Neural implant components
 
+nc-corp-sales-implant = {$implant}, assembled
+nc-corp-sales-implant-tested = {$implant}, assembled and bench-tested
+nc-corp-contract-militech-sandevistan = Sandevistan controllers
+nc-corp-contract-militech-kerenzikov = Kerenzikov boosters
+nc-corp-contract-militech-mantis-blades = Mantis blades
+nc-corp-contract-militech-monowire = Monowire arms
+nc-corp-contract-militech-cybereyes = Standard cybereyes
+nc-corp-contract-militech-neural-link = Neural links Mk.1
+nc-corp-contract-militech-implant-desc = Finished implants: all required parts fitted, the assembly bench-tested.
+nc-corp-contract-militech-vests = Militech bulletproof vests
+nc-corp-contract-militech-hardsuits = Militech combat hardsuits
+
 nc-corp-contract-biotechnica-burgers = Cheeseburgers for a corporate canteen
 nc-corp-contract-biotechnica-pizza = Pizza for a night shift
 nc-corp-contract-biotechnica-bread = Fresh bread

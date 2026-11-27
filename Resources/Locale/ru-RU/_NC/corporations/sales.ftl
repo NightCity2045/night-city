@@ -34,6 +34,18 @@ nc-corp-contract-militech-optics = Компоненты кибероглаз
 nc-corp-contract-militech-optics-desc = Оптические контроллеры и матрицы для линейки имплантов.
 nc-corp-contract-militech-neural = Компоненты нейроимплантов
 
+nc-corp-sales-implant = {$implant}, в сборе
+nc-corp-sales-implant-tested = {$implant}, в сборе и с пройденным тестом на верстаке
+nc-corp-contract-militech-sandevistan = Контроллеры «Сандевистан»
+nc-corp-contract-militech-kerenzikov = Ускорители «Керензиков»
+nc-corp-contract-militech-mantis-blades = Клинки «Богомол»
+nc-corp-contract-militech-monowire = Руки с моноструной
+nc-corp-contract-militech-cybereyes = Стандартные кибероглаза
+nc-corp-contract-militech-neural-link = Нейролинки Mk.1
+nc-corp-contract-militech-implant-desc = Готовые импланты: все обязательные детали установлены, сборка прошла тест на верстаке.
+nc-corp-contract-militech-vests = Бронежилеты Милитех
+nc-corp-contract-militech-hardsuits = Боевые скафандры Милитех
+
 nc-corp-contract-biotechnica-burgers = Чизбургеры для корпоративной столовой
 nc-corp-contract-biotechnica-pizza = Пицца для ночной смены
 nc-corp-contract-biotechnica-bread = Свежий хлеб

@@ -1,0 +1,79 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Body armor and helmets. Plates are steel and plasteel, the carrier is cloth; the hardsuit is the expensive line.
+# Trauma Team hardsuits and faction gear stay unprintable.
+
+- type: latheRecipe
+  abstract: true
+  id: NCBaseArmorRecipe
+  categories:
+  - Clothing
+  completetime: 8
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorRepairKit
+  result: NCArmorRepairKit
+  completetime: 3
+  materials:
+    Steel: 300
+    Plastic: 100
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorPrintClothingHeadHelmetBasic
+  result: ClothingHeadHelmetBasic
+  materials:
+    Steel: 600
+    Plastic: 200
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorPrintClothingOuterArmorBasic
+  result: ClothingOuterArmorBasic
+  materials:
+    Steel: 800
+    Cloth: 300
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorPrintClothingOuterArmorBulletproof
+  result: ClothingOuterArmorBulletproof
+  materials:
+    Steel: 1000
+    Plasteel: 300
+    Cloth: 300
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: ClothingOuterArmorMilitechBulletproof
+  result: ClothingOuterArmorMilitechBulletproof
+  materials:
+    Steel: 1000
+    Plasteel: 500
+    Cloth: 300
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: ClothingOuterArmorBiotechBulletproof
+  result: ClothingOuterArmorBiotechBulletproof
+  materials:
+    Steel: 1000
+    Plasteel: 500
+    Cloth: 300
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: ClothingOuterHardsuitMilitech
+  result: ClothingOuterHardsuitMilitech
+  completetime: 20
+  materials:
+    Steel: 3000
+    Plasteel: 1500
+    Plastic: 1000
+    Glass: 500
+
+- type: latheRecipe
+  parent: [ BaseCircuitboardRecipe, BaseGeneralMachineRecipeCategory ]
+  id: NCArmorFabricatorMachineCircuitboard
+  result: NCArmorFabricatorMachineCircuitboard

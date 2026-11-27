@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: latheRecipePack
+  id: NCArmorStatic
+  recipes:
+  - NCArmorRepairKit
+  - NCArmorPrintClothingHeadHelmetBasic
+  - NCArmorPrintClothingOuterArmorBasic
+  - NCArmorPrintClothingOuterArmorBulletproof
+  - ClothingOuterArmorMilitechBulletproof
+  - ClothingOuterArmorBiotechBulletproof
+  - ClothingOuterHardsuitMilitech
+
+- type: latheRecipePack
+  id: NCArmorBoardsStatic
+  recipes:
+  - NCArmorFabricatorMachineCircuitboard

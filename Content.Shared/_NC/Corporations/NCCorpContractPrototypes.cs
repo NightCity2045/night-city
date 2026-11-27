@@ -80,6 +80,19 @@ public sealed partial class NCCorpItemRequirement : NCCorpContractRequirement
     public EntProtoId Item;
 }
 
+/// <summary>
+/// Finished implants of a model: every required part fitted and, by default, the assembly passed its bench test.
+/// <see cref="Item"/> is the model's base prototype, so factory implants and frames assembled in game both count.
+/// </summary>
+public sealed partial class NCCorpImplantRequirement : NCCorpContractRequirement
+{
+    [DataField(required: true)]
+    public EntProtoId Item;
+
+    [DataField]
+    public bool Tested = true;
+}
+
 /// <summary>Doses of a pharmacology formula, packaged in batch containers.</summary>
 public sealed partial class NCCorpDrugRequirement : NCCorpContractRequirement
 {

@@ -38,7 +38,8 @@
     - map: [ "computerLayerKeyboard" ]
       state: generic_keyboard
     - map: [ "computerLayerScreen" ]
-      state: request-sec
+      sprite: _NC/Structures/Machines/Corporations/sales_console.rsi
+      state: militech
     - map: [ "computerLayerKeys" ]
       state: generic_keys
     - map: [ "enum.WiresVisualLayers.MaintenancePanel" ]
@@ -60,7 +61,8 @@
     - map: [ "computerLayerKeyboard" ]
       state: generic_keyboard
     - map: [ "computerLayerScreen" ]
-      state: request-med
+      sprite: _NC/Structures/Machines/Corporations/sales_console.rsi
+      state: biotechnica
     - map: [ "computerLayerKeys" ]
       state: generic_keys
     - map: [ "enum.WiresVisualLayers.MaintenancePanel" ]

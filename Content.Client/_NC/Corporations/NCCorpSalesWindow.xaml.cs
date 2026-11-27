@@ -99,6 +99,11 @@ public sealed partial class NCCorpSalesWindow : FancyWindow
         {
             case NCCorpItemRequirement item:
                 return _prototypes.TryIndex(item.Item, out var entity) ? entity.Name : item.Item.Id;
+            case NCCorpImplantRequirement implant:
+            {
+                var name = _prototypes.TryIndex(implant.Item, out var implantPrototype) ? implantPrototype.Name : implant.Item.Id;
+                return Loc.GetString(implant.Tested ? "nc-corp-sales-implant-tested" : "nc-corp-sales-implant", ("implant", name));
+            }
             case NCCorpDrugRequirement drug:
             {
                 var name = _prototypes.TryIndex(drug.Formula, out var formula) ? Loc.GetString(formula.Name) : drug.Formula.Id;

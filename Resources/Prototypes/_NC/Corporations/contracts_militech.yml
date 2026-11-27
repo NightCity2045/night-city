@@ -119,3 +119,93 @@
   - !type:NCCorpItemRequirement
     item: NCNeuralControllerStandard
     amount: 4
+
+# Finished implants: every required part fitted and the assembly bench-tested.
+
+- type: ncCorpContract
+  id: NCContractMilitechSandevistan
+  corporation: Militech
+  name: nc-corp-contract-militech-sandevistan
+  description: nc-corp-contract-militech-implant-desc
+  reward: 5000
+  requirements:
+  - !type:NCCorpImplantRequirement
+    item: NCSandevistanImplant
+    amount: 2
+
+- type: ncCorpContract
+  id: NCContractMilitechKerenzikov
+  corporation: Militech
+  name: nc-corp-contract-militech-kerenzikov
+  description: nc-corp-contract-militech-implant-desc
+  reward: 4000
+  requirements:
+  - !type:NCCorpImplantRequirement
+    item: NCKerenzikovImplant
+    amount: 2
+
+- type: ncCorpContract
+  id: NCContractMilitechMantisBlades
+  corporation: Militech
+  name: nc-corp-contract-militech-mantis-blades
+  description: nc-corp-contract-militech-implant-desc
+  reward: 4500
+  requirements:
+  - !type:NCCorpImplantRequirement
+    item: NCMantisBladeImplant
+    amount: 3
+
+- type: ncCorpContract
+  id: NCContractMilitechMonowire
+  corporation: Militech
+  name: nc-corp-contract-militech-monowire
+  description: nc-corp-contract-militech-implant-desc
+  reward: 3600
+  requirements:
+  - !type:NCCorpImplantRequirement
+    item: NCArmMonowireImplant
+    amount: 3
+
+- type: ncCorpContract
+  id: NCContractMilitechCyberEyes
+  corporation: Militech
+  name: nc-corp-contract-militech-cybereyes
+  description: nc-corp-contract-militech-implant-desc
+  reward: 3600
+  requirements:
+  - !type:NCCorpImplantRequirement
+    item: NCCyberEyesStandard
+    amount: 4
+
+- type: ncCorpContract
+  id: NCContractMilitechNeuralLink
+  corporation: Militech
+  name: nc-corp-contract-militech-neural-link
+  description: nc-corp-contract-militech-implant-desc
+  reward: 2800
+  requirements:
+  - !type:NCCorpImplantRequirement
+    item: NCImplantNeuralLinkMk1
+    amount: 4
+
+# Armor printed by the armor fabricator.
+
+- type: ncCorpContract
+  id: NCContractMilitechVests
+  corporation: Militech
+  name: nc-corp-contract-militech-vests
+  reward: 4200
+  requirements:
+  - !type:NCCorpItemRequirement
+    item: ClothingOuterArmorMilitechBulletproof
+    amount: 6
+
+- type: ncCorpContract
+  id: NCContractMilitechHardsuits
+  corporation: Militech
+  name: nc-corp-contract-militech-hardsuits
+  reward: 5000
+  requirements:
+  - !type:NCCorpItemRequirement
+    item: ClothingOuterHardsuitMilitech
+    amount: 2

@@ -4,6 +4,7 @@ using System.Linq;
 using Content.Server._NC.Bank;
 using Content.Shared._NC.Bank;
 using Content.Shared._NC.Corporations;
+using Content.Shared._NC.Medical.Cyberware;
 using Content.Shared._NC.Medical.Pharmacology.Batch;
 using Content.Shared.GameTicking;
 using Content.Shared.Mind;
@@ -63,6 +64,20 @@ public sealed class NCCorpContractSystem : EntitySystem
             slots.Add(Draw(corporation, slots));
 
         return slots;
+    }
+
+    /// <summary>Puts a specific contract of the corporation into an open slot, replacing what was there.</summary>
+    public bool TrySetOpenContract(ProtoId<NCCorpSalesPrototype> corporation, int slot, ProtoId<NCCorpContractPrototype> contract)
+    {
+        GetOpenContracts(corporation);
+        if (!_open.TryGetValue(corporation, out var slots) || slot < 0 || slot >= slots.Count ||
+            !_prototypes.TryIndex(contract, out var prototype) || prototype.Corporation != corporation)
+        {
+            return false;
+        }
+
+        slots[slot] = contract;
+        return true;
     }
 
     /// <summary>Draws a weighted random contract of the corporation that is not open already.</summary>
@@ -140,6 +155,8 @@ public sealed class NCCorpContractSystem : EntitySystem
                 if (MetaData(entity).EntityPrototype?.ID != item.Item.Id)
                     return 0;
                 return TryComp<StackComponent>(entity, out var stack) ? stack.Count : 1;
+            case NCCorpImplantRequirement implant:
+                return IsFinishedImplant(entity, implant) ? 1 : 0;
             case NCCorpDrugRequirement drug:
                 return TryComp<NCPharmaContainerComponent>(entity, out var container) &&
                        container.FormulaId == drug.Formula.Id &&
@@ -150,6 +167,24 @@ public sealed class NCCorpContractSystem : EntitySystem
             default:
                 return 0;
         }
+    }
+
+    private bool IsFinishedImplant(EntityUid entity, NCCorpImplantRequirement implant)
+    {
+        if (MetaData(entity).EntityPrototype is not { } prototype)
+            return false;
+
+        if (prototype.ID != implant.Item.Id &&
+            !_prototypes.EnumerateParents<EntityPrototype>(prototype.ID).Any(parent => parent.ID == implant.Item.Id))
+        {
+            return false;
+        }
+
+        if (!TryComp<NCCyberwareAssemblyComponent>(entity, out var assembly))
+            return true;
+
+        return assembly.FunctionalEfficiency > 0f &&
+               (!implant.Tested || assembly.ValidatedRevision == assembly.ConfigurationRevision);
     }
 
     /// <summary>

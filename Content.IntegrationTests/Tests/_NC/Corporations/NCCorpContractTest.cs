@@ -64,8 +64,11 @@ public sealed class NCCorpContractTest : GameTest
 
             var open = contracts.GetOpenContracts("Militech");
             Assert.That(open, Has.Count.EqualTo(4));
-            var slot = open.ToList().FindIndex(id => id != null);
-            var contract = SProtoMan.Index(open[slot]!.Value);
+            const int slot = 0;
+            Assert.That(contracts.TrySetOpenContract("Militech", slot, "NCContractMilitechSaratoga"), Is.True);
+            Assert.That(contracts.TrySetOpenContract("Militech", slot, "NCContractBiotechnicaBread"), Is.False,
+                "A contract of another corporation cannot be opened.");
+            var contract = SProtoMan.Index<NCCorpContractPrototype>("NCContractMilitechSaratoga");
 
             // An outsider cannot fulfil it.
             var outsider = SEntMan.SpawnEntity(null, coords);
@@ -109,6 +112,42 @@ public sealed class NCCorpContractTest : GameTest
                 Assert.That(goods.All(item => SEntMan.Deleted(item) || SEntMan.IsQueuedForDeletion(item)), "The goods are consumed.");
                 Assert.That(contracts.GetOpenContracts("Militech")[slot], Is.Not.EqualTo(contract.ID), "A new contract takes the slot.");
             });
+        });
+    }
+
+    /// <summary>Factory implants count as finished; empty frames waiting for parts do not.</summary>
+    [Test]
+    public async Task OnlyFinishedImplantsCount()
+    {
+        var contracts = Server.System<NCCorpContractSystem>();
+        var bank = Server.System<NCBankSystem>();
+        var minds = Server.System<SharedMindSystem>();
+        var roles = Server.System<SharedRoleSystem>();
+        await PoolManager.WaitUntil(Server, () => bank.Ready);
+        var map = await Pair.CreateTestMap();
+
+        await Server.WaitAssertion(() =>
+        {
+            var coords = map.GridCoords;
+            var console = SEntMan.SpawnEntity("NCCorpSalesConsoleMilitech", coords);
+            var pallet = SEntMan.SpawnEntity("NCCorpSalesPallet", coords.Offset(new System.Numerics.Vector2(1, 0)));
+            var palletCoords = SEntMan.GetComponent<TransformComponent>(pallet).Coordinates;
+            var consoleEnt = new Entity<NCCorpSalesConsoleComponent>(console, SEntMan.GetComponent<NCCorpSalesConsoleComponent>(console));
+            Assert.That(contracts.TrySetOpenContract("Militech", 1, "NCContractMilitechSandevistan"), Is.True);
+
+            var worker = SEntMan.SpawnEntity(null, coords);
+            SEntMan.EnsureComponent<MindContainerComponent>(worker);
+            var mind = minds.CreateMind(null).Owner;
+            minds.TransferTo(mind, worker);
+            roles.MindAddJobRole(mind, jobPrototype: "MilitechTech");
+
+            SEntMan.SpawnEntity("NCSandevistanImplantEmpty", palletCoords);
+            SEntMan.SpawnEntity("NCSandevistanImplantEmpty", palletCoords);
+            Assert.That(contracts.TryFulfill(consoleEnt, 1, worker), Is.False, "Empty frames are not finished implants.");
+
+            SEntMan.SpawnEntity("NCSandevistanImplant", palletCoords);
+            SEntMan.SpawnEntity("NCSandevistanImplant", palletCoords);
+            Assert.That(contracts.TryFulfill(consoleEnt, 1, worker), Is.True, "Factory implants are finished.");
         });
     }
 }

@@ -1,0 +1,55 @@
+{
+    "version": 1,
+    "license": "CC-BY-SA-3.0",
+    "copyright": "Made for Night City 2045, drawn into the SS14 computer screen area.",
+    "size": {
+        "x": 32,
+        "y": 32
+    },
+    "states": [
+        {
+            "name": "militech",
+            "directions": 4,
+            "delays": [
+                [
+                    0.7,
+                    0.7
+                ],
+                [
+                    0.7,
+                    0.7
+                ],
+                [
+                    0.7,
+                    0.7
+                ],
+                [
+                    0.7,
+                    0.7
+                ]
+            ]
+        },
+        {
+            "name": "biotechnica",
+            "directions": 4,
+            "delays": [
+                [
+                    0.7,
+                    0.7
+                ],
+                [
+                    0.7,
+                    0.7
+                ],
+                [
+                    0.7,
+                    0.7
+                ],
+                [
+                    0.7,
+                    0.7
+                ]
+            ]
+        }
+    ]
+}

@@ -256,6 +256,7 @@
     staticPacks:
     - NCImplantBoardsStatic # NC: the implant fabricator board.
     - NCWeaponBoardsStatic # NC: the weapon fabricator board.
+    - NCArmorBoardsStatic # NC: the armor fabricator board.
     - ScienceBoardsStatic
     - ServiceBoardsStatic
     - CargoBoardsStatic
