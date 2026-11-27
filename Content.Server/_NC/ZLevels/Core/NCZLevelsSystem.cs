@@ -35,6 +35,7 @@ public sealed partial class NCZLevelsSystem : NCSharedZLevelsSystem
         InitView();
 
         SubscribeLocalEvent<NCStationZLevelsComponent, StationPostInitEvent>(OnStationPostInit);
+        SubscribeLocalEvent<NCZMapComponent, ComponentShutdown>(OnZMapShutdown); // NC
     }
 
     private void OnStationPostInit(Entity<NCStationZLevelsComponent> ent, ref StationPostInitEvent args)

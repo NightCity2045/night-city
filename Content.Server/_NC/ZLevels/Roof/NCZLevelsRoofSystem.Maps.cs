@@ -32,7 +32,8 @@ public sealed partial class NCZLevelsRoofSystem
                      .OrderByDescending(kv => kv.Key) // depth sorting
                      .Select(kv => kv.Value)
                      .Where(uid => uid.HasValue)
-                     .Select(uid => uid!.Value))
+                     .Select(uid => uid!.Value)
+                     .Where(uid => !TerminatingOrDeleted(uid))) // NC: maps going away with the round
         {
             sortedMaps.Add(mapUid);
         }
