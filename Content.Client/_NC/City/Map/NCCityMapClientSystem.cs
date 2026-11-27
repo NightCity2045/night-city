@@ -10,7 +10,8 @@ using Robust.Shared.Input.Binding;
 namespace Content.Client._NC.City.Map;
 
 /// <summary>
-/// NC: Opens the city map window from its keybind and feeds it the server's cartography and live position.
+/// NC: Opens the city map window from its keybind, feeds it the server's cartography and live position, and
+/// forwards admin markup edits to the server.
 /// </summary>
 public sealed class NCCityMapClientSystem : EntitySystem
 {
@@ -23,6 +24,7 @@ public sealed class NCCityMapClientSystem : EntitySystem
         base.Initialize();
         SubscribeNetworkEvent<NCCityMapSnapshotEvent>(OnSnapshot);
         SubscribeNetworkEvent<NCCityMapTrackingEvent>(OnTracking);
+        SubscribeNetworkEvent<NCCityMapEditResultEvent>(OnEditResult);
 
         CommandBinds.Builder
             .Bind(ContentKeyFunctions.NCOpenCityMap, InputCmdHandler.FromDelegate(_ => ToggleWindow(), handle: false))
@@ -50,6 +52,9 @@ public sealed class NCCityMapClientSystem : EntitySystem
 
         _window = new NCCityMapWindow();
         _window.OnClose += OnWindowClosed;
+        _window.OnNameBuilding += (position, name) => RaiseNetworkEvent(new NCCityMapNameBuildingRequestEvent(position, name));
+        _window.OnSaveDistrict += (id, name, vertices) => RaiseNetworkEvent(new NCCityMapSaveDistrictRequestEvent(id, name, vertices));
+        _window.OnDeleteDistrict += id => RaiseNetworkEvent(new NCCityMapDeleteDistrictRequestEvent(id));
         _window.SetSource(CompOrNull<TransformComponent>(user)?.GridUid);
         _window.OpenCentered();
         RaiseNetworkEvent(new NCCityMapOpenRequestEvent());
@@ -68,6 +73,11 @@ public sealed class NCCityMapClientSystem : EntitySystem
 
         _window.SetSource(_player.LocalEntity is { } user ? CompOrNull<TransformComponent>(user)?.GridUid : null);
         _window.ApplySnapshot(args);
+    }
+
+    private void OnEditResult(NCCityMapEditResultEvent args)
+    {
+        _window?.ShowEditResult(args);
     }
 
     private void OnTracking(NCCityMapTrackingEvent args)

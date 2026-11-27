@@ -11,8 +11,6 @@ namespace Content.Shared._NC.City.Map;
 public enum NCCityMapFeatureKind : byte
 {
     District,
-    Sector,
-    Street,
     Building,
 }
 
@@ -30,10 +28,13 @@ public enum NCCityMapGeometryKind : byte
 public sealed record NCCityMapTileChunk(int OriginX, int OriginY, List<ulong> Rows);
 
 /// <summary>
-/// Public cartography fragment derived from server-only city-zone geometry.
+/// Public cartography fragment: an authored district outline or a building detected from the map.
+/// <see cref="Id"/> is stable for districts and only valid within one snapshot for buildings.
+/// An empty <see cref="Name"/> means the building has not been named yet.
 /// </summary>
 [Serializable, NetSerializable]
 public sealed record NCCityMapFeature(
+    string Id,
     NCCityMapFeatureKind Kind,
     NCCityMapGeometryKind GeometryKind,
     string Name,
@@ -60,8 +61,8 @@ public sealed class NCCityMapOpenRequestEvent : EntityEventArgs;
 public sealed class NCCityMapCloseRequestEvent : EntityEventArgs;
 
 /// <summary>
-/// Sanitized public cartography for the player's current city network and floor.
-/// Server-only zone prototypes and private zone kinds never cross the network boundary.
+/// Public cartography for the player's current city network and floor. <see cref="CanEdit"/> tells the client to
+/// offer the admin markup tools; the server checks permissions again on every request.
 /// </summary>
 [Serializable, NetSerializable]
 public sealed class NCCityMapSnapshotEvent(
@@ -70,8 +71,10 @@ public sealed class NCCityMapSnapshotEvent(
     Vector2 userPosition,
     List<NCCityMapFeature> features,
     List<NCCityMapMarker> markers,
-    string notice) : EntityEventArgs
+    string notice,
+    bool canEdit = false) : EntityEventArgs
 {
+    public readonly bool CanEdit = canEdit;
     public readonly string NetworkId = networkId;
     public readonly int Z = z;
     public readonly Vector2 UserPosition = userPosition;
@@ -94,4 +97,36 @@ public sealed class NCCityMapTrackingEvent(
     public readonly int Z = z;
     public readonly Vector2 UserPosition = userPosition;
     public readonly List<NCCityMapMarker> Markers = markers;
+}
+
+/// <summary>Admin: names the detected building under <see cref="Position"/> on the admin's floor. Empty clears it.</summary>
+[Serializable, NetSerializable]
+public sealed class NCCityMapNameBuildingRequestEvent(Vector2 position, string name) : EntityEventArgs
+{
+    public readonly Vector2 Position = position;
+    public readonly string Name = name;
+}
+
+/// <summary>Admin: creates a district (empty <see cref="Id"/>) or replaces the outline and name of one.</summary>
+[Serializable, NetSerializable]
+public sealed class NCCityMapSaveDistrictRequestEvent(string id, string name, List<Vector2> vertices) : EntityEventArgs
+{
+    public readonly string Id = id;
+    public readonly string Name = name;
+    public readonly List<Vector2> Vertices = vertices;
+}
+
+/// <summary>Admin: deletes a district.</summary>
+[Serializable, NetSerializable]
+public sealed class NCCityMapDeleteDistrictRequestEvent(string id) : EntityEventArgs
+{
+    public readonly string Id = id;
+}
+
+/// <summary>Result of an admin markup request, shown in the map window's status line.</summary>
+[Serializable, NetSerializable]
+public sealed class NCCityMapEditResultEvent(bool success, string message) : EntityEventArgs
+{
+    public readonly bool Success = success;
+    public readonly string Message = message;
 }

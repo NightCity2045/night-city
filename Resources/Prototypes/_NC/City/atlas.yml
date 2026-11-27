@@ -1,0 +1,337 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# City districts and building names for the Night City Z-network.
+# Building outlines are detected from walls and doors; a name applies to the building containing its point.
+# Edit this from the city map window (admin markup tools), then copy the saved file from server data here.
+- type: ncCityAtlas
+  id: NCNightCityAtlas
+  networkId: f7466602-81be-4ad9-9338-9c181a31e552
+  districts:
+  - id: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f
+    name: "Little China"
+    vertices:
+    - 218,86
+    - 98,86
+    - 98,145
+    - 105,152
+    - 218,152
+  - id: e2e35b70-5277-4359-91a6-0792e01fb477
+    name: "Old Japantown"
+    vertices:
+    - 218,-19
+    - 145,-19
+    - 134,-32
+    - 95,-32
+    - 95,-22
+    - 83,-22
+    - 57,-22
+    - 57,50
+    - 98,50
+    - 98,86
+    - 218,86
+  - id: 0122fb70-1fcc-46c7-968a-0245372d8484
+    name: "Old Combat Zone"
+    vertices:
+    - 218,-19
+    - 145,-19
+    - 134,-32
+    - 95,-32
+    - 95,-22
+    - 57,-22
+    - 57,-109
+    - 218,-109
+  - id: a54f1778-e26b-4dc9-af62-267003c660c7
+    name: "Reclamation Zone"
+    vertices:
+    - 57,-109
+    - -91,-109
+    - -91,-39
+    - 2,-39
+    - 2,-43
+    - 46,-43
+    - 46,-45
+    - 57,-45
+  - id: 504dd7a0-4f25-43df-a96c-3f4069ea6de5
+    name: "Port of Night City"
+    vertices:
+    - -91,-109
+    - -91,-39
+    - -71,-39
+    - -71,-3
+    - -180,-3
+    - -180,-109
+  - id: c20733c2-faa0-4d43-aaf6-37c3f6bd886b
+    name: "Glen"
+    vertices:
+    - 57,50
+    - 57,-45
+    - 46,-45
+    - 46,-43
+    - 2,-43
+    - 2,-39
+    - -71,-39
+    - -71,-3
+    - -82,-3
+    - -82,31
+    - -71,31
+    - -71,57
+    - 57,57
+  - id: 88684957-b4da-4f20-862d-b67b4b030882
+    name: "South Night City"
+    vertices:
+    - -82,-3
+    - -180,-3
+    - -180,12
+    - -180,14
+    - -145,14
+    - -145,26
+    - -145,31
+    - -82,31
+  - id: c4f78018-c60c-4e1f-b114-0ce90b7424c5
+    name: "University District"
+    vertices:
+    - -71,31
+    - -145,31
+    - -145,14
+    - -180,14
+    - -200,14
+    - -200,83
+    - -180,83
+    - -180,80
+    - -83,80
+    - -83,104
+    - -30,104
+    - -30,57
+    - -71,57
+  - id: eca1baef-2094-4278-95dc-88ac7e2c6a40
+    name: "Downtown"
+    vertices:
+    - -200,83
+    - -180,83
+    - -180,80
+    - -83,80
+    - -83,104
+    - -30,104
+    - -50,126
+    - -86,126
+    - -93,128
+    - -104,128
+    - -109,132
+    - -150,132
+    - -150,145
+    - -206,145
+    - -206,116
+  - id: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2
+    name: "Little Europe"
+    vertices:
+    - -206,145
+    - -150,145
+    - -150,132
+    - -109,132
+    - -104,128
+    - -93,128
+    - -86,126
+    - -54,126
+    - -54,203
+    - -196,203
+    - -206,169
+  - id: dab954b5-52a7-4551-a874-d6101d1f1429
+    name: "Old City Center"
+    vertices:
+    - -54,203
+    - -54,126
+    - -50,126
+    - -30,104
+    - -30,58
+    - -30,57
+    - 57,57
+    - 57,50
+    - 98,50
+    - 98,145
+    - 105,152
+    - 105,167
+    - 99,182
+    - 88,193
+    - 78,198
+    - 59,203
+  - id: e49d1531-7134-4212-bb1f-44fc76f325ec
+    name: "Upper Marina"
+    vertices:
+    - 105,152
+    - 105,167
+    - 99,182
+    - 88,193
+    - 94,199
+    - 101,202
+    - 108,203
+    - 201,203
+    - 210,199
+    - 214,193
+    - 216,186
+    - 218,171
+    - 218,152
+  buildings:
+  - name: "G NCPD #1"
+    position: 21.5,18
+  - name: "G Glen Shop"
+    position: 45,18
+    z: 0
+  - name: "G Office"
+    position: 14.5,-7.2
+  - name: "G Hall of Justice"
+    position: 39.8,-8.7
+  - name: "G 241 Building"
+    position: 13.5,-35.5
+  - name: "G City Hall"
+    position: 42.2,-36
+  - name: "G 101 Building"
+    position: -13.5,-25
+  - name: "G Night City Bank"
+    position: -15.6,13.5
+  - name: "G 102 Building"
+    position: -13.5,-5.5
+  - name: "G 103 Building"
+    position: -31.4,-23.9
+  - name: "DT 12th Street Building 01"
+    position: -97.5,118.5
+  - name: "DT 12th Street Building 02"
+    position: -75,115
+  - name: "DT 12th Street Building 03"
+    position: -96.5,91
+  - name: "DT 14th Street Building 01"
+    position: -166.5,107.9
+  - name: "DT 14th Street Building 02"
+    position: -130.2,101.1
+  - name: "DT 14th Street Building 03"
+    position: -164,90
+  - name: "DT 14th Street Building 04"
+    position: -126.9,86
+  - name: "DT 9th Street Building 01"
+    position: -126.5,121
+  - name: "DT Stone Beach Building 01"
+    position: -163.5,130.5
+  - name: "DT Stone Beach Building 02"
+    position: -189,133
+  - name: "G Parkway Street Building 01"
+    position: 38.8,40.1
+  - name: "G Parkway Street Building 02"
+    position: -54.5,41
+  - name: "G Parkway Street Building 03"
+    position: -24.5,41.5
+  - name: "G Potomac Ave. Building 01"
+    position: -56.5,13
+  - name: "G Potomac Ave. Building 02"
+    position: -65.5,-9.5
+  - name: "G Potomac Ave. Building 03"
+    position: -57.1,-28.8
+  - name: "LC S. Mall Street Building 01"
+    position: 149,126.5
+  - name: "LC S. Mall Street Building 02"
+    position: 133,101.5
+  - name: "LC Vine Street Building 01"
+    position: 193,129.5
+  - name: "LC Vine Street Building 02"
+    position: 185.5,103.5
+  - name: "LE Barkeley Ave. Building 01"
+    position: -71,173.5
+  - name: "LE Barkeley Ave. Building 02"
+    position: -71.6,138.1
+  - name: "LE Republic Way Building 01"
+    position: -97,185.5
+  - name: "LE Republic Way Building 02"
+    position: -119.2,177.8
+  - name: "LE Republic Way Building 03"
+    position: -169.5,179
+  - name: "LE Republic Way Building 04"
+    position: -145,174.5
+  - name: "LE Republic Way Building 05"
+    position: -170.5,156.5
+  - name: "LE Republic Way Building 06"
+    position: -119,156.5
+  - name: "LE Republic Way Building 07"
+    position: -141,154.5
+  - name: "LE Republic Way Building 08"
+    position: -191.5,150
+  - name: "OCZ 27th Street Building 01"
+    position: 78.5,-53.5
+  - name: "OCZ Ventura Street Building 01"
+    position: 101.9,-53.6
+  - name: "OCZ Ventura Street Building 02"
+    position: 119.5,-59
+  - name: "OCZ Ventura Street Building 03"
+    position: 80.5,-70
+  - name: "OCZ Ventura Street Building 04"
+    position: 109.8,-73.5
+  - name: "OJT 18th Street Building 01"
+    position: 140,51
+  - name: "OJT 19th Street Building 01"
+    position: 71,39
+  - name: "OJT 19th Street Building 02"
+    position: 155.5,31
+  - name: "OJT 19th Street Building 03"
+    position: 120.3,31.9
+  - name: "OJT 19th Street Building 04"
+    position: 139.5,30.5
+  - name: "OJT 19th Street Building 05"
+    position: 177.5,23.5
+  - name: "OJT 26th Street Building 01"
+    position: 176.7,0.5
+  - name: "OJT 26th Street Building 02"
+    position: 152.2,-3.5
+  - name: "OJT 26th Street Building 03"
+    position: 103.3,-7.1
+  - name: "OJT 29th Street Building 01"
+    position: 180.5,66
+  - name: "PNC W 25th Street Building 01"
+    position: -134,-15.4
+  - name: "PNC W 25th Street Building 02"
+    position: -119.6,-25
+  - name: "PNC W 26th Street Building 01"
+    position: -153.9,-61.9
+  - name: "PNC W 26th Street Building 02"
+    position: -105.7,-64
+  - name: "RZ 30rd Street Building 01"
+    position: -34,-43.5
+  - name: "RZ 30rd Street Building 02"
+    position: -15.5,-44.5
+    z: 0
+  - name: "RZ 30rd Street Building 03"
+    position: 13,-59.7
+  - name: "RZ 30rd Street Building 04"
+    position: -33.3,-56.6
+  - name: "RZ 30rd Street Building 05"
+    position: -19.5,-59
+  - name: "RZ 30rd Street Building 06"
+    position: -9,-71
+  - name: "RZ 31st Street Building 01"
+    position: -58,-45.5
+  - name: "RZ 31st Street Building 02"
+    position: -62,-64
+  - name: "RZ Scoffield Building 01"
+    position: 36,-61
+  - name: "SNC W 22nd Street Building 01"
+    position: -128.5,18.5
+  - name: "SNC W 22nd Street Building 02"
+    position: -92,11.5
+  - name: "UD Alexandria Building 01"
+    position: -119.5,65.5
+  - name: "UD Alexandria Building 02"
+    position: -126.6,39.9
+  - name: "UD Bay Street Building 01"
+    position: -85.5,41.5
+  - name: "UD Farren Building 01"
+    position: -74.5,92
+  - name: "UD Farren Building 02"
+    position: -51,87
+  - name: "UD Farren Building 03"
+    position: -91,65.5
+  - name: "UD Farren Building 04"
+    position: -74,65.5
+  - name: "UD Farren Building 05"
+    position: -50,63.5
+  - name: "UD Skyline Building 01"
+    position: -135.5,65.5
+  - name: "UD Skyline Building 02"
+    position: -165.5,52.7
+  - name: "G Potomac Ave. building 04"
+    position: -42,-7.5

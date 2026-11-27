@@ -40,10 +40,6 @@ public sealed partial class NCCityMapControl : LayoutContainer
     private static readonly Color ScanColor = Color.FromHex("#42E9DC20");
     private static readonly Color DistrictFill = Color.FromHex("#123C4538");
     private static readonly Color DistrictLine = Color.FromHex("#38B9B0A0");
-    private static readonly Color SectorFill = Color.FromHex("#15304142");
-    private static readonly Color SectorLine = Color.FromHex("#508DFF99");
-    private static readonly Color StreetFill = Color.FromHex("#211B1028");
-    private static readonly Color StreetLine = Color.FromHex("#F0C75EB8");
     private static readonly Color BuildingFill = Color.FromHex("#0B2630C8");
     private static readonly Color BuildingLine = Color.FromHex("#75FFF0D8");
     private static readonly Color FloorColor = Color.FromHex("#081A23E8");
@@ -52,6 +48,10 @@ public sealed partial class NCCityMapControl : LayoutContainer
     private static readonly Color WallLineColor = Color.FromHex("#65E8DCE8");
     private static readonly Color DoorFillColor = Color.FromHex("#5A431DC0");
     private static readonly Color DoorLineColor = Color.FromHex("#FFD66BEF");
+    private static readonly Color UnnamedBuildingLine = Color.FromHex("#FF9A3CD8");
+    private static readonly Color SelectedLine = Color.FromHex("#FFFFFFF0");
+    private static readonly Color DraftLine = Color.FromHex("#FF5AF0F0");
+    private static readonly Color DraftFill = Color.FromHex("#FF5AF030");
 
     [Dependency] private IEntityManager _entities = default!;
     [Dependency] private IGameTiming _timing = default!;
@@ -92,6 +92,22 @@ public sealed partial class NCCityMapControl : LayoutContainer
     private bool _dragging;
     private bool _labelsVisible = true;
     private string _serverNotice = string.Empty;
+    private bool _hasData;
+    private Vector2 _pressPosition;
+    private float _pressTravel;
+    private bool _pressed;
+
+    /// <summary>Left click without dragging, in map coordinates. Used by the admin markup tools.</summary>
+    public event Action<Vector2>? OnMapClicked;
+
+    /// <summary>Feature drawn with a selection outline, by feature id.</summary>
+    public string? SelectedFeatureId { get; set; }
+
+    /// <summary>Outlines unnamed buildings so the admin sees what is left to name.</summary>
+    public bool HighlightUnnamed { get; set; }
+
+    /// <summary>District outline being drawn by the admin, in map coordinates.</summary>
+    public List<Vector2>? DraftVertices { get; set; }
 
     public NCCityMapControl()
     {
@@ -150,6 +166,9 @@ public sealed partial class NCCityMapControl : LayoutContainer
     /// </summary>
     public void SetMapData(NCCityMapSnapshotEvent update)
     {
+        // A refreshed snapshot of the same floor (for example after an admin edit) keeps the current view.
+        var refit = !_hasData || update.NetworkId != _networkId || update.Z != _z;
+        _hasData = true;
         _features.Clear();
         _markers.Clear();
         _userPosition = update.UserPosition;
@@ -169,7 +188,8 @@ public sealed partial class NCCityMapControl : LayoutContainer
 
         _features.Sort(static (left, right) => left.Kind.CompareTo(right.Kind));
         RecalculateBounds();
-        FitCity();
+        if (refit)
+            FitCity();
 
         var network = update.NetworkId.Length > 8 ? update.NetworkId[..8].ToUpperInvariant() : update.NetworkId.ToUpperInvariant();
         _networkLabel.Text = string.IsNullOrEmpty(network)
@@ -204,6 +224,9 @@ public sealed partial class NCCityMapControl : LayoutContainer
             return;
 
         _dragging = true;
+        _pressed = true;
+        _pressTravel = 0f;
+        _pressPosition = args.RelativePixelPosition;
         args.Handle();
     }
 
@@ -214,6 +237,9 @@ public sealed partial class NCCityMapControl : LayoutContainer
             return;
 
         _dragging = false;
+        if (_pressed && _pressTravel < 5f)
+            OnMapClicked?.Invoke(ScreenToMap(_pressPosition));
+        _pressed = false;
         args.Handle();
     }
 
@@ -223,6 +249,7 @@ public sealed partial class NCCityMapControl : LayoutContainer
         if (!_dragging || _mapScale <= 0f)
             return;
 
+        _pressTravel += args.Relative.Length();
         // Moving the pointer drags the map itself, so the logical camera moves in the opposite direction.
         var worldDelta = new Vector2(args.Relative.X, -args.Relative.Y) / _mapScale;
         _viewCenter -= worldDelta;
@@ -288,6 +315,7 @@ public sealed partial class NCCityMapControl : LayoutContainer
         if (_labelsVisible)
             DrawLabels(handle, lod);
 
+        DrawEditing(handle);
         DrawUserMarker(handle);
         DrawOperationalMarkers(handle);
         DrawSignalOverlay(handle);
@@ -501,6 +529,82 @@ public sealed partial class NCCityMapControl : LayoutContainer
         var center = new Vector2(PixelWidth / 2f, CanvasTop + canvasHeight / 2f);
         var relative = point - _viewCenter;
         return center + new Vector2(relative.X, -relative.Y) * _mapScale;
+    }
+
+    private Vector2 ScreenToMap(Vector2 point)
+    {
+        var canvasHeight = MathF.Max(1f, PixelHeight - CanvasTop - CanvasBottom);
+        var center = new Vector2(PixelWidth / 2f, CanvasTop + canvasHeight / 2f);
+        var relative = (point - center) / MathF.Max(0.01f, _mapScale);
+        return _viewCenter + new Vector2(relative.X, -relative.Y);
+    }
+
+    /// <summary>Finds the topmost feature of a kind under a map position.</summary>
+    public bool TryFindFeature(Vector2 point, NCCityMapFeatureKind kind, out string id, out string name, out List<Vector2> vertices)
+    {
+        for (var i = _features.Count - 1; i >= 0; i--)
+        {
+            var feature = _features[i];
+            if (feature.Kind != kind || !feature.Contains(point))
+                continue;
+
+            id = feature.Id;
+            name = feature.Name;
+            vertices = feature.Vertices.ToList();
+            return true;
+        }
+
+        id = string.Empty;
+        name = string.Empty;
+        vertices = [];
+        return false;
+    }
+
+    private void DrawEditing(DrawingHandleScreen handle)
+    {
+        foreach (var feature in _features)
+        {
+            var selected = feature.Id == SelectedFeatureId;
+            var unnamed = HighlightUnnamed && feature.Kind == NCCityMapFeatureKind.Building && feature.Name.Length == 0;
+            if ((!selected && !unnamed) || !IsFeatureVisible(feature))
+                continue;
+
+            DrawFeatureOutline(handle, feature, selected ? SelectedLine : UnnamedBuildingLine);
+        }
+
+        if (DraftVertices is not { Count: > 0 } draft)
+            return;
+
+        for (var i = 0; i < draft.Count; i++)
+        {
+            var point = MapToScreen(draft[i]);
+            handle.DrawRect(new UIBox2(point - new Vector2(3f), point + new Vector2(3f)), DraftLine);
+            if (i > 0)
+                handle.DrawLine(MapToScreen(draft[i - 1]), point, DraftLine);
+        }
+
+        if (draft.Count >= 3)
+            handle.DrawLine(MapToScreen(draft[^1]), MapToScreen(draft[0]), DraftFill.WithAlpha(0.9f));
+    }
+
+    private void DrawFeatureOutline(DrawingHandleScreen handle, MapFeature feature, Color color)
+    {
+        if (feature.Vertices.Length >= 2)
+        {
+            for (var i = 0; i < feature.Vertices.Length; i++)
+                handle.DrawLine(MapToScreen(feature.Vertices[i]), MapToScreen(feature.Vertices[(i + 1) % feature.Vertices.Length]), color);
+        }
+
+        foreach (var run in feature.TileRuns)
+        {
+            var first = MapToScreen(run.Origin);
+            var last = MapToScreen(run.Origin + new Vector2(run.Length, 1f));
+            handle.DrawRect(new UIBox2(
+                MathF.Min(first.X, last.X),
+                MathF.Min(first.Y, last.Y),
+                MathF.Max(first.X, last.X),
+                MathF.Max(first.Y, last.Y)), color.WithAlpha(0.35f));
+        }
     }
 
     private void DrawCanvas(DrawingHandleScreen handle)
@@ -879,7 +983,8 @@ public sealed partial class NCCityMapControl : LayoutContainer
 
         foreach (var feature in _features)
         {
-            if (!ShouldLabel(feature.Kind, lod) ||
+            if (feature.Name.Length == 0 ||
+                !ShouldLabel(feature.Kind, lod) ||
                 !IsFeatureVisible(feature) ||
                 !_drawnLabels.Add(feature.Name))
             {
@@ -1032,9 +1137,9 @@ public sealed partial class NCCityMapControl : LayoutContainer
     {
         return lod switch
         {
-            MapLod.City => kind is NCCityMapFeatureKind.District or NCCityMapFeatureKind.Sector,
+            MapLod.City => kind == NCCityMapFeatureKind.District,
             MapLod.Streets => true,
-            MapLod.Buildings => kind is NCCityMapFeatureKind.Street or NCCityMapFeatureKind.Building,
+            MapLod.Buildings => true,
             _ => false,
         };
     }
@@ -1043,8 +1148,8 @@ public sealed partial class NCCityMapControl : LayoutContainer
     {
         return lod switch
         {
-            MapLod.City => kind is NCCityMapFeatureKind.District or NCCityMapFeatureKind.Sector,
-            MapLod.Streets => kind is NCCityMapFeatureKind.Street or NCCityMapFeatureKind.Building,
+            MapLod.City => kind == NCCityMapFeatureKind.District,
+            MapLod.Streets => true,
             MapLod.Buildings => kind == NCCityMapFeatureKind.Building,
             _ => false,
         };
@@ -1059,8 +1164,6 @@ public sealed partial class NCCityMapControl : LayoutContainer
         return kind switch
         {
             NCCityMapFeatureKind.District => (DistrictFill.WithAlpha(DistrictFill.A * alphaScale), DistrictLine),
-            NCCityMapFeatureKind.Sector => (SectorFill.WithAlpha(SectorFill.A * alphaScale), SectorLine),
-            NCCityMapFeatureKind.Street => (StreetFill.WithAlpha(StreetFill.A * alphaScale), StreetLine),
             _ => (BuildingFill.WithAlpha(BuildingFill.A * alphaScale), BuildingLine),
         };
     }
@@ -1070,8 +1173,6 @@ public sealed partial class NCCityMapControl : LayoutContainer
         return kind switch
         {
             NCCityMapFeatureKind.District => Color.FromHex("#EE9BFF"),
-            NCCityMapFeatureKind.Sector => Color.FromHex("#8FB8FF"),
-            NCCityMapFeatureKind.Street => Color.FromHex("#FFE28D"),
             _ => Color.FromHex("#A3FFF7"),
         };
     }
@@ -1216,6 +1317,7 @@ public sealed partial class NCCityMapControl : LayoutContainer
 
     private sealed class MapFeature
     {
+        public readonly string Id;
         public readonly NCCityMapFeatureKind Kind;
         public readonly string Name;
         public readonly string LabelText;
@@ -1230,6 +1332,7 @@ public sealed partial class NCCityMapControl : LayoutContainer
 
         public MapFeature(NCCityMapFeature source)
         {
+            Id = source.Id;
             Kind = source.Kind;
             Name = source.Name;
             LabelText = source.Name.ToUpperInvariant();
@@ -1268,6 +1371,35 @@ public sealed partial class NCCityMapControl : LayoutContainer
             BoundsMin = default;
             BoundsMax = default;
             LabelPosition = default;
+        }
+
+        public bool Contains(Vector2 point)
+        {
+            if (point.X < BoundsMin.X || point.Y < BoundsMin.Y || point.X > BoundsMax.X || point.Y > BoundsMax.Y)
+                return false;
+
+            foreach (var run in TileRuns)
+            {
+                if (point.Y >= run.Origin.Y && point.Y < run.Origin.Y + 1f &&
+                    point.X >= run.Origin.X && point.X < run.Origin.X + run.Length)
+                {
+                    return true;
+                }
+            }
+
+            var inside = false;
+            for (int i = 0, j = Vertices.Length - 1; i < Vertices.Length; j = i++)
+            {
+                var a = Vertices[i];
+                var b = Vertices[j];
+                if (a.Y > point.Y != b.Y > point.Y &&
+                    point.X < (b.X - a.X) * (point.Y - a.Y) / (b.Y - a.Y) + a.X)
+                {
+                    inside = !inside;
+                }
+            }
+
+            return inside;
         }
 
         private static Vector2[] SanitizeVertices(List<Vector2> source)

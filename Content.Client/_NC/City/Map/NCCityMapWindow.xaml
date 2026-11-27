@@ -6,6 +6,22 @@
                       SetSize="820 640">
     <BoxContainer Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True" Margin="4">
         <Label Name="StatusLabel" Text="{Loc 'nc-city-map-loading'}" />
+        <BoxContainer Name="EditPanel" Orientation="Vertical" Visible="False" Margin="0 0 0 4">
+            <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                <Button Name="BuildingModeButton" Text="{Loc 'nc-city-map-edit-mode-building'}" ToggleMode="True" />
+                <Button Name="DistrictModeButton" Text="{Loc 'nc-city-map-edit-mode-district'}" ToggleMode="True" />
+                <Button Name="DrawModeButton" Text="{Loc 'nc-city-map-edit-mode-draw'}" ToggleMode="True" />
+                <LineEdit Name="NameEdit" HorizontalExpand="True" PlaceHolder="{Loc 'nc-city-map-edit-name-placeholder'}" />
+                <Button Name="ApplyButton" Text="{Loc 'nc-city-map-edit-apply'}" />
+            </BoxContainer>
+            <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                <Button Name="RedrawButton" Text="{Loc 'nc-city-map-edit-redraw'}" />
+                <Button Name="UndoPointButton" Text="{Loc 'nc-city-map-edit-undo-point'}" />
+                <Button Name="DeleteButton" Text="{Loc 'nc-city-map-edit-delete'}" />
+                <Button Name="CancelButton" Text="{Loc 'nc-city-map-edit-cancel'}" />
+                <Label Name="EditStatusLabel" HorizontalExpand="True" ClipText="True" />
+            </BoxContainer>
+        </BoxContainer>
         <map:NCCityMapControl Name="MapControl" HorizontalExpand="True" VerticalExpand="True" />
     </BoxContainer>
 </controls:FancyWindow>
