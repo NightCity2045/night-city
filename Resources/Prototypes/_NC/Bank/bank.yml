@@ -114,3 +114,9 @@
 - type: ncBankDepartment
   id: BiotechnicaHQ
   name: nc-bank-account-biotechnica-hq
+
+# Declan Vance's shell company: laundering jobs wire dirty money here. Transfers in carry no fee.
+- type: ncBankDepartment
+  id: NCFixerVanceShell
+  name: nc-bank-account-vance-shell
+  feeFree: true

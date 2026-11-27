@@ -1,0 +1,37 @@
+{
+    "version": 1,
+    "license": "CC-BY-SA-3.0",
+    "copyright": "Night City 2045 fixer; composed from SS14 human, hair and clothing sprites (tgstation lineage, CC-BY-SA-3.0) with new shading, details and lights.",
+    "size": {
+        "x": 32,
+        "y": 32
+    },
+    "states": [
+        {
+            "name": "fixer",
+            "directions": 4
+        },
+        {
+            "name": "fixer-unshaded",
+            "directions": 4,
+            "delays": [
+                [
+                    2.0,
+                    0.6
+                ],
+                [
+                    2.0,
+                    0.6
+                ],
+                [
+                    2.0,
+                    0.6
+                ],
+                [
+                    2.0,
+                    0.6
+                ]
+            ]
+        }
+    ]
+}

@@ -90,3 +90,4 @@ ent-NCBankCartridge = картридж «Банк»
 
 nc-bank-account-militech-hq = Милитех (корпорация)
 nc-bank-account-biotechnica-hq = Биотехника (корпорация)
+nc-bank-account-vance-shell = «Вэнс и партнёры», консалтинг

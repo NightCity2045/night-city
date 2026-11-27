@@ -45,3 +45,11 @@
 - type: ncMissionOwner
   id: PhilharmonicVampyres
   name: nc-mission-owner-philharmonic-vampyres
+
+- type: ncMissionOwner
+  id: HotZone
+  name: nc-mission-owner-hot-zone
+
+- type: ncMissionOwner
+  id: Scavengers
+  name: nc-mission-owner-scavengers

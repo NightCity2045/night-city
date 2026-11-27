@@ -72,6 +72,10 @@ public sealed partial class NCBankDepartmentPrototype : IPrototype
     [DataField]
     public long OpeningBalance;
 
+    /// <summary>Transfers into this account carry no bank fee (a fixer's shell company, for instance).</summary>
+    [DataField]
+    public bool FeeFree;
+
     /// <summary>Salary per payday of each job, until the department manager changes it.</summary>
     [DataField]
     public Dictionary<ProtoId<JobPrototype>, int> Salaries = new();

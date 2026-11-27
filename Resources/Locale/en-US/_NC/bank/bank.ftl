@@ -90,3 +90,4 @@ ent-NCBankCartridge = bank cartridge
 
 nc-bank-account-militech-hq = Militech (corporation)
 nc-bank-account-biotechnica-hq = Biotechnica (corporation)
+nc-bank-account-vance-shell = Vance & Partners Consulting

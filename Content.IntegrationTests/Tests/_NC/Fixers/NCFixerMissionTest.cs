@@ -59,6 +59,10 @@ public sealed class NCFixerMissionTest : GameTest
                 Assert.That(SProtoMan.HasIndex(mission.Fixer), mission.ID);
                 if (mission.Kind == NCFixerMissionKind.Collection)
                     Assert.That(mission.Requirements, Is.Not.Empty, mission.ID);
+                else if (mission.Kind == NCFixerMissionKind.Recon)
+                    Assert.That(mission.Owner, Is.Not.Null, mission.ID);
+                else if (mission.Kind == NCFixerMissionKind.Laundering)
+                    Assert.That(mission.LaunderAmount > 0 && mission.LaunderAccount != null, mission.ID);
                 else if (mission.TargetDepartments.Count == 0)
                     Assert.That(mission.Item, Is.Not.Null, mission.ID);
 
@@ -302,6 +306,101 @@ public sealed class NCFixerMissionTest : GameTest
                     SEntMan.DeleteEntity(mob);
                 }
             }
+        });
+    }
+
+    /// <summary>Recon completes only once someone has stood at every point of the gang's ground.</summary>
+    [Test]
+    public async Task ReconNeedsEveryPoint()
+    {
+        var missions = Server.System<NCFixerMissionSystem>();
+        var transform = Server.System<SharedTransformSystem>();
+        var map = await Pair.CreateTestMap();
+        var points = new List<EntityUid>();
+        EntityUid scout = default;
+        var profile = 0;
+
+        await Server.WaitAssertion(() =>
+        {
+            var coords = map.GridCoords;
+            var fixerUid = SEntMan.SpawnEntity("NCFixerTabitha", coords);
+            for (var i = 0; i < 3; i++)
+                points.Add(SEntMan.SpawnEntity("NCMissionMarkerObjectiveBozos", coords.Offset(new System.Numerics.Vector2(8 + i * 6, 0))));
+            (scout, profile) = SpawnWorker(coords, 900030);
+            var fixer = new Entity<NCFixerComponent>(fixerUid, SEntMan.GetComponent<NCFixerComponent>(fixerUid));
+            Assert.That(missions.TrySetOffer("NCFixerTabitha", 0, "NCFixerTabithaTurfBozos"), Is.True);
+            Assert.That(missions.TryAccept(fixer, 0, scout), Is.True);
+            transform.SetCoordinates(scout, SEntMan.GetComponent<TransformComponent>(points[0]).Coordinates);
+            transform.SetCoordinates(SpawnWorker(coords, 900031).Worker, SEntMan.GetComponent<TransformComponent>(points[1]).Coordinates);
+        });
+
+        await Pair.RunSeconds(2);
+        await Server.WaitAssertion(() =>
+        {
+            Assert.That(missions.TryGetActiveMission(profile, out _, out var status), Is.True);
+            Assert.That(status, Is.EqualTo(NCFixerMissionStatus.Active), "One point is still unscouted.");
+            transform.SetCoordinates(scout, SEntMan.GetComponent<TransformComponent>(points[2]).Coordinates);
+        });
+
+        await Pair.RunSeconds(2);
+        await Server.WaitAssertion(() =>
+        {
+            Assert.That(missions.TryGetActiveMission(profile, out _, out var status), Is.True);
+            Assert.That(status, Is.EqualTo(NCFixerMissionStatus.AwaitingPayment), "All three points scouted.");
+        });
+    }
+
+    /// <summary>A peace offering job fails the moment the gang turns hostile.</summary>
+    [Test]
+    public async Task TruceFailsWhenTheGangTurns()
+    {
+        var missions = Server.System<NCFixerMissionSystem>();
+        var reputation = Server.System<NCStreetReputationSystem>();
+        var map = await Pair.CreateTestMap();
+        var profile = 0;
+
+        await Server.WaitAssertion(() =>
+        {
+            var coords = map.GridCoords;
+            var fixerUid = SEntMan.SpawnEntity("NCFixerTabitha", coords);
+            SEntMan.SpawnEntity("NCMissionMarkerDeadDropValentinos", coords.Offset(new System.Numerics.Vector2(10, 0)));
+            var (worker, p) = SpawnWorker(coords, 900040);
+            profile = p;
+            reputation.AddReputation(profile, 10);
+            var fixer = new Entity<NCFixerComponent>(fixerUid, SEntMan.GetComponent<NCFixerComponent>(fixerUid));
+            Assert.That(missions.TrySetOffer("NCFixerTabitha", 0, "NCFixerTabithaTruceValentinos"), Is.True);
+            Assert.That(missions.TryAccept(fixer, 0, worker), Is.True);
+            var guard = missions.GetMissionEntities(profile).First(uid => SEntMan.HasComponent<NCMissionGuardComponent>(uid));
+            SEntMan.GetComponent<NCMissionGuardComponent>(guard).Hostile.Add(worker);
+        });
+
+        await Pair.RunSeconds(2);
+        await Server.WaitAssertion(() =>
+        {
+            Assert.That(missions.TryGetActiveMission(profile, out _, out _), Is.False, "The truce is off.");
+            Assert.That(reputation.GetReputation(profile), Is.EqualTo(10 - 6));
+        });
+    }
+
+    /// <summary>Money wired to a fee-free shell company arrives whole and the payer pays no fee.</summary>
+    [Test]
+    public async Task ShellCompanyTransfersCarryNoFee()
+    {
+        var bank = Server.System<Content.Server._NC.Bank.NCBankSystem>();
+        await PoolManager.WaitUntil(Server, () => bank.Ready);
+        bank.TryGetDepartmentAccount("NCPD", out var ncpd);
+        bank.TryGetDepartmentAccount("NCFixerVanceShell", out var shell);
+        var ncpdStart = ncpd.Balance;
+        var shellStart = shell.Balance;
+
+        Content.Server._NC.Bank.NCBankTransferResult? result = null;
+        await Server.WaitPost(async () => result = await bank.TryTransferAsync(ncpd, shell.Number, 1000, null));
+        await PoolManager.WaitUntil(Server, () => result != null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.EqualTo(Content.Server._NC.Bank.NCBankTransferResult.Success));
+            Assert.That(ncpd.Balance, Is.EqualTo(ncpdStart - 1000), "No fee on the way to the shell company.");
+            Assert.That(shell.Balance, Is.EqualTo(shellStart + 1000));
         });
     }
 }

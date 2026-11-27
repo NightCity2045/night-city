@@ -1,0 +1,18 @@
+{
+    "version": 1,
+    "license": "CC-BY-SA-3.0",
+    "copyright": "Night City 2045 gang wear. Silhouette from SS14 _NC/Clothing/Uniforms/Tops/sixth_street_tank_top.rsi (CC-BY-SA-3.0); shading, patterns, emblems and neon drawn for Night City 2045.",
+    "size": {
+        "x": 32,
+        "y": 32
+    },
+    "states": [
+        {
+            "name": "icon"
+        },
+        {
+            "name": "equipped-INNERCLOTHING",
+            "directions": 4
+        }
+    ]
+}

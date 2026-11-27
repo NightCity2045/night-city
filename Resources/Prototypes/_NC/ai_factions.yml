@@ -41,3 +41,7 @@
 - type: npcFaction
   id: NCCivilian
   friendly: [NCCivilian]
+
+- type: npcFaction
+  id: NCScavengers
+  friendly: [NCScavengers]

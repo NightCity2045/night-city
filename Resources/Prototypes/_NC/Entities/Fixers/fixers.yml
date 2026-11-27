@@ -53,3 +53,87 @@
   id: NCFixerMissionDeadDrop
   components:
   - type: NCFixerDeadDrop
+
+- type: entity
+  parent: NCFixerBase
+  id: NCFixerTabitha
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Fixers/fixer_tabitha.rsi
+    layers:
+    - state: fixer
+    - state: fixer-unshaded
+      shader: unshaded
+  - type: NCFixer
+    fixer: NCFixerTabitha
+
+- type: entity
+  parent: NCFixerDeadDropBase
+  id: NCFixerDeadDropTabitha
+  suffix: NCFixerTabitha
+  components:
+  - type: NCFixerDeadDrop
+    fixer: NCFixerTabitha
+
+- type: entity
+  parent: NCFixerBase
+  id: NCFixerFeng
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Fixers/fixer_feng.rsi
+    layers:
+    - state: fixer
+    - state: fixer-unshaded
+      shader: unshaded
+  - type: NCFixer
+    fixer: NCFixerFeng
+
+- type: entity
+  parent: NCFixerDeadDropBase
+  id: NCFixerDeadDropFeng
+  suffix: NCFixerFeng
+  components:
+  - type: NCFixerDeadDrop
+    fixer: NCFixerFeng
+
+- type: entity
+  parent: NCFixerBase
+  id: NCFixerVance
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Fixers/fixer_vance.rsi
+    layers:
+    - state: fixer
+    - state: fixer-unshaded
+      shader: unshaded
+  - type: NCFixer
+    fixer: NCFixerVance
+
+- type: entity
+  parent: NCFixerDeadDropBase
+  id: NCFixerDeadDropVance
+  suffix: NCFixerVance
+  components:
+  - type: NCFixerDeadDrop
+    fixer: NCFixerVance
+
+- type: entity
+  parent: NCFixerBase
+  id: NCFixerBotha
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Fixers/fixer_botha.rsi
+    layers:
+    - state: fixer
+    - state: fixer-unshaded
+      shader: unshaded
+  - type: NCFixer
+    fixer: NCFixerBotha
+
+- type: entity
+  parent: NCFixerDeadDropBase
+  id: NCFixerDeadDropBotha
+  suffix: NCFixerBotha
+  components:
+  - type: NCFixerDeadDrop
+    fixer: NCFixerBotha

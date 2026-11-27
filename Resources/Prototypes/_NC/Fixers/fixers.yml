@@ -21,3 +21,47 @@
   - nc-fixer-vlad-greeting-1
   - nc-fixer-vlad-greeting-2
   - nc-fixer-vlad-greeting-3
+
+# Tabitha "Jay" Jones: an ex-nomad who brokers truces between gangs and finds rare guns and goods.
+- type: ncFixer
+  id: NCFixerTabitha
+  name: nc-fixer-tabitha-name
+  description: nc-fixer-tabitha-desc
+  payment: InPerson
+  greetings:
+  - nc-fixer-tabitha-greeting-1
+  - nc-fixer-tabitha-greeting-2
+  - nc-fixer-tabitha-greeting-3
+
+# Josie Feng: runs night clubs, bars and night markets for clients who want a thrill.
+- type: ncFixer
+  id: NCFixerFeng
+  name: nc-fixer-feng-name
+  description: nc-fixer-feng-desc
+  payment: InPerson
+  greetings:
+  - nc-fixer-feng-greeting-1
+  - nc-fixer-feng-greeting-2
+  - nc-fixer-feng-greeting-3
+
+# Declan Vance: a neutral freelance auditor who launders money and hides dirty businesses behind clean books.
+- type: ncFixer
+  id: NCFixerVance
+  name: nc-fixer-vance-name
+  description: nc-fixer-vance-desc
+  payment: Transfer
+  greetings:
+  - nc-fixer-vance-greeting-1
+  - nc-fixer-vance-greeting-2
+  - nc-fixer-vance-greeting-3
+
+# Pieter Botha: a South African veteran who leads expeditions into the Hot Zone ruins.
+- type: ncFixer
+  id: NCFixerBotha
+  name: nc-fixer-botha-name
+  description: nc-fixer-botha-desc
+  payment: InPerson
+  greetings:
+  - nc-fixer-botha-greeting-1
+  - nc-fixer-botha-greeting-2
+  - nc-fixer-botha-greeting-3
