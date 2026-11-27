@@ -178,6 +178,7 @@ nc-pharma-isolated = Соединение выделено и получило �
 nc-pharma-isolation-failed = Соединение не удалось выделить.
 nc-pharma-treated = Партия обработана.
 nc-pharma-filled = Дозы разложены по упаковкам: {$count}.
+nc-pharma-fill-spilled = При фасовке пролита одна доза.
 nc-pharma-waste-full = Поставьте в слот отходов канистру, в которой есть место.
 nc-pharma-waste-nothing = В канистре нет отходов.
 nc-pharma-waste-disposed = Мусоросжигатель сжигает отходы.

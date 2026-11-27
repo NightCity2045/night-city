@@ -83,8 +83,12 @@ public sealed partial class NCPharmaBatchSystem
         NCPharmaFormulaPrototype formula,
         string author)
     {
-        if (!TryGetTuning(out var tuning) || _experiments.Count >= tuning.MaximumExperiments)
+        if (!TryGetTuning(out var tuning) || tuning.MaximumExperiments < 1)
             return null;
+
+        // The oldest records go first, like the notebook, so a long-lived laboratory keeps recording.
+        while (_experiments.Count >= tuning.MaximumExperiments)
+            _experiments.RemoveAt(0);
 
         var record = new NCPharmaExperimentRecord
         {
@@ -149,7 +153,7 @@ public sealed partial class NCPharmaBatchSystem
     /// was already given and spent by the ordinary administration; this only writes down what it did and teaches
     /// the laboratory what the compound does in a living body.
     /// </summary>
-    public bool RecordVivariumStudy(Guid batchId, string actor, string subject, NCPharmaStudyResult result)
+    public bool RecordVivariumStudy(Guid batchId, string actor, string subject, NCPharmaStudyResult result, EntityUid? site = null)
     {
         if (!_batches.TryGetValue(batchId, out var batch) ||
             !TryGetFormula(batch.Formula, out var formula) ||
@@ -159,7 +163,7 @@ public sealed partial class NCPharmaBatchSystem
         }
 
         foreach (var core in Cores(formula))
-            RecordAnalysis(core, NCAnalysisTier.InVivo);
+            RecordAnalysis(core, NCAnalysisTier.InVivo, site);
         AddAudit(batch, tuning, NCPharmaAuditKind.Administered, actor,
             $"observed study subject={subject} outcome={result.Outcome} peak={result.Peak:F2}");
 

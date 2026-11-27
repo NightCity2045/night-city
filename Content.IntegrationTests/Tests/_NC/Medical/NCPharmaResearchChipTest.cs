@@ -101,7 +101,8 @@ public sealed class NCPharmaResearchChipTest : GameTest
         var chip = SEntMan.SpawnEntity("NCPharmaResearchChipStock", new MapCoordinates(Vector2.Zero, map));
         var researched = SEntMan.GetComponent<NCPharmaResearchChipComponent>(chip).Researched;
         Assert.That(researched, Does.Contain(NCPharmaNodeIds.Core(Analgesic)));
-        Assert.That(researched, Does.Contain(NCPharmaNodeIds.Form(Autoinjector)));
+        Assert.That(researched, Has.None.Matches<string>(node => !NCPharmaNodeIds.IsCore(node)),
+            "a chip studies compounds only; forms, modifiers and modes are open to every laboratory");
         Assert.That(Compose(researched), Is.True);
     }
 
@@ -116,10 +117,31 @@ public sealed class NCPharmaResearchChipTest : GameTest
         Assert.That(_batches.TryCreateBatch(
             "NCPharmaFormulaTraumaAnalgesic", null, new NCPharmaProductionInputs(10f, 0.9f, 0.9f, 0.9f, 0f),
             "Tester", "Test", out var batch), Is.True);
-        Assert.That(_batches.TryPerformQc(batch!.BatchId, "Tester", NCPharmaQcTests.All, out _), Is.True);
+        Assert.That(_batches.TryPerformQc(batch!.BatchId, "Tester", NCPharmaQcTests.All, out _, site: console.Owner), Is.True);
 
         Assert.That(chip.Comp.Researched, Does.Contain(NCPharmaNodeIds.Core(Analgesic)), "the core is now studied");
-        Assert.That(chip.Comp.Researched, Does.Contain(NCPharmaNodeIds.Form(Autoinjector)), "and so is its delivery form");
         Assert.That(Compose(chip.Comp.Researched), Is.True, "so a formula can be built on it");
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void WorkTeachesOnlyTheConsolesOfTheLaboratoryWhereItWasDone()
+    {
+        var (console, _, at) = Setup();
+        Assert.That(_console.TryGetChip(console, out var near), Is.True);
+        var far = SEntMan.SpawnEntity("NCPharmaRdConsole", new MapCoordinates(at.Position + new Vector2(100f, 0f), at.MapId));
+        _maps.CreateMap(out var otherMap);
+        var elsewhere = SEntMan.SpawnEntity("NCPharmaRdConsole", new MapCoordinates(Vector2.Zero, otherMap));
+        var analyzer = SEntMan.SpawnEntity("NCPharmaRdConsole", new MapCoordinates(at.Position + new Vector2(3f, 0f), at.MapId));
+
+        _batches.RecordAnalysis(Analgesic, Content.Shared._NC.Medical.Pharmacology.Lab.NCAnalysisTier.Chemical, analyzer);
+
+        Assert.That(near.Comp.Researched, Does.Contain(NCPharmaNodeIds.Core(Analgesic)), "a console of the same laboratory learns it");
+        foreach (var other in new[] { far, elsewhere })
+        {
+            var chip = SEntMan.GetComponent<NCPharmaResearchChipComponent>(
+                _slots.GetItemOrNull(other, "chip") ?? throw new InvalidOperationException("no chip"));
+            Assert.That(chip.Researched, Is.Empty, "a laboratory across the city learns nothing from it");
+        }
     }
 }

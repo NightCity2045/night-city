@@ -502,4 +502,20 @@ public sealed class NCPharmaBatchMathTests
         Assert.That(sloppy.Purity, Is.EqualTo(again.Purity));
         Assert.That(sloppy.Purity, Is.Not.EqualTo(exact.Purity));
     }
+
+    [TestCase(1.4f)]
+    [TestCase(1.25f)]
+    [TestCase(0.85f)]
+    public void AModifierThatChangesStrengthIsOnTheLabelSoAGoodBatchPassesConcentration(float strength)
+    {
+        var modifier = Make<NCPharmaModifierPrototype>((nameof(NCPharmaModifierPrototype.ConcentrationMultiplier), strength));
+        var formula = Formula(target: 4f);
+        var outcome = NCPharmaBatchMath.Produce(formula, [modifier], Standard(), Inputs());
+        var label = new NCPharmaLabel("NC-0001", "formula", 1,
+            NCPharmaBatchMath.ResolveLabelConcentration(formula, [modifier]), 0.9f, true, NCPharmaGrade.Medical);
+
+        Assert.That(label.Concentration, Is.EqualTo(4f * strength).Within(0.0001f));
+        var report = NCPharmaBatchMath.RunQc(Tuning(), Guid.NewGuid(), outcome.Quality, label, NCPharmaQcTests.Concentration);
+        Assert.That(report.Failed, Is.EqualTo(NCPharmaQcTests.None));
+    }
 }

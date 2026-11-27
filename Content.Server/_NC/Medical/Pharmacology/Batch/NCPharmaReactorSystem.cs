@@ -26,6 +26,9 @@ namespace Content.Server._NC.Medical.Pharmacology.Batch;
 public sealed partial class NCPharmaReactorSystem : EntitySystem
 {
     private static readonly TimeSpan Step = TimeSpan.FromSeconds(1);
+
+    /// <summary>How close a scrubber must be to draw a reactor's fumes away.</summary>
+    private const float ScrubberRange = 5f;
     private static readonly ProtoId<NCPharmaProductionProfilePrototype> ManualProfile = "NCPharmaProductionManual";
     private static readonly EntProtoId SmokeEntity = "Smoke";
     private static readonly ProtoId<Content.Shared.Chemistry.Reagent.ReagentPrototype> Fumes = "NCReactorFumes";
@@ -40,6 +43,8 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
     [Dependency] private SmokeSystem _smoke = default!;
     [Dependency] private ExplosionSystem _explosion = default!;
     [Dependency] private NCPharmaBatchSystem _batches = default!;
+    [Dependency] private EntityLookupSystem _lookup = default!;
+    [Dependency] private Content.Shared.Power.EntitySystems.SharedPowerReceiverSystem _power = default!;
 
     public override void Initialize()
     {
@@ -212,7 +217,9 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
             return false;
         }
 
-        NCReactorMath.Step(profile, run.State, run.Controls, 1f);
+        // The reaction does not wait for the power: without it the heater, cooler, stirrer and vent are dead.
+        var controls = _power.IsPowered(reactor.Owner) ? run.Controls : default;
+        NCReactorMath.Step(profile, run.State, controls, 1f);
         if (CheckAccidents(reactor, run, profile))
             return false;
 
@@ -263,12 +270,32 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
 
     private void ReleaseFumes(Entity<NCPharmaReactorComponent> reactor, NCPharmaReactorRunComponent run)
     {
-        var amount = reactor.Comp.FumesPerRelease * (run.Ventilation ? 0.4f : 1f);
+        // Switching extraction on only helps when a working scrubber is there to draw the fumes away.
+        var ventilated = run.Ventilation && HasWorkingScrubber(reactor);
+        var amount = reactor.Comp.FumesPerRelease * (ventilated ? 0.4f : 1f);
         var solution = new Solution();
         solution.AddReagent(Fumes, FixedPoint2.New(amount));
         var smoke = Spawn(SmokeEntity, Transform(reactor).Coordinates);
-        _smoke.StartSmoke(smoke, solution, 12f, run.Ventilation ? 3 : 7);
+        _smoke.StartSmoke(smoke, solution, 12f, ventilated ? 3 : 7);
         _popup.PopupEntity(Loc.GetString("nc-pharma-reactor-popup-release"), reactor, PopupType.LargeCaution);
+    }
+
+    /// <summary>A scrubber near the reactor that is switched on, anchored, powered and drawing air in.</summary>
+    private bool HasWorkingScrubber(EntityUid reactor)
+    {
+        foreach (var scrubber in _lookup.GetEntitiesInRange<Content.Server.Atmos.Piping.Unary.Components.GasVentScrubberComponent>(
+                     Transform(reactor).Coordinates, ScrubberRange))
+        {
+            if (scrubber.Comp.Enabled &&
+                scrubber.Comp.PumpDirection == Content.Shared.Atmos.Piping.Unary.Components.ScrubberPumpDirection.Scrubbing &&
+                Transform(scrubber).Anchored &&
+                _power.IsPowered(scrubber.Owner))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void Rupture(
@@ -365,6 +392,10 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
 
     private void UpdateUi(Entity<NCPharmaReactorComponent> reactor, NCPharmaReactorNotice notice)
     {
+        // A run steps every second; the window is only rebuilt for someone looking at it.
+        if (!_ui.IsUiOpen(reactor.Owner, NCPharmaReactorUiKey.Key))
+            return;
+
         var hasSource = TryGetSource(reactor, out _, out var source);
         var formulas = _batches.BuildFormulaSummaries(false)
             .Where(formula => formula.Status == NCPharmaRegulatoryStatus.Experimental)

@@ -69,14 +69,13 @@ public static class NCPharmaBatchMath
         NCPharmaProductionProfilePrototype profile,
         NCPharmaProductionInputs inputs)
     {
-        var concentrationFactor = 1f;
+        var concentrationFactor = ResolveConcentrationFactor(modifiers);
         var purityDelta = 0f;
         var stabilityDelta = 0f;
         var toxicity = 1f;
         var cost = profile.CostMultiplier;
         foreach (var modifier in modifiers)
         {
-            concentrationFactor *= modifier.ConcentrationMultiplier;
             purityDelta += modifier.PurityDelta;
             stabilityDelta += modifier.StabilityDelta;
             toxicity *= modifier.ToxicityMultiplier;
@@ -99,6 +98,24 @@ public static class NCPharmaBatchMath
         var doses = (int) MathF.Floor(MathF.Max(0f, inputs.InputUnits) * MathF.Max(0f, profile.YieldMultiplier));
         return new NCPharmaProductionOutcome(quality, doses, toxicity, cost, profile.Duration);
     }
+
+    /// <summary>Combined effect of the modifiers on the strength of a dose.</summary>
+    public static float ResolveConcentrationFactor(IReadOnlyList<NCPharmaModifierPrototype> modifiers)
+    {
+        var factor = 1f;
+        foreach (var modifier in modifiers)
+            factor *= modifier.ConcentrationMultiplier;
+        return factor;
+    }
+
+    /// <summary>
+    /// The strength the producer writes on the label: what the formula with its modifiers is meant to deliver.
+    /// Drift of a rushed run and a miscalibrated machine are not on the label, so quality control can catch them.
+    /// </summary>
+    public static float ResolveLabelConcentration(
+        NCPharmaFormulaPrototype formula,
+        IReadOnlyList<NCPharmaModifierPrototype> modifiers) =>
+        formula.TargetConcentration * ResolveConcentrationFactor(modifiers);
 
     /// <summary>
     /// Resolves what one dose of a batch actually does. The dose index makes every dose of the same batch

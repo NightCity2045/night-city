@@ -55,10 +55,41 @@ public sealed partial class NCPharmaDepotSystem : EntitySystem
             return false;
 
         var depot = EnsureComp<NCPharmaDepotComponent>(body);
+        if (seconds > 0f && depot.Entries.Count >= MaximumEntriesPerBody)
+        {
+            // A full depot joins the dose to one of the same compound that is still arriving, so it is not lost.
+            var same = depot.Entries.FirstOrDefault(entry => entry.Drug == drug);
+            if (same != null)
+            {
+                same.ClearanceFactor = (same.Remaining * same.ClearanceFactor + concentration * clearanceFactor) /
+                                       (same.Remaining + concentration);
+                same.Remaining += concentration;
+                same.RatePerSecond += concentration / seconds;
+                _scheduler.Schedule(body, UpdateInterval);
+                return true;
+            }
+        }
+
         if (seconds <= 0f || depot.Entries.Count >= MaximumEntriesPerBody)
         {
+            var applied = _pharmacology.ApplyDose(body, drug, concentration, clearanceFactor);
+            var accepted = applied.Accepted;
+            if (applied.CapacityReached && depot.Entries.Count < MaximumEntriesPerBody)
+            {
+                // The body has no room for one more compound right now: the dose waits in the depot and arrives later.
+                depot.Entries.Add(new NCPharmaDepotEntry
+                {
+                    Drug = drug,
+                    Remaining = concentration,
+                    RatePerSecond = concentration / (float) UpdateInterval.TotalSeconds,
+                    ClearanceFactor = clearanceFactor,
+                });
+                _scheduler.Schedule(body, UpdateInterval);
+                return true;
+            }
+
             TidyDepot(body, depot);
-            return _pharmacology.ApplyDose(body, drug, concentration, clearanceFactor).Accepted;
+            return accepted;
         }
 
         depot.Entries.Add(new NCPharmaDepotEntry
@@ -82,8 +113,9 @@ public sealed partial class NCPharmaDepotSystem : EntitySystem
         {
             var entry = body.Comp.Entries[i];
             var delivered = MathF.Min(entry.Remaining, entry.RatePerSecond * seconds);
-            if (delivered > 0f)
-                _pharmacology.ApplyDose(body.Owner, entry.Drug, delivered, entry.ClearanceFactor);
+            // A body with no room for one more compound refuses the dose; it stays in the depot and is tried again.
+            if (delivered > 0f && _pharmacology.ApplyDose(body.Owner, entry.Drug, delivered, entry.ClearanceFactor).CapacityReached)
+                continue;
 
             entry.Remaining -= delivered;
             if (entry.Remaining <= 0.0001f)

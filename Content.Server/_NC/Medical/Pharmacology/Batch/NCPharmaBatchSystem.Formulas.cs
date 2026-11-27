@@ -92,7 +92,8 @@ public sealed partial class NCPharmaBatchSystem
         string profileId,
         [NotNullWhen(true)] out NCPharmaFormulaPrototype? composed,
         out NCPharmaRdNotice notice,
-        IReadOnlySet<string>? researched = null)
+        IReadOnlySet<string>? researched = null,
+        EntityUid? site = null)
     {
         composed = null;
         notice = NCPharmaRdNotice.InvalidRequest;
@@ -160,8 +161,7 @@ public sealed partial class NCPharmaBatchSystem
             modifiers.Add(modifier);
         }
 
-        if (_derived.Count >= tuning.MaximumDerivedFormulas ||
-            (!continuesLine && CountLineages() >= tuning.MaximumLineages))
+        if (!TryMakeRoomForFormula(tuning, !continuesLine, parent?.ID))
         {
             notice = NCPharmaRdNotice.TooManyFormulas;
             return false;
@@ -217,39 +217,80 @@ public sealed partial class NCPharmaBatchSystem
             (second == null ? string.Empty : $" + {second.ID}") +
             $", {concentration:0.##} per dose, {modifierIds.Count} modifiers");
         notice = NCPharmaRdNotice.Created;
-        RaiseResearch(FormulaNodes(composed));
+        RaiseResearch(ResearchNodes(composed), site);
         return true;
     }
 
-    /// <summary>The nodes of the tree a formula uses.</summary>
-    public static string[] FormulaNodes(NCPharmaFormulaPrototype formula)
-    {
-        var nodes = new List<string>();
-        foreach (var core in Cores(formula))
-            nodes.Add(NCPharmaNodeIds.Core(core.Id));
-        nodes.Add(NCPharmaNodeIds.Form(formula.DeliveryForm.Id));
-        nodes.Add(NCPharmaNodeIds.Profile(formula.DefaultProductionProfile.Id));
-        foreach (var modifier in formula.Modifiers)
-            nodes.Add(NCPharmaNodeIds.Modifier(modifier.Id));
-        return nodes.ToArray();
-    }
+    /// <summary>What a research chip learns from work on a formula: its compounds. Everything else is open to all.</summary>
+    public static string[] ResearchNodes(NCPharmaFormulaPrototype formula) =>
+        Cores(formula).Select(core => NCPharmaNodeIds.Core(core.Id)).ToArray();
 
-    /// <summary>The nodes the stock formulas use. A stock chip starts with them studied.</summary>
+    /// <summary>The compounds the stock formulas use. A stock chip starts with them studied.</summary>
     public string[] StockNodes()
     {
         return AllFormulas
             .Where(formula => !_derived.ContainsKey(formula.ID))
-            .SelectMany(FormulaNodes)
+            .SelectMany(ResearchNodes)
             .Distinct()
             .ToArray();
     }
 
-    /// <summary>Tells every research console that the laboratory has learnt about these nodes.</summary>
-    public void RaiseResearch(string[] nodes)
+    /// <summary>
+    /// Tells the research consoles of the laboratory at <paramref name="site"/> that it has learnt about these nodes. With
+    /// no site (an administrator's edit) every console hears it.
+    /// </summary>
+    public void RaiseResearch(string[] nodes, EntityUid? site = null)
     {
-        var research = new NCPharmaResearchEvent(nodes);
+        var research = new NCPharmaResearchEvent(nodes, site);
         RaiseLocalEvent(ref research);
     }
+
+    /// <summary>
+    /// The registry of developed versions is bounded, and the world lives for a long time. When it is full, the oldest
+    /// abandoned work makes room: an experimental version nothing was produced from and nothing was developed from. A
+    /// new line needs a free line as well; then the oldest line made only of such versions is retired whole. False when
+    /// everything is still in use.
+    /// </summary>
+    private bool TryMakeRoomForFormula(NCPharmaTuningPrototype tuning, bool newLineage, string? keep = null)
+    {
+        if (newLineage && CountLineages() >= tuning.MaximumLineages)
+        {
+            var lineage = _derived.Values
+                .GroupBy(ResolveRoot)
+                .Where(group => group.All(IsAbandoned) && group.All(formula => formula.ID != keep))
+                .OrderBy(group => group.Min(formula => CreatedAt(formula).Ticks))
+                .ThenBy(group => group.Key, StringComparer.Ordinal)
+                .FirstOrDefault();
+            if (lineage == null)
+                return false;
+            foreach (var formula in lineage.ToList())
+                _derived.Remove(formula.ID);
+        }
+
+        while (_derived.Count >= tuning.MaximumDerivedFormulas)
+        {
+            var leaf = _derived.Values
+                .Where(formula => formula.ID != keep && IsAbandoned(formula) && !_derived.Values.Any(child => child.DerivedFrom == formula.ID))
+                .OrderBy(formula => CreatedAt(formula).Ticks)
+                .ThenBy(formula => formula.ID, StringComparer.Ordinal)
+                .FirstOrDefault();
+            if (leaf == null)
+                return false;
+            _derived.Remove(leaf.ID);
+        }
+
+        return true;
+    }
+
+    /// <summary>An experimental version that no batch was made from.</summary>
+    private bool IsAbandoned(NCPharmaFormulaPrototype formula) =>
+        formula.RegulatoryStatus == NCPharmaRegulatoryStatus.Experimental &&
+        !_batches.Values.Any(batch => batch.Formula == formula.ID);
+
+    /// <summary>When a version was created, from the notebook; the earliest possible time when the entry is gone.</summary>
+    private NCActiveWorldTime CreatedAt(NCPharmaFormulaPrototype formula) =>
+        _journal.FirstOrDefault(entry => entry.Kind == NCPharmaJournalKind.VersionCreated && entry.FormulaId == formula.ID)?.Time ??
+        NCActiveWorldTime.Zero;
 
     private int CountLineages() => _derived.Values.Select(ResolveRoot).Distinct().Count();
 
@@ -379,12 +420,16 @@ public sealed partial class NCPharmaBatchSystem
         return true;
     }
 
-    public bool CanApprove(NCPharmaFormulaPrototype formula) =>
+    public bool CanApprove(NCPharmaFormulaPrototype formula) => CanApprove(formula, null);
+
+    private bool CanApprove(NCPharmaFormulaPrototype formula, IReadOnlySet<string>? certified) =>
         formula.RegulatoryStatus == NCPharmaRegulatoryStatus.Experimental &&
         _derived.ContainsKey(formula.ID) &&
-        HasCertifiedBatch(formula.ID);
+        (certified?.Contains(formula.ID) ?? HasCertifiedBatch(formula.ID));
 
-    public NCPharmaFormulaSummary BuildSummary(NCPharmaFormulaPrototype formula) => new(
+    public NCPharmaFormulaSummary BuildSummary(NCPharmaFormulaPrototype formula) => BuildSummary(formula, null);
+
+    private NCPharmaFormulaSummary BuildSummary(NCPharmaFormulaPrototype formula, IReadOnlySet<string>? certified) => new(
         formula.ID,
         formula.Version,
         formula.CustomName == null ? formula.Name.Id : null,
@@ -396,7 +441,7 @@ public sealed partial class NCPharmaBatchSystem
         formula.DefaultProductionProfile.Id,
         formula.RegulatoryStatus,
         formula.DerivedFrom,
-        CanApprove(formula),
+        CanApprove(formula, certified),
         _prototypes.TryIndex(formula.Compound, out var summaryCompound) ? summaryCompound.ToxicConcentration : 0f,
         FeedstockOptions(formula),
         formula.SecondCompound?.Id);
@@ -425,12 +470,17 @@ public sealed partial class NCPharmaBatchSystem
 
     public NCPharmaFormulaSummary[] BuildFormulaSummaries(bool producibleOnly)
     {
+        // One pass over the batches for the whole list, not one per formula.
+        var certified = _batches.Values
+            .Where(batch => batch.QcState == NCPharmaQcState.Certified)
+            .Select(batch => batch.Formula)
+            .ToHashSet();
         return AllFormulas
             .Where(formula => !producibleOnly ||
                               formula.RegulatoryStatus is not
                                   (NCPharmaRegulatoryStatus.Banned or NCPharmaRegulatoryStatus.Recalled))
             .OrderBy(formula => formula.ID, StringComparer.Ordinal)
-            .Select(BuildSummary)
+            .Select(formula => BuildSummary(formula, certified))
             .ToArray();
     }
 
@@ -452,8 +502,11 @@ public sealed partial class NCPharmaBatchSystem
             .ToArray();
     }
 
-    /// <summary>Versions are tracked; the ordinary stock of approved formulas would only flood the notebook.</summary>
-    public bool IsTracked(NCPharmaFormulaPrototype formula) => formula.DerivedFrom != null;
+    /// <summary>
+    /// Everything the laboratory developed is tracked: new lines, later versions and isolated or invented compounds. The
+    /// ordinary stock of approved formulas would only flood the notebook.
+    /// </summary>
+    public bool IsTracked(NCPharmaFormulaPrototype formula) => _derived.ContainsKey(formula.ID);
 
     public void AddJournal(NCPharmaJournalKind kind, string formulaId, string batchCode, string actor, string detail)
     {

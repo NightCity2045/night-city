@@ -36,6 +36,13 @@ public sealed partial class NCPharmacologyComponent : Component
     [DataField]
     public int StrainEpisode;
 
+    /// <summary>
+    /// The body's own seed for its infection strains, drawn once. Zero means a body from before the seed existed; such a
+    /// body keeps deriving its strains from its name, as it always did.
+    /// </summary>
+    [DataField]
+    public int StrainSeed;
+
     /// <summary>Bacterial strain of the current infection, derived from the character and the episode.</summary>
     [ViewVariables]
     public ProtoId<Lab.NCPathogenStrainPrototype>? Strain;

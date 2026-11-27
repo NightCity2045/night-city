@@ -225,6 +225,9 @@ public sealed partial class NCPharmacologySystem
                 TimeSinceLastDose = timestamp - record.LastDose,
                 Stage = record.Stage,
                 Comedown = record.Comedown,
+                PendingTolerance = record.PendingTolerance,
+                Phase = record.Phase,
+                LastConcentration = record.LastConcentration,
             });
         }
 
@@ -247,6 +250,9 @@ public sealed partial class NCPharmacologySystem
                 LastDose = timestamp >= record.TimeSinceLastDose ? timestamp - record.TimeSinceLastDose : TimeSpan.Zero,
                 Stage = record.Stage,
                 Comedown = record.Comedown,
+                PendingTolerance = float.IsFinite(record.PendingTolerance) ? Math.Clamp(record.PendingTolerance, 0f, 1000f) : 0f,
+                Phase = Enum.IsDefined(record.Phase) ? record.Phase : NCDrugPhase.None,
+                LastConcentration = float.IsFinite(record.LastConcentration) ? MathF.Max(0f, record.LastConcentration) : 0f,
             };
         }
     }

@@ -50,6 +50,12 @@ public sealed class NCPharmaBatchRecord
     public int DosesProduced;
     public int DosesPacked;
     public int DosesAdministered;
+
+    /// <summary>Doses used up as quality-control samples. They were packed but never reached a patient.</summary>
+    public int DosesSampled;
+
+    /// <summary>Doses spilled by a clumsy hand while they were repacked.</summary>
+    public int DosesLost;
     public readonly List<NCPharmaAuditEntry> Audit = [];
 
     /// <summary>Purity at the last degradation entry in the history. Runtime only.</summary>
@@ -118,7 +124,8 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
         [NotNullWhen(true)] out NCPharmaBatchRecord? batch)
     {
         batch = null;
-        if (!CanCreateBatch(formulaId, profileId, inputs, out var formula, out var profile, out var modifiers, out var tuning))
+        if (!CanCreateBatch(formulaId, profileId, inputs, out var formula, out var profile, out var modifiers, out var tuning) ||
+            !TryMakeRoomForBatch(tuning))
             return false;
 
         var outcome = NCPharmaBatchMath.Produce(formula, modifiers, profile, inputs);
@@ -144,7 +151,7 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
             record.BatchCode,
             formulaId,
             formula.Version,
-            formula.TargetConcentration,
+            NCPharmaBatchMath.ResolveLabelConcentration(formula, modifiers),
             profile.LabelPurity,
             profile.LabelSterile,
             profile.LabelGrade);
@@ -245,7 +252,7 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
         var delivered = Math.Min(1f, _actions.Resolve(administrator, "NCBiotechAdminister", container.Owner, [batch.BatchId]).Quality);
         var doseIndex = batch.DosesAdministered++;
         var effect = NCPharmaBatchMath.ResolveDose(
-            tuning, form, batch.Actual, batch.ModifierToxicity, batch.BatchId, doseIndex);
+            tuning, form, PackQuality(batch, container.Comp), batch.ModifierToxicity, batch.BatchId, doseIndex);
         var massScale = TryComp<PhysicsComponent>(patient, out var physics)
             ? NCPharmaBatchMath.ResolveMassScale(tuning, physics.FixturesMass)
             : 1f;
@@ -255,6 +262,8 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
         {
             EffectiveConcentration = effect.EffectiveConcentration * massScale * (1f - localFraction) * delivered,
             ToxinBurden = effect.ToxinBurden * massScale * delivered,
+            // A dose that only partly went in carries only part of its contamination.
+            SepsisBurden = effect.SepsisBurden * delivered,
         };
         // NC: with two cores each gets its share of the dose; the pair's extra toxicity is already in the batch.
         var coreShare = formula.SecondCompound != null ? NCPharmaBatchMath.SecondCoreShare : 1f;
@@ -322,7 +331,9 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
         string actor,
         NCPharmaQcTests tests,
         out NCPharmaQcReport report,
-        float quality = 1f)
+        float quality = 1f,
+        EntityUid? site = null,
+        float purityLoss = 0f)
     {
         report = default;
         if (tests == NCPharmaQcTests.None ||
@@ -332,7 +343,9 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
             return false;
         }
 
-        report = NCPharmaBatchMath.RunQc(tuning, batchId, batch.Actual, batch.Label, tests, batch.Masking, quality);
+        // The sample is one pack: what it lost to warmth shows in the reading.
+        var sampled = batch.Actual with { Purity = Math.Clamp(batch.Actual.Purity - MathF.Max(0f, purityLoss), 0f, 1f) };
+        report = NCPharmaBatchMath.RunQc(tuning, batchId, sampled, batch.Label, tests, batch.Masking, quality);
         batch.LastQc = report;
         batch.QcState = NCPharmaBatchMath.ResolveQcState(batch.QcState, report);
         AddAudit(batch, tuning, NCPharmaAuditKind.QcPerformed, actor,
@@ -342,9 +355,7 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
         // Quality control is a chemical analysis: it tells the laboratory what the compound is.
         if (TryGetFormula(batch.Formula, out var analysedFormula))
             foreach (var core in Cores(analysedFormula))
-                RecordAnalysis(core, Content.Shared._NC.Medical.Pharmacology.Lab.NCAnalysisTier.Chemical);
-        if (TryGetFormula(batch.Formula, out var studied))
-            RaiseResearch(FormulaNodes(studied)); // NC
+                RecordAnalysis(core, Content.Shared._NC.Medical.Pharmacology.Lab.NCAnalysisTier.Chemical, site);
         if (TryGetFormula(batch.Formula, out var qcFormula) && IsTracked(qcFormula))
             AddJournal(NCPharmaJournalKind.QcPerformed, batch.Formula, batch.BatchCode, actor,
                 $"tests {report.Performed}, failed {report.Failed}, now {batch.QcState}");
@@ -387,6 +398,32 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
         return true;
     }
 
+    /// <summary>Records that one dose of a pack was used up as a quality-control sample.</summary>
+    public void RecordQcSample(Guid batchId, string actor)
+    {
+        if (!_batches.TryGetValue(batchId, out var batch) || !TryGetTuning(out var tuning))
+            return;
+
+        batch.DosesSampled++;
+        AddAudit(batch, tuning, NCPharmaAuditKind.Sampled, actor, "one dose taken as a quality-control sample");
+    }
+
+    /// <summary>A clumsy hand spills one dose of a pack. False when the pack has no dose to lose.</summary>
+    public bool TrySpillDose(EntityUid pack, string actor)
+    {
+        if (!TryComp<NCPharmaContainerComponent>(pack, out var container) || container.Doses < 1 ||
+            !_batches.TryGetValue(container.BatchId, out var batch) || !TryGetTuning(out var tuning))
+        {
+            return false;
+        }
+
+        container.Doses--;
+        Dirty(pack, container);
+        batch.DosesLost++;
+        AddAudit(batch, tuning, NCPharmaAuditKind.Spilled, actor, "one dose spilled while repacking");
+        return true;
+    }
+
     /// <summary>Records that an administrator read the hidden truth. Reading is never silent.</summary>
     public void RecordInspection(NCPharmaBatchRecord batch, string actor)
     {
@@ -419,7 +456,6 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
         modifiers = [];
         if (!TryGetFormula(formulaId, out formula) ||
             !TryGetTuning(out tuning) ||
-            _batches.Count >= tuning.MaximumBatches ||
             !float.IsFinite(inputs.InputUnits) || inputs.InputUnits <= 0f ||
             !float.IsFinite(inputs.InputPurity) || inputs.InputPurity is < 0f or > 1f ||
             !float.IsFinite(inputs.EquipmentSterility) || inputs.EquipmentSterility is < 0f or > 1f ||
@@ -440,6 +476,41 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
 
         return NCPharmaBatchMath.ValidateFormula(formula, modifiers);
     }
+
+    /// <summary>
+    /// The registry is bounded, and the world lives for a long time. When it is full, the oldest batch that nothing in the
+    /// world still carries makes room: no pack with doses left points at it, and it is not the certificate an experimental
+    /// formula still needs for approval. False when every batch is still in use.
+    /// </summary>
+    private bool TryMakeRoomForBatch(NCPharmaTuningPrototype tuning)
+    {
+        if (_batches.Count < tuning.MaximumBatches)
+            return true;
+
+        var carried = new HashSet<Guid>();
+        var query = EntityQueryEnumerator<NCPharmaContainerComponent>();
+        while (query.MoveNext(out _, out var container))
+        {
+            if (container.Doses > 0)
+                carried.Add(container.BatchId);
+        }
+
+        var retired = _batches.Values
+            .Where(batch => !carried.Contains(batch.BatchId) && !IsApprovalEvidence(batch))
+            .OrderBy(batch => batch.CreatedAt)
+            .ThenBy(batch => batch.BatchCode, StringComparer.Ordinal)
+            .FirstOrDefault();
+        if (retired == null)
+            return false;
+
+        _batches.Remove(retired.BatchId);
+        return true;
+    }
+
+    private bool IsApprovalEvidence(NCPharmaBatchRecord batch) =>
+        batch.QcState == NCPharmaQcState.Certified &&
+        TryGetFormula(batch.Formula, out var formula) &&
+        formula.RegulatoryStatus == NCPharmaRegulatoryStatus.Experimental;
 
     /// <summary>Copies the public label and QC certificate of a batch onto every pack that carries it.</summary>
     private void RefreshContainers(NCPharmaBatchRecord batch)

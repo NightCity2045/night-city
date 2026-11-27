@@ -178,6 +178,7 @@ nc-pharma-isolated = A compound is isolated and named {$name}. It still has to b
 nc-pharma-isolation-failed = The compound could not be isolated.
 nc-pharma-treated = The batch is treated.
 nc-pharma-filled = The doses are repacked into {$count} packs.
+nc-pharma-fill-spilled = A dose was spilled while repacking.
 nc-pharma-waste-full = Put a waste canister with room in it into the waste slot.
 nc-pharma-waste-nothing = There is no waste in the canister.
 nc-pharma-waste-disposed = The incinerator burns the waste.

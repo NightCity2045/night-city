@@ -56,6 +56,13 @@ public sealed partial class NCPharmaContainerComponent : Component
     /// </summary>
     [DataField, AutoNetworkedField]
     public bool KeepCold;
+
+    /// <summary>
+    /// Purity this pack lost to warmth, on top of its batch. The cold chain belongs to the pack: a pack left out spoils,
+    /// the rest of the batch in the cold room does not. Hidden truth, saved with the pack and never replicated.
+    /// </summary>
+    [DataField]
+    public float PurityLoss;
 }
 
 /// <summary>Cancellable DoAfter carried while a dose is being administered.</summary>
