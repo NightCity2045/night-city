@@ -1,7 +1,7 @@
 {
     "version": 1,
     "license": "CC-BY-SA-3.0",
-    "copyright": "Night City 2045 heavy full-borg chassis, original pixel art painted on the SS14 human part silhouettes.",
+    "copyright": "Night City 2045 heavy full-borg chassis, original pixel art laid out on the SS14 human part silhouettes.",
     "size": {
         "x": 32,
         "y": 32
@@ -16,11 +16,15 @@
             "directions": 4
         },
         {
+            "name": "r_arm",
+            "directions": 4
+        },
+        {
             "name": "l_arm",
             "directions": 4
         },
         {
-            "name": "r_arm",
+            "name": "r_hand",
             "directions": 4
         },
         {
@@ -28,7 +32,19 @@
             "directions": 4
         },
         {
-            "name": "r_hand",
+            "name": "r_leg",
+            "directions": 4
+        },
+        {
+            "name": "l_leg",
+            "directions": 4
+        },
+        {
+            "name": "r_foot",
+            "directions": 4
+        },
+        {
+            "name": "l_foot",
             "directions": 4
         }
     ]
