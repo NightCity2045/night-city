@@ -27,8 +27,8 @@
   id: NCShopPickupPoint
   components:
   - type: Sprite
-    sprite: _NC/Markers/mission_markers.rsi
-    state: drop
+    sprite: _NC/Markers/shop_pickup.rsi
+    state: pickup
   - type: NCShopPickupPoint
 
 - type: entity
@@ -36,7 +36,7 @@
   id: NCShopFurnitureVendomat
   components:
   - type: Sprite
-    sprite: Structures/Machines/VendingMachines/vendomat.rsi
+    sprite: _NC/Structures/Machines/Shops/furniture.rsi
   - type: PointLight
     color: "#FFB21F"
   - type: NCShop
@@ -47,7 +47,7 @@
   id: NCShopClothingVendomat
   components:
   - type: Sprite
-    sprite: Structures/Machines/VendingMachines/clothing.rsi
+    sprite: _NC/Structures/Machines/Shops/clothing.rsi
   - type: PointLight
     color: "#FF2A8A"
   - type: NCShop
@@ -58,7 +58,7 @@
   id: NCShopGroceriesVendomat
   components:
   - type: Sprite
-    sprite: Structures/Machines/VendingMachines/snack.rsi
+    sprite: _NC/Structures/Machines/Shops/groceries.rsi
   - type: PointLight
     color: "#9FE35A"
   - type: NCShop
@@ -69,7 +69,7 @@
   id: NCShopBarVendomat
   components:
   - type: Sprite
-    sprite: Structures/Machines/VendingMachines/boozeomat.rsi
+    sprite: _NC/Structures/Machines/Shops/bar.rsi
   - type: PointLight
     color: "#D46BFF"
   - type: NCShop
@@ -80,7 +80,7 @@
   id: NCShopToolsVendomat
   components:
   - type: Sprite
-    sprite: Structures/Machines/VendingMachines/youtool.rsi
+    sprite: _NC/Structures/Machines/Shops/tools.rsi
   - type: PointLight
     color: "#FFB21F"
   - type: NCShop
@@ -91,7 +91,7 @@
   id: NCShopPharmacyVendomat
   components:
   - type: Sprite
-    sprite: Structures/Machines/VendingMachines/medical.rsi
+    sprite: _NC/Structures/Machines/Shops/pharmacy.rsi
   - type: PointLight
     color: "#3FF0FF"
   - type: NCShop
@@ -102,7 +102,7 @@
   id: NCShopGunsVendomat
   components:
   - type: Sprite
-    sprite: Structures/Machines/VendingMachines/ammo.rsi
+    sprite: _NC/Structures/Machines/Shops/guns.rsi
   - type: PointLight
     color: "#FF3A3A"
   - type: NCShop
@@ -113,7 +113,7 @@
   id: NCShopImplantsVendomat
   components:
   - type: Sprite
-    sprite: Structures/Machines/VendingMachines/robotics.rsi
+    sprite: _NC/Structures/Machines/Shops/implants.rsi
   - type: PointLight
     color: "#3FF0FF"
   - type: NCShop
