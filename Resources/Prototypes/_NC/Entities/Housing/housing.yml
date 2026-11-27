@@ -8,8 +8,8 @@
   suffix: Property
   components:
   - type: Sprite
-    sprite: _NC/Markers/mission_markers.rsi
-    state: objective
+    sprite: _NC/Markers/property_marker.rsi
+    state: property
   - type: NCPropertyMarker
 
 - type: entity
@@ -24,7 +24,8 @@
     - map: [ "computerLayerKeyboard" ]
       state: generic_keyboard
     - map: [ "computerLayerScreen" ]
-      state: id
+      sprite: _NC/Structures/Machines/RealEstate/real_estate_terminal.rsi
+      state: realestate
     - map: [ "computerLayerKeys" ]
       state: generic_keys
     - map: [ "enum.WiresVisualLayers.MaintenancePanel" ]
@@ -32,7 +33,7 @@
   - type: PointLight
     radius: 1.5
     energy: 3.0
-    color: "#D3A54F"
+    color: "#3FF0FF"
   - type: ActivatableUI
     key: enum.NCRealEstateUiKey.Key
   - type: UserInterface
@@ -46,10 +47,12 @@
   id: NCPropertyKeyCard
   components:
   - type: Sprite
-    sprite: Objects/Misc/id_cards.rsi
-    state: default
+    sprite: _NC/Objects/Housing/key_card.rsi
+    state: icon
   - type: Item
     size: Tiny
+    sprite: Objects/Misc/id_cards.rsi
+    heldPrefix: default
   - type: NCPropertyCard
   - type: StaticPrice
     price: 0
