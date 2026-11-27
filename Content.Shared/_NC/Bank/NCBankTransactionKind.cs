@@ -18,4 +18,5 @@ public enum NCBankTransactionKind : byte
     SalaryMissed,
     ContractReward,
     FixerPayment,
+    Rent,
 }

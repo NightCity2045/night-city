@@ -50,6 +50,7 @@ nc-bank-kind-admin-withdrawal = Budget withdrawal
 nc-bank-kind-salary-missed = Salary not paid
 nc-bank-kind-contract = Contract reward
 nc-bank-kind-fixer = Fixer payment
+nc-bank-kind-rent = Rent
 nc-bank-kind-unknown = Operation
 
 nc-bank-atm-title = Night City Bank ATM

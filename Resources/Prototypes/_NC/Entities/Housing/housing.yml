@@ -1,0 +1,55 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Rentable properties. A marker inside the premises gives its id, name and hourly rent; the floor and the doors
+# are found from the walls. Put several markers with the same id to join rooms the fill would not reach.
+- type: entity
+  parent: MarkerBase
+  id: NCPropertyMarker
+  suffix: Property
+  components:
+  - type: Sprite
+    sprite: _NC/Markers/mission_markers.rsi
+    state: objective
+  - type: NCPropertyMarker
+
+- type: entity
+  parent: BaseComputer
+  id: NCRealEstateTerminal
+  components:
+  - type: NCRealEstateTerminal
+  - type: Sprite
+    layers:
+    - map: [ "computerLayerBody" ]
+      state: computer
+    - map: [ "computerLayerKeyboard" ]
+      state: generic_keyboard
+    - map: [ "computerLayerScreen" ]
+      state: id
+    - map: [ "computerLayerKeys" ]
+      state: generic_keys
+    - map: [ "enum.WiresVisualLayers.MaintenancePanel" ]
+      state: generic_panel_open
+  - type: PointLight
+    radius: 1.5
+    energy: 3.0
+    color: "#D3A54F"
+  - type: ActivatableUI
+    key: enum.NCRealEstateUiKey.Key
+  - type: UserInterface
+    interfaces:
+      enum.NCRealEstateUiKey.Key:
+        type: NCRealEstateBoundUserInterface
+
+# Issued by the agency, one per door. The agency names it after the property and the door.
+- type: entity
+  parent: BaseItem
+  id: NCPropertyKeyCard
+  components:
+  - type: Sprite
+    sprite: Objects/Misc/id_cards.rsi
+    state: default
+  - type: Item
+    size: Tiny
+  - type: NCPropertyCard
+  - type: StaticPrice
+    price: 0

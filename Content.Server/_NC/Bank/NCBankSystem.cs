@@ -476,6 +476,18 @@ public sealed partial class NCBankSystem : EntitySystem
         return true;
     }
 
+    /// <summary>Charges rent to a character account. No bank fee applies; the money leaves the economy.</summary>
+    public bool TryPayRent(NCBankAccountRecord account, long amount, string property, EntityUid? actor)
+    {
+        if (amount <= 0 || account.Balance < amount)
+            return false;
+
+        Apply(account, NCBankTransactionKind.Rent, -amount, 0, null, property);
+        _adminLog.Add(LogType.NCBank, LogImpact.Low,
+            $"{ToPrettyString(actor):actor} paid {amount} rent for {property} from {account.Number}");
+        return true;
+    }
+
     /// <summary>This round's operations on the account, newest first. History is not stored between rounds.</summary>
     public List<NCBankHistoryLine> GetHistory(NCBankAccountRecord account, int limit = 30)
     {

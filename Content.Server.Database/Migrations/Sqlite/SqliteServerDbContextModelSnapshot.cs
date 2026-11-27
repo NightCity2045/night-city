@@ -1777,6 +1777,33 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.ToTable("nc_police_warrant", (string)null);
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCProperty", b =>
+                {
+                    b.Property<string>("PropertyId")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("property_id");
+
+                    b.Property<int>("KeyVersion")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("key_version");
+
+                    b.Property<long>("PaidUntil")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("paid_until");
+
+                    b.Property<int?>("TenantProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("tenant_profile_id");
+
+                    b.HasKey("PropertyId")
+                        .HasName("PK_nc_property");
+
+                    b.HasIndex("TenantProfileId");
+
+                    b.ToTable("nc_property", (string)null);
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCRoundSnapshot", b =>
                 {
                     b.Property<Guid>("SnapshotId")
@@ -2969,6 +2996,15 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .HasConstraintName("FK_nc_police_warrant_nc_police_case_case_id");
 
                     b.Navigation("Case");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCProperty", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", null)
+                        .WithMany()
+                        .HasForeignKey("TenantProfileId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_nc_property_profile_tenant_profile_id");
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCRoundSnapshotSection", b =>
