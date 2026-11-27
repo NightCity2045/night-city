@@ -275,3 +275,12 @@ nc-fixer-mission-feng-bad-chrome = Плохой хром
 nc-fixer-mission-feng-bad-chrome-desc = Рипердок Maelstrom в подворотне South Night City ставит дешёвый хром завсегдатаям моих клубов, а возвращаются они ко мне в мешках. Закрой его практику. Навсегда.
 nc-fixer-mission-vlad-push-sixth-street = Товар для Шестой
 nc-fixer-mission-vlad-push-sixth-street-desc = 6th Street берёт у Влада и продаёт в порту. Отнеси брикет к их тайнику в South Night City. Их ребята будут ждать, не нервируй их.
+
+cmd-ncrep-desc = Показывает или задаёт уличную репутацию текущего персонажа игрока.
+cmd-ncrep-help = Использование: {$command} <ник> [значение]
+cmd-ncrep-arg-user = <ник>
+cmd-ncrep-arg-value = [значение 0-{$max}]
+cmd-ncrep-error-args = Нужен ник игрока и, по желанию, значение.
+cmd-ncrep-error-no-character = {$username} сейчас не играет персонажем.
+cmd-ncrep-error-value = Значение должно быть целым числом от 0 до {$max}.
+cmd-ncrep-result = {$username}: уличная репутация {$value} ({$level}).

@@ -275,3 +275,12 @@ nc-fixer-mission-feng-bad-chrome = Bad chrome
 nc-fixer-mission-feng-bad-chrome-desc = A Maelstrom ripperdoc in a South Night City back alley fits cheap chrome to my clubs' regulars, and they come back to me in body bags. Close his practice. Permanently.
 nc-fixer-mission-vlad-push-sixth-street = Goods for 6th Street
 nc-fixer-mission-vlad-push-sixth-street-desc = 6th Street buys from Vlad and sells at the port. Take the brick to their drop in South Night City. Their boys will be waiting, do not make them nervous.
+
+cmd-ncrep-desc = Shows or sets the street reputation of a player's current character.
+cmd-ncrep-help = Usage: {$command} <username> [value]
+cmd-ncrep-arg-user = <username>
+cmd-ncrep-arg-value = [value 0-{$max}]
+cmd-ncrep-error-args = Expected a username and an optional value.
+cmd-ncrep-error-no-character = {$username} is not playing a character right now.
+cmd-ncrep-error-value = The value must be a whole number from 0 to {$max}.
+cmd-ncrep-result = {$username}: street reputation {$value} ({$level}).
