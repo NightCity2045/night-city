@@ -43,6 +43,22 @@
 
 - type: entity
   parent: WallSolid
+  id: NCWallMegablock
+  name: megablock concrete wall
+  description: A precast concrete panel off a megabuilding, grey and stained from decades of acid rain.
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Walls/megablock.rsi
+  - type: Icon
+    sprite: _NC/Structures/Walls/megablock.rsi
+  - type: IconSmooth
+    key: walls
+    additionalKeys:
+    - windows
+    base: megablock
+
+- type: entity
+  parent: WallSolid
   id: NCWallproflista
   name: профлист
   components:
