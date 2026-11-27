@@ -2,6 +2,7 @@
 
 # Night City firearms. Cost rises with caliber and class; corporate and experimental guns need precious metals.
 # Material value stays above the best pawn payout (45% of appraisal), so printing guns to sell is never profitable.
+# The Arasaka prototype rifle, the Mallorian handgun, the Burya and the Stukach are never printed: they are found or earned.
 
 - type: latheRecipe
   parent: BaseWeaponRecipeSidearm
@@ -76,24 +77,6 @@
     Plastic: 500
 
 - type: latheRecipe
-  parent: BaseWeaponRecipeSidearm
-  id: NCWeaponPistolMallorian
-  result: NCWeaponPistolMallorian
-  materials:
-    Steel: 1400
-    Plastic: 500
-    Gold: 100
-
-- type: latheRecipe
-  parent: BaseWeaponRecipeSidearm
-  id: NCWeaponPistolBurya
-  result: NCWeaponPistolBurya
-  materials:
-    Steel: 1600
-    Plastic: 500
-    Silver: 150
-
-- type: latheRecipe
   parent: BaseWeaponRecipeLong
   id: NCWeaponSMGSaratoga
   result: NCWeaponSMGSaratoga
@@ -126,16 +109,6 @@
     Steel: 2200
     Plastic: 700
     Gold: 150
-
-- type: latheRecipe
-  parent: BaseWeaponRecipeLong
-  id: NCWeaponRifleArasakaPrototype
-  result: NCWeaponRifleArasakaPrototype
-  materials:
-    Steel: 2500
-    Plastic: 800
-    Gold: 300
-    Silver: 200
 
 - type: latheRecipe
   parent: BaseWeaponRecipeLong
