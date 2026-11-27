@@ -198,6 +198,7 @@ This repository is a large RobustToolbox/SS14-based Night City 2045 overhaul wit
 - The city map window (`NCCityMapSystem`, keybind `NCOpenCityMap`) is the player's map; it renders public zone cartography from the City Zone systems.
 - Roles are the vanilla jobs. Night City organizations, employment, personnel consoles, the Agent device and the Living City NPC simulation were removed; do not reintroduce them without an explicit request.
 - `_NC/LivingCity` now holds only world infrastructure that other features depend on: active world time, party identity, the economy ledger, cash and asset registry, housing and property, police registries, and fixer reputation. Actor parties no longer resolve. Player inheritance (estates and death succession) was removed; a dead character is simply deleted at the round boundary.
+- META (the programmable device runtime, its compiler worker, CitiNet, `.meta`/`.mui`/`.mstyle` sources and META device variants) was removed. Cybereye modes, night vision and neural implants are driven natively from the wearer's context menu. Do not reintroduce META without an explicit request.
 - World state advances only while the round/server world is active. Do not invent offline progression.
 
 ## ECS Rules

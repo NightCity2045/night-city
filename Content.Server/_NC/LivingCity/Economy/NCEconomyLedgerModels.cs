@@ -91,7 +91,6 @@ public sealed record NCPostLedgerTransactionRequest(
     string AuditSource = "system",
     IReadOnlyList<NCAtomicLedgerParticipantWrite>? ParticipantWrites = null,
     IReadOnlyList<NCAtomicLedgerOutboxWrite>? ParticipantOutboxMessages = null,
-    Content.Server.Database.NCMetaAuthorityConstraints? Authority = null,
     [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     string? ParticipantResultPayload = null);
 

@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 
-
 - type: entity
   parent: NCBaseCyberwarePart
   id: NCNeuralControllerStandard
@@ -12,22 +11,6 @@
   - type: NCCyberwarePart
     profile: NCNeuralControllerStandardPart
   - type: NCNeuralController
-  - type: NCMetaHost
-    profile: NCMetaNeuralController
-    allowClaim: true
-  - type: NCMetaDevice
-    allowClaim: true
-    interfaces:
-    - meta.implants.NeuralController
-    - meta.net.MessagePort
-  - type: NCMetaTerminal
-  - type: NCMetaPort
-    networkId: LOCAL
-  - type: NCMetaMessagePort
-  - type: UserInterface
-    interfaces:
-      enum.NCMetaUiKey.Workspace:
-        type: NCMetaWorkspaceBoundUserInterface
 
 - type: entity
   parent: NCNeuralControllerStandard
@@ -48,22 +31,6 @@
   - type: NCCyberwarePart
     profile: NCNeuralControllerImprovisedPart
   - type: NCNeuralController
-  - type: NCMetaHost
-    profile: NCMetaNeuralController
-    allowClaim: true
-  - type: NCMetaDevice
-    allowClaim: true
-    interfaces:
-    - meta.implants.NeuralController
-    - meta.net.MessagePort
-  - type: NCMetaTerminal
-  - type: NCMetaPort
-    networkId: LOCAL
-  - type: NCMetaMessagePort
-  - type: UserInterface
-    interfaces:
-      enum.NCMetaUiKey.Workspace:
-        type: NCMetaWorkspaceBoundUserInterface
 
 - type: entity
   parent: NCNeuralControllerImprovised
@@ -84,22 +51,6 @@
   - type: NCCyberwarePart
     profile: NCNeuralControllerImprovedPart
   - type: NCNeuralController
-  - type: NCMetaHost
-    profile: NCMetaNeuralController
-    allowClaim: true
-  - type: NCMetaDevice
-    allowClaim: true
-    interfaces:
-    - meta.implants.NeuralController
-    - meta.net.MessagePort
-  - type: NCMetaTerminal
-  - type: NCMetaPort
-    networkId: LOCAL
-  - type: NCMetaMessagePort
-  - type: UserInterface
-    interfaces:
-      enum.NCMetaUiKey.Workspace:
-        type: NCMetaWorkspaceBoundUserInterface
 
 - type: entity
   parent: NCNeuralControllerImproved
@@ -120,22 +71,6 @@
   - type: NCCyberwarePart
     profile: NCNeuralControllerPremiumPart
   - type: NCNeuralController
-  - type: NCMetaHost
-    profile: NCMetaNeuralController
-    allowClaim: true
-  - type: NCMetaDevice
-    allowClaim: true
-    interfaces:
-    - meta.implants.NeuralController
-    - meta.net.MessagePort
-  - type: NCMetaTerminal
-  - type: NCMetaPort
-    networkId: LOCAL
-  - type: NCMetaMessagePort
-  - type: UserInterface
-    interfaces:
-      enum.NCMetaUiKey.Workspace:
-        type: NCMetaWorkspaceBoundUserInterface
 
 - type: entity
   parent: NCNeuralControllerPremium

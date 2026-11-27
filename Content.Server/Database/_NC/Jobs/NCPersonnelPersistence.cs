@@ -86,7 +86,6 @@ public sealed partial class ServerDbManager
     {
         DbWriteOpsMetric.Inc();
         var result = await RunDbCommand(() => _db.HireNCCharacterAsync(target, jobId, positionLimit, actor, actorName, reason));
-        if (result.Result == NCPersonnelChangeResult.Success) NotifyNCPlayerEmploymentChanged();
         return result;
     }
 
@@ -95,7 +94,6 @@ public sealed partial class ServerDbManager
     {
         DbWriteOpsMetric.Inc();
         var result = await RunDbCommand(() => _db.SelfHireNCCharacterAsync(target, jobId, positionLimit, actorName, reason));
-        if (result.Result == NCPersonnelChangeResult.Success) NotifyNCPlayerEmploymentChanged();
         return result;
     }
 
@@ -104,7 +102,6 @@ public sealed partial class ServerDbManager
     {
         DbWriteOpsMetric.Inc();
         var result = await RunDbCommand(() => _db.TerminateNCCharacterAsync(target, organizationJobs, actor, actorName, reason));
-        if (result.Result == NCPersonnelChangeResult.Success) NotifyNCPlayerEmploymentChanged();
         return result;
     }
 
@@ -115,7 +112,6 @@ public sealed partial class ServerDbManager
         DbWriteOpsMetric.Inc();
         var result = await RunDbCommand(() => _db.ChangeNCCharacterPositionAsync(target, newJobId, positionLimit,
             organizationJobs, eventType, actor, actorName, reason));
-        if (result.Result == NCPersonnelChangeResult.Success) NotifyNCPlayerEmploymentChanged();
         return result;
     }
 }

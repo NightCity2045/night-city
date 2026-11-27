@@ -434,7 +434,7 @@ public sealed partial class NCEconomyLedgerSystem : EntitySystem
                         message.EventId,
                         message.MessageType,
                         message.Payload)).ToArray(),
-                RequestFingerprint: ParticipantResultFingerprint(request.TransactionId.Value, request.ParticipantResultPayload), Authority: request.Authority));
+                RequestFingerprint: ParticipantResultFingerprint(request.TransactionId.Value, request.ParticipantResultPayload)));
             return ApplyBatchResult(persisted, receipt);
         }
         catch (Exception exception)

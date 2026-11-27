@@ -5,7 +5,7 @@ meta:
   forkId: EchoCyber
   forkVersion: 9834d7d198ecf296a2092e3b069ebf862b24409d
   time: 11/22/2026 08:05:41
-  entityCount: 4480
+  entityCount: 4479
 maps:
 - 1
 grids:
@@ -6672,18 +6672,6 @@ entities:
       pos: -18.5,-8.5
     - type: NCElevatorCallButton
       elevatorId: g102
-- proto: NCMetaServer
-  entities:
-  - uid: 4182
-    components:
-    - type: Transform
-      parent: 1
-      pos: -7.5,21.5
-    - type: NCCityLocation
-    - type: ApcPowerReceiver
-      needsPower: False
-    - type: AlwaysPoweredReceiverState
-      needsPower: True
 - proto: NCPoweredlightAzure
   entities:
   - uid: 2457

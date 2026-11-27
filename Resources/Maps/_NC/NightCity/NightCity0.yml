@@ -5,7 +5,7 @@ meta:
   forkId: EchoCyber
   forkVersion: 9834d7d198ecf296a2092e3b069ebf862b24409d
   time: 11/22/2026 08:05:40
-  entityCount: 14744
+  entityCount: 14743
 maps:
 - 1
 grids:
@@ -10467,6 +10467,16 @@ entities:
       needsPower: False
     - type: AlwaysPoweredReceiverState
       needsPower: True
+  - uid: 1599
+    components:
+    - type: Transform
+      parent: 1
+      pos: -52.5,18.5
+    - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: ComputerBroken
   entities:
   - uid: 13365
@@ -14177,31 +14187,7 @@ entities:
     - type: Transform
       parent: 1
       pos: -52.597004,16.352478
-- proto: NCMetaBodyScanner
-  entities:
-  - uid: 1599
-    components:
-    - type: Transform
-      parent: 1
-      pos: -52.5,18.5
-    - type: NCCityLocation
-    - type: ApcPowerReceiver
-      needsPower: False
-    - type: AlwaysPoweredReceiverState
-      needsPower: True
-- proto: NCMetaDevelopmentVendor
-  entities:
-  - uid: 13432
-    components:
-    - type: Transform
-      parent: 1
-      pos: 60.5,11.5
-    - type: NCCityLocation
-    - type: ApcPowerReceiver
-      needsPower: False
-    - type: AlwaysPoweredReceiverState
-      needsPower: True
-- proto: NCMetaLaboratoryChemMaster
+- proto: ChemMaster
   entities:
   - uid: 14599
     components:

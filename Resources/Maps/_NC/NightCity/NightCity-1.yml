@@ -1742,6 +1742,28 @@ entities:
       needsPower: False
     - type: AlwaysPoweredReceiverState
       needsPower: True
+  - uid: 770
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 120.5,5.5
+    - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
+  - uid: 771
+    components:
+    - type: Transform
+      parent: 1
+      rot: -1.5707963267948966 rad
+      pos: 123.5,5.5
+    - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: CrateChemistryD
   entities:
   - uid: 1242
@@ -2436,30 +2458,6 @@ entities:
       elevatorId: gncb
       currentDepth: -1
       cabinId: a8cdcf0d-5ad6-4714-b81b-a08f6c56d074
-- proto: NCMetaBodyScanner
-  entities:
-  - uid: 770
-    components:
-    - type: Transform
-      parent: 1
-      rot: 1.5707963267948966 rad
-      pos: 120.5,5.5
-    - type: NCCityLocation
-    - type: ApcPowerReceiver
-      needsPower: False
-    - type: AlwaysPoweredReceiverState
-      needsPower: True
-  - uid: 771
-    components:
-    - type: Transform
-      parent: 1
-      rot: -1.5707963267948966 rad
-      pos: 123.5,5.5
-    - type: NCCityLocation
-    - type: ApcPowerReceiver
-      needsPower: False
-    - type: AlwaysPoweredReceiverState
-      needsPower: True
 - proto: NCPoweredlightBlueGray
   entities:
   - uid: 1037

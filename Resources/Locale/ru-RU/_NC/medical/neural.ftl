@@ -1,15 +1,8 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 
-nc-neural-claim = Зарегистрировать контроллер: { $module }
-nc-neural-workspace = Открыть META нейроконтроллера
-nc-neural-commission = Установить базовую нейропрошивку
-nc-neural-commissioned = Нейропрошивка установлена. Контроллер готов.
-nc-neural-commission-failed = Настройка не завершена. Проверьте питание верстака, владельца и установленное ПО.
 nc-neural-status = Диагностика: { $name }
 nc-neural-disable = Отключить: { $name }
 nc-neural-enable = Включить: { $name }
-nc-neural-connect = Подключить удерживаемый кабель к нейроразъёму
-nc-neural-program-request = Запросить сандевистан через META
 nc-neural-reading = { $name }: нагрев { $heat }%, восстановление { $cooldown } с.
 nc-neural-socket-empty = Чиповый разъём пуст. Доступных чипов пока нет.
 nc-neural-dodged = { $user } уклоняется благодаря керензикову!
@@ -173,35 +166,35 @@ ent-NCNeuralElectrodeStandard = электродная матрица
     .suffix = Стандартное
 
 ent-NCNeuralInterfaceImplant = нейроинтерфейсный разъём
-    .desc = Проводное подключение к совместимым устройствам META. Требует нейролинк и разрешения устройства.
+    .desc = Проводной нейроразъём. Требует нейролинк.
     .suffix = Стандартное
 
 ent-NCNeuralInterfaceImplantEmpty = нейроинтерфейсный разъём
-    .desc = Проводное подключение к совместимым устройствам META. Требует нейролинк и разрешения устройства.
+    .desc = Проводной нейроразъём. Требует нейролинк.
     .suffix = Стандартное, пустой корпус
 
 ent-NCNeuralInterfaceImplantQualityImproved = нейроинтерфейсный разъём
-    .desc = Проводное подключение к совместимым устройствам META. Требует нейролинк и разрешения устройства.
+    .desc = Проводной нейроразъём. Требует нейролинк.
     .suffix = Улучшенное
 
 ent-NCNeuralInterfaceImplantQualityImprovedEmpty = нейроинтерфейсный разъём
-    .desc = Проводное подключение к совместимым устройствам META. Требует нейролинк и разрешения устройства.
+    .desc = Проводной нейроразъём. Требует нейролинк.
     .suffix = Улучшенное, пустой корпус
 
 ent-NCNeuralInterfaceImplantQualityImprovised = нейроинтерфейсный разъём
-    .desc = Проводное подключение к совместимым устройствам META. Требует нейролинк и разрешения устройства.
+    .desc = Проводной нейроразъём. Требует нейролинк.
     .suffix = Кустарное
 
 ent-NCNeuralInterfaceImplantQualityImprovisedEmpty = нейроинтерфейсный разъём
-    .desc = Проводное подключение к совместимым устройствам META. Требует нейролинк и разрешения устройства.
+    .desc = Проводной нейроразъём. Требует нейролинк.
     .suffix = Кустарное, пустой корпус
 
 ent-NCNeuralInterfaceImplantQualityPremium = нейроинтерфейсный разъём
-    .desc = Проводное подключение к совместимым устройствам META. Требует нейролинк и разрешения устройства.
+    .desc = Проводной нейроразъём. Требует нейролинк.
     .suffix = Премиальное
 
 ent-NCNeuralInterfaceImplantQualityPremiumEmpty = нейроинтерфейсный разъём
-    .desc = Проводное подключение к совместимым устройствам META. Требует нейролинк и разрешения устройства.
+    .desc = Проводной нейроразъём. Требует нейролинк.
     .suffix = Премиальное, пустой корпус
 
 ent-NCNeuralProcessorImproved = нейронный сопроцессор

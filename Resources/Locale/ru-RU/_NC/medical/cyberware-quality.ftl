@@ -120,18 +120,6 @@ ent-NCSkeletalPowerJunctionQualityPremium = { ent-NCSkeletalPowerJunction }
     .desc = { ent-NCSkeletalPowerJunction.desc }
     .suffix = Премиальное
 
-ent-NCMetaCyberOpticsQualityImprovised = { ent-NCMetaCyberOptics }
-    .desc = { ent-NCMetaCyberOptics.desc }
-    .suffix = Кустарное
-
-ent-NCMetaCyberOpticsQualityImproved = { ent-NCMetaCyberOptics }
-    .desc = { ent-NCMetaCyberOptics.desc }
-    .suffix = Улучшенное
-
-ent-NCMetaCyberOpticsQualityPremium = { ent-NCMetaCyberOptics }
-    .desc = { ent-NCMetaCyberOptics.desc }
-    .suffix = Премиальное
-
 ent-NCImplantNeuralLinkMk1QualityImprovised = { ent-NCImplantNeuralLinkMk1 }
     .desc = Кибернетический компонент. Качество и состояние проверяются при осмотре.
     .suffix = Кустарное
@@ -814,66 +802,6 @@ ent-NCImplantMuscleBoneLaceUnpreparedQualityImproved = { ent-NCImplantMuscleBone
 
 ent-NCImplantMuscleBoneLaceUnpreparedQualityPremium = { ent-NCImplantMuscleBoneLaceUnprepared }
     .desc = { ent-NCImplantMuscleBoneLaceUnprepared.desc }
-    .suffix = Премиальное
-
-ent-NCMetaToolHandImplantQualityImprovised = { ent-NCMetaToolHandImplant }
-    .desc = { ent-NCMetaToolHandImplant.desc }
-    .suffix = Кустарное
-
-ent-NCMetaToolHandImplantQualityImproved = { ent-NCMetaToolHandImplant }
-    .desc = { ent-NCMetaToolHandImplant.desc }
-    .suffix = Улучшенное
-
-ent-NCMetaToolHandImplantQualityPremium = { ent-NCMetaToolHandImplant }
-    .desc = { ent-NCMetaToolHandImplant.desc }
-    .suffix = Премиальное
-
-ent-NCMetaMantisBladeImplantQualityImprovised = { ent-NCMetaMantisBladeImplant }
-    .desc = { ent-NCMetaMantisBladeImplant.desc }
-    .suffix = Кустарное
-
-ent-NCMetaMantisBladeImplantQualityImproved = { ent-NCMetaMantisBladeImplant }
-    .desc = { ent-NCMetaMantisBladeImplant.desc }
-    .suffix = Улучшенное
-
-ent-NCMetaMantisBladeImplantQualityPremium = { ent-NCMetaMantisBladeImplant }
-    .desc = { ent-NCMetaMantisBladeImplant.desc }
-    .suffix = Премиальное
-
-ent-NCMetaBiomonitorImplantQualityImprovised = { ent-NCMetaBiomonitorImplant }
-    .desc = { ent-NCMetaBiomonitorImplant.desc }
-    .suffix = Кустарное
-
-ent-NCMetaBiomonitorImplantQualityImproved = { ent-NCMetaBiomonitorImplant }
-    .desc = { ent-NCMetaBiomonitorImplant.desc }
-    .suffix = Улучшенное
-
-ent-NCMetaBiomonitorImplantQualityPremium = { ent-NCMetaBiomonitorImplant }
-    .desc = { ent-NCMetaBiomonitorImplant.desc }
-    .suffix = Премиальное
-
-ent-NCMetaSandevistanImplantQualityImprovised = { ent-NCMetaSandevistanImplant }
-    .desc = { ent-NCMetaSandevistanImplant.desc }
-    .suffix = Кустарное
-
-ent-NCMetaSandevistanImplantQualityImproved = { ent-NCMetaSandevistanImplant }
-    .desc = { ent-NCMetaSandevistanImplant.desc }
-    .suffix = Улучшенное
-
-ent-NCMetaSandevistanImplantQualityPremium = { ent-NCMetaSandevistanImplant }
-    .desc = { ent-NCMetaSandevistanImplant.desc }
-    .suffix = Премиальное
-
-ent-NCMetaKerenzikovImplantQualityImprovised = { ent-NCMetaKerenzikovImplant }
-    .desc = { ent-NCMetaKerenzikovImplant.desc }
-    .suffix = Кустарное
-
-ent-NCMetaKerenzikovImplantQualityImproved = { ent-NCMetaKerenzikovImplant }
-    .desc = { ent-NCMetaKerenzikovImplant.desc }
-    .suffix = Улучшенное
-
-ent-NCMetaKerenzikovImplantQualityPremium = { ent-NCMetaKerenzikovImplant }
-    .desc = { ent-NCMetaKerenzikovImplant.desc }
     .suffix = Премиальное
 
 nc-cyberware-frame-quality = Качество корпуса: {$quality}.

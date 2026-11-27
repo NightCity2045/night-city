@@ -6,7 +6,6 @@
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using Content.Client._NC.Meta.Editor;
 using NightCity.Diagnostics.Contracts;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
@@ -69,16 +68,6 @@ public sealed partial class NCDiagnosticsClientSystem
                 node["text"] = args["includeTextFields"]?.GetValue<bool>() == true && !SensitiveTextControl(edit)
                     ? BoundText(edit.Text) : "[redacted]";
             }
-            if (control is NCMetaCodeEditor editor)
-            {
-                var redacted = args["includeTextFields"]?.GetValue<bool>() != true || SensitiveTextControl(editor);
-                node["editable"] = editor.Editable;
-                node["textRedacted"] = redacted;
-                node["textTruncated"] = !redacted && editor.Source.Length > 512;
-                node["text"] = redacted ? "[redacted]" : BoundText(editor.Source);
-                if (!redacted && editor.VisibleInTree)
-                    node["editorState"] = JsonSerializer.SerializeToNode(editor.GetDiagnosticEditorState(), DiagnosticProtocol.JsonOptions);
-            }
             if (control is TextEdit multiline)
             {
                 var redacted = args["includeTextFields"]?.GetValue<bool>() != true || SensitiveTextControl(multiline);
@@ -133,7 +122,7 @@ public sealed partial class NCDiagnosticsClientSystem
             ["windowHeight"] = _graphics ? _clyde.MainWindow.Size.Y : (int?) null,
             ["framebufferWidth"] = _graphics ? _clyde.MainWindow.RenderTarget.Size.X : (int?) null,
             ["framebufferHeight"] = _graphics ? _clyde.MainWindow.RenderTarget.Size.Y : (int?) null,
-            ["uiScale"] = _ui.RootControl.UIScale, ["clipboardTest"] = ClipboardObservation(),
+            ["uiScale"] = _ui.RootControl.UIScale,
             ["truncated"] = queue.Count != 0, ["handlePolicy"] = "valid-until-next-ui-inspection-or-control-removal" };
     }
 
@@ -151,7 +140,6 @@ public sealed partial class NCDiagnosticsClientSystem
         var action = args.RequiredString("action", 32);
         switch (action)
         {
-            case "editor_input": return InteractEditor(control, args);
             case "scroll": return InteractScroll(control, args);
             case "select_tab":
             {
@@ -166,9 +154,6 @@ public sealed partial class NCDiagnosticsClientSystem
                 tabs.CurrentTab = tabMatches[0];
                 break;
             }
-            case "clipboard": return InteractClipboard(control, args);
-            case "client_size": return ResizeDiagnosticWindow(control, args, true);
-            case "own_window_size": return ResizeDiagnosticWindow(control, args, false);
             case "click":
             case "hover":
                 if (!_graphics)
@@ -214,18 +199,6 @@ public sealed partial class NCDiagnosticsClientSystem
                     multiline.CursorPosition = new(0, TextEdit.LineBreakBias.Top);
                     multiline.SelectionStart = new(multiline.TextLength, TextEdit.LineBreakBias.Top);
                     multiline.InsertAtCursor(replacement);
-                    break;
-                }
-                if (control is NCMetaCodeEditor editor)
-                {
-                    if (action != "set_text" || !editor.Editable)
-                        throw new DiagnosticException("unsupported_control", "This operation requires an editable text control; source editors support set_text.");
-                    if (SensitiveTextControl(editor))
-                        throw new DiagnosticException("access_denied", "Secret text fields cannot be filled through diagnostic UI actions.");
-                    if (args["text"] is not JsonValue sourceNode || !sourceNode.TryGetValue<string>(out var source) || source.Length > 2048)
-                        throw new DiagnosticException("invalid_arguments", "UI text must be a string of at most 2048 characters.");
-                    if (!editor.TryReplaceDocument(source))
-                        throw new DiagnosticException("invalid_arguments", "The source editor rejected the document.");
                     break;
                 }
                 if (control is not LineEdit { Editable: true } edit)

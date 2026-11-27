@@ -1,15 +1,8 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 
-nc-neural-claim = Register controller: { $module }
-nc-neural-workspace = Open neural controller META
-nc-neural-commission = Commission basic neural firmware
-nc-neural-commissioned = Neural firmware installed. Controller ready.
-nc-neural-commission-failed = Commissioning incomplete. Check bench power, ownership and existing firmware.
 nc-neural-status = Diagnostics: { $name }
 nc-neural-disable = Disable: { $name }
 nc-neural-enable = Enable: { $name }
-nc-neural-connect = Connect held cable to neural jack
-nc-neural-program-request = Request Sandevistan through META
 nc-neural-reading = { $name }: heat { $heat }%, recovery { $cooldown } s.
 nc-neural-socket-empty = Chip socket empty. No chips are currently available.
 nc-neural-dodged = { $user } evades with Kerenzikov!
@@ -173,35 +166,35 @@ ent-NCNeuralElectrodeStandard = electrode matrix
     .suffix = Standard
 
 ent-NCNeuralInterfaceImplant = neural interface jack
-    .desc = Wired connection to compatible META devices. Requires a neural link and device permissions.
+    .desc = Wired neural port. Requires a neural link.
     .suffix = Standard
 
 ent-NCNeuralInterfaceImplantEmpty = neural interface jack
-    .desc = Wired connection to compatible META devices. Requires a neural link and device permissions.
+    .desc = Wired neural port. Requires a neural link.
     .suffix = Standard, empty frame
 
 ent-NCNeuralInterfaceImplantQualityImproved = neural interface jack
-    .desc = Wired connection to compatible META devices. Requires a neural link and device permissions.
+    .desc = Wired neural port. Requires a neural link.
     .suffix = Improved
 
 ent-NCNeuralInterfaceImplantQualityImprovedEmpty = neural interface jack
-    .desc = Wired connection to compatible META devices. Requires a neural link and device permissions.
+    .desc = Wired neural port. Requires a neural link.
     .suffix = Improved, empty frame
 
 ent-NCNeuralInterfaceImplantQualityImprovised = neural interface jack
-    .desc = Wired connection to compatible META devices. Requires a neural link and device permissions.
+    .desc = Wired neural port. Requires a neural link.
     .suffix = Improvised
 
 ent-NCNeuralInterfaceImplantQualityImprovisedEmpty = neural interface jack
-    .desc = Wired connection to compatible META devices. Requires a neural link and device permissions.
+    .desc = Wired neural port. Requires a neural link.
     .suffix = Improvised, empty frame
 
 ent-NCNeuralInterfaceImplantQualityPremium = neural interface jack
-    .desc = Wired connection to compatible META devices. Requires a neural link and device permissions.
+    .desc = Wired neural port. Requires a neural link.
     .suffix = Premium
 
 ent-NCNeuralInterfaceImplantQualityPremiumEmpty = neural interface jack
-    .desc = Wired connection to compatible META devices. Requires a neural link and device permissions.
+    .desc = Wired neural port. Requires a neural link.
     .suffix = Premium, empty frame
 
 ent-NCNeuralProcessorImproved = neural coprocessor

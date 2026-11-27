@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 
-
 - type: ncCyberwarePartSlot
   id: NCNeuralControllerSlot
   name: nc-neural-slot-controller
@@ -196,18 +195,6 @@
   slot: NCNeuralCoolingSlot
   maximumIntegrity: 100
   quality: NCCyberwareQualityPremium
-
-- type: ncMetaHardware
-  id: NCMetaNeuralController
-  memoryBytes: 262144
-  storageBytes: 1048576
-  maxProcesses: 1
-  gasPerWindow: 25000
-  idleWatts: 0
-  activeWatts: 1
-  interfaces:
-  - meta.implants.NeuralController
-  - meta.net.MessagePort
 
 - type: ncCyberwareAssembly
   id: NCNeuralLinkMk1Assembly

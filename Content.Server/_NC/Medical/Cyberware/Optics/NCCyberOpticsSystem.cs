@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 using System.Linq;
 using System.Numerics;
-using Content.Server._NC.Meta.Devices;
-using Content.Server._NC.Meta.Domains;
-using Content.Server._NC.Meta.Runtime;
 using Content.Server._NC.Medical.Cyberware.Internal;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Cyberware;
@@ -37,14 +34,12 @@ public sealed partial class NCOpticWearerComponent : Component
     public Vector2? AppliedZoom;
 }
 
-/// <summary>Native optical limits apply equally to manual requests and guest programs.</summary>
+/// <summary>Cybereye modes requested by the wearer, limited by the installed modules and the eye's own condition.</summary>
 public sealed partial class NCCyberOpticsSystem : EntitySystem
 {
     [Dependency] private Content.Shared.Movement.Systems.SharedContentEyeSystem _contentEye = default!;
     [Dependency] private NCCyberwareSystem _cyberware = default!;
-    [Dependency] private NCMetaOpticsSystem _lowLight = default!;
-    [Dependency] private NCMetaRuntimeSystem _runtime = default!;
-    [Dependency] private NCMetaDeviceRegistrySystem _devices = default!;
+    [Dependency] private NCCyberEyeLowLightSystem _lowLight = default!;
     [Dependency] private NCMedicalImplantSystem _medical = default!;
     [Dependency] private SharedContainerSystem _containers = default!;
     [Dependency] private SharedInteractionSystem _interaction = default!;
@@ -65,31 +60,13 @@ public sealed partial class NCCyberOpticsSystem : EntitySystem
         SubscribeLocalEvent<NCOpticWearerComponent, GetVerbsEvent<AlternativeVerb>>(OnVerbs);
         SubscribeLocalEvent<NCOpticRadarComponent, ActivateInWorldEvent>(OnRadarActivate);
         SubscribeLocalEvent<NCOpticWearerComponent, ComponentShutdown>(OnWearerShutdown);
-        _devices.RegisterPowerPolicy(ControllerPower);
         InitializeRecording();
-        InitializeMeta();
         InitializeSurgery();
         InitializeAppearance();
     }
 
-    public bool TryResolveController(EntityUid controller, out EntityUid eye, out EntityUid body)
-    {
-        eye = default; body = default;
-        if (!HasComp<NCOpticControllerComponent>(controller) ||
-            !_containers.TryGetContainingContainer((controller, null, null), out var container) ||
-            !HasComp<NCCyberEyeComponent>(container.Owner)) return false;
-        eye = container.Owner;
-        return _cyberware.TryGetOwningBody(eye, out body);
-    }
-
     public bool TryGetController(EntityUid eye, out EntityUid controller) =>
         _cyberware.TryGetMedicalPart(eye, "NCOpticControllerSlot", out controller) && HasComp<NCOpticControllerComponent>(controller);
-
-    private bool? ControllerPower(EntityUid uid) => !HasComp<NCOpticControllerComponent>(uid) ? null :
-        TryResolveController(uid, out var eye, out _) ? IsReady(eye, out _) :
-        TryGetServiceBench(uid, out var bench) && _cells.HasCharge(bench, 1);
-
-    public bool HasControllerPower(EntityUid uid) => ControllerPower(uid) == true;
 
     public bool IsReady(EntityUid eye, out EntityUid body)
     {
@@ -131,32 +108,13 @@ public sealed partial class NCCyberOpticsSystem : EntitySystem
         if (mode == NCOpticMode.AntiFlash) optics.AntiFlash = enabled;
         else if (mode == NCOpticMode.AugmentedReality) optics.AugmentedReality = enabled;
         else optics.ActiveMode = enabled ? mode : NCOpticMode.Clear;
-        optics.CommandLease = _timing.CurTime + TimeSpan.FromSeconds(2);
         return true;
-    }
-
-    public bool TrySetRuntimeWatts(EntityUid controller, float watts, float seconds = 0)
-    {
-        if (!float.IsFinite(watts) || watts < 0 || !float.IsFinite(seconds) || seconds < 0) return false;
-        if (TryGetServiceBench(controller, out var bench)) return seconds == 0 || _cells.TryUseCharge(bench, watts * seconds);
-        if (!TryResolveController(controller, out var eye, out _) ||
-            !TryComp<NCCyberEyeComponent>(eye, out var optics)) return false;
-        optics.RuntimeLoad = Math.Clamp(watts / 4, 0, .5f);
-        return true;
-    }
-
-    public void ClearController(EntityUid controller)
-    {
-        if (TryResolveController(controller, out var eye, out _) && TryComp<NCCyberEyeComponent>(eye, out var optics))
-        { optics.ActiveMode = NCOpticMode.Clear; optics.AntiFlash = false; optics.AugmentedReality = false; optics.CommandLease = TimeSpan.Zero; }
     }
 
     public override void Update(float frameTime)
     {
         if (_timing.CurTime < _nextUpdate) return;
         _nextUpdate = _timing.CurTime + TimeSpan.FromMilliseconds(500);
-        var boards = EntityQueryEnumerator<NCOpticControllerComponent>();
-        while (boards.MoveNext(out var board, out _)) _devices.TryRestoreOpticIdentity(board);
         UpdateExternalRadars();
         var bodies = new Dictionary<EntityUid, List<Entity<NCCyberEyeComponent>>>();
         var query = EntityQueryEnumerator<NCCyberEyeComponent>();
@@ -166,8 +124,6 @@ public sealed partial class NCCyberOpticsSystem : EntitySystem
             if (!_cyberware.TryGetOwningBody(uid, out var body)) { ClearEye(uid, optics); continue; }
             if (!bodies.TryGetValue(body, out var eyes)) bodies[body] = eyes = [];
             eyes.Add((uid, optics)); EnsureComp<NCOpticWearerComponent>(body);
-            if (TryGetController(uid, out var controller))
-                _runtime.TryPublishEvent(controller, "meta.implants.CyberEye.sampled", process => Sample(process, uid));
         }
         foreach (var (body, eyes) in bodies) UpdateBody(body, eyes);
         var wearers = EntityQueryEnumerator<NCOpticWearerComponent>();
@@ -190,14 +146,14 @@ public sealed partial class NCCyberOpticsSystem : EntitySystem
         foreach (var eye in eyes.Take(2))
         {
             eye.Comp.Body = body;
-            if (!IsReady(eye, out _) || eye.Comp.CommandLease <= _timing.CurTime) { ClearEye(eye, eye.Comp); continue; }
+            if (!IsReady(eye, out _)) { ClearEye(eye, eye.Comp); continue; }
             if (eye.Comp.ActiveMode != NCOpticMode.Clear && !TryModule(eye, eye.Comp.ActiveMode, out _)) eye.Comp.ActiveMode = NCOpticMode.Clear;
             var ownFlash = eye.Comp.AntiFlash && TryModule(eye, NCOpticMode.AntiFlash, out _);
             flash |= ownFlash;
-            var lowLight = eye.Comp.ActiveMode == NCOpticMode.LowLight && TryComp<NCMetaOpticsComponent>(eye, out var old) &&
-                _lowLight.TryMeasure(body, old, out var ambient) && ambient > .005 / MathF.Max(.5f, FunctionQuality(eye, NCOpticMode.LowLight));
-            _lowLight.TrySetManualFilter(eye.Owner, body, lowLight);
-            var load = eye.Comp.RuntimeLoad + (eye.Comp.ActiveMode == NCOpticMode.Clear ? 0 : .35f / MathF.Max(.5f, FunctionQuality(eye, eye.Comp.ActiveMode))) +
+            var lowLight = eye.Comp.ActiveMode == NCOpticMode.LowLight && TryComp<NCCyberEyeLowLightComponent>(eye, out var sensor) &&
+                _lowLight.TryMeasure(body, sensor, out var ambient) && ambient > .005 / MathF.Max(.5f, FunctionQuality(eye, NCOpticMode.LowLight));
+            _lowLight.TrySetFilter(eye.Owner, body, lowLight);
+            var load = (eye.Comp.ActiveMode == NCOpticMode.Clear ? 0 : .35f / MathF.Max(.5f, FunctionQuality(eye, eye.Comp.ActiveMode))) +
                 (ownFlash ? .1f / MathF.Max(.5f, FunctionQuality(eye, NCOpticMode.AntiFlash)) : 0) + (eye.Comp.AugmentedReality ? .1f : 0);
             _cyberware.TrySetLoad(eye, Math.Clamp(load, 0, 1));
             if (eye.Comp.ActiveMode == NCOpticMode.Infrared) view.Contacts = Observe(body, null, true, FunctionQuality(eye, NCOpticMode.Infrared));
@@ -216,8 +172,8 @@ public sealed partial class NCCyberOpticsSystem : EntitySystem
 
     private void ClearEye(EntityUid uid, NCCyberEyeComponent eye)
     {
-        if (eye.Body is { } body && Exists(body)) _lowLight.TrySetManualFilter(uid, body, false);
-        eye.ActiveMode = NCOpticMode.Clear; eye.AntiFlash = false; eye.AugmentedReality = false; eye.RuntimeLoad = 0;
+        if (eye.Body is { } body && Exists(body)) _lowLight.TrySetFilter(uid, body, false);
+        eye.ActiveMode = NCOpticMode.Clear; eye.AntiFlash = false; eye.AugmentedReality = false;
         _cyberware.TrySetLoad(uid, 0);
     }
 
@@ -261,10 +217,8 @@ public sealed partial class NCCyberOpticsSystem : EntitySystem
         var query = EntityQueryEnumerator<NCCyberEyeComponent>();
         while (query.MoveNext(out var eye, out _))
         {
-            if (!_cyberware.TryGetOwningBody(eye, out var owner) || owner != user || !TryGetController(eye, out var controller)) continue;
-            var target = eye; var board = controller;
-            if (_devices.CanClaim(board, user)) args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString("nc-optics-claim", ("eye", Name(eye))), Act = () => _devices.TryClaim(board, user) });
-            AddControllerVerbs(target, board, user, args.Verbs);
+            if (!_cyberware.TryGetOwningBody(eye, out var owner) || owner != user || !TryGetController(eye, out _)) continue;
+            var target = eye;
             if (TryModule(eye, NCOpticMode.Recording, out var memory))
                 args.Verbs.Add(new AlternativeVerb { Text = Loc.GetString("nc-optics-album") + ": " + Name(eye), Act = () => SendAlbum(memory, user, 0) });
             foreach (var mode in Enum.GetValues<NCOpticMode>())
@@ -278,10 +232,10 @@ public sealed partial class NCCyberOpticsSystem : EntitySystem
 
     private bool TryRequest(EntityUid eye, EntityUid user, NCOpticMode mode)
     {
-        if (!_blocker.CanInteract(user, user) || !IsReady(eye, out var body) || body != user || !TryGetController(eye, out var controller)) return false;
+        if (!_blocker.CanInteract(user, user) || !IsReady(eye, out var body) || body != user || !TryGetController(eye, out _)) return false;
         var optics = Comp<NCCyberEyeComponent>(eye);
         var enabled = mode switch { NCOpticMode.AntiFlash => !optics.AntiFlash, NCOpticMode.AugmentedReality => !optics.AugmentedReality, _ => optics.ActiveMode != mode };
         optics.RequestedMode = mode;
-        return PublishCommand(controller, (int) mode, enabled, user);
+        return TrySetMode(eye, mode, enabled);
     }
 }

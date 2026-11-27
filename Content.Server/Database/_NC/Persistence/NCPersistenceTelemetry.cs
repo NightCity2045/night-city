@@ -230,13 +230,6 @@ public sealed partial class ServerDbManager
                 }
             }
         }
-        catch (NCMetaBlobQuotaException)
-        {
-            // Expected bounded-storage backpressure must not trip the shared DB circuit.
-            RegisterNCPersistenceSuccess();
-            NCPersistenceTelemetry.Record(write, writeClass, Stopwatch.GetElapsedTime(startedAt), null, false);
-            throw;
-        }
         catch
         {
             RegisterNCPersistenceFailure();

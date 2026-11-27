@@ -12,7 +12,7 @@ using Robust.Shared.Timing;
 
 namespace Content.Server._NC.Vehicle;
 
-/// <summary>Real alarm hardware. Manual key access and alarm fallback do not depend on a META process.</summary>
+/// <summary>Real alarm hardware with manual key access and an alarm fallback.</summary>
 [RegisterComponent]
 public sealed partial class NCVehicleSecurityComponent : Component
 {

@@ -28,12 +28,10 @@ public sealed partial class NCCyberEyeComponent : Component
     public bool AntiFlash;
     public bool AugmentedReality;
     public TimeSpan NextSample;
-    public TimeSpan CommandLease;
-    public float RuntimeLoad;
     public EntityUid? Body;
 }
 
-/// <summary>Removable META computer. Its durable device identity derives from the part identity.</summary>
+/// <summary>Removable optic controller board; a cybereye needs one installed to switch modes.</summary>
 [RegisterComponent]
 public sealed partial class NCOpticControllerComponent : Component
 {

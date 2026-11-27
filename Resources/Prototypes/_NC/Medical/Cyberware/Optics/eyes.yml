@@ -25,7 +25,7 @@
       NCOpticNeuralSlot: NCOpticNeuralStandard
       NCOpticPowerSlot: NCOpticPowerStandard
   - type: NCCyberEye
-  - type: NCMetaOptics
+  - type: NCCyberEyeLowLight
     supportsLowLight: true
   - type: VisualOrgan
     layer: enum.HumanoidVisualLayers.Eyes
@@ -69,7 +69,7 @@
       NCOpticNeuralSlot: NCOpticNeuralImprovised
       NCOpticPowerSlot: NCOpticPowerImprovised
   - type: NCCyberEye
-  - type: NCMetaOptics
+  - type: NCCyberEyeLowLight
     supportsLowLight: true
   - type: VisualOrgan
     layer: enum.HumanoidVisualLayers.Eyes
@@ -113,7 +113,7 @@
       NCOpticNeuralSlot: NCOpticNeuralImproved
       NCOpticPowerSlot: NCOpticPowerImproved
   - type: NCCyberEye
-  - type: NCMetaOptics
+  - type: NCCyberEyeLowLight
     supportsLowLight: true
   - type: VisualOrgan
     layer: enum.HumanoidVisualLayers.Eyes
@@ -157,7 +157,7 @@
       NCOpticNeuralSlot: NCOpticNeuralPremium
       NCOpticPowerSlot: NCOpticPowerPremium
   - type: NCCyberEye
-  - type: NCMetaOptics
+  - type: NCCyberEyeLowLight
     supportsLowLight: true
   - type: VisualOrgan
     layer: enum.HumanoidVisualLayers.Eyes

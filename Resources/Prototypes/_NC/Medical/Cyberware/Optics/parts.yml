@@ -32,17 +32,6 @@
   id: NCOpticCosmeticSlot
   name: nc-optics-slot-cosmetic
 
-- type: ncMetaHardware
-  id: NCMetaOpticController
-  memoryBytes: 262144
-  storageBytes: 1048576
-  maxProcesses: 1
-  gasPerWindow: 25000
-  idleWatts: 0
-  activeWatts: 1
-  interfaces:
-  - meta.implants.CyberEye
-
 - type: ncCyberwarePart
   id: NCOpticControllerStandardPart
   slot: NCOpticControllerSlot
@@ -60,20 +49,6 @@
   - type: NCCyberwarePart
     profile: NCOpticControllerStandardPart
   - type: NCOpticController
-  - type: NCMetaHost
-    profile: NCMetaOpticController
-    allowClaim: true
-  - type: NCMetaDevice
-    allowClaim: true
-    interfaces:
-    - meta.implants.CyberEye
-  - type: NCMetaTerminal
-  - type: NCMetaPort
-    networkId: LOCAL
-  - type: UserInterface
-    interfaces:
-      enum.NCMetaUiKey.Workspace:
-        type: NCMetaWorkspaceBoundUserInterface
 
 - type: entity
   parent: NCOpticControllerStandard
@@ -100,20 +75,6 @@
   - type: NCCyberwarePart
     profile: NCOpticControllerImprovisedPart
   - type: NCOpticController
-  - type: NCMetaHost
-    profile: NCMetaOpticController
-    allowClaim: true
-  - type: NCMetaDevice
-    allowClaim: true
-    interfaces:
-    - meta.implants.CyberEye
-  - type: NCMetaTerminal
-  - type: NCMetaPort
-    networkId: LOCAL
-  - type: UserInterface
-    interfaces:
-      enum.NCMetaUiKey.Workspace:
-        type: NCMetaWorkspaceBoundUserInterface
 
 - type: entity
   parent: NCOpticControllerImprovised
@@ -140,20 +101,6 @@
   - type: NCCyberwarePart
     profile: NCOpticControllerImprovedPart
   - type: NCOpticController
-  - type: NCMetaHost
-    profile: NCMetaOpticController
-    allowClaim: true
-  - type: NCMetaDevice
-    allowClaim: true
-    interfaces:
-    - meta.implants.CyberEye
-  - type: NCMetaTerminal
-  - type: NCMetaPort
-    networkId: LOCAL
-  - type: UserInterface
-    interfaces:
-      enum.NCMetaUiKey.Workspace:
-        type: NCMetaWorkspaceBoundUserInterface
 
 - type: entity
   parent: NCOpticControllerImproved
@@ -180,20 +127,6 @@
   - type: NCCyberwarePart
     profile: NCOpticControllerPremiumPart
   - type: NCOpticController
-  - type: NCMetaHost
-    profile: NCMetaOpticController
-    allowClaim: true
-  - type: NCMetaDevice
-    allowClaim: true
-    interfaces:
-    - meta.implants.CyberEye
-  - type: NCMetaTerminal
-  - type: NCMetaPort
-    networkId: LOCAL
-  - type: UserInterface
-    interfaces:
-      enum.NCMetaUiKey.Workspace:
-        type: NCMetaWorkspaceBoundUserInterface
 
 - type: entity
   parent: NCOpticControllerPremium

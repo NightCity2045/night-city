@@ -52,11 +52,6 @@
   - type: NCCyberwarePart
     profile: NCMedicalControllerImprovisedPart
   - type: NCMedicalController
-  - type: NCMetaDevice
-    allowClaim: true
-    interfaces: [meta.implants.MedicalProgrammer]
-  - type: NCMetaPort
-    networkId: LOCAL
 
 - type: ncCyberwarePart
   id: NCMedicalControllerStandardPart
@@ -74,11 +69,6 @@
   - type: NCCyberwarePart
     profile: NCMedicalControllerStandardPart
   - type: NCMedicalController
-  - type: NCMetaDevice
-    allowClaim: true
-    interfaces: [meta.implants.MedicalProgrammer]
-  - type: NCMetaPort
-    networkId: LOCAL
 
 - type: ncCyberwarePart
   id: NCMedicalControllerImprovedPart
@@ -96,11 +86,6 @@
   - type: NCCyberwarePart
     profile: NCMedicalControllerImprovedPart
   - type: NCMedicalController
-  - type: NCMetaDevice
-    allowClaim: true
-    interfaces: [meta.implants.MedicalProgrammer]
-  - type: NCMetaPort
-    networkId: LOCAL
 
 - type: ncCyberwarePart
   id: NCMedicalControllerPremiumPart
@@ -118,11 +103,6 @@
   - type: NCCyberwarePart
     profile: NCMedicalControllerPremiumPart
   - type: NCMedicalController
-  - type: NCMetaDevice
-    allowClaim: true
-    interfaces: [meta.implants.MedicalProgrammer]
-  - type: NCMetaPort
-    networkId: LOCAL
 
 - type: ncCyberwarePart
   id: NCMedicalSensorImprovisedPart

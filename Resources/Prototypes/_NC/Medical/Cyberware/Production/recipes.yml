@@ -367,6 +367,8 @@
   - NCProduceNCMedicalSensorImproved
   - NCProduceNCMedicalSensorPremium
   - NCProduceNCMedicalControllerBasic
+  - NCProduceNCMedicalControllerBiomonitor
+  - NCProduceNCMedicalControllerInjector
   - NCProduceNCOpticRadarImplantStandardEmpty
   - NCProduceNCOpticRadarImplantImprovisedEmpty
   - NCProduceNCOpticRadarImplantImprovedEmpty

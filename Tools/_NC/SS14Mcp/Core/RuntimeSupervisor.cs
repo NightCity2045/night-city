@@ -31,7 +31,6 @@ public sealed class RuntimeSupervisor(WorkspacePaths paths, IDiagnosticBridge br
         public readonly Dictionary<string, string> BinaryHashes = new();
         public ResourceSnapshotInfo? Resources;
         public string? BuildId;
-        public NightCity.Diagnostics.Seeds.SqliteSeedArtifact.Report? SqlitePrefill;
         public string State = "starting";
     }
 
@@ -56,7 +55,6 @@ public sealed class RuntimeSupervisor(WorkspacePaths paths, IDiagnosticBridge br
             if (_environments.Values.Count(x => x.State != "stopped") >= 3)
                 throw new DiagnosticException("environment_limit", "At most three owned environments may run at once.");
             var build = DiagnosticRuntimeBuild.Resolve(paths, Environment.GetEnvironmentVariable("SS14_MCP_BUILD_ID"));
-            var sqliteSeed = SqliteSeedPrefill.ReadEnvironment();
             var serverAssembly = build.ServerAssembly;
             var clientAssembly = build.ClientAssembly;
             if (!File.Exists(serverAssembly) || clients > 0 && !File.Exists(clientAssembly))
@@ -119,12 +117,6 @@ public sealed class RuntimeSupervisor(WorkspacePaths paths, IDiagnosticBridge br
             var serverAssemblyDirectory = Path.Combine(serverDirectory, "bin", "Content.Server");
             StageBinaries(Path.GetDirectoryName(serverAssembly)!, serverAssemblyDirectory, cancellationToken);
             PrepareResourceRoots(serverDirectory);
-            if (sqliteSeed != null)
-            {
-                environment.SqlitePrefill = await sqliteSeed.MaterializeAsync(paths, id, cancellationToken);
-                environment.Logs.Add("info", "supervisor", "Validated pristine SQLite prefill; normal server migrations will still run.");
-                await WriteManifestAsync(environment, cancellationToken);
-            }
             var serverArgs = new[] { Path.Combine(serverAssemblyDirectory, "Content.Server.dll"), "--config-file", configPath,
                 "--data-dir", Path.Combine(directory, "server-data"), "--mount-dir", paths.Resolve("RobustToolbox/Resources"),
                 "--mount-dir", environment.Resources.Directory };
@@ -249,7 +241,7 @@ public sealed class RuntimeSupervisor(WorkspacePaths paths, IDiagnosticBridge br
         };
         foreach (var argument in arguments)
             start.ArgumentList.Add(argument);
-        SqliteSeedPrefill.ClearBootstrapEnvironment(start);
+        ClearInheritedSecrets(start);
         foreach (var (key, value) in variables)
             start.Environment[key] = value;
         using (var owner = Process.GetCurrentProcess())
@@ -295,31 +287,6 @@ public sealed class RuntimeSupervisor(WorkspacePaths paths, IDiagnosticBridge br
             if (Path.GetExtension(file) is ".dll" or ".json" or ".exe" or ".so" or ".dylib" or ".txt")
                 File.Copy(file, Path.Combine(destination, Path.GetFileName(file)), overwrite: false);
         }
-        // META resolves only this canonical worker bundle. Top-level DLL copies
-        // cannot substitute for its deps/runtimeconfig and matching core.
-        var workerSource = paths.Resolve(Path.GetFullPath(Path.Combine(source, "..", "MetaCompilerWorker")));
-        if (File.Exists(Path.Combine(source, "Content.Server.dll")))
-        {
-            string[] workerFiles = ["Meta.CompilerWorker.dll", "Meta.CompilerWorker.deps.json",
-                "Meta.CompilerWorker.runtimeconfig.json", "Content.Meta.dll"];
-            foreach (var name in workerFiles)
-            {
-                var file = paths.Resolve(Path.Combine(workerSource, name));
-                if (!File.Exists(file))
-                    throw new DiagnosticException("build_required", "The canonical META compiler worker bundle is incomplete.");
-            }
-            var core = paths.Resolve(Path.Combine(source, "Content.Meta.dll"));
-            if (!File.Exists(core) || !SHA256.HashData(File.ReadAllBytes(core)).AsSpan().SequenceEqual(
-                    SHA256.HashData(File.ReadAllBytes(Path.Combine(workerSource, "Content.Meta.dll")))))
-                throw new DiagnosticException("build_required", "Runtime and compiler worker contain different META cores.");
-            var workerDestination = paths.Resolve(Path.GetFullPath(Path.Combine(destination, "..", "MetaCompilerWorker")));
-            System.IO.Directory.CreateDirectory(workerDestination);
-            foreach (var name in workerFiles)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                File.Copy(Path.Combine(workerSource, name), Path.Combine(workerDestination, name), overwrite: false);
-            }
-        }
         var runtimes = Path.Combine(source, "runtimes");
         if (!System.IO.Directory.Exists(runtimes))
             return;
@@ -356,7 +323,6 @@ public sealed class RuntimeSupervisor(WorkspacePaths paths, IDiagnosticBridge br
         object manifest;
         lock (environment.Gate)
             manifest = new { Environment = Describe(environment), BinarySha256 = environment.BinaryHashes, ResourceSnapshot = environment.Resources, AcceptanceBuildId = environment.BuildId,
-                SqlitePrefill = environment.SqlitePrefill,
                 OwnerProcessId = Environment.ProcessId,
                 Processes = environment.Processes.Select(process => new { process.Id, StartedAtUtc = process.StartTime.ToUniversalTime() }).ToArray() };
         return File.WriteAllTextAsync(Path.Combine(environment.Directory, "manifest.json"),
@@ -389,5 +355,13 @@ public sealed class RuntimeSupervisor(WorkspacePaths paths, IDiagnosticBridge br
             foreach (var process in processes) process.Dispose();
         }
         _startupGate.Dispose();
+    }
+
+    /// <summary>Game children never inherit supervisor configuration, auth or model-provider keys.</summary>
+    private static void ClearInheritedSecrets(ProcessStartInfo start)
+    {
+        foreach (var key in start.Environment.Keys.Where(key => key.StartsWith("SS14_MCP_", StringComparison.Ordinal) ||
+                     key == "NC_DIAGNOSTICS_WORKSPACE" || key.StartsWith("ROBUST_AUTH_", StringComparison.Ordinal) ||
+                     key is "OPENAI_API_KEY" or "ANTHROPIC_API_KEY").ToArray()) start.Environment.Remove(key);
     }
 }

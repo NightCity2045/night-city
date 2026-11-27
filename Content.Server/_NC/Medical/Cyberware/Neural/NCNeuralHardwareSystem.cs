@@ -2,8 +2,6 @@
 using System.Linq;
 using Content.Server._NC.Medical.Cyberware.Abilities;
 using Content.Server._NC.Medical.Wounds;
-using Content.Server._NC.Meta.Devices;
-using Content.Server._NC.Meta.Runtime;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Cyberware;
 using Content.Shared._NC.Medical.Cyberware.Abilities;
@@ -17,7 +15,6 @@ using Content.Shared.Popups;
 using Content.Shared.PowerCell;
 using Content.Shared.Standing;
 using Content.Shared.Verbs;
-using Robust.Shared.Containers;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
@@ -26,16 +23,11 @@ namespace Content.Server._NC.Medical.Cyberware.Neural;
 [RegisterComponent]
 public sealed partial class NCNeuralWearerComponent : Component;
 
-[RegisterComponent]
-public sealed partial class NCNeuralBenchComponent : Component;
-
 public sealed partial class NCNeuralHardwareSystem : EntitySystem
 {
     [Dependency] private NCCyberwareSystem _cyberware = default!;
     [Dependency] private NCCyberwareAbilitySystem _abilities = default!;
-    [Dependency] private NCMetaDeviceRegistrySystem _devices = default!;
-    [Dependency] private NCMetaRuntimeSystem _runtime = default!;
-    [Dependency] private SharedContainerSystem _containers = default!;
+    [Dependency] private NCMedicalBodySystem _medical = default!;
     [Dependency] private SharedInteractionSystem _interaction = default!;
     [Dependency] private ActionBlockerSystem _blocker = default!;
     [Dependency] private StandingStateSystem _standing = default!;
@@ -49,9 +41,6 @@ public sealed partial class NCNeuralHardwareSystem : EntitySystem
     {
         base.Initialize();
         SubscribeLocalEvent<NCNeuralWearerComponent, GetVerbsEvent<AlternativeVerb>>(OnWearerVerbs);
-        _devices.RegisterPowerPolicy(ControllerPower);
-        _devices.RegisterClaimPolicy(ClaimPolicy);
-        InitializeMeta();
     }
 
     public bool IsReady(EntityUid module) => TryComp<NCCyberwareComponent>(module, out var hardware) &&
@@ -61,39 +50,16 @@ public sealed partial class NCNeuralHardwareSystem : EntitySystem
     public bool TryGetController(EntityUid module, out EntityUid controller) =>
         _cyberware.TryGetMedicalPart(module, "NCNeuralControllerSlot", out controller) && HasComp<NCNeuralControllerComponent>(controller);
 
-    public bool TryResolveController(EntityUid board, out EntityUid module, out EntityUid body)
+    public bool TrySetEnabled(EntityUid module, bool enabled)
     {
-        module = default; body = default;
-        if (!HasComp<NCNeuralControllerComponent>(board) ||
-            !_containers.TryGetContainingContainer((board, null, null), out var container) ||
-            !HasComp<NCNeuralHardwareComponent>(container.Owner)) return false;
-        module = container.Owner;
-        return _cyberware.TryGetOwningBody(module, out body);
-    }
-
-    public bool TryGetServiceBench(EntityUid board, out EntityUid bench)
-    {
-        bench = default;
-        if (!_containers.TryGetContainingContainer((board, null, null), out var container)) return false;
-        var parent = container.Owner;
-        if (HasComp<NCNeuralHardwareComponent>(parent))
-        {
-            if (_cyberware.TryGetOwningBody(parent, out _) || !_containers.TryGetContainingContainer((parent, null, null), out container)) return false;
-            parent = container.Owner;
-        }
-        bench = parent;
-        return HasComp<NCCyberwareWorkbenchComponent>(bench);
-    }
-
-    private bool? ControllerPower(EntityUid board) => !HasComp<NCNeuralControllerComponent>(board) ? null :
-        TryResolveController(board, out var module, out _) ? IsReady(module) :
-        TryGetServiceBench(board, out var bench) && _cells.HasCharge(bench, 1);
-    public bool HasControllerPower(EntityUid board) => ControllerPower(board) == true;
-    public bool TrySetRuntimeWatts(EntityUid board, float watts, float seconds)
-    {
-        if (!float.IsFinite(watts) || watts < 0 || !float.IsFinite(seconds) || seconds < 0) return false;
-        if (TryGetServiceBench(board, out var bench)) return seconds == 0 || _cells.TryUseCharge(bench, watts * seconds);
-        return TryResolveController(board, out var module, out _) && _cyberware.TrySetComputeLoad(module, Math.Clamp(watts / 4, 0, .5f));
+        if (!TryComp<NCNeuralHardwareComponent>(module, out var neural) ||
+            !_cyberware.TryGetOwningBody(module, out var body) || enabled && !IsReady(module)) return false;
+        if (neural.Kind == NCNeuralKind.Sandevistan)
+            return _abilities.TrySetEnabled(body, module, enabled);
+        if (neural.Kind is NCNeuralKind.Link or NCNeuralKind.ChipSocket) return enabled;
+        neural.Enabled = enabled;
+        _medical.TryMarkDirty(body, NCMedicalDirtyDomains.Persistence);
+        return true;
     }
 
     public bool TryEvade(EntityUid target, EntityUid? source, Content.Shared._NC.ActionResolution.NCActionResolutionId resolution, uint sequence)
@@ -126,20 +92,12 @@ public sealed partial class NCNeuralHardwareSystem : EntitySystem
     {
         if (_timing.CurTime < _nextUpdate) return;
         _nextUpdate = _timing.CurTime + TimeSpan.FromSeconds(.5);
-        var boards = EntityQueryEnumerator<NCNeuralControllerComponent>();
-        while (boards.MoveNext(out var board, out _))
-        {
-            _devices.TryRestoreNeuralIdentity(board);
-            if (TryGetServiceBench(board, out var bench)) EnsureComp<NCNeuralBenchComponent>(bench);
-        }
         var activeBodies = new HashSet<EntityUid>();
         var query = EntityQueryEnumerator<NCNeuralHardwareComponent>();
         while (query.MoveNext(out var uid, out var neural))
         {
             if (IsPaused(uid) || !_cyberware.TryGetOwningBody(uid, out var body)) continue;
             EnsureComp<NCNeuralWearerComponent>(body);
-            if (TryGetController(uid, out var board))
-                _runtime.TryPublishEvent(board, "meta.implants.NeuralController.sampled", process => Sample(process, uid));
             if (neural.Kind == NCNeuralKind.Sandevistan && TryComp<Robust.Shared.Player.ActorComponent>(body, out var actor))
             {
                 var hardware = Comp<NCCyberwareComponent>(uid);

@@ -120,18 +120,6 @@ ent-NCSkeletalPowerJunctionQualityPremium = { ent-NCSkeletalPowerJunction }
     .desc = { ent-NCSkeletalPowerJunction.desc }
     .suffix = Premium
 
-ent-NCMetaCyberOpticsQualityImprovised = { ent-NCMetaCyberOptics }
-    .desc = { ent-NCMetaCyberOptics.desc }
-    .suffix = Improvised
-
-ent-NCMetaCyberOpticsQualityImproved = { ent-NCMetaCyberOptics }
-    .desc = { ent-NCMetaCyberOptics.desc }
-    .suffix = Improved
-
-ent-NCMetaCyberOpticsQualityPremium = { ent-NCMetaCyberOptics }
-    .desc = { ent-NCMetaCyberOptics.desc }
-    .suffix = Premium
-
 ent-NCImplantNeuralLinkMk1QualityImprovised = { ent-NCImplantNeuralLinkMk1 }
     .desc = A cybernetic component. Examine it to check its quality and condition.
     .suffix = Improvised
@@ -814,66 +802,6 @@ ent-NCImplantMuscleBoneLaceUnpreparedQualityImproved = { ent-NCImplantMuscleBone
 
 ent-NCImplantMuscleBoneLaceUnpreparedQualityPremium = { ent-NCImplantMuscleBoneLaceUnprepared }
     .desc = { ent-NCImplantMuscleBoneLaceUnprepared.desc }
-    .suffix = Premium
-
-ent-NCMetaToolHandImplantQualityImprovised = { ent-NCMetaToolHandImplant }
-    .desc = { ent-NCMetaToolHandImplant.desc }
-    .suffix = Improvised
-
-ent-NCMetaToolHandImplantQualityImproved = { ent-NCMetaToolHandImplant }
-    .desc = { ent-NCMetaToolHandImplant.desc }
-    .suffix = Improved
-
-ent-NCMetaToolHandImplantQualityPremium = { ent-NCMetaToolHandImplant }
-    .desc = { ent-NCMetaToolHandImplant.desc }
-    .suffix = Premium
-
-ent-NCMetaMantisBladeImplantQualityImprovised = { ent-NCMetaMantisBladeImplant }
-    .desc = { ent-NCMetaMantisBladeImplant.desc }
-    .suffix = Improvised
-
-ent-NCMetaMantisBladeImplantQualityImproved = { ent-NCMetaMantisBladeImplant }
-    .desc = { ent-NCMetaMantisBladeImplant.desc }
-    .suffix = Improved
-
-ent-NCMetaMantisBladeImplantQualityPremium = { ent-NCMetaMantisBladeImplant }
-    .desc = { ent-NCMetaMantisBladeImplant.desc }
-    .suffix = Premium
-
-ent-NCMetaBiomonitorImplantQualityImprovised = { ent-NCMetaBiomonitorImplant }
-    .desc = { ent-NCMetaBiomonitorImplant.desc }
-    .suffix = Improvised
-
-ent-NCMetaBiomonitorImplantQualityImproved = { ent-NCMetaBiomonitorImplant }
-    .desc = { ent-NCMetaBiomonitorImplant.desc }
-    .suffix = Improved
-
-ent-NCMetaBiomonitorImplantQualityPremium = { ent-NCMetaBiomonitorImplant }
-    .desc = { ent-NCMetaBiomonitorImplant.desc }
-    .suffix = Premium
-
-ent-NCMetaSandevistanImplantQualityImprovised = { ent-NCMetaSandevistanImplant }
-    .desc = { ent-NCMetaSandevistanImplant.desc }
-    .suffix = Improvised
-
-ent-NCMetaSandevistanImplantQualityImproved = { ent-NCMetaSandevistanImplant }
-    .desc = { ent-NCMetaSandevistanImplant.desc }
-    .suffix = Improved
-
-ent-NCMetaSandevistanImplantQualityPremium = { ent-NCMetaSandevistanImplant }
-    .desc = { ent-NCMetaSandevistanImplant.desc }
-    .suffix = Premium
-
-ent-NCMetaKerenzikovImplantQualityImprovised = { ent-NCMetaKerenzikovImplant }
-    .desc = { ent-NCMetaKerenzikovImplant.desc }
-    .suffix = Improvised
-
-ent-NCMetaKerenzikovImplantQualityImproved = { ent-NCMetaKerenzikovImplant }
-    .desc = { ent-NCMetaKerenzikovImplant.desc }
-    .suffix = Improved
-
-ent-NCMetaKerenzikovImplantQualityPremium = { ent-NCMetaKerenzikovImplant }
-    .desc = { ent-NCMetaKerenzikovImplant.desc }
     .suffix = Premium
 
 nc-cyberware-frame-quality = Frame quality: {$quality}.

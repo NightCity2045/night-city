@@ -20,7 +20,6 @@ namespace Content.Server._NC.Diagnostics;
 
 public sealed partial class NCDiagnosticsSystem
 {
-    [Dependency] private Content.Server._NC.Meta.Runtime.NCMetaRuntimeSystem _metaRuntime = default!;
     private sealed record QuerySnapshot(JsonObject[] Entities, DateTimeOffset ExpiresAt, long Tick, bool Truncated);
     private readonly Dictionary<string, QuerySnapshot> _querySnapshots = new();
 
@@ -40,9 +39,6 @@ public sealed partial class NCDiagnosticsSystem
         var uid = ResolveEntity(args);
         var result = NCDiagnosticProjection.Capture(uid, EntityManager, requested);
         AppendCyberwareProjection(uid, result);
-        // META diagnostics intentionally contain no source, guest values or capability identities.
-        result["metaRuntime"] = JsonSerializer.SerializeToNode(
-            _metaRuntime.GetDiagnosticSnapshot(uid));
         return result;
     }
 

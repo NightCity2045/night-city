@@ -5,7 +5,7 @@ meta:
   forkId: EchoCyber
   forkVersion: 563c9eb8025bea660287a2666b38234d281ec1bb
   time: 11/18/2026 20:45:02
-  entityCount: 4510
+  entityCount: 4505
 maps:
 - 1
 grids:
@@ -5757,46 +5757,6 @@ entities:
       parent: 1
       rot: -1.5707963267948966 rad
       pos: 8.5,14.5
-    - type: NCCityLocation
-    - type: ApcPowerReceiver
-      needsPower: False
-    - type: AlwaysPoweredReceiverState
-      needsPower: True
-- proto: NCMetaCyberdeck
-  entities:
-  - uid: 4320
-    components:
-    - type: Transform
-      parent: 1
-      rot: -1.5707963267948966 rad
-      pos: -15.365117,-28.529413
-  - uid: 4447
-    components:
-    - type: Transform
-      parent: 1
-      rot: -1.5707963267948966 rad
-      pos: -15.380742,-29.201756
-- proto: NCMetaNeuralCyberdeck
-  entities:
-  - uid: 4448
-    components:
-    - type: Transform
-      parent: 1
-      rot: 3.141592653589793 rad
-      pos: -14.427617,-29.264297
-  - uid: 4449
-    components:
-    - type: Transform
-      parent: 1
-      rot: 1.5707963267948966 rad
-      pos: -14.474492,-28.748314
-- proto: NCMetaServer
-  entities:
-  - uid: 4182
-    components:
-    - type: Transform
-      parent: 1
-      pos: -7.5,21.5
     - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False

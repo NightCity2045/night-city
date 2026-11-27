@@ -73,8 +73,7 @@ public sealed record NCPersistentBatchMutationRequest(
     NCActiveWorldTime ActiveWorldTime,
     IReadOnlyList<NCPersistentBatchOutboxWrite> OutboxMessages,
     NCPersistenceWriteClass WriteClass = NCPersistenceWriteClass.DurableOutcome,
-    string? RequestFingerprint = null,
-    NCMetaAuthorityConstraints? Authority = null);
+    string? RequestFingerprint = null);
 
 public sealed record NCPersistentAggregateMutationData(
     string AggregateType,
@@ -127,8 +126,7 @@ public sealed record NCPersistentMutationRequest(
     NCActiveWorldTime ActiveWorldTime,
     IReadOnlyList<NCOutboxWrite> OutboxMessages,
     NCPersistenceWriteClass WriteClass = NCPersistenceWriteClass.DurableOutcome,
-    string? RequestFingerprint = null,
-    NCMetaAuthorityConstraints? Authority = null);
+    string? RequestFingerprint = null);
 
 public sealed record NCPersistentMutationResult(
     NCPersistentMutationStatus Status,
@@ -431,15 +429,9 @@ public abstract partial class ServerDbBase
                 error);
         }
 
-        var authorityCurrent = await CheckNCMetaAuthorityAsync(db.DbContext, request.Authority);
-        var projectCurrent = await CheckNCMetaProjectMutationAsync(db.DbContext, request.CommandType,
-            [new(request.EventId, request.EventType, request.AggregateType, request.AggregateId,
-                request.ExpectedAggregateVersion, request.SnapshotFormatVersion, request.SnapshotPayload, request.EventPayload)]);
-        if (!authorityCurrent || !projectCurrent || currentVersion != request.ExpectedAggregateVersion)
+        if (currentVersion != request.ExpectedAggregateVersion)
         {
-            var error = !authorityCurrent ? "Native META authority changed before commit." : !projectCurrent ?
-                "The META project has been deleted or its retirement transition is invalid." :
-                $"Expected aggregate version {request.ExpectedAggregateVersion}, found {currentVersion}.";
+            var error = $"Expected aggregate version {request.ExpectedAggregateVersion}, found {currentVersion}.";
             db.DbContext.NCCommandReceipts.Add(CreateReceipt(
                 request,
                 NCCommandReceiptState.Failed,
@@ -461,12 +453,6 @@ public abstract partial class ServerDbBase
             throw new InvalidOperationException("The aggregate version space has been exhausted.");
 
         var nextVersion = currentVersion + 1;
-        if (snapshot != null)
-            await TrackNCMetaBlobReferencesAsync(db.DbContext, snapshot.AggregateType, snapshot.AggregateId,
-                snapshot.AggregateVersion, snapshot.FormatVersion, snapshot.SessionEpoch, snapshot.ActiveWorldTicks,
-                snapshot.Payload, snapshot.CreatedAt);
-        await TrackNCMetaBlobReferencesAsync(db.DbContext, request.AggregateType, request.AggregateId, nextVersion,
-            request.SnapshotFormatVersion, request.SessionEpoch.Value, request.ActiveWorldTime.Ticks, request.SnapshotPayload, now);
         var receipt = CreateReceipt(
             request,
             NCCommandReceiptState.Started,
@@ -486,7 +472,7 @@ public abstract partial class ServerDbBase
             CausationId = request.CausationId,
             SessionEpoch = request.SessionEpoch.Value,
             ActiveWorldTicks = request.ActiveWorldTime.Ticks,
-            Payload = NCMetaJournalIntegrity.Attest(request.AggregateType, request.AggregateId, nextVersion,
+            Payload = NCJournalIntegrity.Attest(request.AggregateType, request.AggregateId, nextVersion,
                 request.SnapshotFormatVersion, request.SessionEpoch.Value, request.ActiveWorldTime.Ticks,
                 request.SnapshotPayload, request.EventPayload, snapshot),
             CreatedAt = now,
@@ -607,8 +593,7 @@ public abstract partial class ServerDbBase
                 error);
         }
 
-        var conflict = !await CheckNCMetaAuthorityAsync(db.DbContext, request.Authority) ||
-            !await CheckNCMetaProjectMutationAsync(db.DbContext, request.CommandType, request.Writes);
+        var conflict = false;
         for (var i = 0; i < request.Writes.Count; i++)
         {
             if (request.Writes[i].ExpectedAggregateVersion != current[i].AggregateVersion)
@@ -648,12 +633,6 @@ public abstract partial class ServerDbBase
 
             var nextVersion = write.ExpectedAggregateVersion + 1;
             snapshots.TryGetValue((write.AggregateType, write.AggregateId), out var snapshot);
-            if (snapshot != null)
-                await TrackNCMetaBlobReferencesAsync(db.DbContext, snapshot.AggregateType, snapshot.AggregateId,
-                    snapshot.AggregateVersion, snapshot.FormatVersion, snapshot.SessionEpoch, snapshot.ActiveWorldTicks,
-                    snapshot.Payload, snapshot.CreatedAt);
-            await TrackNCMetaBlobReferencesAsync(db.DbContext, write.AggregateType, write.AggregateId, nextVersion,
-                write.SnapshotFormatVersion, request.SessionEpoch.Value, request.ActiveWorldTime.Ticks, write.SnapshotPayload, now);
             db.DbContext.NCEventJournal.Add(new NCEventJournalEntry
             {
                 EventId = write.EventId,
@@ -666,7 +645,7 @@ public abstract partial class ServerDbBase
                 CausationId = request.CausationId,
                 SessionEpoch = request.SessionEpoch.Value,
                 ActiveWorldTicks = request.ActiveWorldTime.Ticks,
-                Payload = NCMetaJournalIntegrity.Attest(write.AggregateType, write.AggregateId, nextVersion,
+                Payload = NCJournalIntegrity.Attest(write.AggregateType, write.AggregateId, nextVersion,
                     write.SnapshotFormatVersion, request.SessionEpoch.Value, request.ActiveWorldTime.Ticks,
                     write.SnapshotPayload, write.EventPayload, snapshot),
                 CreatedAt = now,
@@ -1174,7 +1153,6 @@ public abstract partial class ServerDbBase
     {
         ArgumentNullException.ThrowIfNull(request);
         ValidateFingerprint(request.RequestFingerprint);
-        ValidateNCMetaAuthority(request.Authority);
         if (request.CommandId == Guid.Empty)
             throw new ArgumentException("Command ID must be non-empty.", nameof(request));
         if (request.EventId == Guid.Empty)
@@ -1214,7 +1192,6 @@ public abstract partial class ServerDbBase
     {
         ArgumentNullException.ThrowIfNull(request);
         ValidateFingerprint(request.RequestFingerprint);
-        ValidateNCMetaAuthority(request.Authority);
         if (request.CommandId == Guid.Empty)
             throw new ArgumentException("Command ID must be non-empty.", nameof(request));
         if (request.CorrelationId == Guid.Empty)

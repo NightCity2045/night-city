@@ -34,7 +34,6 @@ public sealed partial class ServerDbManager
     {
         DbWriteOpsMetric.Inc();
         var result = await RunDbCommand(() => _db.SetNCCharacterEmploymentAsync(userId, profileId, job));
-        if (result) NotifyNCPlayerEmploymentChanged();
         return result;
     }
 
@@ -42,7 +41,6 @@ public sealed partial class ServerDbManager
     {
         DbWriteOpsMetric.Inc();
         var result = await RunDbCommand(() => _db.ResignNCCharacterEmploymentAsync(userId, profileId));
-        if (result) NotifyNCPlayerEmploymentChanged();
         return result;
     }
 }

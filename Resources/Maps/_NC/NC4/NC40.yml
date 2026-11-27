@@ -5,7 +5,7 @@ meta:
   forkId: EchoCyber
   forkVersion: 563c9eb8025bea660287a2666b38234d281ec1bb
   time: 11/18/2026 20:45:02
-  entityCount: 13809
+  entityCount: 13808
 maps:
 - 1
 grids:
@@ -12085,18 +12085,6 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 13.5,21.5
-    - type: NCCityLocation
-    - type: ApcPowerReceiver
-      needsPower: False
-    - type: AlwaysPoweredReceiverState
-      needsPower: True
-- proto: NCMetaDevelopmentVendor
-  entities:
-  - uid: 13432
-    components:
-    - type: Transform
-      parent: 1
-      pos: 60.5,11.5
     - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False

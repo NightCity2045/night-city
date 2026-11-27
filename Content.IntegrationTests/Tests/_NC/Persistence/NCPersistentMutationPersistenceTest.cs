@@ -22,7 +22,7 @@ namespace Content.IntegrationTests.Tests._NC.Persistence;
 public sealed class NCPersistentMutationPersistenceTest : GameTest
 {
     [Test]
-    public async Task MetaSingleAndBatchJournalAttestationsRejectTamperedStateMissingEventsAndTruncatedCheckpoint()
+    public async Task SingleAndBatchJournalAttestationsRejectTamperedStateAndMissingEvents()
     {
         var db = GetDb(Pair.Server, out var connection, out var options);
         await using var databaseConnection = connection;
@@ -30,7 +30,7 @@ public sealed class NCPersistentMutationPersistenceTest : GameTest
         var clock = await db.StartNCActiveWorldSessionAsync(epoch);
         var firstRequest = CreateRequest(epoch, clock.Time, 0, "{\"text\":\"durable 😀\"}") with
         {
-            AggregateType = "meta.project", EventPayload = "{\"business\":1,\"_ncMetaSnapshot\":\"caller-forged\"}",
+            AggregateType = "test.project", EventPayload = "{\"business\":1,\"_ncMetaSnapshot\":\"caller-forged\"}",
         };
         Assert.That((await db.ApplyNCPersistentMutationAsync(firstRequest)).Status, Is.EqualTo(NCPersistentMutationStatus.Applied));
         var baseline = await db.GetNCAggregateSnapshotAsync(firstRequest.AggregateType, firstRequest.AggregateId);
@@ -38,50 +38,32 @@ public sealed class NCPersistentMutationPersistenceTest : GameTest
         {
             CommandId = Guid.NewGuid(), EventId = Guid.NewGuid(), ExpectedAggregateVersion = 1, SnapshotPayload = "{\"text\":\"second\"}",
         })).Status, Is.EqualTo(NCPersistentMutationStatus.Applied));
-        var batch = new NCPersistentBatchMutationRequest(Guid.NewGuid(), "test.meta-batch", "test", "owner-1",
-            [new(Guid.NewGuid(), "meta.project.changed", "meta.project", firstRequest.AggregateId, 2, 1, "{\"text\":\"third\"}", "{}"),
-                new(Guid.NewGuid(), "meta.device.changed", "meta.device", "other-device", 0, 1, "{}", "{}")],
+        var batch = new NCPersistentBatchMutationRequest(Guid.NewGuid(), "test.batch", "test", "owner-1",
+            [new(Guid.NewGuid(), "test.project.changed", "test.project", firstRequest.AggregateId, 2, 1, "{\"text\":\"third\"}", "{}"),
+                new(Guid.NewGuid(), "test.device.changed", "test.device", "other-device", 0, 1, "{}", "{}")],
             "{}", Guid.NewGuid(), null, epoch, clock.Time, []);
         Assert.That((await db.ApplyNCPersistentBatchMutationAsync(batch)).Status, Is.EqualTo(NCPersistentMutationStatus.Applied));
-        var current = await db.GetNCAggregateSnapshotAsync("meta.project", firstRequest.AggregateId);
-        var tail = await db.GetNCPersistentEventPageAsync("meta.project", firstRequest.AggregateId, null, 4, 2);
-        Assert.That(NCMetaJournalIntegrity.CanValidateTail(current, baseline, tail), Is.True,
+        var current = await db.GetNCAggregateSnapshotAsync("test.project", firstRequest.AggregateId);
+        var tail = await db.GetNCPersistentEventPageAsync("test.project", firstRequest.AggregateId, null, 4, 2);
+        Assert.That(NCJournalIntegrity.CanValidateTail(current, baseline, tail), Is.True,
             "Both single and ledger-style batch paths must bind the same contiguous state chain.");
-        var newDevice = await db.GetNCAggregateSnapshotAsync("meta.device", "other-device");
-        var deviceEvents = await db.GetNCPersistentEventPageAsync("meta.device", "other-device", null, 2, 1);
-        Assert.That(NCMetaJournalIntegrity.CanValidateTail(newDevice, null, deviceEvents), Is.True);
+        var newDevice = await db.GetNCAggregateSnapshotAsync("test.device", "other-device");
+        var deviceEvents = await db.GetNCPersistentEventPageAsync("test.device", "other-device", null, 2, 1);
+        Assert.That(NCJournalIntegrity.CanValidateTail(newDevice, null, deviceEvents), Is.True);
 
         await using var context = new SqliteServerDbContext(options);
-        var row = await context.NCAggregateSnapshots.SingleAsync(value => value.AggregateType == "meta.project" && value.AggregateId == firstRequest.AggregateId);
+        var row = await context.NCAggregateSnapshots.SingleAsync(value => value.AggregateType == "test.project" && value.AggregateId == firstRequest.AggregateId);
         row.Payload = "{\"injected\":true}";
         await context.SaveChangesAsync();
-        var tampered = await db.GetNCAggregateSnapshotAsync("meta.project", firstRequest.AggregateId);
-        Assert.That(NCMetaJournalIntegrity.CanValidateTail(tampered, baseline, tail), Is.False,
+        var tampered = await db.GetNCAggregateSnapshotAsync("test.project", firstRequest.AggregateId);
+        Assert.That(NCJournalIntegrity.CanValidateTail(tampered, baseline, tail), Is.False,
             "Changing live state while preserving its version and timestamp must not pass journal verification.");
         row.Payload = current.Payload;
-        context.NCEventJournal.Remove(await context.NCEventJournal.SingleAsync(value => value.AggregateType == "meta.project" &&
+        context.NCEventJournal.Remove(await context.NCEventJournal.SingleAsync(value => value.AggregateType == "test.project" &&
             value.AggregateId == firstRequest.AggregateId && value.AggregateVersion == 2));
         await context.SaveChangesAsync();
-        var missingMiddle = await db.GetNCPersistentEventPageAsync("meta.project", firstRequest.AggregateId, null, 4, 2);
-        Assert.That(NCMetaJournalIntegrity.CanValidateTail(current, baseline, missingMiddle), Is.False);
-
-        var snapshotId = Guid.NewGuid();
-        var sections = new[]
-        {
-            new NCRoundSnapshotSectionWrite("meta-aggregates", "world", "city", 0, 1, 0, "[]", NCMetaJournalIntegrity.HashPayload("[]")),
-            new NCRoundSnapshotSectionWrite("meta-aggregates", "world", "city", 1, 1, 0, "[]", NCMetaJournalIntegrity.HashPayload("[]")),
-        };
-        var inventorySections = sections.Select(value => new NCRoundSnapshotInventorySection(value.SectionType, value.OwnerType,
-            value.OwnerId, value.ChunkIndex, value.FormatVersion, value.EntityCount, 2, value.Checksum)).ToArray();
-        Assert.That((await db.CommitNCRoundSnapshotAsync(new(snapshotId, epoch.Value, clock.Time.Ticks, 1, "test", 0, "",
-            NCRoundSnapshotInventoryIntegrity.Checksum(inventorySections), DateTime.UtcNow, sections, []))).Status,
-            Is.EqualTo(NCRoundSnapshotCommitStatus.Committed));
-        Assert.That(await db.GetNCRoundSnapshotInventoryAsync(snapshotId), Is.Not.Null);
-        context.NCRoundSnapshotSections.Remove(await context.NCRoundSnapshotSections.SingleAsync(value =>
-            value.SnapshotId == snapshotId && value.ChunkIndex == 1));
-        await context.SaveChangesAsync();
-        Assert.That(await db.GetNCRoundSnapshotInventoryAsync(snapshotId), Is.Null,
-            "A missing final META chunk must invalidate the complete selected manifest inventory.");
+        var missingMiddle = await db.GetNCPersistentEventPageAsync("test.project", firstRequest.AggregateId, null, 4, 2);
+        Assert.That(NCJournalIntegrity.CanValidateTail(current, baseline, missingMiddle), Is.False);
     }
 
     [Test]
@@ -94,7 +76,7 @@ public sealed class NCPersistentMutationPersistenceTest : GameTest
         {
             var epoch = NCSessionEpoch.New();
             var clock = await db.StartNCActiveWorldSessionAsync(epoch);
-            var section = new NCRoundSnapshotSectionWrite("meta-devices", "world", "city", 0, 1, 1, payload, Hash(payload));
+            var section = new NCRoundSnapshotSectionWrite("test-section", "world", "city", 0, 1, 1, payload, Hash(payload));
             var checksum = Hash($"{section.SectionType}\u001f{section.OwnerType}\u001f{section.OwnerId}\u001f{section.ChunkIndex}\u001f{section.FormatVersion}\u001f{section.EntityCount}\u001f{section.Checksum}");
             var id = Guid.NewGuid();
             var committed = await db.CommitNCRoundSnapshotAsync(new(id, epoch.Value, clock.Time.Ticks, 1,
@@ -104,9 +86,9 @@ public sealed class NCPersistentMutationPersistenceTest : GameTest
         }
         var selected = await Commit("[{\"id\":\"first-world\"}]");
         var latest = await Commit("[{\"id\":\"next-world\"}]");
-        var oldSections = await db.GetNCRoundSnapshotSectionsAsync(selected, "meta-devices", "world", "city");
-        var freshSections = await db.GetNCRoundSnapshotSectionsAsync(latest, "meta-devices", "world", "city");
-        var missing = await db.GetNCRoundSnapshotSectionsAsync(Guid.NewGuid(), "meta-devices", "world", "city");
+        var oldSections = await db.GetNCRoundSnapshotSectionsAsync(selected, "test-section", "world", "city");
+        var freshSections = await db.GetNCRoundSnapshotSectionsAsync(latest, "test-section", "world", "city");
+        var missing = await db.GetNCRoundSnapshotSectionsAsync(Guid.NewGuid(), "test-section", "world", "city");
         Assert.Multiple(() =>
         {
             Assert.That(oldSections, Has.Count.EqualTo(1));
@@ -115,26 +97,6 @@ public sealed class NCPersistentMutationPersistenceTest : GameTest
             Assert.That(freshSections.Single().Payload, Does.Contain("next-world"));
             Assert.That(missing, Is.Empty);
         });
-    }
-
-    [Test]
-    public async Task NCMetaContentAddressedBlobsAreDeduplicatedAndVerified()
-    {
-        var db = GetDb(Pair.Server);
-        var bytes = System.Text.Encoding.UTF8.GetBytes("META: durable исходник 😀\n");
-        var digest = await db.StoreNCMetaBlobAsync(bytes);
-        var repeated = await db.StoreNCMetaBlobAsync(bytes.ToArray());
-        var restored = await db.ReadNCMetaBlobAsync(digest);
-        Assert.Multiple(() =>
-        {
-            Assert.That(digest, Has.Length.EqualTo(64));
-            Assert.That(repeated, Is.EqualTo(digest));
-            Assert.That(restored, Is.EqualTo(bytes));
-            Assert.That(restored, Is.Not.SameAs(bytes));
-        });
-        Assert.That(await db.ReadNCMetaBlobAsync(new string('0', 64)), Is.Null);
-        Assert.ThrowsAsync<ArgumentException>(async () => await db.ReadNCMetaBlobAsync("../../outside"));
-        Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await db.StoreNCMetaBlobAsync(new byte[1024 * 1024 + 1]));
     }
 
     [Test]

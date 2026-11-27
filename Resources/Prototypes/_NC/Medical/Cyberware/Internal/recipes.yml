@@ -165,6 +165,28 @@
     Plastic: 100
 
 - type: latheRecipe
+  id: NCProduceNCMedicalControllerBiomonitor
+  result: NCMedicalControllerBiomonitor
+  completetime: 8
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 150
+    Glass: 150
+    Plastic: 100
+
+- type: latheRecipe
+  id: NCProduceNCMedicalControllerInjector
+  result: NCMedicalControllerInjector
+  completetime: 8
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 150
+    Glass: 150
+    Plastic: 100
+
+- type: latheRecipe
   id: NCProduceNCBiomonitorImplantEmpty
   result: NCBiomonitorImplantEmpty
   completetime: 8
