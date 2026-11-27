@@ -3,14 +3,12 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Shared._NC.Police.UI;
-using Robust.Shared.Prototypes;
 
 namespace Content.Client._NC.Police;
 
 public sealed partial class NCPoliceRecordsBoundUserInterface(EntityUid owner, Enum uiKey)
     : BoundUserInterface(owner, uiKey)
 {
-    [Dependency] private IPrototypeManager _prototypes = default!;
 
     private NCPoliceRecordsWindow? _window;
 
@@ -18,7 +16,7 @@ public sealed partial class NCPoliceRecordsBoundUserInterface(EntityUid owner, E
     {
         base.Open();
 
-        _window = new NCPoliceRecordsWindow(_prototypes);
+        _window = new NCPoliceRecordsWindow();
         _window.OnSearch += query => SendMessage(new NCPoliceRecordsSearchMessage(query));
         _window.OnSelected += characterId => SendMessage(new NCPoliceRecordsSelectMessage(characterId));
         _window.OnStatusChanged += (characterId, status, reason) =>

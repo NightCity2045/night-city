@@ -18,7 +18,6 @@ public enum NCPoliceRecordsUiKey : byte
 public sealed record NCPoliceRecordSummary(
     int CharacterId,
     string CharacterName,
-    string? JobPrototypeId,
     bool PresentThisRound,
     NCPoliceOperationalStatus Status,
     string? Reason,

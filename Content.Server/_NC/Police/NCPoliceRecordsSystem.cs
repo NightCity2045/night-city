@@ -606,7 +606,6 @@ public sealed partial class NCPoliceRecordsSystem : EntitySystem
         return new NCPoliceRecordSummary(
             value.CharacterId.Value,
             value.CharacterName,
-            null,
             presentThisRound,
             value.Status,
             value.Reason,

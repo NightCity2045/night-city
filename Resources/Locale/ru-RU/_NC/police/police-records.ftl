@@ -15,7 +15,6 @@ nc-police-records-present-group = В ТЕКУЩЕМ ЗАПУСКЕ
 nc-police-records-registry-group = ГОРОДСКОЙ РЕЕСТР
 nc-police-records-no-results = Подходящие жители не найдены
 nc-police-records-select-prompt = Выберите жителя, чтобы открыть его досье.
-nc-police-records-job = Место работы: 
 nc-police-records-current-status = Полицейский статус: 
 nc-police-records-current-reason = Основание: 
 nc-police-records-updated-by = Последнее изменение: 

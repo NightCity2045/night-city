@@ -15,7 +15,6 @@ nc-police-records-present-group = IN THE CURRENT LAUNCH
 nc-police-records-registry-group = CITY REGISTRY
 nc-police-records-no-results = No matching residents
 nc-police-records-select-prompt = Select a resident to open their dossier.
-nc-police-records-job = Employment: 
 nc-police-records-current-status = Police status: 
 nc-police-records-current-reason = Basis: 
 nc-police-records-updated-by = Last changed by: 

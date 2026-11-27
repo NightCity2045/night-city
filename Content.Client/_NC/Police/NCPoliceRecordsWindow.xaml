@@ -47,10 +47,6 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                         <ScrollContainer Name="DossierTab">
                             <BoxContainer Margin="8" Orientation="Vertical" SeparationOverride="6">
                                 <BoxContainer Orientation="Horizontal">
-                                    <Label Text="{Loc 'nc-police-records-job'}" StyleClasses="LabelKeyText" />
-                                    <Label Name="JobLabel" />
-                                </BoxContainer>
-                                <BoxContainer Orientation="Horizontal">
                                     <Label Text="{Loc 'nc-police-records-current-status'}" StyleClasses="LabelKeyText" />
                                     <Label Name="CurrentStatusLabel" />
                                 </BoxContainer>
