@@ -30,9 +30,8 @@
 
     # Head
     - map: [ "enum.HumanoidVisualLayers.Head" ]
-      sprite: _NC/Mobs/Cyberware/parts.rsi
+      sprite: _NC/Mobs/Cyberware/Borg/standard.rsi
       state: head_m
-      color: "#A8BAC9"
       visible: false
     - map: [ "enum.HumanoidVisualLayers.Snout" ]
     - map: [ "enum.HumanoidVisualLayers.Eyes" ]
