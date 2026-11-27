@@ -1,12 +1,6 @@
 # SPDX-FileCopyrightText: 2026 Astro
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 
-ent-NCBiocompatibleFiber = biocompatible reinforcing fiber
-    .desc = A spool for muscle and bone reinforcement. Synthesized from oil, carbon and silicon at 350 K.
-ent-NCSyntheticMuscle = synthetic muscle cassette
-    .desc = A sterile culture-derived muscle substrate fabricated from biomass.
-ent-NCBoneReinforcementComposite = bone reinforcement composite
-    .desc = An implant-grade composite synthesized from oil, phosphorus and silicon at 420 K.
 ent-NCSkeletalAnchors = skeletal anchor kit
     .desc = Standard spinal and pelvic mounting hardware for Sigma.
 ent-NCSkeletalHeavyAnchors = reinforced skeletal anchor kit
@@ -27,9 +21,6 @@ nc-cyber-production-slot-ncskeletalanchorslot = skeletal anchors
 nc-cyber-production-slot-ncskeletalheavyanchorslot = reinforced skeletal anchors
 nc-cyber-production-slot-ncbetaactuatorslot = Beta heavy actuators
 nc-cyber-production-slot-ncskeletalpowerslot = power junction
-nc-cyber-production-ingredient-fiber = biocompatible reinforcing fiber
-nc-cyber-production-ingredient-muscle = synthetic muscle cassette
-nc-cyber-production-ingredient-composite = bone reinforcement composite
 nc-cyber-production-prepared = Factory checked and sterile prepared: ready for surgery.
 nc-cyber-production-unprepared = Factory preparation required. Assemble, flash and test frames, then use a sterile preparation pack on the powered bench.
 nc-cyber-production-preparation-failed = Preparation unavailable: check the held sterile pack, battery, assembly test and component condition.

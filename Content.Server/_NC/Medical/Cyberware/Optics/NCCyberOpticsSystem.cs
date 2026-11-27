@@ -91,14 +91,6 @@ public sealed partial class NCCyberOpticsSystem : EntitySystem
         return false;
     }
 
-    public float FunctionQuality(EntityUid eye, NCOpticMode mode)
-    {
-        var quality = _cyberware.QualityPerformance(eye);
-        if (TryModule(eye, mode, out var part) && TryComp<NCCyberwarePartComponent>(part, out var physical))
-            quality = MathF.Min(quality, _prototypes.Index(_prototypes.Index(physical.Profile).Quality).Performance);
-        return quality;
-    }
-
     public bool TrySetMode(EntityUid eye, NCOpticMode mode, bool enabled)
     {
         if (!Enum.IsDefined(mode) || !IsReady(eye, out var body) || !TryComp<NCCyberEyeComponent>(eye, out var optics) ||
@@ -151,18 +143,18 @@ public sealed partial class NCCyberOpticsSystem : EntitySystem
             var ownFlash = eye.Comp.AntiFlash && TryModule(eye, NCOpticMode.AntiFlash, out _);
             flash |= ownFlash;
             var lowLight = eye.Comp.ActiveMode == NCOpticMode.LowLight && TryComp<NCCyberEyeLowLightComponent>(eye, out var sensor) &&
-                _lowLight.TryMeasure(body, sensor, out var ambient) && ambient > .005 / MathF.Max(.5f, FunctionQuality(eye, NCOpticMode.LowLight));
+                _lowLight.TryMeasure(body, sensor, out var ambient) && ambient > .005;
             _lowLight.TrySetFilter(eye.Owner, body, lowLight);
-            var load = (eye.Comp.ActiveMode == NCOpticMode.Clear ? 0 : .35f / MathF.Max(.5f, FunctionQuality(eye, eye.Comp.ActiveMode))) +
-                (ownFlash ? .1f / MathF.Max(.5f, FunctionQuality(eye, NCOpticMode.AntiFlash)) : 0) + (eye.Comp.AugmentedReality ? .1f : 0);
+            var load = (eye.Comp.ActiveMode == NCOpticMode.Clear ? 0 : .35f) +
+                (ownFlash ? .1f : 0) + (eye.Comp.AugmentedReality ? .1f : 0);
             _cyberware.TrySetLoad(eye, Math.Clamp(load, 0, 1));
-            if (eye.Comp.ActiveMode == NCOpticMode.Infrared) view.Contacts = Observe(body, null, true, FunctionQuality(eye, NCOpticMode.Infrared));
+            if (eye.Comp.ActiveMode == NCOpticMode.Infrared) view.Contacts = Observe(body, null, true);
             if (eye.Comp.ActiveMode == NCOpticMode.Radar && FindRadar(body) is { } radar && radar.Comp.ActiveUntil > _timing.CurTime)
-                view.Contacts = Observe(body, radar, false, FunctionQuality(eye, NCOpticMode.Radar));
-            if (eye.Comp.ActiveMode != NCOpticMode.Clear) { view.Mode = eye.Comp.ActiveMode; view.Quality = FunctionQuality(eye, view.Mode); }
+                view.Contacts = Observe(body, radar, false);
+            if (eye.Comp.ActiveMode != NCOpticMode.Clear) view.Mode = eye.Comp.ActiveMode;
             if (eye.Comp.ActiveMode == NCOpticMode.Telescope &&
                 (!TryComp<PhysicsComponent>(body, out var physics) || physics.LinearVelocity.LengthSquared() < .04f))
-                view.Zoom = Math.Clamp(eye.Comp.MaximumZoom * MathF.Min(1, FunctionQuality(eye, NCOpticMode.Telescope)), 1, 2);
+                view.Zoom = Math.Clamp(eye.Comp.MaximumZoom, 1, 2);
             if (eye.Comp.AugmentedReality && TryModule(eye, NCOpticMode.AugmentedReality, out _) && _medical.TryGetReading(body, out var sample))
                 view.Telemetry = Loc.GetString("nc-medical-implant-reading", ("oxygen", sample.Oxygen), ("perfusion", sample.Perfusion), ("pain", sample.Pain), ("blood", sample.Blood));
         }

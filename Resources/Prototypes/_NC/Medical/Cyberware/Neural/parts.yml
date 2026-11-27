@@ -8,25 +8,6 @@
   id: NCNeuralControllerStandardPart
   slot: NCNeuralControllerSlot
   maximumIntegrity: 60
-  quality: NCCyberwareQualityStandard
-
-- type: ncCyberwarePart
-  id: NCNeuralControllerImprovisedPart
-  slot: NCNeuralControllerSlot
-  maximumIntegrity: 40
-  quality: NCCyberwareQualityImprovised
-
-- type: ncCyberwarePart
-  id: NCNeuralControllerImprovedPart
-  slot: NCNeuralControllerSlot
-  maximumIntegrity: 80
-  quality: NCCyberwareQualityImproved
-
-- type: ncCyberwarePart
-  id: NCNeuralControllerPremiumPart
-  slot: NCNeuralControllerSlot
-  maximumIntegrity: 100
-  quality: NCCyberwareQualityPremium
 
 - type: ncCyberwarePartSlot
   id: NCNeuralProcessorSlot
@@ -36,25 +17,6 @@
   id: NCNeuralProcessorStandardPart
   slot: NCNeuralProcessorSlot
   maximumIntegrity: 60
-  quality: NCCyberwareQualityStandard
-
-- type: ncCyberwarePart
-  id: NCNeuralProcessorImprovisedPart
-  slot: NCNeuralProcessorSlot
-  maximumIntegrity: 40
-  quality: NCCyberwareQualityImprovised
-
-- type: ncCyberwarePart
-  id: NCNeuralProcessorImprovedPart
-  slot: NCNeuralProcessorSlot
-  maximumIntegrity: 80
-  quality: NCCyberwareQualityImproved
-
-- type: ncCyberwarePart
-  id: NCNeuralProcessorPremiumPart
-  slot: NCNeuralProcessorSlot
-  maximumIntegrity: 100
-  quality: NCCyberwareQualityPremium
 
 - type: ncCyberwarePartSlot
   id: NCNeuralElectrodeSlot
@@ -64,25 +26,6 @@
   id: NCNeuralElectrodeStandardPart
   slot: NCNeuralElectrodeSlot
   maximumIntegrity: 60
-  quality: NCCyberwareQualityStandard
-
-- type: ncCyberwarePart
-  id: NCNeuralElectrodeImprovisedPart
-  slot: NCNeuralElectrodeSlot
-  maximumIntegrity: 40
-  quality: NCCyberwareQualityImprovised
-
-- type: ncCyberwarePart
-  id: NCNeuralElectrodeImprovedPart
-  slot: NCNeuralElectrodeSlot
-  maximumIntegrity: 80
-  quality: NCCyberwareQualityImproved
-
-- type: ncCyberwarePart
-  id: NCNeuralElectrodePremiumPart
-  slot: NCNeuralElectrodeSlot
-  maximumIntegrity: 100
-  quality: NCCyberwareQualityPremium
 
 - type: ncCyberwarePartSlot
   id: NCNeuralReaderSlot
@@ -92,25 +35,6 @@
   id: NCNeuralReaderStandardPart
   slot: NCNeuralReaderSlot
   maximumIntegrity: 60
-  quality: NCCyberwareQualityStandard
-
-- type: ncCyberwarePart
-  id: NCNeuralReaderImprovisedPart
-  slot: NCNeuralReaderSlot
-  maximumIntegrity: 40
-  quality: NCCyberwareQualityImprovised
-
-- type: ncCyberwarePart
-  id: NCNeuralReaderImprovedPart
-  slot: NCNeuralReaderSlot
-  maximumIntegrity: 80
-  quality: NCCyberwareQualityImproved
-
-- type: ncCyberwarePart
-  id: NCNeuralReaderPremiumPart
-  slot: NCNeuralReaderSlot
-  maximumIntegrity: 100
-  quality: NCCyberwareQualityPremium
 
 - type: ncCyberwarePartSlot
   id: NCNeuralPulseSlot
@@ -120,25 +44,6 @@
   id: NCNeuralPulseStandardPart
   slot: NCNeuralPulseSlot
   maximumIntegrity: 60
-  quality: NCCyberwareQualityStandard
-
-- type: ncCyberwarePart
-  id: NCNeuralPulseImprovisedPart
-  slot: NCNeuralPulseSlot
-  maximumIntegrity: 40
-  quality: NCCyberwareQualityImprovised
-
-- type: ncCyberwarePart
-  id: NCNeuralPulseImprovedPart
-  slot: NCNeuralPulseSlot
-  maximumIntegrity: 80
-  quality: NCCyberwareQualityImproved
-
-- type: ncCyberwarePart
-  id: NCNeuralPulsePremiumPart
-  slot: NCNeuralPulseSlot
-  maximumIntegrity: 100
-  quality: NCCyberwareQualityPremium
 
 - type: ncCyberwarePartSlot
   id: NCNeuralCoolingSlot
@@ -148,25 +53,6 @@
   id: NCNeuralCoolingStandardPart
   slot: NCNeuralCoolingSlot
   maximumIntegrity: 60
-  quality: NCCyberwareQualityStandard
-
-- type: ncCyberwarePart
-  id: NCNeuralCoolingImprovisedPart
-  slot: NCNeuralCoolingSlot
-  maximumIntegrity: 40
-  quality: NCCyberwareQualityImprovised
-
-- type: ncCyberwarePart
-  id: NCNeuralCoolingImprovedPart
-  slot: NCNeuralCoolingSlot
-  maximumIntegrity: 80
-  quality: NCCyberwareQualityImproved
-
-- type: ncCyberwarePart
-  id: NCNeuralCoolingPremiumPart
-  slot: NCNeuralCoolingSlot
-  maximumIntegrity: 100
-  quality: NCCyberwareQualityPremium
 
 - type: ncCyberwareAssembly
   id: NCNeuralLinkMk1Assembly

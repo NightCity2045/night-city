@@ -949,8 +949,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
                         (profile.RequiresPower ? (module.CrisisBlocksActiveModes ? 0f : module.CrisisEfficiency) : 1f) * 100f) : null,
                 SkeletalSurgeryCompleted: module.SkeletalSurgeryCompleted,
                 SkeletalLoadTestPassed: module.SkeletalLoadTestPassed,
-                Medical: BuildMedicalImplant(moduleUid),
-                Quality: _cyberware.GetAssemblyQuality(moduleUid)));
+                Medical: BuildMedicalImplant(moduleUid)));
             disclosedEntities.Add(moduleUid);
         }
 
@@ -976,7 +975,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
         if (!TryComp<NCMedicalImplantComponent>(uid, out var medical)) return null;
         var state = medical.State;
         return new(medical.Injector, _cyberware.MedicalControllerReady(uid), state.Cartridge.Volume.Float(),
-            NCMedicalImplantMath.MeteredDose(state.Dose, _cyberware.MedicalPartQuality(uid, "NCMedicalPumpSlot").MeasurementStep), state.IntervalSeconds, state.Limit, state.Delivered, state.CooldownSeconds, state.Automatic);
+            NCMedicalImplantMath.MeteredDose(state.Dose, NCMedicalImplantMath.MeasurementStep), state.IntervalSeconds, state.Limit, state.Delivered, state.CooldownSeconds, state.Automatic);
     }
 
     private List<NCMedicalCyberwarePartSummary>? BuildCyberwareParts(EntityUid module)
@@ -989,17 +988,15 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
         {
             EntProtoId? prototype = null;
             var condition = NCDiagnosticBand.Critical;
-            ProtoId<NCCyberwareQualityPrototype>? quality = null;
             ProtoId<NCCyberwareFirmwarePrototype>? firmware = null;
             if (container.ContainedEntity is { } uid && HasComp<NCCyberwarePartComponent>(uid))
             {
                 prototype = MetaData(uid).EntityPrototype?.ID;
-                quality = _prototypes.Index(Comp<NCCyberwarePartComponent>(uid).Profile).Quality;
                 if (TryComp<NCMedicalControllerComponent>(uid, out var controller)) firmware = controller.Firmware;
                 if (TryComp<NCOrganIntegrityComponent>(uid, out var integrity))
                     condition = ToFunctionBand(SafeRatio(integrity.CurrentIntegrity, integrity.MaxIntegrity));
             }
-            parts.Add(new NCMedicalCyberwarePartSummary(slot, prototype, condition, quality, firmware, assembly.OptionalSlots.Contains(slot)));
+            parts.Add(new NCMedicalCyberwarePartSummary(slot, prototype, condition, firmware, assembly.OptionalSlots.Contains(slot)));
         }
         return parts;
     }

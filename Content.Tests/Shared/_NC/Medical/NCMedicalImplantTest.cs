@@ -48,7 +48,7 @@ public sealed class NCMedicalImplantTest : ContentUnitTest
         {
             Profile = "NCAutoInjector", StableInstanceId = Guid.NewGuid(),
             MedicalImplant = new() { Delivered = 8, CooldownSeconds = 45, Automatic = true },
-            Assembly = new() { Parts = [new() { Slot = "NCMedicalControllerSlot", EntityPrototype = "NCMedicalControllerPremium", MedicalFirmware = "NCMedicalFirmwareInjector" }] },
+            Assembly = new() { Parts = [new() { Slot = "NCMedicalControllerSlot", EntityPrototype = "NCMedicalControllerStandard", MedicalFirmware = "NCMedicalFirmwareInjector" }] },
         };
         var serialization = IoCManager.Resolve<ISerializationManager>();
         var copy = serialization.Read<NCCyberwareStateSnapshot>(serialization.WriteValue(state, alwaysWrite: true), notNullableOverride: true);
@@ -57,7 +57,7 @@ public sealed class NCMedicalImplantTest : ContentUnitTest
             Assert.That(copy.MedicalImplant!.Delivered, Is.EqualTo(8));
             Assert.That(copy.MedicalImplant.CooldownSeconds, Is.EqualTo(45));
             Assert.That(copy.Assembly!.Parts[0].MedicalFirmware!.Value.Id, Is.EqualTo("NCMedicalFirmwareInjector"));
-            Assert.That(copy.Assembly.Parts[0].EntityPrototype, Is.EqualTo("NCMedicalControllerPremium"));
+            Assert.That(copy.Assembly.Parts[0].EntityPrototype, Is.EqualTo("NCMedicalControllerStandard"));
         });
         var clone = NCMedicalImplantMath.Clone(copy.MedicalImplant!);
         clone.Delivered = 0;

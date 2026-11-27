@@ -41,7 +41,7 @@ public sealed partial class NCCyberwareSystem
         foreach (var socket in assembly.Parts.Values)
             if (socket.ContainedEntity is { } uid && TryComp<NCArmDriveComponent>(uid, out var drive) &&
                 TryComp<Content.Shared._NC.Medical.Anatomy.NCOrganIntegrityComponent>(uid, out var integrity) && integrity.CurrentIntegrity > 0)
-                return 1 + (drive.Strength - 1) * Math.Clamp(assembly.FunctionalEfficiency, 0, 1) * Math.Min(QualityPerformance(arm), 1.5f);
+                return 1 + (drive.Strength - 1) * Math.Clamp(assembly.FunctionalEfficiency, 0, 1);
         return 1f;
     }
 

@@ -29,9 +29,8 @@ public sealed partial class NCNeuralVisualComponent : Component
 
 public static class NCNeuralMath
 {
-    public static float DodgeChance(float quality, float efficiency) =>
-        !float.IsFinite(quality) || !float.IsFinite(efficiency) ? 0 :
-            Math.Clamp(.15f * Math.Clamp(quality, 0, 1.5f) * Math.Clamp(efficiency, 0, 1), 0, .225f);
+    public static float DodgeChance(float efficiency) =>
+        !float.IsFinite(efficiency) ? 0 : .15f * Math.Clamp(efficiency, 0, 1);
 }
 
 [Serializable, Robust.Shared.Serialization.NetSerializable]

@@ -33,6 +33,7 @@
   cooldownSeconds: 0
   startupEnergy: 0
   integralItem: NCIntegralScrewdriver
+
 - type: ncCyberware
   id: NCToolHand
   name: NCToolHand
@@ -70,6 +71,7 @@
   capabilities: []
   assembly: NCToolHandAssembly
   requiresFactoryPreparation: true
+
 - type: ncCyberwareAbility
   id: NCBiomonitorAbility
   activationSound:
@@ -142,6 +144,7 @@
   cooldownSeconds: 0
   startupEnergy: 0
   integralItem: NCIntegralMantisBlade
+
 - type: ncCyberware
   id: NCMantisBlade
   name: NCMantisBlade
@@ -181,6 +184,7 @@
   capabilities: []
   assembly: NCMantisBladeAssembly
   requiresFactoryPreparation: true
+
 - type: ncCyberwareAbility
   id: NCSandevistanAbility
   activationSound:

@@ -16,6 +16,7 @@
     damage:
       types:
         Blunt: 12
+
 - type: entity
   parent: CombatKnife
   id: NCIntegralArmClaws
@@ -32,6 +33,7 @@
     damage:
       types:
         Slash: 10
+
 - type: entity
   parent: CombatKnife
   id: NCIntegralArmBlade
@@ -48,6 +50,7 @@
     damage:
       types:
         Slash: 14
+
 - type: entity
   parent: CombatKnife
   id: NCIntegralArmMonowire
@@ -67,6 +70,7 @@
     damage:
       types:
         Slash: 11
+
 - type: entity
   parent: WeaponArcStatic
   id: NCWeaponArcMonowire
@@ -78,6 +82,7 @@
     animation: None
   - type: TimedDespawn
     lifetime: 0.25
+
 - type: entity
   parent: BaseItem
   id: NCIntegralArmPistol
@@ -116,6 +121,7 @@
     containers:
       gun_magazine: !type:ContainerSlot {}
       gun_chamber: !type:ContainerSlot {}
+
 - type: entity
   parent: BaseItem
   id: NCIntegralArmLauncher
@@ -146,6 +152,7 @@
     containers:
       ballistic-ammo: !type:Container
         ents: []
+
 - type: entity
   parent: BaseItem
   id: NCIntegralArmMedical

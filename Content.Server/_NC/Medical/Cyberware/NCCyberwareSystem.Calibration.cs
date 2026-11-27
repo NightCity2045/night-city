@@ -101,7 +101,7 @@ public sealed partial class NCCyberwareSystem
                     continue;
                 demands.Add(new NCCyberwarePowerDemand(state.StableInstanceId, definition.PowerPriority,
                     (definition.IdlePowerPerSecond + definition.LoadedPowerPerSecond *
-                    (uid == entity.Owner ? 1f : EffectivePowerLoad(state, definition, _timing.CurTime))) / QualityPerformance(uid)));
+                    (uid == entity.Owner ? 1f : EffectivePowerLoad(state, definition, _timing.CurTime)))));
             }
             var width = holder.Comp.MaximumPower * NCCyberwareCondition.Efficiency(
                 Comp<NCOrganIntegrityComponent>(holder).CurrentIntegrity,

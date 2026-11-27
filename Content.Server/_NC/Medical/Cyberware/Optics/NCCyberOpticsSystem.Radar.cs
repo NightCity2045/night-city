@@ -23,7 +23,7 @@ public sealed partial class NCCyberOpticsSystem
         {
             if (HasComp<NCCyberwareComponent>(uid) || radar.User is not { } user || !Exists(user) || radar.ActiveUntil <= _timing.CurTime ||
                 !_interaction.InRangeUnobstructed(user, uid, 1.5f) || !_cells.HasCharge(uid, 1)) continue;
-            var contacts = Observe(user, (uid, radar), false, 1);
+            var contacts = Observe(user, (uid, radar), false);
             _externalViews[user] = contacts;
             SendView(user, new NCOpticViewEvent { Viewer = GetNetEntity(user), Map = Transform(user).MapID, Contacts = contacts, Mode = NCOpticMode.Radar });
         }
@@ -68,7 +68,7 @@ public sealed partial class NCCyberOpticsSystem
         return true;
     }
 
-    private NCOpticContact[] Observe(EntityUid body, Entity<NCOpticRadarComponent>? radar, bool thermal, float quality)
+    private NCOpticContact[] Observe(EntityUid body, Entity<NCOpticRadarComponent>? radar, bool thermal)
     {
         if (radar is { } movedMap && movedMap.Comp.ScanMap != Transform(body).MapID)
         { movedMap.Comp.Observations.Clear(); movedMap.Comp.Contacts = []; movedMap.Comp.NextScan = TimeSpan.Zero; movedMap.Comp.ScanMap = Transform(body).MapID; }
@@ -110,7 +110,7 @@ public sealed partial class NCCyberOpticsSystem
             observations[candidate.Owner] = (position, movedAt, prior.Id);
             if (movedAt == TimeSpan.MinValue || _timing.CurTime - movedAt > TimeSpan.FromSeconds(1.5)) continue;
             var age = (float) (_timing.CurTime - movedAt).TotalSeconds;
-            result.Add(new(prior.Id, NCOpticMath.Quantize(position, .5f / MathF.Max(.5f, quality)), age, false));
+            result.Add(new(prior.Id, NCOpticMath.Quantize(position, .5f), age, false));
         }
         var contacts = result.Take(32).ToArray();
         if (radar is { } scanned)

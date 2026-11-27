@@ -1,12 +1,6 @@
 # SPDX-FileCopyrightText: 2026 Astro
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 
-ent-NCBiocompatibleFiber = биосовместимое армирующее волокно
-    .desc = Катушка волокна для усиления мышц и костей. Синтезируется из масла, углерода и кремния при 350 К.
-ent-NCSyntheticMuscle = кассета синтетических мышечных пучков
-    .desc = Мышечная основа, произведённая биофабрикатором из биомассы.
-ent-NCBoneReinforcementComposite = композит армирования костей
-    .desc = Композит для имплантации. Синтезируется из масла, фосфора и кремния при 420 К.
 ent-NCSkeletalAnchors = комплект креплений каркаса
     .desc = Стандартные крепления позвоночника и таза для Sigma.
 ent-NCSkeletalHeavyAnchors = комплект усиленных креплений каркаса
@@ -27,9 +21,6 @@ nc-cyber-production-slot-ncskeletalanchorslot = крепления каркас�
 nc-cyber-production-slot-ncskeletalheavyanchorslot = усиленные крепления каркаса
 nc-cyber-production-slot-ncbetaactuatorslot = тяжёлые приводы Beta
 nc-cyber-production-slot-ncskeletalpowerslot = распределительный узел питания
-nc-cyber-production-ingredient-fiber = биосовместимое армирующее волокно
-nc-cyber-production-ingredient-muscle = кассета синтетических мышечных пучков
-nc-cyber-production-ingredient-composite = композит армирования костей
 nc-cyber-production-prepared = Производственная проверка и стерильная подготовка завершены: можно устанавливать.
 nc-cyber-production-unprepared = Требуется производственная подготовка. Соберите, прошейте и проверьте каркас; затем примените комплект стерильной подготовки к верстаку с батареей.
 nc-cyber-production-preparation-failed = Подготовка недоступна: проверьте комплект в руке, батарею, результат испытания и состояние деталей.

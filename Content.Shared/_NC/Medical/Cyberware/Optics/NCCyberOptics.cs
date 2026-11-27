@@ -69,7 +69,6 @@ public sealed class NCOpticViewEvent : EntityEventArgs
     public NetEntity Viewer;
     public MapId Map;
     public NCOpticMode Mode;
-    public float Quality = 1;
     public float Zoom = 1;
     public NCOpticContact[] Contacts = [];
     public string Telemetry = string.Empty;

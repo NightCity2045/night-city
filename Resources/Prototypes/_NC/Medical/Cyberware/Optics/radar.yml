@@ -74,7 +74,6 @@
 - type: entity
   parent: NCCyberwareImplantBase
   id: NCOpticRadarImplantStandard
-  suffix: Standard
   components:
   - type: Sprite
     sprite: _NC/Objects/Cyberware/optics.rsi
@@ -82,7 +81,6 @@
   - type: NCCyberware
     profile: NCOpticRadarImplantProfile
     factoryPrepared: true
-    quality: NCCyberwareQualityStandard
     qualityParts:
       NCMedicalSensorSlot: NCMedicalSensorStandard
       NCOpticPowerSlot: NCOpticPowerStandard
@@ -92,87 +90,6 @@
   parent: NCOpticRadarImplantStandard
   id: NCOpticRadarImplantStandardEmpty
   suffix: Standard empty frame
-  components:
-  - type: NCCyberware
-    factoryPrepared: false
-  - type: NCCyberwareAssembly
-    initialized: true
-
-- type: entity
-  parent: NCCyberwareImplantBase
-  id: NCOpticRadarImplantImprovised
-  suffix: Improvised
-  components:
-  - type: Sprite
-    sprite: _NC/Objects/Cyberware/optics.rsi
-    state: radar
-  - type: NCCyberware
-    profile: NCOpticRadarImplantProfile
-    factoryPrepared: true
-    quality: NCCyberwareQualityImprovised
-    qualityParts:
-      NCMedicalSensorSlot: NCMedicalSensorImprovised
-      NCOpticPowerSlot: NCOpticPowerImprovised
-  - type: NCOpticRadar
-
-- type: entity
-  parent: NCOpticRadarImplantImprovised
-  id: NCOpticRadarImplantImprovisedEmpty
-  suffix: Improvised empty frame
-  components:
-  - type: NCCyberware
-    factoryPrepared: false
-  - type: NCCyberwareAssembly
-    initialized: true
-
-- type: entity
-  parent: NCCyberwareImplantBase
-  id: NCOpticRadarImplantImproved
-  suffix: Improved
-  components:
-  - type: Sprite
-    sprite: _NC/Objects/Cyberware/optics.rsi
-    state: radar
-  - type: NCCyberware
-    profile: NCOpticRadarImplantProfile
-    factoryPrepared: true
-    quality: NCCyberwareQualityImproved
-    qualityParts:
-      NCMedicalSensorSlot: NCMedicalSensorImproved
-      NCOpticPowerSlot: NCOpticPowerImproved
-  - type: NCOpticRadar
-
-- type: entity
-  parent: NCOpticRadarImplantImproved
-  id: NCOpticRadarImplantImprovedEmpty
-  suffix: Improved empty frame
-  components:
-  - type: NCCyberware
-    factoryPrepared: false
-  - type: NCCyberwareAssembly
-    initialized: true
-
-- type: entity
-  parent: NCCyberwareImplantBase
-  id: NCOpticRadarImplantPremium
-  suffix: Premium
-  components:
-  - type: Sprite
-    sprite: _NC/Objects/Cyberware/optics.rsi
-    state: radar
-  - type: NCCyberware
-    profile: NCOpticRadarImplantProfile
-    factoryPrepared: true
-    quality: NCCyberwareQualityPremium
-    qualityParts:
-      NCMedicalSensorSlot: NCMedicalSensorPremium
-      NCOpticPowerSlot: NCOpticPowerPremium
-  - type: NCOpticRadar
-
-- type: entity
-  parent: NCOpticRadarImplantPremium
-  id: NCOpticRadarImplantPremiumEmpty
-  suffix: Premium empty frame
   components:
   - type: NCCyberware
     factoryPrepared: false
@@ -202,42 +119,6 @@
 - type: latheRecipe
   id: NCProduceNCOpticRadarImplantStandardEmpty
   result: NCOpticRadarImplantStandardEmpty
-  completetime: 12
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 500
-    Glass: 300
-    Plastic: 200
-
-- type: latheRecipe
-  id: NCProduceNCOpticRadarImplantImprovisedEmpty
-  result: NCOpticRadarImplantImprovisedEmpty
-  completetime: 12
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 500
-    Glass: 300
-    Plastic: 200
-
-- type: latheRecipe
-  id: NCProduceNCOpticRadarImplantImprovedEmpty
-  result: NCOpticRadarImplantImprovedEmpty
-  completetime: 12
-  applyMaterialDiscount: false
-  categories:
-  - Parts
-  materials:
-    Steel: 500
-    Glass: 300
-    Plastic: 200
-
-- type: latheRecipe
-  id: NCProduceNCOpticRadarImplantPremiumEmpty
-  result: NCOpticRadarImplantPremiumEmpty
   completetime: 12
   applyMaterialDiscount: false
   categories:
