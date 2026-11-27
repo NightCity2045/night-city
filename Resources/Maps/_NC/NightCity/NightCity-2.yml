@@ -3,8 +3,8 @@ meta:
   category: Map
   engineVersion: 284.0.2
   forkId: EchoCyber
-  forkVersion: 9834d7d198ecf296a2092e3b069ebf862b24409d
-  time: 11/22/2026 08:05:40
+  forkVersion: be524da4b41781c61399952aad42f92f7e1b6dd0
+  time: 11/26/2026 07:14:56
   entityCount: 323
 maps:
 - 1
@@ -24,7 +24,7 @@ entities:
   - uid: 1
     components:
     - type: MetaData
-      name: NightCity4 [-2]
+      name: NightCity9 [-2]
     - type: Transform
     - type: Map
       mapPaused: True
@@ -153,6 +153,7 @@ entities:
     - type: Transform
       parent: 1
       pos: -151.5,114.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -162,6 +163,7 @@ entities:
     - type: Transform
       parent: 1
       pos: -151.5,116.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -171,6 +173,7 @@ entities:
     - type: Transform
       parent: 1
       pos: -126.5,119.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -180,6 +183,7 @@ entities:
     - type: Transform
       parent: 1
       pos: -119.5,116.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -189,6 +193,7 @@ entities:
     - type: Transform
       parent: 1
       pos: -129.5,115.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -198,6 +203,7 @@ entities:
     - type: Transform
       parent: 1
       pos: -129.5,114.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -207,6 +213,7 @@ entities:
     - type: Transform
       parent: 1
       pos: -127.5,113.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -216,6 +223,7 @@ entities:
     - type: Transform
       parent: 1
       pos: -129.5,116.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -225,6 +233,7 @@ entities:
     - type: Transform
       parent: 1
       pos: -128.5,113.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -234,6 +243,7 @@ entities:
     - type: Transform
       parent: 1
       pos: -126.5,113.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -243,6 +253,7 @@ entities:
     - type: Transform
       parent: 1
       pos: -151.5,115.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -252,6 +263,7 @@ entities:
     - type: Transform
       parent: 1
       pos: -125.5,119.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -261,6 +273,7 @@ entities:
     - type: Transform
       parent: 1
       pos: -116.5,127.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -292,11 +305,13 @@ entities:
     - type: Transform
       parent: 1
       pos: -115.49629,121.85806
+    - type: NCCityLocation
   - uid: 269
     components:
     - type: Transform
       parent: 1
       pos: -115.51973,122.53775
+    - type: NCCityLocation
 - proto: NCPoweredlightCorporateRed
   entities:
   - uid: 436
