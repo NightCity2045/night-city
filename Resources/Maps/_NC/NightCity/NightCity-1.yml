@@ -3024,6 +3024,37 @@ entities:
       needsPower: False
     - type: AlwaysPoweredReceiverState
       needsPower: True
+- proto: NCPoweredlightSodium
+  entities:
+  - uid: 1394
+    components:
+    - type: Transform
+      parent: 1
+      rot: 3.141592653589793 rad
+      pos: -96.5,16.5
+  - uid: 1410
+    components:
+    - type: Transform
+      parent: 1
+      rot: -1.5707963267948966 rad
+      pos: -87.5,19.5
+  - uid: 1411
+    components:
+    - type: Transform
+      parent: 1
+      rot: -1.5707963267948966 rad
+      pos: -87.5,11.5
+  - uid: 1412
+    components:
+    - type: Transform
+      parent: 1
+      rot: 3.141592653589793 rad
+      pos: -90.5,8.5
+  - uid: 1421
+    components:
+    - type: Transform
+      parent: 1
+      pos: -92.5,6.5
 - proto: NCStairsDown
   entities:
   - uid: 381
@@ -3793,35 +3824,6 @@ entities:
       needsPower: False
     - type: AlwaysPoweredReceiverState
       needsPower: True
-  - uid: 1394
-    components:
-    - type: Transform
-      parent: 1
-      rot: 3.141592653589793 rad
-      pos: -96.5,16.5
-  - uid: 1410
-    components:
-    - type: Transform
-      parent: 1
-      rot: -1.5707963267948966 rad
-      pos: -87.5,19.5
-  - uid: 1411
-    components:
-    - type: Transform
-      parent: 1
-      rot: -1.5707963267948966 rad
-      pos: -87.5,11.5
-  - uid: 1412
-    components:
-    - type: Transform
-      parent: 1
-      rot: 3.141592653589793 rad
-      pos: -90.5,8.5
-  - uid: 1421
-    components:
-    - type: Transform
-      parent: 1
-      pos: -92.5,6.5
 - proto: PresentRandomUnsafe
   entities:
   - uid: 1250
