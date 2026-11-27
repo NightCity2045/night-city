@@ -5,7 +5,7 @@ meta:
   forkId: EchoCyber
   forkVersion: 9834d7d198ecf296a2092e3b069ebf862b24409d
   time: 11/22/2026 08:05:40
-  entityCount: 14778
+  entityCount: 14813
 maps:
 - 1
 grids:
@@ -5426,6 +5426,76 @@ entities:
     - type: Transform
       parent: 1
       pos: -117.5,-67.5
+  - uid: 14859
+    components:
+    - type: Transform
+      parent: 1
+      pos: -153.5,-85.5
+  - uid: 14860
+    components:
+    - type: Transform
+      parent: 1
+      pos: -148.5,-82.5
+  - uid: 14861
+    components:
+    - type: Transform
+      parent: 1
+      pos: -154.5,-69.5
+  - uid: 14862
+    components:
+    - type: Transform
+      parent: 1
+      pos: -152.5,-69.5
+  - uid: 14865
+    components:
+    - type: Transform
+      parent: 1
+      pos: -139.5,-38.5
+  - uid: 14866
+    components:
+    - type: Transform
+      parent: 1
+      pos: -137.5,-15.5
+  - uid: 14869
+    components:
+    - type: Transform
+      parent: 1
+      pos: -121.5,-11.5
+  - uid: 14870
+    components:
+    - type: Transform
+      parent: 1
+      pos: -135.5,-85.5
+  - uid: 14871
+    components:
+    - type: Transform
+      parent: 1
+      pos: -130.5,-83.5
+  - uid: 14872
+    components:
+    - type: Transform
+      parent: 1
+      pos: -117.5,-87.5
+  - uid: 14873
+    components:
+    - type: Transform
+      parent: 1
+      pos: -120.5,-82.5
+  - uid: 14874
+    components:
+    - type: Transform
+      parent: 1
+      pos: -147.5,-66.5
+  - uid: 14875
+    components:
+    - type: Transform
+      parent: 1
+      pos: -147.5,-64.5
+  - uid: 14885
+    components:
+    - type: Transform
+      parent: 1
+      pos: -127.5,-17.5
 - proto: AirlockArmoryGlassLocked
   entities:
   - uid: 5946
@@ -5842,6 +5912,111 @@ entities:
     - type: Transform
       parent: 1
       pos: -119.5,-16.5
+  - uid: 14863
+    components:
+    - type: Transform
+      parent: 1
+      pos: -110.5,-57.5
+  - uid: 14864
+    components:
+    - type: Transform
+      parent: 1
+      pos: -109.5,-57.5
+  - uid: 14867
+    components:
+    - type: Transform
+      parent: 1
+      pos: -132.5,-3.5
+  - uid: 14868
+    components:
+    - type: Transform
+      parent: 1
+      pos: -131.5,-3.5
+  - uid: 14876
+    components:
+    - type: Transform
+      parent: 1
+      pos: -101.5,-56.5
+  - uid: 14877
+    components:
+    - type: Transform
+      parent: 1
+      pos: -101.5,-55.5
+  - uid: 14878
+    components:
+    - type: Transform
+      parent: 1
+      pos: -101.5,-53.5
+  - uid: 14879
+    components:
+    - type: Transform
+      parent: 1
+      pos: -101.5,-52.5
+  - uid: 14880
+    components:
+    - type: Transform
+      parent: 1
+      pos: -140.5,-32.5
+  - uid: 14881
+    components:
+    - type: Transform
+      parent: 1
+      pos: -140.5,-31.5
+  - uid: 14882
+    components:
+    - type: Transform
+      parent: 1
+      pos: -140.5,-30.5
+  - uid: 14883
+    components:
+    - type: Transform
+      parent: 1
+      pos: -79.5,-34.5
+  - uid: 14884
+    components:
+    - type: Transform
+      parent: 1
+      pos: -79.5,-33.5
+  - uid: 14886
+    components:
+    - type: Transform
+      parent: 1
+      pos: -79.5,-10.5
+  - uid: 14887
+    components:
+    - type: Transform
+      parent: 1
+      pos: -79.5,-9.5
+  - uid: 14888
+    components:
+    - type: Transform
+      parent: 1
+      pos: -160.5,-21.5
+  - uid: 14889
+    components:
+    - type: Transform
+      parent: 1
+      pos: -160.5,-20.5
+  - uid: 14890
+    components:
+    - type: Transform
+      parent: 1
+      pos: -160.5,-19.5
+  - uid: 14891
+    components:
+    - type: Transform
+      parent: 1
+      pos: -160.5,-16.5
+  - uid: 14892
+    components:
+    - type: Transform
+      parent: 1
+      pos: -160.5,-15.5
+  - uid: 14893
+    components:
+    - type: Transform
+      parent: 1
+      pos: -160.5,-14.5
 - proto: AirlockServiceTheatreGlassLocked
   entities:
   - uid: 11523
