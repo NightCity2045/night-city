@@ -476,6 +476,18 @@ public sealed partial class NCBankSystem : EntitySystem
         return true;
     }
 
+    /// <summary>Pays for a shop purchase from an account. No bank fee applies; the money leaves the economy.</summary>
+    public bool TryPayPurchase(NCBankAccountRecord account, long amount, string item, EntityUid? actor)
+    {
+        if (amount <= 0 || account.Balance < amount)
+            return false;
+
+        Apply(account, NCBankTransactionKind.Purchase, -amount, 0, null, item);
+        _adminLog.Add(LogType.NCBank, LogImpact.Low,
+            $"{ToPrettyString(actor):actor} paid {amount} for {item} from {account.Number}");
+        return true;
+    }
+
     /// <summary>Charges rent to a character account. No bank fee applies; the money leaves the economy.</summary>
     public bool TryPayRent(NCBankAccountRecord account, long amount, string property, EntityUid? actor)
     {

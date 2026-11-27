@@ -1,0 +1,120 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Shop vending machines: buy with the money on your bank account. Big goods appear at the nearest pickup point.
+- type: entity
+  abstract: true
+  parent: BaseStructure
+  id: NCShopVendomatBase
+  components:
+  - type: Sprite
+    layers:
+    - state: off
+    - state: normal-unshaded
+      shader: unshaded
+  - type: InteractionOutline
+  - type: ActivatableUI
+    key: enum.NCShopUiKey.Key
+  - type: UserInterface
+    interfaces:
+      enum.NCShopUiKey.Key:
+        type: NCShopBoundUserInterface
+  - type: PointLight
+    radius: 1.5
+    energy: 1.6
+
+- type: entity
+  parent: MarkerBase
+  id: NCShopPickupPoint
+  components:
+  - type: Sprite
+    sprite: _NC/Markers/mission_markers.rsi
+    state: drop
+  - type: NCShopPickupPoint
+
+- type: entity
+  parent: NCShopVendomatBase
+  id: NCShopFurnitureVendomat
+  components:
+  - type: Sprite
+    sprite: Structures/Machines/VendingMachines/vendomat.rsi
+  - type: PointLight
+    color: "#FFB21F"
+  - type: NCShop
+    catalog: NCShopFurniture
+
+- type: entity
+  parent: NCShopVendomatBase
+  id: NCShopClothingVendomat
+  components:
+  - type: Sprite
+    sprite: Structures/Machines/VendingMachines/clothing.rsi
+  - type: PointLight
+    color: "#FF2A8A"
+  - type: NCShop
+    catalog: NCShopClothing
+
+- type: entity
+  parent: NCShopVendomatBase
+  id: NCShopGroceriesVendomat
+  components:
+  - type: Sprite
+    sprite: Structures/Machines/VendingMachines/snack.rsi
+  - type: PointLight
+    color: "#9FE35A"
+  - type: NCShop
+    catalog: NCShopGroceries
+
+- type: entity
+  parent: NCShopVendomatBase
+  id: NCShopBarVendomat
+  components:
+  - type: Sprite
+    sprite: Structures/Machines/VendingMachines/boozeomat.rsi
+  - type: PointLight
+    color: "#D46BFF"
+  - type: NCShop
+    catalog: NCShopBar
+
+- type: entity
+  parent: NCShopVendomatBase
+  id: NCShopToolsVendomat
+  components:
+  - type: Sprite
+    sprite: Structures/Machines/VendingMachines/youtool.rsi
+  - type: PointLight
+    color: "#FFB21F"
+  - type: NCShop
+    catalog: NCShopTools
+
+- type: entity
+  parent: NCShopVendomatBase
+  id: NCShopPharmacyVendomat
+  components:
+  - type: Sprite
+    sprite: Structures/Machines/VendingMachines/medical.rsi
+  - type: PointLight
+    color: "#3FF0FF"
+  - type: NCShop
+    catalog: NCShopPharmacy
+
+- type: entity
+  parent: NCShopVendomatBase
+  id: NCShopGunsVendomat
+  components:
+  - type: Sprite
+    sprite: Structures/Machines/VendingMachines/ammo.rsi
+  - type: PointLight
+    color: "#FF3A3A"
+  - type: NCShop
+    catalog: NCShopGuns
+
+- type: entity
+  parent: NCShopVendomatBase
+  id: NCShopImplantsVendomat
+  components:
+  - type: Sprite
+    sprite: Structures/Machines/VendingMachines/robotics.rsi
+  - type: PointLight
+    color: "#3FF0FF"
+  - type: NCShop
+    catalog: NCShopImplants

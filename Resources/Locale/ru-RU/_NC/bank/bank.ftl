@@ -51,6 +51,7 @@ nc-bank-kind-salary-missed = Зарплата не выплачена
 nc-bank-kind-contract = Оплата контракта
 nc-bank-kind-fixer = Оплата фиксера
 nc-bank-kind-rent = Аренда
+nc-bank-kind-purchase = Покупка
 nc-bank-kind-unknown = Операция
 
 nc-bank-atm-title = Банкомат Банка Найт-Сити
