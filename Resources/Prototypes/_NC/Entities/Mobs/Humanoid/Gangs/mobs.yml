@@ -300,3 +300,48 @@
       task: SimpleHumanoidHostileCompound
   - type: Loadout
     prototypes: [ NCDebtorGear ]
+
+# Medical Technologies: grows replacement limbs and quietly sells cyberware to boostergangs.
+- type: entity
+  abstract: true
+  parent: MobHuman
+  id: NCMobHumanSecurityMedicalTechnologiesBase
+  components:
+  - type: RandomHumanoidAppearance
+    randomizeName: false
+    allowedMarkingLayers: [ Hair, FacialHair, UndergarmentTop, UndergarmentBottom ]
+  - type: NpcFactionMember
+    factions: [ NCMedicalTechnologiesSecurity ]
+  - type: FactionException
+  - type: NPCRetaliation
+  - type: HTN
+    rootTask:
+      task: SimpleHumanoidHostileCompound
+
+- type: entity
+  parent: NCMobHumanSecurityMedicalTechnologiesBase
+  id: NCMobHumanSecurityMedicalTechnologiesGuard
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityMedicalTechnologiesGuardGear ]
+
+- type: entity
+  parent: NCMobHumanSecurityMedicalTechnologiesBase
+  id: NCMobHumanSecurityMedicalTechnologiesOrderly
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityMedicalTechnologiesOrderlyGear ]
+
+- type: entity
+  parent: NCMobHumanSecurityMedicalTechnologiesBase
+  id: NCMobHumanSecurityMedicalTechnologiesSurgeon
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityMedicalTechnologiesSurgeonGear ]
+
+- type: entity
+  parent: NCMobHumanSecurityMedicalTechnologiesBase
+  id: NCMobHumanSecurityMedicalTechnologiesChief
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityMedicalTechnologiesChiefGear ]

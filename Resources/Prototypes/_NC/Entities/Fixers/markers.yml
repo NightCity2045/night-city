@@ -364,3 +364,36 @@
   - type: NCMissionMarker
     kind: Guard
     owner: PhilharmonicVampyres
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerObjectiveMedicalTechnologies
+  suffix: Objective, Medical Technologies
+  components:
+  - type: Sprite
+    state: objective
+  - type: NCMissionMarker
+    kind: Objective
+    owner: MedicalTechnologies
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerDeadDropMedicalTechnologies
+  suffix: DeadDrop, Medical Technologies
+  components:
+  - type: Sprite
+    state: drop
+  - type: NCMissionMarker
+    kind: DeadDrop
+    owner: MedicalTechnologies
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerGuardMedicalTechnologies
+  suffix: Guard, Medical Technologies
+  components:
+  - type: Sprite
+    state: guard
+  - type: NCMissionMarker
+    kind: Guard
+    owner: MedicalTechnologies

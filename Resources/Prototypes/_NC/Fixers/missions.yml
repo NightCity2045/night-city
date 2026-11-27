@@ -106,6 +106,22 @@
   timeLimit: 2400
 
 - type: ncFixerMission
+  id: NCFixerInsiderMedTechBoosters
+  fixer: NCFixerInsider
+  kind: Retrieval
+  name: nc-fixer-mission-insider-medtech-boosters
+  description: nc-fixer-mission-insider-medtech-boosters-desc
+  minimumReputation: 25
+  owner: MedicalTechnologies
+  terminal: NCMissionIntelTerminal
+  item: NCMissionDataShard
+  encounter: SecurityMedicalTechnologiesLab
+  reward: 5000
+  reputationGain: 6
+  reputationLoss: 5
+  timeLimit: 2400
+
+- type: ncFixerMission
   id: NCFixerInsiderCorporatePda
   fixer: NCFixerInsider
   kind: Retrieval
@@ -235,3 +251,18 @@
   reputationGain: 5
   reputationLoss: 5
   timeLimit: 1800
+
+- type: ncFixerMission
+  id: NCFixerVladMedTechVats
+  fixer: NCFixerVlad
+  kind: Sabotage
+  name: nc-fixer-mission-vlad-medtech-vats
+  description: nc-fixer-mission-vlad-medtech-vats-desc
+  minimumReputation: 25
+  owner: MedicalTechnologies
+  item: NCMedTechVatController
+  encounter: SecurityMedicalTechnologiesLab
+  reward: 4500
+  reputationGain: 6
+  reputationLoss: 5
+  timeLimit: 2400

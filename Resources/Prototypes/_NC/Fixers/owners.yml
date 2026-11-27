@@ -45,3 +45,7 @@
 - type: ncMissionOwner
   id: PhilharmonicVampyres
   name: nc-mission-owner-philharmonic-vampyres
+
+- type: ncMissionOwner
+  id: MedicalTechnologies
+  name: nc-mission-owner-medical-technologies

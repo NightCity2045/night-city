@@ -134,3 +134,17 @@ ent-NCMobHumanSecurityBiotechnicaGuard = охранник (Биотехника)
     .desc = Корпоративная охрана.
 ent-NCMobHumanSecurityBiotechnicaHeavy = тяжёлый охранник (Биотехника)
     .desc = Корпоративная охрана, хорошо вооружённая.
+
+nc-medtech-warning-1 = Это стерильный объект. Посторонним вход воспрещён.
+nc-medtech-warning-2 = Клиника закрыта, чумба. Приходи по записи.
+nc-medtech-alarm-1 = Проникновение! Пустить на органы!
+nc-medtech-alarm-2 = Никто не уйдёт с нашим товаром!
+
+ent-NCMobHumanSecurityMedicalTechnologiesGuard = охранник (Medical Technologies)
+    .desc = Корпоративная охрана в хирургической шапочке. Пистолет у него не для красоты.
+ent-NCMobHumanSecurityMedicalTechnologiesOrderly = санитар (Medical Technologies)
+    .desc = Носит тела и запчасти между этажами, а мачете — для тех, кто задаёт вопросы.
+ent-NCMobHumanSecurityMedicalTechnologiesSurgeon = хирург (Medical Technologies)
+    .desc = Днём выращивает конечности, ночью ставит хром бустерам.
+ent-NCMobHumanSecurityMedicalTechnologiesChief = главврач (Medical Technologies)
+    .desc = Управляет фермой конечностей и побочным бизнесом, который её кормит.

@@ -134,3 +134,17 @@ ent-NCMobHumanSecurityBiotechnicaGuard = Biotechnica security guard
     .desc = Corporate security.
 ent-NCMobHumanSecurityBiotechnicaHeavy = Biotechnica security heavy
     .desc = Corporate security, heavily armed.
+
+nc-medtech-warning-1 = This is a sterile facility. Visitors are not permitted.
+nc-medtech-warning-2 = Clinic's closed, choom. Come back with an appointment.
+nc-medtech-alarm-1 = Breach! Harvest them!
+nc-medtech-alarm-2 = Nobody leaves with our stock!
+
+ent-NCMobHumanSecurityMedicalTechnologiesGuard = Medical Technologies security guard
+    .desc = Corporate security in a surgical cap. The pistol is not for show.
+ent-NCMobHumanSecurityMedicalTechnologiesOrderly = Medical Technologies orderly
+    .desc = Carries bodies and parts between floors, and a machete for anyone who asks questions.
+ent-NCMobHumanSecurityMedicalTechnologiesSurgeon = Medical Technologies surgeon
+    .desc = Grows limbs by day and fits chrome to boosters by night.
+ent-NCMobHumanSecurityMedicalTechnologiesChief = Medical Technologies chief of staff
+    .desc = Runs the limb farm and the side business that keeps it profitable.

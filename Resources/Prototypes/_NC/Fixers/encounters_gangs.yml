@@ -212,3 +212,23 @@
   - mob: NCMobHumanSecurityBiotechnicaHeavy
     min: 1
     max: 2
+
+# Medical Technologies' limb farm in the port: armed staff on every floor.
+- type: ncFixerEncounter
+  id: SecurityMedicalTechnologiesLab
+  extraPerLevel: 1
+  warnings: [ nc-medtech-warning-1, nc-medtech-warning-2 ]
+  alarms: [ nc-medtech-alarm-1, nc-medtech-alarm-2 ]
+  entries:
+  - mob: NCMobHumanSecurityMedicalTechnologiesGuard
+    min: 3
+    max: 4
+  - mob: NCMobHumanSecurityMedicalTechnologiesOrderly
+    min: 2
+    max: 3
+  - mob: NCMobHumanSecurityMedicalTechnologiesSurgeon
+    min: 1
+    max: 2
+  - mob: NCMobHumanSecurityMedicalTechnologiesChief
+    min: 1
+    max: 1

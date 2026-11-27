@@ -57,6 +57,7 @@ nc-mission-owner-valentinos = Valentinos
 nc-mission-owner-bozos = Bozos
 nc-mission-owner-inquisitors = Inquisitors
 nc-mission-owner-philharmonic-vampyres = Philharmonic Vampyres
+nc-mission-owner-medical-technologies = Medical Technologies
 
 nc-fixer-mission-target-killed = The target is dead and dead men pay no debts: {$mission} failed.
 nc-mission-terminal-hacking = You start cracking the terminal...
@@ -89,6 +90,8 @@ nc-fixer-mission-insider-biotech-trials = Clinical trials
 nc-fixer-mission-insider-biotech-trials-desc = Biotechnica tests drugs on people who never signed anything. The trial data sits on a terminal at their site.
 nc-fixer-mission-insider-biotech-lab = The lab's dirty secret
 nc-fixer-mission-insider-biotech-lab-desc = A Biotechnica lab hides research that would end careers. Security is heavy. The story is worth it.
+nc-fixer-mission-insider-medtech-boosters = Chrome for boosters
+nc-fixer-mission-insider-medtech-boosters-desc = Medical Technologies grows replacement limbs in the port and sells cyberware to boostergangs on the side. The customer list sits on a terminal in their building. Three floors, armed staff with pistols and blades. Bring me the shard.
 nc-fixer-mission-insider-corporate-pda = Someone's PDA
 nc-fixer-mission-insider-corporate-pda-desc = A corp employee carries their whole work life in a PDA. Bring it to my drop and I'll take it from there.
 
@@ -108,6 +111,8 @@ nc-fixer-mission-vlad-debtor = Debt collection
 nc-fixer-mission-vlad-debtor-desc = This man owes Vlad. Find him, beat him well. Alive. Dead men do not pay.
 nc-fixer-mission-vlad-debtor-valentinos = Debtor under protection
 nc-fixer-mission-vlad-debtor-valentinos-desc = My debtor runs to Valentinos and thinks he is safe. Show him he is wrong. Alive, and do not start a war.
+nc-fixer-mission-vlad-medtech-vats = Spoiled harvest
+nc-fixer-mission-vlad-medtech-vats-desc = Medical Technologies grows arms and legs in the port and sells chrome to boosters on my streets. Vlad does not like competition. Break the machine that runs their vats. Their doctors carry guns and machetes, be ready.
 
 ent-NCFixerInsider = net terminal
     .desc = A public Net access point. The screen shows a masked face and a blinking cursor.
