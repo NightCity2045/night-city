@@ -5,7 +5,7 @@ meta:
   forkId: EchoCyber
   forkVersion: 9834d7d198ecf296a2092e3b069ebf862b24409d
   time: 11/22/2026 08:05:40
-  entityCount: 15033
+  entityCount: 15041
 maps:
 - 1
 grids:
@@ -14172,6 +14172,50 @@ entities:
       needsPower: False
     - type: AlwaysPoweredReceiverState
       needsPower: True
+- proto: NCMissionMarkerDeadDropNeutral
+  entities:
+  - uid: 15118
+    components:
+    - type: Transform
+      parent: 1
+      pos: -172.5,-17.5
+  - uid: 15119
+    components:
+    - type: Transform
+      parent: 1
+      pos: -139.5,-93.5
+  - uid: 15120
+    components:
+    - type: Transform
+      parent: 1
+      pos: -111.5,-45.5
+  - uid: 15121
+    components:
+    - type: Transform
+      parent: 1
+      pos: -149.5,-39.5
+- proto: NCMissionMarkerObjectiveNeutral
+  entities:
+  - uid: 15114
+    components:
+    - type: Transform
+      parent: 1
+      pos: -152.5,-63.5
+  - uid: 15115
+    components:
+    - type: Transform
+      parent: 1
+      pos: -134.5,-18.5
+  - uid: 15116
+    components:
+    - type: Transform
+      parent: 1
+      pos: -133.5,-89.5
+  - uid: 15117
+    components:
+    - type: Transform
+      parent: 1
+      pos: -107.5,-65.5
 - proto: NCPharmaColdStorage
   entities:
   - uid: 14557

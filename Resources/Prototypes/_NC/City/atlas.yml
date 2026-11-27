@@ -290,6 +290,28 @@
     position: -153.9,-61.9
   - name: "PNC W 26th Street Building 02"
     position: -105.7,-64
+  - name: "PNC W 25th Street Building 03"
+    position: -91.5,-9.5
+  - name: "PNC W 25th Street Building 04"
+    position: -91.5,-22.5
+    z: 0
+  - name: "PNC W 25th Street Building 05"
+    position: -76.5,-22.5
+  - name: "PNC Pier Terminal"
+    position: -157.5,-18.5
+  - name: "PNC W 25th Street Building 06"
+    position: -121.5,-9.5
+  - name: "PNC W 26th Street Building 03"
+    position: -135.5,-35.5
+  - name: "PNC W 26th Street Building 04"
+    position: -97.5,-54.5
+    z: 0
+  - name: "PNC W 27th Street Building 01"
+    position: -150.5,-81.5
+  - name: "PNC W 27th Street Building 02"
+    position: -134.5,-88.5
+  - name: "PNC W 27th Street Building 03"
+    position: -115.5,-89.5
   - name: "RZ 30rd Street Building 01"
     position: -34,-43.5
   - name: "RZ 30rd Street Building 02"
