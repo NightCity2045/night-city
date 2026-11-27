@@ -173,3 +173,17 @@ ent-NCMobHumanSecurityMedicalTechnologiesSurgeon = хирург (Medical Technol
     .desc = Днём выращивает конечности, ночью ставит хром бустерам.
 ent-NCMobHumanSecurityMedicalTechnologiesChief = главврач (Medical Technologies)
     .desc = Управляет фермой конечностей и побочным бизнесом, который её кормит.
+
+nc-ncu-warning-1 = Студенческий, пожалуйста. Нет пропуска — нет входа.
+nc-ncu-warning-2 = Приёмные часы закончились. Разворачивайся.
+nc-ncu-alarm-1 = Посторонний на кампусе! Закрыть лаборатории!
+nc-ncu-alarm-2 = Все посты — защищать исследования!
+
+ent-NCMobHumanSecurityNightCityUniversityOfficer = патрульный кампуса (NCU)
+    .desc = Ходит по коридорам Night City University с шоковой дубинкой и коротким терпением.
+ent-NCMobHumanSecurityNightCityUniversityGuard = охранник (NCU)
+    .desc = Охрана кампуса. Крепость знаний платит за настоящие стволы.
+ent-NCMobHumanSecurityNightCityUniversityResponder = боец группы реагирования (NCU)
+    .desc = Шлем, жилет, пистолет. Его зовут, когда кто-то лезет в лаборатории.
+ent-NCMobHumanSecurityNightCityUniversityChief = начальник охраны кампуса (NCU)
+    .desc = Очень серьёзно относится к миссии университета по защите знаний.

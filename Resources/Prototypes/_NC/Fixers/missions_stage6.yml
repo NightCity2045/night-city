@@ -514,3 +514,61 @@
   reward: 2000
   reputationGain: 3
   timeLimit: 1800
+
+# University District: Night City University, its labs and the Inquisitors squatting the old annex.
+- type: ncFixerMission
+  id: NCFixerInsiderNcuResearch
+  fixer: NCFixerInsider
+  kind: Retrieval
+  name: nc-fixer-mission-insider-ncu-research
+  description: nc-fixer-mission-insider-ncu-research-desc
+  minimumReputation: 25
+  owner: NightCityUniversity
+  terminal: NCMissionIntelTerminal
+  item: NCMissionDataShard
+  encounter: SecurityNightCityUniversityCampus
+  reward: 5000
+  reputationGain: 6
+  reputationLoss: 5
+  timeLimit: 2400
+
+- type: ncFixerMission
+  id: NCFixerVanceCampusRecon
+  fixer: NCFixerVance
+  kind: Recon
+  name: nc-fixer-mission-vance-campus-recon
+  description: nc-fixer-mission-vance-campus-recon-desc
+  minimumReputation: 10
+  owner: NightCityUniversity
+  reconPoints: 3
+  reward: 2000
+  reputationGain: 3
+  timeLimit: 1800
+
+- type: ncFixerMission
+  id: NCFixerFengInquisitorsBroadcast
+  fixer: NCFixerFeng
+  kind: Sabotage
+  name: nc-fixer-mission-feng-inquisitors-broadcast
+  description: nc-fixer-mission-feng-inquisitors-broadcast-desc
+  minimumReputation: 25
+  owner: Inquisitors
+  item: NCMissionSabotageTarget
+  encounter: GangInquisitorsStronghold
+  reward: 3500
+  reputationGain: 5
+  reputationLoss: 4
+  timeLimit: 2400
+
+- type: ncFixerMission
+  id: NCFixerVladStudentDealer
+  fixer: NCFixerVlad
+  kind: Beating
+  name: nc-fixer-mission-vlad-student-dealer
+  description: nc-fixer-mission-vlad-student-dealer-desc
+  owner: Neutral
+  item: NCMobHumanDebtor
+  reward: 1500
+  reputationGain: 3
+  reputationLoss: 4
+  timeLimit: 1200

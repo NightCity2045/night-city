@@ -463,3 +463,36 @@
   - type: NCMissionMarker
     kind: Guard
     owner: MedicalTechnologies
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerObjectiveNightCityUniversity
+  suffix: Objective, Night City University
+  components:
+  - type: Sprite
+    state: objective
+  - type: NCMissionMarker
+    kind: Objective
+    owner: NightCityUniversity
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerDeadDropNightCityUniversity
+  suffix: DeadDrop, Night City University
+  components:
+  - type: Sprite
+    state: drop
+  - type: NCMissionMarker
+    kind: DeadDrop
+    owner: NightCityUniversity
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerGuardNightCityUniversity
+  suffix: Guard, Night City University
+  components:
+  - type: Sprite
+    state: guard
+  - type: NCMissionMarker
+    kind: Guard
+    owner: NightCityUniversity

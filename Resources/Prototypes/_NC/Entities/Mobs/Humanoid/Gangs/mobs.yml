@@ -392,3 +392,48 @@
   components:
   - type: Loadout
     prototypes: [ NCSecurityMedicalTechnologiesChiefGear ]
+
+# Night City University campus security: the "fortress of learning" guards its knowledge seriously.
+- type: entity
+  abstract: true
+  parent: MobHuman
+  id: NCMobHumanSecurityNightCityUniversityBase
+  components:
+  - type: RandomHumanoidAppearance
+    randomizeName: false
+    allowedMarkingLayers: [ Hair, FacialHair, UndergarmentTop, UndergarmentBottom ]
+  - type: NpcFactionMember
+    factions: [ NCNightCityUniversitySecurity ]
+  - type: FactionException
+  - type: NPCRetaliation
+  - type: HTN
+    rootTask:
+      task: SimpleHumanoidHostileCompound
+
+- type: entity
+  parent: NCMobHumanSecurityNightCityUniversityBase
+  id: NCMobHumanSecurityNightCityUniversityOfficer
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityNightCityUniversityOfficerGear ]
+
+- type: entity
+  parent: NCMobHumanSecurityNightCityUniversityBase
+  id: NCMobHumanSecurityNightCityUniversityGuard
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityNightCityUniversityGuardGear ]
+
+- type: entity
+  parent: NCMobHumanSecurityNightCityUniversityBase
+  id: NCMobHumanSecurityNightCityUniversityResponder
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityNightCityUniversityResponderGear ]
+
+- type: entity
+  parent: NCMobHumanSecurityNightCityUniversityBase
+  id: NCMobHumanSecurityNightCityUniversityChief
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityNightCityUniversityChiefGear ]

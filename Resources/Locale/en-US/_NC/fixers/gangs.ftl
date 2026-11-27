@@ -173,3 +173,17 @@ ent-NCMobHumanSecurityMedicalTechnologiesSurgeon = Medical Technologies surgeon
     .desc = Grows limbs by day and fits chrome to boosters by night.
 ent-NCMobHumanSecurityMedicalTechnologiesChief = Medical Technologies chief of staff
     .desc = Runs the limb farm and the side business that keeps it profitable.
+
+nc-ncu-warning-1 = Campus ID, please. No ID, no entry.
+nc-ncu-warning-2 = Visiting hours are over. Turn around.
+nc-ncu-alarm-1 = Intruder on campus! Lock down the labs!
+nc-ncu-alarm-2 = Protect the research, all units!
+
+ent-NCMobHumanSecurityNightCityUniversityOfficer = NCU campus officer
+    .desc = Walks the corridors of Night City University with a stun baton and a short temper.
+ent-NCMobHumanSecurityNightCityUniversityGuard = NCU security guard
+    .desc = Campus security. The fortress of learning pays for real guns.
+ent-NCMobHumanSecurityNightCityUniversityResponder = NCU response officer
+    .desc = Helmet, vest, pistol. Called in when someone goes after the labs.
+ent-NCMobHumanSecurityNightCityUniversityChief = NCU chief of campus security
+    .desc = Takes the university's mission of protecting knowledge very seriously.

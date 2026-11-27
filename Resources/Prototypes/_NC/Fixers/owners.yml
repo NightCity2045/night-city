@@ -57,3 +57,7 @@
 - type: ncMissionOwner
   id: MedicalTechnologies
   name: nc-mission-owner-medical-technologies
+
+- type: ncMissionOwner
+  id: NightCityUniversity
+  name: nc-mission-owner-night-city-university

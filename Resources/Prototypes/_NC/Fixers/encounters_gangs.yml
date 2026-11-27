@@ -260,3 +260,23 @@
   - mob: NCMobHumanSecurityMedicalTechnologiesChief
     min: 1
     max: 1
+
+# Night City University: campus security sweeps every floor of the main building.
+- type: ncFixerEncounter
+  id: SecurityNightCityUniversityCampus
+  extraPerLevel: 1
+  warnings: [ nc-ncu-warning-1, nc-ncu-warning-2 ]
+  alarms: [ nc-ncu-alarm-1, nc-ncu-alarm-2 ]
+  entries:
+  - mob: NCMobHumanSecurityNightCityUniversityOfficer
+    min: 2
+    max: 3
+  - mob: NCMobHumanSecurityNightCityUniversityGuard
+    min: 2
+    max: 3
+  - mob: NCMobHumanSecurityNightCityUniversityResponder
+    min: 1
+    max: 2
+  - mob: NCMobHumanSecurityNightCityUniversityChief
+    min: 1
+    max: 1

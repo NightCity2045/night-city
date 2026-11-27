@@ -350,25 +350,25 @@
   - name: "SNC Shop Storage"
     position: -120.5,8.5
     z: 0
-  - name: "UD Alexandria Building 01"
+  - name: "UD University Quad"
     position: -119.5,65.5
-  - name: "UD Alexandria Building 02"
+  - name: "UD Alexandria Street Shops"
     position: -126.6,39.9
-  - name: "UD Bay Street Building 01"
+  - name: "UD Net Cafe and Diner"
     position: -85.5,41.5
   - name: "UD Farren Building 01"
     position: -74.5,92
-  - name: "UD Farren Building 02"
-    position: -51,87
-  - name: "UD Farren Building 03"
+  - name: "UD NCU Student Residence"
+    position: -52.5,87.5
+  - name: "UD Student Bar"
     position: -91,65.5
-  - name: "UD Farren Building 04"
-    position: -74,65.5
-  - name: "UD Farren Building 05"
-    position: -50,63.5
-  - name: "UD Skyline Building 01"
+  - name: "UD Old Lecture Annex"
+    position: -77.5,65.5
+  - name: "UD Lecture Annex"
+    position: -56.5,63.5
+  - name: "UD Campus Clinic"
     position: -135.5,65.5
-  - name: "UD Skyline Building 02"
+  - name: "UD Night City University"
     position: -165.5,52.7
   - name: "G Potomac Ave. building 04"
     position: -42,-7.5

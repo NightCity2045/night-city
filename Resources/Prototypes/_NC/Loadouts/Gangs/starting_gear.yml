@@ -348,3 +348,45 @@
     gloves: ClothingHandsGlovesLatex
   inhand:
   - NCWeaponPistolAvenger
+
+- type: startingGear
+  id: NCSecurityNightCityUniversityOfficerGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitSecGrey
+    shoes: ClothingShoesBootsJack
+    head: ClothingHeadHatBeret
+    outerClothing: ClothingOuterArmorBasicSlim
+  inhand:
+  - Stunbaton
+
+- type: startingGear
+  id: NCSecurityNightCityUniversityGuardGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitSecGrey
+    shoes: ClothingShoesBootsJack
+    head: ClothingHeadHatBeret
+    outerClothing: ClothingOuterArmorBasic
+  inhand:
+  - NCWeaponPistolFederalX9
+
+- type: startingGear
+  id: NCSecurityNightCityUniversityResponderGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitSecGrey
+    shoes: ClothingShoesBootsJack
+    head: ClothingHeadHelmetBasic
+    outerClothing: ClothingOuterArmorBasic
+    eyes: ClothingEyesGlassesSecurity
+  inhand:
+  - NCWeaponPistolMarkIII
+
+- type: startingGear
+  id: NCSecurityNightCityUniversityChiefGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitSecGrey
+    shoes: ClothingShoesBootsJack
+    outerClothing: ClothingOuterArmorBasic
+    eyes: ClothingEyesGlassesSecurity
+    neck: ClothingNeckScarfStripedBlue
+  inhand:
+  - NCWeaponPistolAvenger

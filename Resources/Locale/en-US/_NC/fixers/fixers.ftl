@@ -58,6 +58,7 @@ nc-mission-owner-bozos = Bozos
 nc-mission-owner-inquisitors = Inquisitors
 nc-mission-owner-philharmonic-vampyres = Philharmonic Vampyres
 nc-mission-owner-medical-technologies = Medical Technologies
+nc-mission-owner-night-city-university = Night City University
 
 nc-fixer-mission-target-killed = The target is dead and dead men pay no debts: {$mission} failed.
 nc-mission-terminal-hacking = You start cracking the terminal...
@@ -284,3 +285,12 @@ cmd-ncrep-error-args = Expected a username and an optional value.
 cmd-ncrep-error-no-character = {$username} is not playing a character right now.
 cmd-ncrep-error-value = The value must be a whole number from 0 to {$max}.
 cmd-ncrep-result = {$username}: street reputation {$value} ({$level}).
+
+nc-fixer-mission-insider-ncu-research = Open access
+nc-fixer-mission-insider-ncu-research-desc = Night City University's cyberware lab is sitting on research three corps would kill for. The data never leaves their own terminals. Get into the lab or the server vault, pull it onto a shard and walk it out. Campus security is armed and takes "protecting knowledge" literally.
+nc-fixer-mission-vance-campus-recon = Campus tour
+nc-fixer-mission-vance-campus-recon-desc = A client wants to know how Night City University guards its labs and its server vault. Walk the halls, stand where the good stuff is kept, and do not start anything.
+nc-fixer-mission-feng-inquisitors-broadcast = Dead air
+nc-fixer-mission-feng-inquisitors-broadcast-desc = The Inquisitors squat in the old lecture annex by the university and broadcast sermons against "chromed filth" every night. My club kids are getting jumped on the way home. Smash their broadcast rig.
+nc-fixer-mission-vlad-student-dealer = Tuition fees
+nc-fixer-mission-vlad-student-dealer-desc = A student sells my goods around the university and keeps the money for himself. Find him and explain the business. Hands only, I want him able to pay.

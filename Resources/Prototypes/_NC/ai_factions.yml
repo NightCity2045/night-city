@@ -49,3 +49,7 @@
 - type: npcFaction
   id: NCMedicalTechnologiesSecurity
   friendly: [NCMedicalTechnologiesSecurity]
+
+- type: npcFaction
+  id: NCNightCityUniversitySecurity
+  friendly: [NCNightCityUniversitySecurity]

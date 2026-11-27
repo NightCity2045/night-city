@@ -58,6 +58,7 @@ nc-mission-owner-bozos = Бозос
 nc-mission-owner-inquisitors = Инквизиторы
 nc-mission-owner-philharmonic-vampyres = Филармонические вампиры
 nc-mission-owner-medical-technologies = Medical Technologies
+nc-mission-owner-night-city-university = Night City University
 
 nc-fixer-mission-target-killed = Цель мертва, а мёртвые долгов не отдают: «{$mission}» провален.
 nc-mission-terminal-hacking = Ты начинаешь взламывать терминал...
@@ -284,3 +285,12 @@ cmd-ncrep-error-args = Нужен ник игрока и, по желанию, �
 cmd-ncrep-error-no-character = {$username} сейчас не играет персонажем.
 cmd-ncrep-error-value = Значение должно быть целым числом от 0 до {$max}.
 cmd-ncrep-result = {$username}: уличная репутация {$value} ({$level}).
+
+nc-fixer-mission-insider-ncu-research = Открытый доступ
+nc-fixer-mission-insider-ncu-research-desc = Кибер-лаборатория Night City University сидит на исследованиях, за которые три корпорации готовы убить. Данные не покидают их собственных терминалов. Проникни в лабораторию или серверную, слей всё на шард и вынеси. Охрана кампуса вооружена и понимает «защиту знаний» буквально.
+nc-fixer-mission-vance-campus-recon = Экскурсия по кампусу
+nc-fixer-mission-vance-campus-recon-desc = Клиент хочет знать, как Night City University охраняет свои лаборатории и серверную. Пройдись по коридорам, постой там, где хранится самое ценное, и ничего не начинай.
+nc-fixer-mission-feng-inquisitors-broadcast = Мёртвый эфир
+nc-fixer-mission-feng-inquisitors-broadcast-desc = Inquisitors засели в старом учебном корпусе у университета и каждую ночь вещают проповеди против «хромированной мрази». Мои клубные ребята получают по дороге домой. Разнеси их вещательную стойку.
+nc-fixer-mission-vlad-student-dealer = Плата за обучение
+nc-fixer-mission-vlad-student-dealer-desc = Один студент толкает мой товар вокруг университета, а деньги оставляет себе. Найди его и объясни, как устроен бизнес. Только руками: мне нужно, чтобы он мог заплатить.
