@@ -5,11 +5,35 @@
   recipes:
   - NCArmorRepairKit
   - NCArmorPrintClothingHeadHelmetBasic
+  - NCArmorPrintClothingHeadHelmetRiot
+  - NCArmorPrintClothingHeadHelmetMerc
+  - NCArmorPrintNCSixthStreetCombatHelmet
+  - NCArmorPrintClothingHeadHelmetArasakaOperative
+  - NCArmorPrintClothingHeadHelmetSwat
   - NCArmorPrintClothingOuterArmorBasic
+  - NCArmorPrintClothingOuterArmorBasicSlim
+  - NCArmorPrintClothingOuterVestDetective
+  - NCArmorPrintClothingOuterArmorReflective
+  - NCArmorPrintClothingOuterVestWebMerc
+  - NCArmorPrintNCSixthStreetLightVest
+  - NCArmorPrintNCGangTygerClawsVest
+  - NCArmorPrintNCGangValentinosVest
+  - NCArmorPrintNCGangBozosVest
+  - NCArmorPrintNCGangPhilharmonicVampyresVest
   - NCArmorPrintClothingOuterArmorBulletproof
+  - NCArmorPrintClothingOuterVestWeb
+  - NCArmorPrintClothingOuterVestWebElite
+  - NCArmorPrintNCSixthStreetHeavyVest
+  - NCArmorPrintNCGangMaelstromVest
+  - NCArmorPrintNCGangInquisitorsVest
+  - NCArmorPrintNCGangScavengersVest
   - ClothingOuterArmorMilitechBulletproof
   - ClothingOuterArmorBiotechBulletproof
+  - NCArmorPrintClothingOuterArmorNWN
+  - NCArmorPrintClothingOuterArmorCaptainCarapace
+  - NCArmorPrintClothingOuterArmorCentcommCarapace
   - ClothingOuterHardsuitMilitech
+  - NCArmorPrintCardArmour
 
 - type: latheRecipePack
   id: NCArmorBoardsStatic

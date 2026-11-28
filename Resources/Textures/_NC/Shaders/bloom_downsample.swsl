@@ -1,0 +1,16 @@
+light_mode unshaded;
+uniform sampler2D SOURCE_TEXTURE;
+uniform highp vec2 sourcePixelSize;
+
+void fragment() {
+    highp vec2 uv = FRAGCOORD.xy * SCREEN_PIXEL_SIZE.xy;
+    highp vec2 o = sourcePixelSize * 0.5;
+
+    // Four bilinear taps average a 4x4 block of the source, so small lights do not shimmer as the camera moves.
+    highp vec3 col = texture(SOURCE_TEXTURE, uv + vec2(-o.x, -o.y)).rgb
+        + texture(SOURCE_TEXTURE, uv + vec2(o.x, -o.y)).rgb
+        + texture(SOURCE_TEXTURE, uv + vec2(-o.x, o.y)).rgb
+        + texture(SOURCE_TEXTURE, uv + vec2(o.x, o.y)).rgb;
+
+    COLOR = vec4(col * 0.25, 1.0);
+}

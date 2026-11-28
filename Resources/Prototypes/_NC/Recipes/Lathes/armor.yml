@@ -1,7 +1,9 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 
 # Body armor and helmets. Plates are steel and plasteel, the carrier is cloth; the hardsuit is the expensive line.
-# Trauma Team hardsuits and faction gear stay unprintable.
+# Every vest in the armor slot is printable, gang colours included; Trauma Team hardsuits stay unprintable.
+# Cost follows protection: light armorjacks (SP 11) are steel and cloth, plate carriers (SP 13) add plasteel,
+# corporate carriers take more of it and the carapaces (SP 15) the most.
 
 - type: latheRecipe
   abstract: true
@@ -72,6 +74,210 @@
     Plasteel: 1500
     Plastic: 1000
     Glass: 500
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorPrintClothingOuterArmorBasicSlim
+  result: ClothingOuterArmorBasicSlim
+  materials:
+    Steel: 700
+    Cloth: 300
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorPrintClothingOuterVestDetective
+  result: ClothingOuterVestDetective
+  materials:
+    Steel: 600
+    Cloth: 400
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorPrintClothingOuterArmorReflective
+  result: ClothingOuterArmorReflective
+  materials:
+    Steel: 800
+    Glass: 300
+    Cloth: 300
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorPrintClothingOuterVestWebMerc
+  result: ClothingOuterVestWebMerc
+  materials:
+    Steel: 900
+    Plasteel: 200
+    Cloth: 400
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorPrintNCSixthStreetLightVest
+  result: NCSixthStreetLightVest
+  materials:
+    Steel: 800
+    Cloth: 300
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorPrintNCGangTygerClawsVest
+  result: NCGangTygerClawsVest
+  materials:
+    Steel: 800
+    Cloth: 400
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorPrintNCGangValentinosVest
+  result: NCGangValentinosVest
+  materials:
+    Steel: 800
+    Cloth: 400
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorPrintNCGangBozosVest
+  result: NCGangBozosVest
+  materials:
+    Steel: 800
+    Cloth: 400
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorPrintNCGangPhilharmonicVampyresVest
+  result: NCGangPhilharmonicVampyresVest
+  materials:
+    Steel: 800
+    Cloth: 400
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorPrintClothingOuterVestWeb
+  result: ClothingOuterVestWeb
+  materials:
+    Steel: 1000
+    Plasteel: 300
+    Cloth: 500
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorPrintClothingOuterVestWebElite
+  result: ClothingOuterVestWebElite
+  materials:
+    Steel: 1000
+    Plasteel: 500
+    Cloth: 600
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorPrintNCSixthStreetHeavyVest
+  result: NCSixthStreetHeavyVest
+  materials:
+    Steel: 1000
+    Plasteel: 300
+    Cloth: 300
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorPrintNCGangMaelstromVest
+  result: NCGangMaelstromVest
+  materials:
+    Steel: 1000
+    Plasteel: 300
+    Cloth: 400
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorPrintNCGangInquisitorsVest
+  result: NCGangInquisitorsVest
+  materials:
+    Steel: 1000
+    Plasteel: 300
+    Cloth: 400
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorPrintNCGangScavengersVest
+  result: NCGangScavengersVest
+  materials:
+    Steel: 1000
+    Plasteel: 300
+    Cloth: 400
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorPrintClothingOuterArmorNWN
+  result: ClothingOuterArmorNWN
+  materials:
+    Steel: 1000
+    Plasteel: 500
+    Cloth: 300
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorPrintClothingOuterArmorCaptainCarapace
+  result: ClothingOuterArmorCaptainCarapace
+  materials:
+    Steel: 1500
+    Plasteel: 800
+    Cloth: 300
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorPrintClothingOuterArmorCentcommCarapace
+  result: ClothingOuterArmorCentcommCarapace
+  materials:
+    Steel: 1500
+    Plasteel: 800
+    Cloth: 300
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorPrintCardArmour
+  result: CardArmour
+  materials:
+    Cardboard: 1000
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorPrintClothingHeadHelmetRiot
+  result: ClothingHeadHelmetRiot
+  materials:
+    Steel: 600
+    Plastic: 300
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorPrintClothingHeadHelmetMerc
+  result: ClothingHeadHelmetMerc
+  materials:
+    Steel: 600
+    Plastic: 200
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorPrintNCSixthStreetCombatHelmet
+  result: NCSixthStreetCombatHelmet
+  materials:
+    Steel: 600
+    Plastic: 200
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorPrintClothingHeadHelmetArasakaOperative
+  result: ClothingHeadHelmetArasakaOperative
+  materials:
+    Steel: 700
+    Plasteel: 200
+    Plastic: 200
+
+- type: latheRecipe
+  parent: NCBaseArmorRecipe
+  id: NCArmorPrintClothingHeadHelmetSwat
+  result: ClothingHeadHelmetSwat
+  materials:
+    Steel: 800
+    Plasteel: 200
+    Glass: 200
 
 - type: latheRecipe
   parent: [ BaseCircuitboardRecipe, BaseGeneralMachineRecipeCategory ]

@@ -5,6 +5,9 @@
 ui-options-nc-post-processing-label = Night City post-processing
 ui-options-nc-bloom = Bloom
 ui-options-nc-bloom-intensity = Bloom intensity
+ui-options-nc-color-grade = Night City colour grade
+ui-options-nc-color-grade-strength = Colour grade strength
+ui-options-nc-neon-glow = Neon glow on surfaces
 ui-options-nc-vignette = Vignette
 ui-options-nc-film-grain = Film grain
 ui-options-nc-film-grain-strength = Film grain intensity

@@ -18,6 +18,10 @@
       state: atm-panel
   - type: PointLight
     color: "#3FF0FF"
+  - type: NCNeonEmission
+    size: 1, 0.9
+    offset: 0, -0.6
+    intensity: 0.35
   - type: ItemSlots
   - type: ContainerContainer
     containers:

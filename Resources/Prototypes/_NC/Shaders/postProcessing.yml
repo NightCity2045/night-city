@@ -12,3 +12,15 @@
   id: NCPostProcess
   kind: source
   path: "/Textures/_NC/Shaders/post_process.swsl"
+
+- type: shader
+  id: NCBloomDownsample
+  kind: source
+  path: "/Textures/_NC/Shaders/bloom_downsample.swsl"
+
+# Neon glow is added on top of the light map instead of painted over it.
+- type: shader
+  id: NCNeonEmission
+  kind: canvas
+  light_mode: unshaded
+  blend_mode: add

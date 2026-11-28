@@ -1,0 +1,4 @@
+- files: ["neutral.png", "night_city.png"]
+  license: "CC-BY-SA-4.0"
+  copyright: "Generated for Night City 2045. neutral.png is the identity colour-grading table; grade a copy of it in an image editor to make a new look."
+  source: "https://github.com/NightCitySS14/night-city-2045-public"

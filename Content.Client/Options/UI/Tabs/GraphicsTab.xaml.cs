@@ -86,6 +86,14 @@ public sealed partial class GraphicsTab : Control
             0,
             200,
             (_, value) => Loc.GetString("ui-options-value-percent", ("value", value / 100f)));
+        Control.AddOptionCheckBox(NCGraphicsCVars.ColorGrade, NCColorGradeCheckBox);
+        Control.AddOptionSlider(
+            NCGraphicsCVars.ColorGradeStrength,
+            NCColorGradeStrengthSlider,
+            0,
+            100,
+            (_, value) => Loc.GetString("ui-options-value-percent", ("value", value / 100f)));
+        Control.AddOptionCheckBox(NCGraphicsCVars.NeonGlow, NCNeonGlowCheckBox);
         Control.AddOptionCheckBox(NCGraphicsCVars.Vignette, NCVignetteCheckBox);
         Control.AddOptionCheckBox(NCGraphicsCVars.FilmGrain, NCFilmGrainCheckBox);
         Control.AddOptionPercentSlider(
