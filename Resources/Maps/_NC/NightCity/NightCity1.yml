@@ -5,7 +5,7 @@ meta:
   forkId: EchoCyber
   forkVersion: be524da4b41781c61399952aad42f92f7e1b6dd0
   time: 11/26/2026 07:14:57
-  entityCount: 11288
+  entityCount: 11294
 maps:
 - 1
 grids:
@@ -13760,6 +13760,13 @@ entities:
     - type: Transform
       parent: 1
       pos: -156.5,-67.5
+- proto: NCMissionMarkerDeadDropNeutral
+  entities:
+  - uid: 12260
+    components:
+    - type: Transform
+      parent: 1
+      pos: -10.5,-43.5
 - proto: NCMissionMarkerGuardBiotechnica
   entities:
   - uid: 10320
@@ -13967,6 +13974,31 @@ entities:
     - type: Transform
       parent: 1
       pos: -162.5,140.5
+  - uid: 12256
+    components:
+    - type: Transform
+      parent: 1
+      pos: -20.5,-49.5
+  - uid: 12257
+    components:
+    - type: Transform
+      parent: 1
+      pos: -16.5,-40.5
+  - uid: 12258
+    components:
+    - type: Transform
+      parent: 1
+      pos: -10.5,-49.5
+  - uid: 12259
+    components:
+    - type: Transform
+      parent: 1
+      pos: -8.5,-41.5
+  - uid: 12261
+    components:
+    - type: Transform
+      parent: 1
+      pos: -9.5,-70.5
 - proto: NCMissionMarkerObjectiveNightCityUniversity
   entities:
   - uid: 5529

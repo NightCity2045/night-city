@@ -416,3 +416,12 @@ nc-fixer-mission-vlad-vampyres-guest-book = Guest book
 nc-fixer-mission-vlad-vampyres-guest-book-desc = The Philharmonic Vampyres keep a guest book at the yacht club: every name that ever came to their salon. Some of those names pay me to make it disappear.
 nc-fixer-mission-feng-vampyre-elder = The elder
 nc-fixer-mission-feng-vampyre-elder-desc = The Vampyres' elder sleeps in a coffin on the top floor of the yacht club and drains girls from my clubs. Wake him up for good.
+
+nc-fixer-mission-vance-reclamation-patrols = Reclamation patrols
+nc-fixer-mission-vance-reclamation-patrols-desc = 6th Street says it is rebuilding the Reclamation Zone; mostly it is holding empty blocks. Walk their buildings and tell me where they post people.
+nc-fixer-mission-feng-reclamation-veteran = The veteran
+nc-fixer-mission-feng-reclamation-veteran-desc = A 6th Street veteran collects "rebuilding dues" from my bartenders on 30th Street. Put him on the ground and leave him breathing so he can pass the message on.
+nc-fixer-mission-vlad-reclamation-rent = Reclamation rent
+nc-fixer-mission-vlad-reclamation-rent-desc = 6th Street keeps a book of who pays them rent for squatting in the Reclamation Zone. Destroy it and half the zone stops paying.
+nc-fixer-mission-botha-reclamation-arms = Militia arms
+nc-fixer-mission-botha-reclamation-arms-desc = 6th Street stashed a military prototype in one of their empty blocks in the Reclamation Zone. A buyer wants it before they learn how to use it.

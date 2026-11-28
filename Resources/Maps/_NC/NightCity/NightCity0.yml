@@ -5,7 +5,7 @@ meta:
   forkId: EchoCyber
   forkVersion: be524da4b41781c61399952aad42f92f7e1b6dd0
   time: 11/26/2026 07:14:57
-  entityCount: 20968
+  entityCount: 20998
 maps:
 - 1
 grids:
@@ -26852,6 +26852,16 @@ entities:
     - type: Transform
       parent: 1
       pos: -149.5,-39.5
+  - uid: 24839
+    components:
+    - type: Transform
+      parent: 1
+      pos: -11.5,-41.5
+  - uid: 24845
+    components:
+    - type: Transform
+      parent: 1
+      pos: 38.5,-74.5
 - proto: NCMissionMarkerDeadDropPhilharmonicVampyres
   entities:
   - uid: 23332
@@ -26866,6 +26876,16 @@ entities:
     - type: Transform
       parent: 1
       pos: -100.5,20.5
+  - uid: 24819
+    components:
+    - type: Transform
+      parent: 1
+      pos: -65.5,-49.5
+  - uid: 24831
+    components:
+    - type: Transform
+      parent: 1
+      pos: 37.5,-46.5
 - proto: NCMissionMarkerDeadDropTygerClaws
   entities:
   - uid: 22423
@@ -27147,6 +27167,68 @@ entities:
     - type: Transform
       parent: 1
       pos: 14.5,115.5
+- proto: NCMissionMarkerGuardSixthStreet
+  entities:
+  - uid: 24820
+    components:
+    - type: Transform
+      parent: 1
+      pos: -62.5,-49.5
+  - uid: 24821
+    components:
+    - type: Transform
+      parent: 1
+      pos: -58.5,-46.5
+  - uid: 24822
+    components:
+    - type: Transform
+      parent: 1
+      pos: -56.5,-44.5
+  - uid: 24823
+    components:
+    - type: Transform
+      parent: 1
+      pos: -60.5,-44.5
+  - uid: 24824
+    components:
+    - type: Transform
+      parent: 1
+      pos: -65.5,-41.5
+  - uid: 24827
+    components:
+    - type: Transform
+      parent: 1
+      pos: -69.5,-62.5
+  - uid: 24828
+    components:
+    - type: Transform
+      parent: 1
+      pos: -73.5,-66.5
+  - uid: 24829
+    components:
+    - type: Transform
+      parent: 1
+      pos: -69.5,-66.5
+  - uid: 24832
+    components:
+    - type: Transform
+      parent: 1
+      pos: 33.5,-46.5
+  - uid: 24833
+    components:
+    - type: Transform
+      parent: 1
+      pos: 37.5,-50.5
+  - uid: 24835
+    components:
+    - type: Transform
+      parent: 1
+      pos: -36.5,-43.5
+  - uid: 24836
+    components:
+    - type: Transform
+      parent: 1
+      pos: -34.5,-46.5
 - proto: NCMissionMarkerGuardTygerClaws
   entities:
   - uid: 17111
@@ -27383,6 +27465,46 @@ entities:
     - type: Transform
       parent: 1
       pos: -162.5,130.5
+  - uid: 24837
+    components:
+    - type: Transform
+      parent: 1
+      pos: -9.5,-49.5
+  - uid: 24838
+    components:
+    - type: Transform
+      parent: 1
+      pos: -9.5,-39.5
+  - uid: 24840
+    components:
+    - type: Transform
+      parent: 1
+      pos: -22.5,-49.5
+  - uid: 24841
+    components:
+    - type: Transform
+      parent: 1
+      pos: -30.5,-57.5
+  - uid: 24842
+    components:
+    - type: Transform
+      parent: 1
+      pos: -8.5,-74.5
+  - uid: 24843
+    components:
+    - type: Transform
+      parent: 1
+      pos: 35.5,-67.5
+  - uid: 24844
+    components:
+    - type: Transform
+      parent: 1
+      pos: 40.5,-72.5
+  - uid: 24846
+    components:
+    - type: Transform
+      parent: 1
+      pos: 35.5,-56.5
 - proto: NCMissionMarkerObjectivePhilharmonicVampyres
   entities:
   - uid: 16751
@@ -27407,6 +27529,38 @@ entities:
     - type: Transform
       parent: 1
       pos: 16.5,101.5
+- proto: NCMissionMarkerObjectiveSixthStreet
+  entities:
+  - uid: 24817
+    components:
+    - type: Transform
+      parent: 1
+      pos: -51.5,-49.5
+  - uid: 24818
+    components:
+    - type: Transform
+      parent: 1
+      pos: -51.5,-41.5
+  - uid: 24825
+    components:
+    - type: Transform
+      parent: 1
+      pos: -71.5,-64.5
+  - uid: 24826
+    components:
+    - type: Transform
+      parent: 1
+      pos: -73.5,-62.5
+  - uid: 24830
+    components:
+    - type: Transform
+      parent: 1
+      pos: 35.5,-48.5
+  - uid: 24834
+    components:
+    - type: Transform
+      parent: 1
+      pos: -33.5,-43.5
 - proto: NCMissionMarkerObjectiveTygerClaws
   entities:
   - uid: 17117

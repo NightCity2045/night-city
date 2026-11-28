@@ -416,3 +416,12 @@ nc-fixer-mission-vlad-vampyres-guest-book = Книга гостей
 nc-fixer-mission-vlad-vampyres-guest-book-desc = Philharmonic Vampyres хранят в яхт-клубе книгу гостей: все имена, что бывали в их салоне. Кое-кто из этих имён платит мне, чтобы она исчезла.
 nc-fixer-mission-feng-vampyre-elder = Старейшина
 nc-fixer-mission-feng-vampyre-elder-desc = Старейшина Vampyres спит в гробу на верхнем этаже яхт-клуба и выпивает девушек из моих клубов. Разбуди его навсегда.
+
+nc-fixer-mission-vance-reclamation-patrols = Патрули Reclamation Zone
+nc-fixer-mission-vance-reclamation-patrols-desc = 6th Street говорит, что отстраивает Reclamation Zone, а на деле в основном держит пустые кварталы. Пройдись по их зданиям и расскажи, где они ставят людей.
+nc-fixer-mission-feng-reclamation-veteran = Ветеран
+nc-fixer-mission-feng-reclamation-veteran-desc = Ветеран 6th Street собирает с моих барменов на 30-й улице «взносы на восстановление». Уложи его, но оставь дышать, чтобы он передал послание.
+nc-fixer-mission-vlad-reclamation-rent = Аренда в Reclamation Zone
+nc-fixer-mission-vlad-reclamation-rent-desc = 6th Street ведёт книгу тех, кто платит им за жильё в пустых домах Reclamation Zone. Уничтожь её, и половина зоны перестанет платить.
+nc-fixer-mission-botha-reclamation-arms = Оружие ополчения
+nc-fixer-mission-botha-reclamation-arms-desc = 6th Street спрятали военный прототип в одном из своих пустых кварталов в Reclamation Zone. Покупатель хочет получить его раньше, чем они разберутся, как им пользоваться.

@@ -5,7 +5,7 @@ meta:
   forkId: EchoCyber
   forkVersion: be524da4b41781c61399952aad42f92f7e1b6dd0
   time: 11/26/2026 07:14:57
-  entityCount: 8245
+  entityCount: 8252
 maps:
 - 1
 grids:
@@ -10843,6 +10843,13 @@ entities:
       needsPower: False
     - type: AlwaysPoweredReceiverState
       needsPower: True
+- proto: NCMissionMarkerDeadDropNeutral
+  entities:
+  - uid: 8536
+    components:
+    - type: Transform
+      parent: 1
+      pos: 10.5,-68.5
 - proto: NCMissionMarkerGuardBiotechnica
   entities:
   - uid: 7319
@@ -11016,6 +11023,38 @@ entities:
     - type: Transform
       parent: 1
       pos: -165.5,84.5
+- proto: NCMissionMarkerObjectiveNeutral
+  entities:
+  - uid: 8530
+    components:
+    - type: Transform
+      parent: 1
+      pos: -18.5,-50.5
+  - uid: 8531
+    components:
+    - type: Transform
+      parent: 1
+      pos: -20.5,-42.5
+  - uid: 8532
+    components:
+    - type: Transform
+      parent: 1
+      pos: -14.5,-42.5
+  - uid: 8533
+    components:
+    - type: Transform
+      parent: 1
+      pos: -12.5,-50.5
+  - uid: 8534
+    components:
+    - type: Transform
+      parent: 1
+      pos: -8.5,-42.5
+  - uid: 8535
+    components:
+    - type: Transform
+      parent: 1
+      pos: 12.5,-70.5
 - proto: NCMissionMarkerObjectivePhilharmonicVampyres
   entities:
   - uid: 7315
