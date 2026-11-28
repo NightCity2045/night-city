@@ -23,11 +23,10 @@ public sealed class WallConstruction : InteractionTest
     [Test]
     public async Task DeconstructWall()
     {
+        // NC-Edit-Start: walls come down only with an RCD; a welder leaves them standing.
         await StartDeconstruction(WallSolid);
         await InteractUsing(Weld);
-        AssertPrototype(Girder);
-        await Interact(Wrench, Screw);
-        AssertDeleted();
-        await AssertEntityLookup((Steel, 4));
+        AssertPrototype(WallSolid);
+        // NC-Edit-End
     }
 }
