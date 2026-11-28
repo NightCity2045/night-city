@@ -107,6 +107,7 @@
     onActivateInWorld: true
   - type: WiresPanel
   - type: WiresPanelSecurity
+  - type: NCSealedWiresPanel # NC: no hacking or hand deconstruction; only an RCD takes an airlock apart
   - type: Wires
     boardName: wires-board-name-airlock
     layoutId: Airlock

@@ -24,6 +24,7 @@
     eyes: ClothingEyesGlassesMeson
     gloves: ClothingHandsGlovesColorYellow
     id: MilitechRiggerPDA
+    ears: ClothingHeadsetEngineering
     belt: ClothingBeltUtilityFilled
   storage:
     back:

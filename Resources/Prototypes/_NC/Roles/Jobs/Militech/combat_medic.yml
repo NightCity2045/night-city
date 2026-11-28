@@ -24,6 +24,7 @@
     mask: ClothingMaskSterile
     gloves: ClothingHandsGlovesNitrile
     id: MilitechCombatMedicPDA
+    ears: ClothingHeadsetEngineering
     belt: ClothingBeltMedicalFilled
     armor: ClothingOuterArmorMilitechBulletproof
   storage:

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 
 # Night City firearms. Cost rises with caliber and class; corporate and experimental guns need precious metals.
-# Material value stays above the best pawn payout (45% of appraisal), so printing guns to sell is never profitable.
+# Printed guns are marked; pawn buyers value them by their materials (plus 10%), so printing guns to sell is never profitable.
 # The Arasaka prototype rifle, the Mallorian handgun, the Burya and the Stukach are never printed: they are found or earned.
 
 - type: latheRecipe

@@ -21,7 +21,6 @@
     castShadows: false
     netsync: false
   - type: AccessReader
-    access: [["Engineering"]]
   - type: Sprite
     drawdepth: WallMountedItems
     sprite: Structures/Power/apc.rsi
@@ -237,4 +236,3 @@
     maxCharge: 50000
     startingCharge: 50000
   - type: AccessReader
-    access: [["Xenoborg"]]

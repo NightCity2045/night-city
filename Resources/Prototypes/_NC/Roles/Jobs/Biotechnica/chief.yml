@@ -24,6 +24,7 @@
     eyes: ClothingEyesGlasses
     gloves: ClothingHandsGlovesBiotechnica
     id: BiotechnicaChiefPDA
+    ears: ClothingHeadsetScience
     armor: ClothingOuterArmorBiotechBulletproof
     outerClothing: ClothingOuterCoatBiotechnicaMedtechAdvanced
 

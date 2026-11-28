@@ -12,7 +12,6 @@
   - type: BarSign
     emped: EmpBarSign
   - type: AccessReader
-    access: [["Bar"]]
   - type: ActivatableUIRequiresPower
   - type: ActivatableUIRequiresAccess
   - type: ActivatableUI

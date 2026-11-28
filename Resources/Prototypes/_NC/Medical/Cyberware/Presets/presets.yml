@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Role cyberware, fitted once per character the first time it enters the role.
+
+# Trauma Team field crews carry heavy armour: an implanted linear frame takes the weight. Its muscle-bone lace,
+# neural link and body power bus are fitted with it.
+- type: ncCyberwarePreset
+  id: NCPresetTraumaTeamFrame
+  items:
+  - NCImplantLinearFrameSigma

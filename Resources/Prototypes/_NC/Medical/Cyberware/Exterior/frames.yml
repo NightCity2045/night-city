@@ -7,10 +7,14 @@
   id: NCBorgClinicalFrameTorso
   components:
   - type: Sprite
-    color: "#EFF5FF"
+    sprite: _NC/Mobs/Cyberware/Borg/clinical.rsi
+    state: torso_m
   - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.Chest
     data:
-      color: "#EFF5FF"
+      sprite: _NC/Mobs/Cyberware/Borg/clinical.rsi
+      state: torso_m
+      color: "#FFFFFF"
 
 - type: entity
   parent: NCBorgFrameArmLeft
@@ -18,6 +22,8 @@
   components:
   - type: NCCyberwareExterior
     finish: NCFinishMedical
+    rsi: _NC/Mobs/Cyberware/Borg/clinical.rsi
+    tint: false
 
 - type: entity
   parent: NCBorgFrameArmRight
@@ -25,6 +31,8 @@
   components:
   - type: NCCyberwareExterior
     finish: NCFinishMedical
+    rsi: _NC/Mobs/Cyberware/Borg/clinical.rsi
+    tint: false
 
 - type: entity
   parent: NCBorgFrameLegLeft
@@ -32,6 +40,8 @@
   components:
   - type: NCCyberwareExterior
     finish: NCFinishMedical
+    rsi: _NC/Mobs/Cyberware/Borg/clinical.rsi
+    tint: false
 
 - type: entity
   parent: NCBorgFrameLegRight
@@ -39,6 +49,8 @@
   components:
   - type: NCCyberwareExterior
     finish: NCFinishMedical
+    rsi: _NC/Mobs/Cyberware/Borg/clinical.rsi
+    tint: false
 
 - type: entity
   parent: NCBorgStandardShell

@@ -38,3 +38,7 @@ ent-NCShopGunsVendomat = оружейный автомат
 nc-shop-implants = Магазин имплантов
 ent-NCShopImplantsVendomat = автомат имплантов
     .desc = Гражданские импланты. Без боевых.
+
+nc-shop-black-market = Чёрный рынок
+ent-NCShopBlackMarketVendomat = вендомат чёрного рынка
+    .desc = Прикручен в глухом переулке. Без вопросов, без чеков, без возвратов.

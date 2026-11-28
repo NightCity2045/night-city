@@ -367,7 +367,6 @@
     qualities: Welding
   - type: Lock
   - type: AccessReader
-    access: [["CentralCommand"]]
 
 - type: entity
   parent: [BaseBrandedLighter, BaseMajorContraband]

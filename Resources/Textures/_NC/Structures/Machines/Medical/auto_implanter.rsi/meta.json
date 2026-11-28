@@ -1,0 +1,25 @@
+{
+    "version": 1,
+    "license": "CC-BY-SA-3.0",
+    "copyright": "Night City 2045 event auto-implanter, original pixel art.",
+    "size": {
+        "x": 32,
+        "y": 32
+    },
+    "states": [
+        {
+            "name": "off"
+        },
+        {
+            "name": "normal-unshaded",
+            "delays": [
+                [
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5
+                ]
+            ]
+        }
+    ]
+}

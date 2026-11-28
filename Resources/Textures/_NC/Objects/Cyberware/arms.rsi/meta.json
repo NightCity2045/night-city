@@ -1,115 +1,95 @@
 {
     "version": 1,
-    "license": "CC0-1.0",
-    "copyright": "Original Night City 2045 art. Inventory reference generated with OpenAI ImageGen; native on-body pixel masters authored separately. Sources and prompt: Tools/_NC/Cyberware/Art; build: Tools/_NC/Cyberware/generate_cyberarm_sprites.py.",
+    "license": "CC-BY-SA-3.0",
+    "copyright": "Night City 2045 cyberarm hardware icons, original pixel art in the Cyberpunk 2077 cyberarm style.",
     "size": {
         "x": 32,
         "y": 32
     },
     "states": [
         {
-            "name": "microdrive",
-            "directions": 1
+            "name": "civilian_left"
         },
         {
-            "name": "guide",
-            "directions": 1
+            "name": "civilian_right"
         },
         {
-            "name": "lock",
-            "directions": 1
+            "name": "armored_left"
         },
         {
-            "name": "damper",
-            "directions": 1
+            "name": "armored_right"
         },
         {
-            "name": "cooling",
-            "directions": 1
+            "name": "clinical_left"
         },
         {
-            "name": "claws",
-            "directions": 1
+            "name": "clinical_right"
         },
         {
-            "name": "blade",
-            "directions": 1
+            "name": "mantis"
         },
         {
-            "name": "hinge",
-            "directions": 1
+            "name": "blade"
         },
         {
-            "name": "reel",
-            "directions": 1
+            "name": "claws"
         },
         {
-            "name": "wire",
-            "directions": 1
+            "name": "monowire"
         },
         {
-            "name": "pistol",
-            "directions": 1
+            "name": "pistol"
         },
         {
-            "name": "launcher",
-            "directions": 1
+            "name": "launcher"
         },
         {
-            "name": "tool",
-            "directions": 1
+            "name": "tool"
         },
         {
-            "name": "medical",
-            "directions": 1
+            "name": "medical"
         },
         {
-            "name": "storage",
-            "directions": 1
+            "name": "storage"
         },
         {
-            "name": "socket",
-            "directions": 1
+            "name": "socket"
         },
         {
-            "name": "impact",
-            "directions": 1
+            "name": "impact"
         },
         {
-            "name": "cuff",
-            "directions": 1
+            "name": "microdrive"
         },
         {
-            "name": "shell",
-            "directions": 1
+            "name": "guide"
         },
         {
-            "name": "drive",
-            "directions": 1
+            "name": "lock"
         },
         {
-            "name": "mantis",
-            "directions": 1
+            "name": "damper"
         },
         {
-            "name": "monowire",
-            "directions": 1
+            "name": "cooling"
         },
         {
-            "name": "civilian_left",
-            "directions": 1
+            "name": "hinge"
         },
         {
-            "name": "civilian_right",
-            "directions": 1
+            "name": "reel"
         },
         {
-            "name": "armored_left",
-            "directions": 1
+            "name": "wire"
         },
         {
-            "name": "armored_right",
-            "directions": 1
+            "name": "cuff"
+        },
+        {
+            "name": "shell"
+        },
+        {
+            "name": "drive"
         },
         {
             "name": "inhand-left",

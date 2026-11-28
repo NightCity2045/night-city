@@ -24,6 +24,7 @@
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesCombat
     id: MilitechOperativeLeadPDA
+    ears: ClothingHeadsetEngineering
     belt: ClothingBeltSecurity
     armor: ClothingOuterArmorMilitechBulletproof
   storage:

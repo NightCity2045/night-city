@@ -79,8 +79,8 @@
   description: A finite 100-unit service supply for the external biopod reservoir. Nutrients and medicine enter the separate injection port.
   components:
   - type: Sprite
-    sprite: Objects/Specific/Chemistry/beaker.rsi
-    state: beaker
+    sprite: _NC/Objects/Cyberware/borg.rsi
+    state: reservoir
   - type: SolutionManager
     solutions:
     - NCBorgSupportBottleSolution

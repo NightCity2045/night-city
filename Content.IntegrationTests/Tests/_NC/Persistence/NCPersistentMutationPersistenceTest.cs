@@ -8,10 +8,12 @@ using System.Linq;
 using Content.IntegrationTests.Fixtures;
 using Content.Server.Database;
 using Content.Shared._NC.Persistence.Time;
+using Content.Shared.Preferences;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Robust.Shared.Configuration;
 using Robust.Shared.Log;
+using Robust.Shared.Network;
 using Robust.Shared.Serialization.Manager;
 using Robust.UnitTesting;
 
@@ -51,6 +53,75 @@ public sealed class NCPersistentMutationPersistenceTest : GameTest
             Assert.That(oldSections.Single().Payload, Does.Contain("first-world"));
             Assert.That(freshSections.Single().Payload, Does.Contain("next-world"));
             Assert.That(missing, Is.Empty);
+        });
+    }
+
+    [Test]
+    public async Task AbsentCharactersKeepTheirSectionsAcrossRounds()
+    {
+        var db = GetDb(Pair.Server);
+        static string Hash(string value) => Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(
+            System.Text.Encoding.UTF8.GetBytes(value)));
+        static NCRoundSnapshotSectionWrite Section(string type, string ownerType, string owner, string payload)
+            => new(type, ownerType, owner, 0, 1, 1, payload, Hash(payload));
+        async Task<string> CreateCharacter()
+        {
+            var preference = await db.InitPrefsAsync(new NetUserId(Guid.NewGuid()), new HumanoidCharacterProfile());
+            return preference.Profiles.Single().Id.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        }
+        async Task<Guid> Commit(IReadOnlyList<int> deleted, params NCRoundSnapshotSectionWrite[] sections)
+        {
+            var epoch = NCSessionEpoch.New();
+            var clock = await db.StartNCActiveWorldSessionAsync(epoch);
+            var checksum = Hash(string.Join('\n', sections
+                .OrderBy(value => value.SectionType, StringComparer.Ordinal)
+                .ThenBy(value => value.OwnerType, StringComparer.Ordinal)
+                .ThenBy(value => value.OwnerId, StringComparer.Ordinal)
+                .ThenBy(value => value.ChunkIndex)
+                .Select(value => $"{value.SectionType}\u001f{value.OwnerType}\u001f{value.OwnerId}\u001f{value.ChunkIndex}\u001f{value.FormatVersion}\u001f{value.EntityCount}\u001f{value.Checksum}")));
+            var id = Guid.NewGuid();
+            var committed = await db.CommitNCRoundSnapshotAsync(new(id, epoch.Value, clock.Time.Ticks, 1,
+                "test", 1, "", checksum, DateTime.UtcNow, sections, deleted,
+                CarryForwardCharacterOwnerType: "character"));
+            Assert.That(committed.Status, Is.EqualTo(NCRoundSnapshotCommitStatus.Committed));
+            return id;
+        }
+        async Task<string?> Payload(Guid snapshot, string type, string owner)
+            => (await db.GetNCRoundSnapshotSectionsAsync(snapshot, type, "character", owner)).SingleOrDefault()?.Payload;
+
+        var absent = await CreateCharacter();
+        var played = await CreateCharacter();
+        var died = await CreateCharacter();
+
+        await Commit([],
+            Section("player-medical", "character", absent, "absent-body"),
+            Section("player-possessions", "character", absent, "absent-items"),
+            Section("player-medical", "character", played, "played-old-body"),
+            Section("player-possessions", "character", played, "played-old-items"),
+            Section("player-medical", "character", died, "died-body"),
+            Section("map", "world", "city", "first-world"));
+        var second = await Commit([int.Parse(died)],
+            Section("player-medical", "character", played, "played-new-body"),
+            Section("map", "world", "city", "next-world"));
+        var third = await Commit([], Section("map", "world", "city", "last-world"));
+
+        var absentBody = await Payload(second, "player-medical", absent);
+        var absentItems = await Payload(second, "player-possessions", absent);
+        var absentBodyLater = await Payload(third, "player-medical", absent);
+        var playedBody = await Payload(second, "player-medical", played);
+        var playedItems = await Payload(second, "player-possessions", played);
+        var diedBody = await Payload(second, "player-medical", died);
+        var world = await db.GetNCRoundSnapshotSectionsAsync(second, "map", "world", "city");
+        Assert.Multiple(() =>
+        {
+            Assert.That(absentBody, Is.EqualTo("absent-body"));
+            Assert.That(absentItems, Is.EqualTo("absent-items"));
+            Assert.That(absentBodyLater, Is.EqualTo("absent-body"));
+            Assert.That(playedBody, Is.EqualTo("played-new-body"));
+            // A character that played writes its own complete state; older sections must not resurrect.
+            Assert.That(playedItems, Is.Null);
+            Assert.That(diedBody, Is.Null);
+            Assert.That(world.Single().Payload, Is.EqualTo("next-world"));
         });
     }
 

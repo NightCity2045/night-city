@@ -7,6 +7,8 @@
   id: NCBorgPodHead
   name: biopod casing
   components:
+  - type: Sprite
+    state: pod
   - type: Organ
     category: Head
   - type: ParentOrgan
@@ -21,6 +23,8 @@
   id: NCBorgPerfusionPump
   name: biopod life support node
   components:
+  - type: Sprite
+    state: perfusion_pump
   - type: Organ
     category: Heart
   - type: NCOrganFunction
@@ -34,6 +38,8 @@
   id: NCBorgOxygenator
   name: biopod life support node
   components:
+  - type: Sprite
+    state: oxygenator
   - type: Organ
     category: Lungs
   - type: NCOrganFunction
@@ -46,6 +52,8 @@
   id: NCBorgMetabolicFilter
   name: biopod life support node
   components:
+  - type: Sprite
+    state: metabolic_filter
   - type: Organ
     category: Liver
   - type: NCOrganFunction
@@ -59,6 +67,8 @@
   id: NCBorgWasteFilter
   name: biopod life support node
   components:
+  - type: Sprite
+    state: waste_filter
   - type: Organ
     category: Kidneys
   - type: NCOrganFunction
@@ -71,6 +81,8 @@
   id: NCBorgNutrientProcessor
   name: biopod life support node
   components:
+  - type: Sprite
+    state: nutrient_processor
   - type: Organ
     category: Stomach
   - type: NCOrganFunction
@@ -89,15 +101,15 @@
   name: standard civilian frame
   components:
   - type: Sprite
-    sprite: _NC/Mobs/Cyberware/parts.rsi
+    sprite: _NC/Mobs/Cyberware/Borg/standard.rsi
     state: torso_m
-    color: "#A8BAC9"
+    color: "#FFFFFF"
   - type: VisualOrgan
     layer: enum.HumanoidVisualLayers.Chest
     data:
-      sprite: _NC/Mobs/Cyberware/parts.rsi
+      sprite: _NC/Mobs/Cyberware/Borg/standard.rsi
       state: torso_m
-      color: "#A8BAC9"
+      color: "#FFFFFF"
   - type: Organ
     category: Torso
   - type: ParentOrgan
@@ -108,6 +120,8 @@
   id: NCBorgFramePowerHolder
   name: civilian frame cell holder
   components:
+  - type: Sprite
+    state: power_holder
   - type: Organ
     category: Thorax
   - type: ParentOrgan
@@ -162,16 +176,18 @@
   name: civilian frame node
   components:
   - type: Sprite
-    sprite: _NC/Mobs/Cyberware/parts.rsi
+    sprite: _NC/Mobs/Cyberware/Borg/standard.rsi
     state: l_arm
-    color: "#A8BAC9"
+    color: "#FFFFFF"
   - type: VisualOrgan
     layer: enum.HumanoidVisualLayers.LArm
     data:
-      sprite: _NC/Mobs/Cyberware/parts.rsi
+      sprite: _NC/Mobs/Cyberware/Borg/standard.rsi
       state: l_arm
-      color: "#A8BAC9"
+      color: "#FFFFFF"
   - type: NCCyberwareExterior
+    rsi: _NC/Mobs/Cyberware/Borg/standard.rsi
+    tint: false
   - type: Organ
     category: ArmLeft
   - type: ParentOrgan
@@ -188,16 +204,18 @@
   name: civilian frame node
   components:
   - type: Sprite
-    sprite: _NC/Mobs/Cyberware/parts.rsi
+    sprite: _NC/Mobs/Cyberware/Borg/standard.rsi
     state: r_arm
-    color: "#A8BAC9"
+    color: "#FFFFFF"
   - type: VisualOrgan
     layer: enum.HumanoidVisualLayers.RArm
     data:
-      sprite: _NC/Mobs/Cyberware/parts.rsi
+      sprite: _NC/Mobs/Cyberware/Borg/standard.rsi
       state: r_arm
-      color: "#A8BAC9"
+      color: "#FFFFFF"
   - type: NCCyberwareExterior
+    rsi: _NC/Mobs/Cyberware/Borg/standard.rsi
+    tint: false
   - type: Organ
     category: ArmRight
   - type: ParentOrgan
@@ -214,15 +232,15 @@
   name: civilian frame node
   components:
   - type: Sprite
-    sprite: _NC/Mobs/Cyberware/parts.rsi
+    sprite: _NC/Mobs/Cyberware/Borg/standard.rsi
     state: l_hand
-    color: "#A8BAC9"
+    color: "#FFFFFF"
   - type: VisualOrgan
     layer: enum.HumanoidVisualLayers.LHand
     data:
-      sprite: _NC/Mobs/Cyberware/parts.rsi
+      sprite: _NC/Mobs/Cyberware/Borg/standard.rsi
       state: l_hand
-      color: "#A8BAC9"
+      color: "#FFFFFF"
   - type: Organ
     category: HandLeft
   - type: NCAnatomicalRegion
@@ -240,15 +258,15 @@
   name: civilian frame node
   components:
   - type: Sprite
-    sprite: _NC/Mobs/Cyberware/parts.rsi
+    sprite: _NC/Mobs/Cyberware/Borg/standard.rsi
     state: r_hand
-    color: "#A8BAC9"
+    color: "#FFFFFF"
   - type: VisualOrgan
     layer: enum.HumanoidVisualLayers.RHand
     data:
-      sprite: _NC/Mobs/Cyberware/parts.rsi
+      sprite: _NC/Mobs/Cyberware/Borg/standard.rsi
       state: r_hand
-      color: "#A8BAC9"
+      color: "#FFFFFF"
   - type: Organ
     category: HandRight
   - type: NCAnatomicalRegion
@@ -266,16 +284,18 @@
   name: civilian frame node
   components:
   - type: Sprite
-    sprite: _NC/Mobs/Cyberware/parts.rsi
+    sprite: _NC/Mobs/Cyberware/Borg/standard.rsi
     state: l_leg
-    color: "#A8BAC9"
+    color: "#FFFFFF"
   - type: VisualOrgan
     layer: enum.HumanoidVisualLayers.LLeg
     data:
-      sprite: _NC/Mobs/Cyberware/parts.rsi
+      sprite: _NC/Mobs/Cyberware/Borg/standard.rsi
       state: l_leg
-      color: "#A8BAC9"
+      color: "#FFFFFF"
   - type: NCCyberwareExterior
+    rsi: _NC/Mobs/Cyberware/Borg/standard.rsi
+    tint: false
   - type: Organ
     category: LegLeft
   - type: ParentOrgan
@@ -290,16 +310,18 @@
   name: civilian frame node
   components:
   - type: Sprite
-    sprite: _NC/Mobs/Cyberware/parts.rsi
+    sprite: _NC/Mobs/Cyberware/Borg/standard.rsi
     state: r_leg
-    color: "#A8BAC9"
+    color: "#FFFFFF"
   - type: VisualOrgan
     layer: enum.HumanoidVisualLayers.RLeg
     data:
-      sprite: _NC/Mobs/Cyberware/parts.rsi
+      sprite: _NC/Mobs/Cyberware/Borg/standard.rsi
       state: r_leg
-      color: "#A8BAC9"
+      color: "#FFFFFF"
   - type: NCCyberwareExterior
+    rsi: _NC/Mobs/Cyberware/Borg/standard.rsi
+    tint: false
   - type: Organ
     category: LegRight
   - type: ParentOrgan
@@ -314,15 +336,15 @@
   name: civilian frame node
   components:
   - type: Sprite
-    sprite: Mobs/Species/Human/parts.rsi
+    sprite: _NC/Mobs/Cyberware/Borg/standard.rsi
     state: l_foot
-    color: "#A8BAC9"
+    color: "#FFFFFF"
   - type: VisualOrgan
     layer: enum.HumanoidVisualLayers.LFoot
     data:
-      sprite: Mobs/Species/Human/parts.rsi
+      sprite: _NC/Mobs/Cyberware/Borg/standard.rsi
       state: l_foot
-      color: "#A8BAC9"
+      color: "#FFFFFF"
   - type: Organ
     category: FootLeft
   - type: NCAnatomicalRegion
@@ -336,15 +358,15 @@
   name: civilian frame node
   components:
   - type: Sprite
-    sprite: Mobs/Species/Human/parts.rsi
+    sprite: _NC/Mobs/Cyberware/Borg/standard.rsi
     state: r_foot
-    color: "#A8BAC9"
+    color: "#FFFFFF"
   - type: VisualOrgan
     layer: enum.HumanoidVisualLayers.RFoot
     data:
-      sprite: Mobs/Species/Human/parts.rsi
+      sprite: _NC/Mobs/Cyberware/Borg/standard.rsi
       state: r_foot
-      color: "#A8BAC9"
+      color: "#FFFFFF"
   - type: Organ
     category: FootRight
   - type: NCAnatomicalRegion
@@ -362,7 +384,7 @@
     data:
       sprite: Mobs/Customization/eyes.rsi
       state: eyes
-      color: "#75DCEB"
+      color: "#FF2A2A"
   - type: Organ
     category: Eyes
   - type: NCOrganFunction

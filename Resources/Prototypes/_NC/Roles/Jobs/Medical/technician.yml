@@ -22,6 +22,7 @@
     eyes: ClothingEyesGlassesMeson
     gloves: ClothingHandsGlovesColorYellow
     id: NCMedicalTechnicianPDA
+    ears: ClothingHeadsetMedical
     belt: ClothingBeltUtilityEngineering
     outerClothing: ClothingOuterCoatLab
   storage:

@@ -1,0 +1,50 @@
+ent-NCPawnShopGoldenEddie = "Golden" Eddie
+    .desc = A licensed pawnbroker with a loupe in his eye. Takes anything, pays little, keeps tidy books for the NCPD.
+ent-NCPawnShopSecondChance = Second Chance buyer
+    .desc = Buys back whatever you bring. Fair-ish prices, no questions asked out loud.
+ent-NCPawnShopFence = back-alley fence
+    .desc = Hood up, face covered. The best prices in the city, if you live to spend them.
+
+nc-pawn-shop-golden-eddie = Golden Eddie pawnshop
+nc-pawn-shop-second-chance = Second Chance buyback
+nc-pawn-shop-fence = Back-alley fence
+
+nc-pawn-hint = Pile what you want to sell on the pallet: crates and bags go with everything inside. Cash is handed over in person.
+nc-pawn-empty-pallet = The pallet is empty.
+nc-pawn-line-count = { $name } ×{ $count }
+nc-pawn-offer = Offer: { $amount } €$
+nc-pawn-not-buying = Not buying this.
+nc-pawn-sell = Sell
+nc-pawn-sell-all = Sell all
+nc-pawn-total = Total: { $amount } €$
+nc-pawn-empty-first = Empty it first, or sell everything at once.
+nc-pawn-refused = The buyer will not take { THE($item) }.
+
+nc-pawn-category-lmg = Machine guns
+nc-pawn-category-sniper = Sniper rifles
+nc-pawn-category-rifle = Rifles
+nc-pawn-category-smg = Submachine guns
+nc-pawn-category-shotgun = Shotguns
+nc-pawn-category-pistol = Pistols
+nc-pawn-category-gun = Firearms
+nc-pawn-category-cyberware = Cyberware
+nc-pawn-category-cyberware-part = Cyberware parts
+nc-pawn-category-armor = Armor
+nc-pawn-category-organ = Organs
+nc-pawn-category-blood = Blood
+nc-pawn-category-pharma = Pharmaceuticals
+nc-pawn-category-pharma-raw = Pharmaceutical raw materials
+nc-pawn-category-magazine = Magazines and ammo boxes
+nc-pawn-category-cartridge = Cartridges
+nc-pawn-category-board = Circuit boards
+nc-pawn-category-melee = Melee weapons
+nc-pawn-category-clothing = Clothing
+nc-pawn-category-food = Food
+
+nc-police-pawn-log = Pawn log
+nc-police-pawn-log-title = Pawn buyers this round
+nc-police-pawn-log-refresh = Refresh
+nc-police-pawn-log-empty = Nobody has sold anything this round.
+nc-police-pawn-log-entry = [{ $time }] { $shop }: { $seller } sold { $item } ×{ $count } for { $amount } €$
+ent-NCPawnPallet = buyer's pallet
+    .desc = Pile the goods here, then talk to the buyer.

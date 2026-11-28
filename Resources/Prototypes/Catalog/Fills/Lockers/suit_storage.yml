@@ -149,7 +149,6 @@
       entity_storage: !type:NestedSelector
         tableId: FillEngineerHardsuit
   - type: AccessReader
-    access: [["Engineering"]]
 
 #Atmospherics hardsuit
 - type: entity
@@ -162,7 +161,6 @@
       entity_storage: !type:NestedSelector
         tableId: FillAtmosphericsHardsuit
   - type: AccessReader
-    access: [["Atmospherics"]]
 
 #Security hardsuit
 - type: entity
@@ -175,7 +173,6 @@
       entity_storage: !type:NestedSelector
         tableId: FillSuitStorageSecurity
   - type: AccessReader
-    access: [["Security"]]
 
 - type: entityTable
   id: FillSuitStorageSecurity
@@ -196,7 +193,6 @@
       entity_storage: !type:NestedSelector
         tableId: FillChiefEngineerHardsuit
   - type: AccessReader
-    access: [["ChiefEngineer"]]
 
 #CMO's hardsuit
 - type: entity
@@ -209,7 +205,6 @@
       entity_storage: !type:NestedSelector
         tableId: FillChiefMedicalOfficerHardsuit
   - type: AccessReader
-    access: [ [ "ChiefMedicalOfficer" ] ]
 
 #RD's hardsuit
 - type: entity
@@ -222,7 +217,6 @@
       entity_storage: !type:NestedSelector
         tableId: FillResearchDirectorHardsuit
   - type: AccessReader
-    access: [ [ "ResearchDirector" ] ]
 
 #HOS's hardsuit
 - type: entity
@@ -235,7 +229,6 @@
       entity_storage: !type:NestedSelector
         tableId: FillHeadOfSecurityHardsuit
   - type: AccessReader
-    access: [["HeadOfSecurity"]]
 
 #Warden's hardsuit
 - type: entity
@@ -248,7 +241,6 @@
       entity_storage: !type:NestedSelector
         tableId: FillLockerWardenHarduit
   - type: AccessReader
-    access: [["Armory"]]
 
 #Captain's hardsuit
 - type: entity
@@ -261,7 +253,6 @@
       entity_storage: !type:NestedSelector
         tableId: FillCaptainHardsuit
   - type: AccessReader
-    access: [["Captain"]]
 
 #Salvage hardsuit
 - type: entity
@@ -274,7 +265,6 @@
       entity_storage: !type:NestedSelector
         tableId: FillSalvageSpecialistHardsuitSpatio
   - type: AccessReader
-    access: [["Salvage"]]
 
 #Blood-red hardsuit
 - type: entity

@@ -22,6 +22,7 @@
     shoes: ClothingShoesBootsJack
     eyes: ClothingEyesGlassesSecurity
     id: MilitechOperativePDA
+    ears: ClothingHeadsetEngineering
     belt: ClothingBeltSecurity
     armor: ClothingOuterArmorMilitechBulletproof
   storage:

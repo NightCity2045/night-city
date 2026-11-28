@@ -4,6 +4,7 @@
 
 using System.Linq;
 using Content.Client.UserInterface.Controls;
+using Content.Shared._NC.Pawn;
 using Content.Shared._NC.Police.UI;
 using Content.Shared._NC.LivingCity.Police;
 using Content.Shared.Database._NC.Police;
@@ -45,6 +46,8 @@ public sealed partial class NCPoliceRecordsWindow : FancyWindow
         RecordTabs.SetTabTitle(1, Loc.GetString("nc-police-tab-cases"));
         RecordTabs.SetTabTitle(2, Loc.GetString("nc-police-tab-warrants"));
         RecordTabs.SetTabTitle(3, Loc.GetString("nc-police-tab-fines"));
+        PawnLogButton.OnToggled += args => TogglePawnLog(args.Pressed);
+        PawnLogRefreshButton.OnPressed += _ => OnPawnLogRequested?.Invoke();
 
         foreach (var status in Enum.GetValues<NCPoliceOperationalStatus>())
             StatusSelector.AddItem(StatusName(status), (int) status);
@@ -161,6 +164,30 @@ public sealed partial class NCPoliceRecordsWindow : FancyWindow
             if (_selectedFineId is { } fineId && reason.Length > 0)
                 OnFineStatusChanged?.Invoke(fineId, (NCPoliceFineStatus) FineStatusSelector.SelectedId, reason);
         };
+    }
+
+    public event Action? OnPawnLogRequested;
+
+    /// <summary>The round's pawn log from every buyer, newest first.</summary>
+    public void UpdatePawnLog(NCPolicePawnLogMessage log)
+    {
+        PawnLogList.Clear();
+        foreach (var entry in log.Entries)
+        {
+            var time = $"{(int) entry.Time.TotalHours:00}:{entry.Time.Minutes:00}";
+            PawnLogList.AddItem(Loc.GetString("nc-police-pawn-log-entry", ("time", time), ("shop", entry.Shop),
+                ("seller", entry.Seller), ("item", entry.Item), ("count", entry.Count), ("amount", entry.Payout)));
+        }
+
+        PawnLogEmptyLabel.Visible = log.Entries.Count == 0;
+    }
+
+    private void TogglePawnLog(bool shown)
+    {
+        PawnLogPanel.Visible = shown;
+        RecordsPanel.Visible = !shown;
+        if (shown)
+            OnPawnLogRequested?.Invoke();
     }
 
     public void UpdateData(NCPoliceRecordsUpdateMessage update)

@@ -8,8 +8,8 @@
   nameId: nc-borg-node-name
   manufacturer: Zhirafa Technical Collective
   icon:
-    sprite: Objects/Misc/stock_parts.rsi
-    state: micro_mani
+    sprite: _NC/Objects/Cyberware/borg.rsi
+    state: frame_node
   form: OrganReplacement
   size: 1
   maximumIntegrity: 100
@@ -37,8 +37,8 @@
   nameId: nc-borg-node-name
   manufacturer: Zhirafa Technical Collective
   icon:
-    sprite: Objects/Misc/stock_parts.rsi
-    state: micro_mani
+    sprite: _NC/Objects/Cyberware/borg.rsi
+    state: power_holder
   form: OrganReplacement
   size: 1
   maximumIntegrity: 100
@@ -66,8 +66,8 @@
   nameId: nc-borg-node-name
   manufacturer: Zhirafa Technical Collective
   icon:
-    sprite: Objects/Misc/stock_parts.rsi
-    state: micro_mani
+    sprite: _NC/Objects/Cyberware/borg.rsi
+    state: perfusion_pump
   form: OrganReplacement
   size: 1
   maximumIntegrity: 100

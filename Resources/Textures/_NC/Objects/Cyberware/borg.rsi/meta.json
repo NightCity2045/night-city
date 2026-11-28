@@ -1,0 +1,38 @@
+{
+    "version": 1,
+    "license": "CC-BY-SA-3.0",
+    "copyright": "Night City 2045 full-borg conversion hardware, original pixel art in the Cyberpunk 2077 style.",
+    "size": {
+        "x": 32,
+        "y": 32
+    },
+    "states": [
+        {
+            "name": "pod"
+        },
+        {
+            "name": "perfusion_pump"
+        },
+        {
+            "name": "oxygenator"
+        },
+        {
+            "name": "metabolic_filter"
+        },
+        {
+            "name": "waste_filter"
+        },
+        {
+            "name": "nutrient_processor"
+        },
+        {
+            "name": "frame_node"
+        },
+        {
+            "name": "power_holder"
+        },
+        {
+            "name": "reservoir"
+        }
+    ]
+}

@@ -361,10 +361,12 @@
   - type: VisualOrgan
     layer: enum.HumanoidVisualLayers.LArm
     data:
-      sprite: _NC/Mobs/Cyberware/parts.rsi
+      sprite: _NC/Mobs/Cyberware/Limbs/industrial.rsi
       state: l_arm
-      color: "#A8BAC9"
+      color: "#FFFFFF"
   - type: NCCyberwareExterior
+    rsi: _NC/Mobs/Cyberware/Limbs/industrial.rsi
+    tint: false
   - type: NCCyberwareSlotHost
     slots: [ NCSlotArmUtilityLeft, NCSlotArmHandLeft, NCSlotArmSocketLeft, NCSlotArmForearm2Left, NCSlotArmForearm3Left ]
   - type: NCArmFrame
@@ -401,10 +403,12 @@
   - type: VisualOrgan
     layer: enum.HumanoidVisualLayers.RArm
     data:
-      sprite: _NC/Mobs/Cyberware/parts.rsi
+      sprite: _NC/Mobs/Cyberware/Limbs/industrial.rsi
       state: r_arm
-      color: "#A8BAC9"
+      color: "#FFFFFF"
   - type: NCCyberwareExterior
+    rsi: _NC/Mobs/Cyberware/Limbs/industrial.rsi
+    tint: false
   - type: NCCyberwareSlotHost
     slots: [ NCSlotArmUtilityRight, NCSlotArmHandRight, NCSlotArmSocketRight, NCSlotArmForearm2Right, NCSlotArmForearm3Right ]
   - type: NCArmFrame

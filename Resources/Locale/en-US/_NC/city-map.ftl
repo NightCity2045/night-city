@@ -26,3 +26,12 @@ nc-city-map-edit-building-named = Building named "{$name}". Saved to {$path}.
 nc-city-map-edit-building-cleared = Building name cleared. Saved to {$path}.
 nc-city-map-edit-district-saved = District "{$name}" saved to {$path}.
 nc-city-map-edit-district-deleted = District deleted. Saved to {$path}.
+
+cmd-nccitybuildings-desc = Shows what city map building detection sees on your floor.
+cmd-nccitybuildings-help = Usage: nccitybuildings
+cmd-nccitybuildings-no-floor = You are not on a floor map.
+cmd-nccitybuildings-grid = NavMap grid {$grid}: {$chunks} chunks, at {$x}, {$y}, rotated {$rotation}°.
+cmd-nccitybuildings-tiles = Grids used: {$grids}. Floor tiles: {$floor}, walls: {$walls}, doors: {$doors}.
+cmd-nccitybuildings-street = Street fill: {$seeds} edge tiles to start from, {$street} street tiles reached.
+cmd-nccitybuildings-regions = Enclosed areas: {$regions}, largest {$largest} tiles. Dropped: {$small} too small, {$large} larger than {$limit} tiles.
+cmd-nccitybuildings-result = Buildings detected: {$buildings}.

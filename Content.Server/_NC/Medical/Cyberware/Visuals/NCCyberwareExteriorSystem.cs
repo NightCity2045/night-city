@@ -49,9 +49,11 @@ public sealed partial class NCCyberwareExteriorSystem : EntitySystem
         // Appearance copying can pass another organ's data object. Never repaint that source organ by aliasing it.
         args.Data = _serialization.CreateCopy(args.Data, notNullableOverride: true);
         var skin = finish.SyntheticSkin && !ent.Comp.Ruptured;
-        args.Data.RsiPath = skin ? "Mobs/Species/Human/parts.rsi" : "_NC/Mobs/Cyberware/parts.rsi";
+        args.Data.RsiPath = skin ? "Mobs/Species/Human/parts.rsi" : ent.Comp.Rsi;
         args.Data.TexturePath = null;
-        args.Data.Color = skin ? ent.Comp.SkinColor ?? visual.Profile.SkinColor : ent.Comp.Ruptured ? Color.FromHex("#B87872") : finish.Color;
+        args.Data.Color = skin ? ent.Comp.SkinColor ?? visual.Profile.SkinColor
+            : ent.Comp.Ruptured ? Color.FromHex("#B87872")
+            : ent.Comp.Tint ? finish.Color : Color.White;
         args.Data.Visible = true;
     }
 

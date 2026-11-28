@@ -20,6 +20,7 @@
     back: ClothingBackpackMedical
     shoes: ClothingShoesColorWhite
     id: NCMedicalPsychologistPDA
+    ears: ClothingHeadsetMedical
     outerClothing: ClothingOuterCoatLab
 
 - type: jobIcon

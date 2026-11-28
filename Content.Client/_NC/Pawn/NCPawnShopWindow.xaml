@@ -1,0 +1,21 @@
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<controls:FancyWindow xmlns="https://spacestation14.io"
+                      xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      x:Class="Content.Client._NC.Pawn.NCPawnShopWindow"
+                      SetSize="460 520"
+                      MinSize="380 320">
+    <BoxContainer Margin="10" Orientation="Vertical" SeparationOverride="8">
+        <Label Text="{Loc 'nc-pawn-hint'}" FontColorOverride="#888888" />
+        <PanelContainer StyleClasses="LowDivider" />
+        <Label Name="EmptyLabel" Text="{Loc 'nc-pawn-empty-pallet'}" FontColorOverride="#AAAAAA" Align="Center" />
+        <ScrollContainer VerticalExpand="True" HScrollEnabled="False">
+            <BoxContainer Name="LinesContainer" Orientation="Vertical" SeparationOverride="4" />
+        </ScrollContainer>
+        <PanelContainer StyleClasses="LowDivider" />
+        <BoxContainer Orientation="Horizontal" SeparationOverride="6">
+            <Label Name="TotalLabel" HorizontalExpand="True" VerticalAlignment="Center" />
+            <Button Name="SellAllButton" Text="{Loc 'nc-pawn-sell-all'}" />
+        </BoxContainer>
+    </BoxContainer>
+</controls:FancyWindow>
