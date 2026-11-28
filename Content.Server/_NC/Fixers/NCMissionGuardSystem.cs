@@ -14,6 +14,8 @@ using Content.Shared.NPC.Systems;
 using Content.Shared.Weapons.Melee;
 using Content.Shared.Weapons.Ranged.Components;
 using Content.Shared.Mind.Components;
+using Content.Shared._NC.Coordinates.Systems;
+using Robust.Shared.Map;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
 using Robust.Shared.Timing;
@@ -23,11 +25,15 @@ namespace Content.Server._NC.Fixers;
 /// <summary>
 /// Mission defenders are neutral until provoked. Someone walking into a post is warned; drawing a weapon there,
 /// lingering close after the warning, hurting anyone or anything of the mission, or taking a mission item in
-/// view of a guard turns the whole group hostile to that person.
+/// view of a guard turns the whole group hostile to that person. Aggressive groups skip the warning.
+/// A group is a mission's defenders, or (with a negative id) people standing at a place or walking a patrol
+/// without one.
 /// </summary>
 public sealed class NCMissionGuardSystem : EntitySystem
 {
     private static readonly TimeSpan ScanInterval = TimeSpan.FromSeconds(0.5);
+    private const float PostRange = 24f;
+    private const int PostFloorRange = 2;
 
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private EntityLookupSystem _lookup = default!;
@@ -38,6 +44,8 @@ public sealed class NCMissionGuardSystem : EntitySystem
     [Dependency] private SharedHandsSystem _hands = default!;
     [Dependency] private MobStateSystem _mobState = default!;
     [Dependency] private NpcFactionSystem _factions = default!;
+    [Dependency] private SharedTransformSystem _transform = default!;
+    [Dependency] private NCMapCoordinatesSystem _mapCoordinates = default!;
 
     private TimeSpan _nextScan;
     private readonly HashSet<Entity<MindContainerComponent>> _nearby = new();
@@ -58,6 +66,7 @@ public sealed class NCMissionGuardSystem : EntitySystem
         {
             guard.Warnings = encounter.Warnings.ToList();
             guard.Alarms = encounter.Alarms.ToList();
+            guard.Aggressive = encounter.Aggressive;
         }
 
         EnsureComp<FactionExceptionComponent>(mob);
@@ -89,7 +98,7 @@ public sealed class NCMissionGuardSystem : EntitySystem
                     continue;
                 }
 
-                if (HoldsWeapon(player))
+                if (guard.Aggressive || HoldsWeapon(player))
                 {
                     Alarm(guard.Mission, player);
                     continue;
@@ -106,6 +115,85 @@ public sealed class NCMissionGuardSystem : EntitySystem
                     Alarm(guard.Mission, player);
             }
         }
+    }
+
+    /// <summary>
+    /// Spawns an encounter's defenders at the guard posts that serve a place (posts of the place's owner, or the
+    /// place itself when there are none) and makes them one group.
+    /// </summary>
+    public List<EntityUid> SpawnDefenders(EntityUid place, NCFixerEncounterPrototype encounter, int group, int extra = 0)
+    {
+        var owner = CompOrNull<NCMissionMarkerComponent>(place)?.Owner;
+        var posts = new List<EntityUid>();
+        var query = EntityQueryEnumerator<NCMissionMarkerComponent>();
+        while (query.MoveNext(out var uid, out var marker))
+        {
+            if (marker.Kind == NCMissionMarkerKind.Guard && (owner == null || marker.Owner == owner) && IsNearby(place, uid))
+                posts.Add(uid);
+        }
+
+        var mobs = new List<EntProtoId>();
+        foreach (var entry in encounter.Entries)
+        {
+            var amount = _random.Next(entry.Min, entry.Max + 1);
+            for (var i = 0; i < amount; i++)
+                mobs.Add(entry.Mob);
+        }
+
+        for (var i = 0; i < extra && encounter.Entries.Count > 0; i++)
+            mobs.Add(_random.Pick(encounter.Entries).Mob);
+
+        var spawned = new List<EntityUid>();
+        var count = 0;
+        foreach (var mob in mobs)
+        {
+            var at = posts.Count > 0
+                ? Transform(posts[count++ % posts.Count]).Coordinates
+                : Transform(place).Coordinates.Offset(new System.Numerics.Vector2(_random.Next(-2, 3), _random.Next(-2, 3)));
+            spawned.Add(SpawnGuard(mob, at, group, encounter));
+        }
+
+        return spawned;
+    }
+
+    /// <summary>Spawns one member of a group.</summary>
+    public EntityUid SpawnGuard(EntProtoId mob, EntityCoordinates at, int group, NCFixerEncounterPrototype? encounter)
+    {
+        var uid = Spawn(mob, at);
+        EnsureComp<NCMissionEntityComponent>(uid).Mission = group;
+        MakeGuard(uid, group, encounter);
+        return uid;
+    }
+
+    /// <summary>Moves a group's members over to another group (a mission taking over people already there).</summary>
+    public void Regroup(IEnumerable<EntityUid> members, int group)
+    {
+        foreach (var uid in members)
+        {
+            if (TryComp<NCMissionGuardComponent>(uid, out var guard))
+                guard.Mission = group;
+            if (TryComp<NCMissionEntityComponent>(uid, out var entity))
+                entity.Mission = group;
+        }
+    }
+
+    /// <summary>
+    /// Whether a guard post serves a place: on the city network, within range on the plan and a couple of floors
+    /// up or down; off the network, on the same map and within range.
+    /// </summary>
+    public bool IsNearby(EntityUid place, EntityUid post, float range = PostRange, int floors = PostFloorRange)
+    {
+        if (_mapCoordinates.TryGetCoordinates(place, out var origin) &&
+            _mapCoordinates.TryGetCoordinates(post, out var coordinates))
+        {
+            return coordinates.NetworkId == origin.NetworkId &&
+                   Math.Abs(coordinates.Z - origin.Z) <= floors &&
+                   (coordinates.Position - origin.Position).Length() <= range;
+        }
+
+        var a = _transform.GetMapCoordinates(place);
+        var b = _transform.GetMapCoordinates(post);
+        return a.MapId == b.MapId && (a.Position - b.Position).Length() <= range;
     }
 
     private bool HoldsWeapon(EntityUid player)

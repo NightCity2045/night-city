@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Street patrol: fight whoever the group is hostile to, otherwise walk to the next patrol point
+# (NCMissionPatrolSystem keeps NCPatrolTarget on the blackboard), otherwise idle.
+- type: htnCompound
+  id: NCPatrolHumanoidCompound
+  branches:
+    - tasks:
+        - !type:HTNCompoundTask
+          task: RangedCombatCompound
+    - tasks:
+        - !type:HTNCompoundTask
+          task: MeleeCombatCompound
+    - preconditions:
+        - !type:KeyExistsPrecondition
+          key: NCPatrolTarget
+      tasks:
+        - !type:HTNPrimitiveTask
+          operator: !type:MoveToOperator
+            pathfindInPlanning: true
+            targetKey: NCPatrolTarget
+    - tasks:
+        - !type:HTNCompoundTask
+          task: IdleCompound

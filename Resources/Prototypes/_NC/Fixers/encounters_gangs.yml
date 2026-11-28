@@ -333,6 +333,7 @@
 # Arasaka Black Vault under ground zero: sleepers, blades, a netrunner and turrets.
 - type: ncFixerEncounter
   id: ArasakaVaultPost
+  aggressive: true
   extraPerLevel: 1
   warnings: [ nc-arasaka-warning-1, nc-arasaka-warning-2 ]
   alarms: [ nc-arasaka-alarm-1, nc-arasaka-alarm-2 ]
@@ -349,6 +350,7 @@
 
 - type: ncFixerEncounter
   id: ArasakaVaultStronghold
+  aggressive: true
   extraPerLevel: 2
   warnings: [ nc-arasaka-warning-1, nc-arasaka-warning-2 ]
   alarms: [ nc-arasaka-alarm-1, nc-arasaka-alarm-2 ]
