@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Text.Json;
 using Content.Server._NC.LivingCity.Time;
 using Content.Server._NC.Medical.Persistence;
+using Content.Server.GameTicking;
 using Content.Server.Preferences.Managers;
 using Content.Shared._NC.Identity;
 using Content.Shared._NC.Medical.Physiology;
@@ -17,8 +18,12 @@ namespace Content.Server._NC.Persistence.RoundSnapshot;
 
 /// <summary>
 /// Decides character survival at the common capture boundary and refreshes preference caches after commit.
-/// Clinical arrest becomes a profile deletion only at the end-of-round boundary.
 /// </summary>
+/// <remarks>
+/// The round end and leaving for the lobby are the only points of no return. A character whose body is
+/// physiologically critical, in clinical arrest or irreversibly dead at either point is deleted when the
+/// round snapshot commits; a lobby exit is remembered until then because profiles only change at that boundary.
+/// </remarks>
 public sealed partial class NCCharacterLifecycleSnapshotSystem : EntitySystem
 {
     private const string SectionType = "character-lifecycle";
@@ -32,12 +37,15 @@ public sealed partial class NCCharacterLifecycleSnapshotSystem : EntitySystem
     private readonly Dictionary<NCCharacterId, NetUserId> _owners = [];
     private readonly HashSet<NCCharacterId> _irreversiblyDead = [];
     private readonly HashSet<NCCharacterId> _clinicalDeathsAtClose = [];
+    private readonly HashSet<NCCharacterId> _criticalAtClose = [];
+    private readonly HashSet<NCCharacterId> _abandonedWhileDown = [];
 
     public override void Initialize()
     {
         base.Initialize();
         SubscribeLocalEvent<PlayerSpawnCompleteEvent>(OnPlayerSpawnComplete);
         SubscribeLocalEvent<PlayerDetachedEvent>(OnPlayerDetached);
+        SubscribeLocalEvent<PlayerJoinedLobbyEvent>(OnPlayerJoinedLobby);
         SubscribeLocalEvent<NCPhysiologyComponent, NCPhysiologyChangedEvent>(OnPhysiologyChanged);
         SubscribeLocalEvent<NCPhysiologyComponent, EntityTerminatingEvent>(OnBodyTerminating);
         SubscribeLocalEvent<NCActiveWorldSessionClosingEvent>(OnSessionClosing, before: [typeof(NCRoundSnapshotCoordinatorSystem)]);
@@ -54,6 +62,24 @@ public sealed partial class NCCharacterLifecycleSnapshotSystem : EntitySystem
         _bindings[args.Mob] = new CharacterBinding(characterId, args.Player.UserId);
         _owners[characterId] = args.Player.UserId;
         _irreversiblyDead.Remove(characterId);
+        _abandonedWhileDown.Remove(characterId);
+    }
+
+    /// <summary>
+    /// Going back to the lobby mid-round gives up every character of that player still lying down in the round.
+    /// </summary>
+    private void OnPlayerJoinedLobby(PlayerJoinedLobbyEvent args)
+    {
+        var userId = args.PlayerSession.UserId;
+        foreach (var (characterId, body) in _medicalPersistence.GetRoundSnapshotPlayerBodies())
+        {
+            if (_owners.GetValueOrDefault(characterId) == userId &&
+                TryComp<NCPhysiologyComponent>(body, out var physiology) &&
+                IsDown(physiology))
+            {
+                _abandonedWhileDown.Add(characterId);
+            }
+        }
     }
 
     private void OnPlayerDetached(PlayerDetachedEvent args)
@@ -79,6 +105,7 @@ public sealed partial class NCCharacterLifecycleSnapshotSystem : EntitySystem
     private void OnSessionClosing(NCActiveWorldSessionClosingEvent args)
     {
         _clinicalDeathsAtClose.Clear();
+        _criticalAtClose.Clear();
         foreach (var (characterId, body) in _medicalPersistence.GetRoundSnapshotPlayerBodies())
         {
             if (!_owners.ContainsKey(characterId) || !TryComp<NCPhysiologyComponent>(body, out var physiology))
@@ -88,6 +115,8 @@ public sealed partial class NCCharacterLifecycleSnapshotSystem : EntitySystem
                 _irreversiblyDead.Add(characterId);
             else if (physiology.Condition == NCPhysiologicalCondition.ClinicalArrest)
                 _clinicalDeathsAtClose.Add(characterId);
+            else if (physiology.Condition == NCPhysiologicalCondition.Critical)
+                _criticalAtClose.Add(characterId);
         }
     }
 
@@ -97,7 +126,10 @@ public sealed partial class NCCharacterLifecycleSnapshotSystem : EntitySystem
         {
             var irreversible = _irreversiblyDead.Contains(characterId);
             var clinicalArrest = _clinicalDeathsAtClose.Contains(characterId);
-            var payload = JsonSerializer.Serialize(new CharacterLifecycleDocument(irreversible, clinicalArrest));
+            var critical = _criticalAtClose.Contains(characterId);
+            var abandoned = _abandonedWhileDown.Contains(characterId);
+            var payload = JsonSerializer.Serialize(
+                new CharacterLifecycleDocument(irreversible, clinicalArrest, critical, abandoned));
             args.TryAddSection(
                 SectionType,
                 OwnerType,
@@ -105,7 +137,7 @@ public sealed partial class NCCharacterLifecycleSnapshotSystem : EntitySystem
                 FormatVersion,
                 1,
                 payload);
-            if (irreversible || clinicalArrest)
+            if (irreversible || clinicalArrest || critical || abandoned)
                 args.DeleteCharacter(characterId.Value);
         }
     }
@@ -134,14 +166,28 @@ public sealed partial class NCCharacterLifecycleSnapshotSystem : EntitySystem
             _irreversiblyDead.Add(characterId);
     }
 
+    private static bool IsDown(NCPhysiologyComponent physiology)
+    {
+        return physiology.Irreversible ||
+               physiology.Condition is NCPhysiologicalCondition.Critical or
+                   NCPhysiologicalCondition.ClinicalArrest or
+                   NCPhysiologicalCondition.Dead;
+    }
+
     private void OnRoundRestart(RoundRestartCleanupEvent args)
     {
         _bindings.Clear();
         _owners.Clear();
         _irreversiblyDead.Clear();
         _clinicalDeathsAtClose.Clear();
+        _criticalAtClose.Clear();
+        _abandonedWhileDown.Clear();
     }
 
     private readonly record struct CharacterBinding(NCCharacterId CharacterId, NetUserId UserId);
-    private sealed record CharacterLifecycleDocument(bool IrreversiblyDead, bool ClinicalArrestAtClose);
+    private sealed record CharacterLifecycleDocument(
+        bool IrreversiblyDead,
+        bool ClinicalArrestAtClose,
+        bool CriticalAtClose,
+        bool AbandonedWhileDown);
 }

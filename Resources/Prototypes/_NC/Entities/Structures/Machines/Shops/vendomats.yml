@@ -21,6 +21,11 @@
   - type: PointLight
     radius: 1.5
     energy: 1.6
+  # A pool of the machine's colour on the pavement in front of it.
+  - type: NCNeonEmission
+    size: 1.4, 1.1
+    offset: 0, -0.7
+    intensity: 0.45
 
 - type: entity
   parent: MarkerBase

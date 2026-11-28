@@ -32,6 +32,7 @@ public sealed partial class NCPharmaSynthesisSystem : EntitySystem
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private UserInterfaceSystem _ui = default!;
     [Dependency] private NCPharmaBatchSystem _batches = default!;
+    [Dependency] private Content.Shared.Power.EntitySystems.SharedPowerReceiverSystem _power = default!;
 
     public override void Initialize()
     {
@@ -48,8 +49,17 @@ public sealed partial class NCPharmaSynthesisSystem : EntitySystem
         base.Update(frameTime);
 
         var query = EntityQueryEnumerator<NCPharmaSynthesisRunComponent, NCPharmaSynthesizerComponent>();
+        var lost = TimeSpan.FromSeconds(frameTime);
         while (query.MoveNext(out var uid, out var run, out var station))
         {
+            // Without power the run stands still and resumes where it stopped.
+            if (!_power.IsPowered(uid))
+            {
+                run.StartedAt += lost;
+                run.FinishAt += lost;
+                continue;
+            }
+
             if (_timing.CurTime < run.FinishAt)
                 continue;
 
@@ -92,8 +102,11 @@ public sealed partial class NCPharmaSynthesisSystem : EntitySystem
         if (HasComp<NCPharmaSynthesisRunComponent>(station))
             return NCPharmaStationNotice.Busy;
 
-        if (!TryGetSource(station, out var sourceUid, out var source))
+        if (!_sources.TryReadSlot(station, station.Comp.SourceSlot, out _) &&
+            !_sources.TryReadSlot(station, station.Comp.SecondSourceSlot, out _))
+        {
             return NCPharmaStationNotice.NoSource;
+        }
 
         if (units < 1 || units > station.Comp.MaximumUnitsPerRun ||
             !_batches.TryGetFormula(formulaId, out var formula) ||
@@ -110,50 +123,55 @@ public sealed partial class NCPharmaSynthesisSystem : EntitySystem
             return NCPharmaStationNotice.ExperimentalLimit;
         }
 
-        if (source.Units < units)
-            return NCPharmaStationNotice.NotEnoughSource;
-
-        // NC: the compound can only be made from the raw material it accepts; an alternative gives fewer doses.
-        var yield = _batches.ResolveFeedstockYield(formula, source.Feedstock);
-        if (yield <= 0f)
-            return NCPharmaStationNotice.WrongFeedstock;
+        // NC: each compound can only be made from the raw material it accepts; an alternative gives fewer doses.
+        // A formula of two compounds may take each of them from its own canister.
+        if (!_batches.TryGetCoreProfiles(formula, out var cores))
+            return NCPharmaStationNotice.InvalidRequest;
+        switch (_sources.TryPlanDraw(cores, station, station.Comp.SourceSlot, station.Comp.SecondSourceSlot, units, out var draw))
+        {
+            case NCPharmaDrawResult.NoSource:
+                return NCPharmaStationNotice.NoSource;
+            case NCPharmaDrawResult.NotEnoughSource:
+                return NCPharmaStationNotice.NotEnoughSource;
+            case NCPharmaDrawResult.WrongFeedstock:
+                return NCPharmaStationNotice.WrongFeedstock;
+        }
 
         // NC: a modifier may ask for a reagent from the vial in the additive slot; the run uses it up when it starts.
-        ProtoId<ReagentPrototype>? requiredReagent = null;
-        var requiredAmount = 0f;
+        // Every modifier that asks gets its share; two asking for the same reagent need both amounts.
+        var required = new Dictionary<ProtoId<ReagentPrototype>, float>();
         foreach (var modifierId in formula.Modifiers)
         {
             if (_prototypes.TryIndex(modifierId, out var found) && found.RequiredReagent is { } reagent)
-            {
-                requiredReagent = reagent;
-                requiredAmount = found.RequiredAmount;
-                break;
-            }
+                required[reagent] = required.GetValueOrDefault(reagent) + found.RequiredAmount;
         }
 
         Entity<SolutionComponent>? additiveSolution = null;
-        if (requiredReagent is { } needed)
+        if (required.Count > 0)
         {
             if (GetAdditive(station) is not { } vial ||
                 !_solutions.TryGetDrainableSolution(vial, out additiveSolution, out var vialContents) ||
-                (float) vialContents.GetTotalPrototypeQuantity(needed) < requiredAmount)
+                required.Any(pair => (float) vialContents.GetTotalPrototypeQuantity(pair.Key) < pair.Value))
             {
                 return NCPharmaStationNotice.MissingAdditive;
             }
         }
 
         var inputs = new NCPharmaProductionInputs(
-            units * yield,
-            source.Purity,
+            units * draw.Plan.Yield,
+            draw.Purity,
             station.Comp.EquipmentSterility,
             station.Comp.EquipmentMixing,
             station.Comp.CalibrationError,
-            source.Contaminants); // NC
+            draw.Contaminants); // NC
 
         // NC: the material is liquid in the canister; the run takes its share and leaves the rest as it was.
-        _sources.Consume(source, units);
-        if (additiveSolution is { } drawn && requiredReagent is { } used)
-            _solutions.RemoveReagent(drawn, used.Id, FixedPoint2.New(requiredAmount));
+        _sources.Consume(draw, units);
+        if (additiveSolution is { } drawn)
+        {
+            foreach (var (used, amount) in required)
+                _solutions.RemoveReagent(drawn, used.Id, FixedPoint2.New(amount));
+        }
 
         var run = EnsureComp<NCPharmaSynthesisRunComponent>(station);
         run.Formula = formula.ID;
@@ -212,28 +230,13 @@ public sealed partial class NCPharmaSynthesisSystem : EntitySystem
         return _itemSlots.TryGetSlot(station, station.Comp.AdditiveSlot, out var slot) ? slot.Item : null;
     }
 
-    private bool TryGetSource(
-        Entity<NCPharmaSynthesizerComponent> station,
-        out EntityUid sourceUid,
-        out NCPharmaSourceReading source)
-    {
-        sourceUid = default;
-        source = default;
-        if (!_itemSlots.TryGetSlot(station, station.Comp.SourceSlot, out var slot) ||
-            slot.Item is not { } item ||
-            !HasComp<NCPharmaSourceComponent>(item) ||
-            !_sources.TryRead(item, out source))
-        {
-            return false;
-        }
-
-        sourceUid = item;
-        return true;
-    }
-
     private void UpdateUi(Entity<NCPharmaSynthesizerComponent> station, NCPharmaStationNotice notice)
     {
-        var hasSource = TryGetSource(station, out _, out var source);
+        if (!_ui.IsUiOpen(station.Owner, NCPharmaStationUiKey.Key))
+            return;
+
+        var hasSource = _sources.TryReadSlot(station, station.Comp.SourceSlot, out var source);
+        var hasSecond = _sources.TryReadSlot(station, station.Comp.SecondSourceSlot, out var second);
         var busy = TryComp<NCPharmaSynthesisRunComponent>(station, out var run);
         var progress = 0f;
         if (busy && run != null && run.FinishAt > run.StartedAt)
@@ -254,6 +257,7 @@ public sealed partial class NCPharmaSynthesisSystem : EntitySystem
                 notice,
                 _batches.BuildFormulaSummaries(true),
                 hasSource ? source.Feedstock : null,
-                AdditiveContents(station)));
+                AdditiveContents(station),
+                hasSecond ? new NCPharmaSourceSummary(second.Units, second.Purity, second.Feedstock) : null));
     }
 }

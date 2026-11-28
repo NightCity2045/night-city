@@ -27,6 +27,9 @@ public sealed partial class NCPharmaStationSystem : EntitySystem
 {
     private const float InteractionRange = 1.5f;
 
+    /// <summary>Below this quality of work an isolation fails and a repacking spills a dose.</summary>
+    private const float SkillThreshold = 0.8f;
+
     [Dependency] private SharedDoAfterSystem _doAfter = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private SharedHandsSystem _hands = default!;
@@ -146,8 +149,10 @@ public sealed partial class NCPharmaStationSystem : EntitySystem
         var coordinates = Transform(machine).Coordinates;
         if (unknownPool is { } pool)
         {
-            _actions.Resolve(args.User, "NCBiotechIsolate", machine.Owner);
-            if (_batches.TryIsolateCompound(pool, item, Name(args.User), out var formula, out var codename))
+            // A clumsy isolation ruins the attempt; the seized sample stays for another try.
+            var isolation = _actions.Resolve(args.User, "NCBiotechIsolate", machine.Owner).Quality;
+            if (isolation >= SkillThreshold &&
+                _batches.TryIsolateCompound(pool, item, Name(args.User), out var formula, out var codename))
             {
                 QueueDel(item);
                 _popup.PopupEntity(Loc.GetString("nc-pharma-isolated", ("name", codename)), machine, args.User);
@@ -288,7 +293,11 @@ public sealed partial class NCPharmaStationSystem : EntitySystem
         if (!_power.IsPowered(machine.Owner) || GetLoaded(machine, machine.Comp.Slot) is not { } item)
             return;
 
-        _actions.Resolve(args.User, "NCBiotechFill", machine.Owner);
+        // A clumsy hand spills one dose while it repacks.
+        var spilled = _actions.Resolve(args.User, "NCBiotechFill", machine.Owner).Quality < SkillThreshold &&
+                      _batches.TrySpillDose(item, Name(args.User));
+        if (spilled)
+            _popup.PopupEntity(Loc.GetString("nc-pharma-fill-spilled"), machine, args.User);
         var packs = _batches.TryRepack(item, machine.Comp.DosesPerPack, Transform(machine).Coordinates, Name(args.User));
         _popup.PopupEntity(Loc.GetString(packs > 0 ? "nc-pharma-filled" : "nc-lab-machine-wrong-sample",
             ("count", packs)), machine, args.User);

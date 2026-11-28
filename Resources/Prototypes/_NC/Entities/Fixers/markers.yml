@@ -430,3 +430,201 @@
   - type: NCMissionMarker
     kind: Guard
     owner: Scavengers
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerObjectiveMedicalTechnologies
+  suffix: Objective, Medical Technologies
+  components:
+  - type: Sprite
+    state: objective
+  - type: NCMissionMarker
+    kind: Objective
+    owner: MedicalTechnologies
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerDeadDropMedicalTechnologies
+  suffix: DeadDrop, Medical Technologies
+  components:
+  - type: Sprite
+    state: drop
+  - type: NCMissionMarker
+    kind: DeadDrop
+    owner: MedicalTechnologies
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerGuardMedicalTechnologies
+  suffix: Guard, Medical Technologies
+  components:
+  - type: Sprite
+    state: guard
+  - type: NCMissionMarker
+    kind: Guard
+    owner: MedicalTechnologies
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerObjectiveNightCityUniversity
+  suffix: Objective, Night City University
+  components:
+  - type: Sprite
+    state: objective
+  - type: NCMissionMarker
+    kind: Objective
+    owner: NightCityUniversity
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerDeadDropNightCityUniversity
+  suffix: DeadDrop, Night City University
+  components:
+  - type: Sprite
+    state: drop
+  - type: NCMissionMarker
+    kind: DeadDrop
+    owner: NightCityUniversity
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerGuardNightCityUniversity
+  suffix: Guard, Night City University
+  components:
+  - type: Sprite
+    state: guard
+  - type: NCMissionMarker
+    kind: Guard
+    owner: NightCityUniversity
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerObjectiveNetwork54
+  suffix: Objective, Network 54
+  components:
+  - type: Sprite
+    state: objective
+  - type: NCMissionMarker
+    kind: Objective
+    owner: Network54
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerDeadDropNetwork54
+  suffix: DeadDrop, Network 54
+  components:
+  - type: Sprite
+    state: drop
+  - type: NCMissionMarker
+    kind: DeadDrop
+    owner: Network54
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerGuardNetwork54
+  suffix: Guard, Network 54
+  components:
+  - type: Sprite
+    state: guard
+  - type: NCMissionMarker
+    kind: Guard
+    owner: Network54
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerObjectiveMarinaSecurity
+  suffix: Objective, Marina Security
+  components:
+  - type: Sprite
+    state: objective
+  - type: NCMissionMarker
+    kind: Objective
+    owner: MarinaSecurity
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerDeadDropMarinaSecurity
+  suffix: DeadDrop, Marina Security
+  components:
+  - type: Sprite
+    state: drop
+  - type: NCMissionMarker
+    kind: DeadDrop
+    owner: MarinaSecurity
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerGuardMarinaSecurity
+  suffix: Guard, Marina Security
+  components:
+  - type: Sprite
+    state: guard
+  - type: NCMissionMarker
+    kind: Guard
+    owner: MarinaSecurity
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerObjectiveArasakaRemnant
+  suffix: Objective, Arasaka remnant
+  components:
+  - type: Sprite
+    state: objective
+  - type: NCMissionMarker
+    kind: Objective
+    owner: ArasakaRemnant
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerDeadDropArasakaRemnant
+  suffix: DeadDrop, Arasaka remnant
+  components:
+  - type: Sprite
+    state: drop
+  - type: NCMissionMarker
+    kind: DeadDrop
+    owner: ArasakaRemnant
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerGuardArasakaRemnant
+  suffix: Guard, Arasaka remnant
+  components:
+  - type: Sprite
+    state: guard
+  - type: NCMissionMarker
+    kind: Guard
+    owner: ArasakaRemnant
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerObjectiveScavengerTunnels
+  suffix: Objective, Scavenger tunnels
+  components:
+  - type: Sprite
+    state: objective
+  - type: NCMissionMarker
+    kind: Objective
+    owner: ScavengerTunnels
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerDeadDropScavengerTunnels
+  suffix: DeadDrop, Scavenger tunnels
+  components:
+  - type: Sprite
+    state: drop
+  - type: NCMissionMarker
+    kind: DeadDrop
+    owner: ScavengerTunnels
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerGuardScavengerTunnels
+  suffix: Guard, Scavenger tunnels
+  components:
+  - type: Sprite
+    state: guard
+  - type: NCMissionMarker
+    kind: Guard
+    owner: ScavengerTunnels

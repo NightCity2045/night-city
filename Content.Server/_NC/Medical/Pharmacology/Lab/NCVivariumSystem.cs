@@ -68,7 +68,7 @@ public sealed partial class NCVivariumSystem : EntitySystem
 
         var result = NCPharmaBatchMath.ResolveStudy(tuning, args.Effect, compound.ToxicConcentration);
         var subject = Name(args.Patient);
-        if (!_batches.RecordVivariumStudy(args.BatchId, Name(args.Administrator), subject, result))
+        if (!_batches.RecordVivariumStudy(args.BatchId, Name(args.Administrator), subject, result, post))
             return;
 
         var report = new StringBuilder();

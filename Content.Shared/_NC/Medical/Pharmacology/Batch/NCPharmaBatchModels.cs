@@ -130,6 +130,8 @@ public enum NCPharmaAuditKind : byte
     Degraded,
     AdminAdjusted,
     Treated,
+    Sampled,
+    Spilled,
 }
 
 /// <summary>
@@ -254,6 +256,9 @@ public readonly record struct NCPharmaReagentAmount(string Id, float Amount);
 public static class NCPharmaNodeIds
 {
     public static string Core(string id) => "core:" + id;
+
+    /// <summary>True for a compound node: the only kind a research chip has to study before it can be built on.</summary>
+    public static bool IsCore(string node) => node.StartsWith("core:", StringComparison.Ordinal);
 
     public static string Form(string id) => "form:" + id;
 

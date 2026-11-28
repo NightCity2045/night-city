@@ -304,3 +304,221 @@
     gloves: ClothingHandsGlovesFingerless
   inhand:
   - NCWeaponRifleCopperhead
+
+- type: startingGear
+  id: NCSecurityMedicalTechnologiesGuardGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitSecGrey
+    shoes: ClothingShoesBootsJack
+    outerClothing: ClothingOuterArmorBasic
+    head: ClothingHeadHatSurgcapBlue
+    gloves: ClothingHandsGlovesLatex
+  inhand:
+  - NCWeaponPistolP35
+
+- type: startingGear
+  id: NCSecurityMedicalTechnologiesOrderlyGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitMedicalDoctor
+    shoes: ClothingShoesColorWhite
+    mask: ClothingMaskSterile
+    head: ClothingHeadHatSurgcapGreen
+    gloves: ClothingHandsGlovesLatex
+  inhand:
+  - Machete
+
+- type: startingGear
+  id: NCSecurityMedicalTechnologiesSurgeonGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitMedicalDoctor
+    shoes: ClothingShoesColorWhite
+    outerClothing: ClothingOuterCoatLab
+    mask: ClothingMaskSterile
+    gloves: ClothingHandsGlovesLatex
+  inhand:
+  - KitchenKnife
+
+- type: startingGear
+  id: NCSecurityMedicalTechnologiesChiefGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitMedicalDoctor
+    shoes: ClothingShoesBootsJack
+    outerClothing: ClothingOuterCoatLabCmo
+    eyes: ClothingEyesGlassesSecurity
+    gloves: ClothingHandsGlovesLatex
+  inhand:
+  - NCWeaponPistolAvenger
+
+- type: startingGear
+  id: NCSecurityNightCityUniversityOfficerGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitSecGrey
+    shoes: ClothingShoesBootsJack
+    head: ClothingHeadHatBeret
+    outerClothing: ClothingOuterArmorBasicSlim
+  inhand:
+  - Stunbaton
+
+- type: startingGear
+  id: NCSecurityNightCityUniversityGuardGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitSecGrey
+    shoes: ClothingShoesBootsJack
+    head: ClothingHeadHatBeret
+    outerClothing: ClothingOuterArmorBasic
+  inhand:
+  - NCWeaponPistolFederalX9
+
+- type: startingGear
+  id: NCSecurityNightCityUniversityResponderGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitSecGrey
+    shoes: ClothingShoesBootsJack
+    head: ClothingHeadHelmetBasic
+    outerClothing: ClothingOuterArmorBasic
+    eyes: ClothingEyesGlassesSecurity
+  inhand:
+  - NCWeaponPistolMarkIII
+
+- type: startingGear
+  id: NCSecurityNightCityUniversityChiefGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitSecGrey
+    shoes: ClothingShoesBootsJack
+    outerClothing: ClothingOuterArmorBasic
+    eyes: ClothingEyesGlassesSecurity
+    neck: ClothingNeckScarfStripedBlue
+  inhand:
+  - NCWeaponPistolAvenger
+
+- type: startingGear
+  id: NCSecurityNetwork54DoormanGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitLawyerBlack
+    shoes: ClothingShoesColorBlack
+    outerClothing: ClothingOuterArmorBasicSlim
+    ears: ClothingHeadsetGrey
+  inhand:
+  - Stunbaton
+
+- type: startingGear
+  id: NCSecurityNetwork54GuardGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitLawyerBlack
+    shoes: ClothingShoesColorBlack
+    outerClothing: ClothingOuterArmorBasicSlim
+    ears: ClothingHeadsetGrey
+    eyes: ClothingEyesGlassesSunglasses
+  inhand:
+  - NCWeaponPistolFederalX9
+
+- type: startingGear
+  id: NCSecurityNetwork54ResponderGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitLawyerBlack
+    shoes: ClothingShoesColorBlack
+    outerClothing: ClothingOuterArmorBasic
+    ears: ClothingHeadsetGrey
+    eyes: ClothingEyesGlassesSunglasses
+  inhand:
+  - NCWeaponSMGSaratoga
+
+- type: startingGear
+  id: NCSecurityNetwork54ChiefGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitLawyerBlack
+    shoes: ClothingShoesColorBlack
+    outerClothing: ClothingOuterArmorBasic
+    ears: ClothingHeadsetGrey
+    eyes: ClothingEyesGlassesSunglasses
+  inhand:
+  - NCWeaponPistolOverlord
+
+- type: startingGear
+  id: NCSecurityMarinaConciergeGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitLawyerBlue
+    shoes: ClothingShoesColorWhite
+    outerClothing: ClothingOuterArmorBasicSlim
+    ears: ClothingHeadsetGrey
+  inhand:
+  - Stunbaton
+
+- type: startingGear
+  id: NCSecurityMarinaGuardGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorWhite
+    shoes: ClothingShoesColorWhite
+    outerClothing: ClothingOuterArmorBasicSlim
+    ears: ClothingHeadsetGrey
+    eyes: ClothingEyesGlassesSunglasses
+  inhand:
+  - NCWeaponPistolMarkIII
+
+- type: startingGear
+  id: NCSecurityMarinaResponderGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorWhite
+    shoes: ClothingShoesColorWhite
+    outerClothing: ClothingOuterArmorBasic
+    ears: ClothingHeadsetGrey
+    eyes: ClothingEyesGlassesSunglasses
+    head: ClothingHeadHatBeret
+  inhand:
+  - NCWeaponShotgunCrusher
+
+- type: startingGear
+  id: NCSecurityMarinaChiefGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitLawyerBlue
+    shoes: ClothingShoesColorWhite
+    outerClothing: ClothingOuterArmorBasic
+    ears: ClothingHeadsetGrey
+    eyes: ClothingEyesGlassesSunglasses
+  inhand:
+  - NCWeaponPistolMallorian
+
+- type: startingGear
+  id: NCArasakaRemnantSleeperGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorBlack
+    shoes: ClothingShoesBootsCombat
+    gloves: ClothingHandsGlovesCombat
+    outerClothing: ClothingOuterArmorBulletproof
+    head: ClothingHeadHelmetSwat
+    mask: ClothingMaskGasSwat
+  inhand:
+  - NCWeaponSMGShingen
+
+- type: startingGear
+  id: NCArasakaRemnantNinjaGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorBlack
+    shoes: ClothingShoesBootsCombat
+    gloves: ClothingHandsGlovesCombat
+    outerClothing: ClothingOuterArmorBasicSlim
+    mask: ClothingMaskGasSwat
+  inhand:
+  - Katana
+
+- type: startingGear
+  id: NCArasakaRemnantNetrunnerGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorBlack
+    shoes: ClothingShoesBootsCombat
+    gloves: ClothingHandsGlovesCombat
+    outerClothing: ClothingOuterArmorBasicSlim
+    eyes: ClothingEyesGlassesSunglasses
+  inhand:
+  - NCWeaponPistolOverlord
+
+- type: startingGear
+  id: NCArasakaRemnantCommanderGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorBlack
+    shoes: ClothingShoesBootsCombat
+    gloves: ClothingHandsGlovesCombat
+    outerClothing: ClothingOuterArmorHeavy
+    head: ClothingHeadHelmetSwat
+  inhand:
+  - NCWeaponRifleArasakaPrototype

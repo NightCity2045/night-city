@@ -1,0 +1,14 @@
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<dispatch:NCDispatchCartridgeUiFragment xmlns="https://spacestation14.io"
+                                        xmlns:dispatch="clr-namespace:Content.Client._NC.Dispatch"
+                                        Margin="5"
+                                        VerticalExpand="True">
+    <BoxContainer Orientation="Vertical" SeparationOverride="6" VerticalExpand="True">
+        <Label Name="UnavailableLabel" Text="{Loc 'nc-dispatch-unavailable'}" Align="Center" Visible="False" />
+        <Label Name="ServiceLabel" StyleClasses="LabelHeading" />
+        <Label Name="EmptyLabel" Text="{Loc 'nc-dispatch-empty'}" FontColorOverride="#888888" Visible="False" />
+        <ScrollContainer VerticalExpand="True" HScrollEnabled="False">
+            <BoxContainer Name="IncidentsContainer" Orientation="Vertical" SeparationOverride="8" />
+        </ScrollContainer>
+    </BoxContainer>
+</dispatch:NCDispatchCartridgeUiFragment>

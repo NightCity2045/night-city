@@ -44,6 +44,9 @@ public enum NCFixerPayment : byte
 
     /// <summary>Paid to the taker's bank account.</summary>
     Transfer,
+
+    /// <summary>A corporate job board: paid into the employer's department and corporation accounts.</summary>
+    Employer,
 }
 
 public enum NCMissionMarkerKind : byte
@@ -67,6 +70,13 @@ public sealed partial class NCMissionOwnerPrototype : IPrototype
 
     [DataField(required: true)]
     public LocId Name;
+
+    /// <summary>
+    /// Defenders who stand at the owner's places even without a mission: they appear when someone wanders up to
+    /// an objective and leave once nobody is around. Null keeps the places empty until a mission is taken.
+    /// </summary>
+    [DataField]
+    public ProtoId<NCFixerEncounterPrototype>? Ambient;
 }
 
 /// <summary>Defenders spawned around a mission objective when the mission is taken.</summary>
@@ -90,6 +100,40 @@ public sealed partial class NCFixerEncounterPrototype : IPrototype
     /// <summary>What a guard shouts when the group turns hostile.</summary>
     [DataField]
     public List<LocId> Alarms = new() { "nc-mission-guard-alarm-1", "nc-mission-guard-alarm-2" };
+
+    /// <summary>Attacks anyone it sees instead of warning first.</summary>
+    [DataField]
+    public bool Aggressive;
+}
+
+/// <summary>
+/// A street patrol: a few of the owners' people walking between their places while a player is on that ground.
+/// </summary>
+[Prototype("ncMissionPatrol")]
+public sealed partial class NCMissionPatrolPrototype : IPrototype
+{
+    [IdDataField]
+    public string ID { get; private set; } = default!;
+
+    /// <summary>Whose ground this is: their objective and guard markers are the patrol's waypoints.</summary>
+    [DataField(required: true)]
+    public List<ProtoId<NCMissionOwnerPrototype>> Owners = new();
+
+    /// <summary>Who walks the patrol.</summary>
+    [DataField(required: true)]
+    public ProtoId<NCFixerEncounterPrototype> Encounter;
+
+    /// <summary>How many patrols walk at once.</summary>
+    [DataField]
+    public int Groups = 1;
+
+    /// <summary>A player this close to any waypoint brings the patrol out.</summary>
+    [DataField]
+    public float ActivationRange = 20f;
+
+    /// <summary>How long a beaten patrol stays away.</summary>
+    [DataField]
+    public TimeSpan RespawnDelay = TimeSpan.FromMinutes(5);
 }
 
 [DataDefinition]
@@ -131,6 +175,21 @@ public sealed partial class NCFixerPrototype : IPrototype
 
     [DataField]
     public TimeSpan RefreshInterval = TimeSpan.FromMinutes(15);
+
+    /// <summary>
+    /// A corporation's internal job board: only employees of this account's department take its jobs.
+    /// With <see cref="NCFixerPayment.Employer"/> the reward goes to the employer instead of the taker.
+    /// </summary>
+    [DataField]
+    public ProtoId<NCBankDepartmentPrototype>? Employer;
+
+    /// <summary>Employer payment: the corporation account that receives what the field department does not.</summary>
+    [DataField]
+    public ProtoId<NCBankDepartmentPrototype>? EmployerCorporation;
+
+    /// <summary>Employer payment: the field department's share of each reward.</summary>
+    [DataField]
+    public float EmployerShare = 0.5f;
 }
 
 /// <summary>One mission of a fixer's pool.</summary>

@@ -43,7 +43,8 @@ public sealed class NCPharmaStationState(
     NCPharmaStationNotice notice,
     NCPharmaFormulaSummary[] formulas,
     string? sourceFeedstock = null,
-    NCPharmaReagentAmount[]? additive = null) : BoundUserInterfaceState
+    NCPharmaReagentAmount[]? additive = null,
+    NCPharmaSourceSummary? secondSource = null) : BoundUserInterfaceState
 {
     public readonly bool SourcePresent = sourcePresent;
     public readonly float SourceUnits = sourceUnits;
@@ -60,7 +61,14 @@ public sealed class NCPharmaStationState(
 
     /// <summary>What the vial in the additive slot holds, if there is one.</summary>
     public readonly NCPharmaReagentAmount[] Additive = additive ?? [];
+
+    /// <summary>The second raw-material canister, if one is inserted.</summary>
+    public readonly NCPharmaSourceSummary? SecondSource = secondSource;
 }
+
+/// <summary>What a raw-material canister in a machine holds, as its window shows it.</summary>
+[Serializable, NetSerializable]
+public readonly record struct NCPharmaSourceSummary(float Units, float Purity, string Feedstock);
 
 /// <summary>Request to produce a known formula. The server revalidates every field.</summary>
 [Serializable, NetSerializable]

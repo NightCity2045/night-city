@@ -60,6 +60,10 @@ public sealed partial class NCMissionGuardComponent : Component
     [DataField]
     public TimeSpan Patience = TimeSpan.FromSeconds(6);
 
+    /// <summary>Attacks anyone it sees instead of warning first.</summary>
+    [DataField]
+    public bool Aggressive;
+
     [DataField]
     public List<LocId> Warnings = new();
 

@@ -105,6 +105,8 @@
   name: Arasaka operative helmet
   description: A sleek, high-tech tactical helmet worn by Arasaka security forces.
   components:
+  - type: NCArmor
+    profile: NCArmorCombatHelmet
   - type: Sprite
     sprite: _NC/Clothing/Head/Helmets/arasaka_operative.rsi
   - type: Clothing

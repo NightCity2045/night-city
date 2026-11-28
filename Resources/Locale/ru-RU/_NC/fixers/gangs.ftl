@@ -159,3 +159,79 @@ ent-NCGangScavengersVest = пластины из лома (Мусорщики)
     .desc = Листовой металл и дорожные знаки, примотанные вместо брони.
 ent-NCGangScavengersMask = противогаз (Мусорщики)
     .desc = Старый противогаз от пыли Зоны поражения.
+
+nc-medtech-warning-1 = Это стерильный объект. Посторонним вход воспрещён.
+nc-medtech-warning-2 = Клиника закрыта, чумба. Приходи по записи.
+nc-medtech-alarm-1 = Проникновение! Пустить на органы!
+nc-medtech-alarm-2 = Никто не уйдёт с нашим товаром!
+
+ent-NCMobHumanSecurityMedicalTechnologiesGuard = охранник (Medical Technologies)
+    .desc = Корпоративная охрана в хирургической шапочке. Пистолет у него не для красоты.
+ent-NCMobHumanSecurityMedicalTechnologiesOrderly = санитар (Medical Technologies)
+    .desc = Носит тела и запчасти между этажами, а мачете — для тех, кто задаёт вопросы.
+ent-NCMobHumanSecurityMedicalTechnologiesSurgeon = хирург (Medical Technologies)
+    .desc = Днём выращивает конечности, ночью ставит хром бустерам.
+ent-NCMobHumanSecurityMedicalTechnologiesChief = главврач (Medical Technologies)
+    .desc = Управляет фермой конечностей и побочным бизнесом, который её кормит.
+
+nc-ncu-warning-1 = Студенческий, пожалуйста. Нет пропуска — нет входа.
+nc-ncu-warning-2 = Приёмные часы закончились. Разворачивайся.
+nc-ncu-alarm-1 = Посторонний на кампусе! Закрыть лаборатории!
+nc-ncu-alarm-2 = Все посты — защищать исследования!
+
+ent-NCMobHumanSecurityNightCityUniversityOfficer = патрульный кампуса (NCU)
+    .desc = Ходит по коридорам Night City University с шоковой дубинкой и коротким терпением.
+ent-NCMobHumanSecurityNightCityUniversityGuard = охранник (NCU)
+    .desc = Охрана кампуса. Крепость знаний платит за настоящие стволы.
+ent-NCMobHumanSecurityNightCityUniversityResponder = боец группы реагирования (NCU)
+    .desc = Шлем, жилет, пистолет. Его зовут, когда кто-то лезет в лаборатории.
+ent-NCMobHumanSecurityNightCityUniversityChief = начальник охраны кампуса (NCU)
+    .desc = Очень серьёзно относится к миссии университета по защите знаний.
+
+nc-n54-warning-1 = Только по пресс-картам. Отойди от двери.
+nc-n54-warning-2 = Это закрытый вещательный объект. Уходи.
+nc-n54-alarm-1 = Проникновение в бюро! Блокировать серверы!
+nc-n54-alarm-2 = Никто не уйдёт с нашими записями!
+
+nc-marina-warning-1 = Только для жильцов и гостей. Разворачивайся.
+nc-marina-warning-2 = Это частная марина. Тебя попросили уйти.
+nc-marina-alarm-1 = Посторонний на набережной! Всем постам!
+nc-marina-alarm-2 = Защитить жильцов, уложить нарушителя!
+
+ent-NCMobHumanSecurityMarinaConcierge = консьерж (Marina)
+    .desc = Улыбка, синий костюм и шокер для гостей, забывших о манерах.
+ent-NCMobHumanSecurityMarinaGuard = охранник (Marina)
+    .desc = Белый костюм, тёмные очки, пистолет под пиджаком. Жильцы платят за молчание.
+ent-NCMobHumanSecurityMarinaResponder = боец группы реагирования (Marina)
+    .desc = В броне и с дробовиком. Его вызывают, когда кто-то прошёл мимо консьержа.
+ent-NCMobHumanSecurityMarinaChief = начальник охраны (Marina)
+    .desc = Знает каждую яхту, каждого жильца и каждую тайну набережной.
+
+ent-NCMobHumanSecurityNetwork54Doorman = швейцар (Network 54)
+    .desc = Костюм, гарнитура и шоковая дубинка. Стережёт дверь бюро.
+ent-NCMobHumanSecurityNetwork54Guard = охранник (Network 54)
+    .desc = Корпоративная охрана новостей. Пистолет не для камеры.
+ent-NCMobHumanSecurityNetwork54Responder = боец группы реагирования (Network 54)
+    .desc = Броня и пистолет-пулемёт. Его зовут, когда кто-то лезет за записями.
+ent-NCMobHumanSecurityNetwork54Chief = начальник охраны (Network 54)
+    .desc = Держит секреты бюро подальше от эфира и чужих рук.
+
+nc-arasaka-warning-1 = Незарегистрированный контакт. Покиньте сектор.
+nc-arasaka-warning-2 = Этого объекта не существует. Скоро не будет и тебя.
+nc-arasaka-alarm-1 = Нарушение периметра. Зачистить.
+nc-arasaka-alarm-2 = За Компанию!
+
+ent-NCMobHumanArasakaRemnantSleeper = спящий Arasaka
+    .desc = Двадцать лет на посту под эпицентром и всё ещё выполняет приказы, которых никто не помнит.
+ent-NCMobHumanArasakaRemnantNinja = клинок Arasaka
+    .desc = Тихий, быстрый и очень острый.
+ent-NCMobHumanArasakaRemnantNetrunner = нетраннер хранилища Arasaka
+    .desc = Охраняет подсеть хранилища изнутри.
+ent-NCMobHumanArasakaRemnantCommander = командир Чёрного хранилища
+    .desc = Последний офицер объекта, которого никогда не строили.
+ent-NCArasakaRemnantTurret = турель Чёрного хранилища
+    .desc = Старая сторожевая пушка Arasaka. Всё ещё работает.
+ent-NCHotZoneFalloutWeak = радиоактивные осадки
+    .desc = Слабый радиационный фон от взрыва 2023 года.
+ent-NCHotZoneFalloutStrong = сильные радиоактивные осадки
+    .desc = Опасная радиация от взрыва 2023 года.

@@ -68,6 +68,41 @@
     amount: 10
 
 - type: ncCorpContract
+  id: NCContractMilitechRonin
+  corporation: Militech
+  name: nc-corp-contract-militech-ronin
+  reward: 4800
+  requirements:
+  - !type:NCCorpItemRequirement
+    item: NCWeaponRifleRonin
+    amount: 5
+
+- type: ncCorpContract
+  id: NCContractMilitechRoninKit
+  corporation: Militech
+  name: nc-corp-contract-militech-ronin-kit
+  description: nc-corp-contract-militech-ronin-kit-desc
+  reward: 4200
+  requirements:
+  - !type:NCCorpItemRequirement
+    item: NCWeaponRifleRonin
+    amount: 3
+  - !type:NCCorpItemRequirement
+    item: NCMagazine556Ronin
+    amount: 10
+
+- type: ncCorpContract
+  id: NCContractMilitechCarnage
+  corporation: Militech
+  name: nc-corp-contract-militech-carnage
+  description: nc-corp-contract-militech-carnage-desc
+  reward: 4000
+  requirements:
+  - !type:NCCorpItemRequirement
+    item: NCWeaponShotgunCarnage
+    amount: 5
+
+- type: ncCorpContract
   id: NCContractMilitechAmmo
   corporation: Militech
   name: nc-corp-contract-militech-ammo

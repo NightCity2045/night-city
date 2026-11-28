@@ -45,8 +45,6 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
     private static readonly TimeSpan CheckInterval = TimeSpan.FromSeconds(1);
     private static readonly TimeSpan CleanupInterval = TimeSpan.FromSeconds(5);
     private const float CleanupPlayerRange = 12f;
-    private const float GuardMarkerRange = 24f;
-    private const int GuardFloorRange = 2;
     private const float ReconRange = 2f;
 
     [Dependency] private IPrototypeManager _prototypes = default!;
@@ -71,6 +69,7 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
     [Dependency] private NCCorpContractSystem _goods = default!;
     [Dependency] private NCStreetReputationSystem _reputation = default!;
     [Dependency] private NCMissionGuardSystem _guards = default!;
+    [Dependency] private NCAmbientDefenseSystem _ambient = default!;
 
     private readonly Dictionary<string, List<ProtoId<NCFixerMissionPrototype>?>> _offers = new();
     private readonly Dictionary<string, TimeSpan> _nextRefresh = new();
@@ -268,6 +267,24 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
         return mission.ItemFromFixer ? mission.Owner : null;
     }
 
+    /// <summary>
+    /// Whether the user may take this fixer's jobs: anyone for a street fixer, only the employer's staff for a
+    /// corporate job board.
+    /// </summary>
+    public bool CanWorkFor(ProtoId<NCFixerPrototype> fixer, EntityUid user)
+    {
+        if (!_prototypes.TryIndex(fixer, out var prototype) || prototype.Employer is not { } employer)
+            return true;
+
+        return _prototypes.TryIndex(employer, out var account) &&
+               account.Department is { } departmentId &&
+               _prototypes.TryIndex(departmentId, out var department) &&
+               _minds.TryGetMind(user, out var mindId, out _) &&
+               _jobs.MindTryGetJobId(mindId, out var job) &&
+               job is { } jobId &&
+               department.Roles.Contains(jobId);
+    }
+
     private EntityUid? FindFixerDrop(ProtoId<NCFixerPrototype> fixer)
     {
         var query = EntityQueryEnumerator<NCFixerDeadDropComponent>();
@@ -347,6 +364,12 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
         if (_active.ContainsKey(profileId))
         {
             _popup.PopupEntity(Loc.GetString("nc-fixer-already-busy"), fixer, user);
+            return false;
+        }
+
+        if (!CanWorkFor(fixer.Comp.Fixer, user))
+        {
+            _popup.PopupEntity(Loc.GetString("nc-fixer-not-employee"), fixer, user);
             return false;
         }
 
@@ -483,55 +506,13 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
         if (!_prototypes.TryIndex(encounterId, out var encounter))
             return;
 
-        var owner = CompOrNull<NCMissionMarkerComponent>(objective)?.Owner;
-        var posts = new List<EntityUid>();
-        var query = EntityQueryEnumerator<NCMissionMarkerComponent>();
-        while (query.MoveNext(out var uid, out var marker))
-        {
-            if (marker.Kind == NCMissionMarkerKind.Guard && (owner == null || marker.Owner == owner) && IsNearby(objective, uid))
-                posts.Add(uid);
-        }
+        // People already standing at the place without a mission become the mission's defenders.
+        if (_ambient.TryAdopt(objective, active.Id, active.Spawned))
+            return;
 
-        var count = 0;
         var level = _reputation.TryGetProfile(taker, out var profile) ? _reputation.GetLevel(_reputation.GetReputation(profile)) : 0;
         var extra = (int) MathF.Floor(level * encounter.ExtraPerLevel);
-        var mobs = new List<EntProtoId>();
-        foreach (var entry in encounter.Entries)
-        {
-            var amount = _random.Next(entry.Min, entry.Max + 1);
-            for (var i = 0; i < amount; i++)
-                mobs.Add(entry.Mob);
-        }
-
-        for (var i = 0; i < extra && encounter.Entries.Count > 0; i++)
-            mobs.Add(_random.Pick(encounter.Entries).Mob);
-
-        foreach (var mob in mobs)
-        {
-            var at = posts.Count > 0
-                ? Transform(posts[count++ % posts.Count]).Coordinates
-                : Transform(objective).Coordinates.Offset(new System.Numerics.Vector2(_random.Next(-2, 3), _random.Next(-2, 3)));
-            _guards.MakeGuard(SpawnMissionEntity(active, mob, at), active.Id, encounter);
-        }
-    }
-
-    /// <summary>
-    /// Whether a guard post serves the objective: on the city network, within range on the plan and a couple of
-    /// floors up or down; off the network, on the same map and within range.
-    /// </summary>
-    private bool IsNearby(EntityUid objective, EntityUid post)
-    {
-        if (_mapCoordinates.TryGetCoordinates(objective, out var origin) &&
-            _mapCoordinates.TryGetCoordinates(post, out var coordinates))
-        {
-            return coordinates.NetworkId == origin.NetworkId &&
-                   Math.Abs(coordinates.Z - origin.Z) <= GuardFloorRange &&
-                   (coordinates.Position - origin.Position).Length() <= GuardMarkerRange;
-        }
-
-        var a = _transform.GetMapCoordinates(objective);
-        var b = _transform.GetMapCoordinates(post);
-        return a.MapId == b.MapId && (a.Position - b.Position).Length() <= GuardMarkerRange;
+        active.Spawned.AddRange(_guards.SpawnDefenders(objective, encounter, active.Id, extra));
     }
 
     private string Name(EntityUid uid)
@@ -636,6 +617,15 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
         if (payment == NCFixerPayment.Transfer && _bank.TryPayFixer(active.ProfileId, mission.Reward, mission.ID))
         {
             Notify(active, Loc.GetString("nc-fixer-mission-paid-transfer", ("mission", name), ("reward", mission.Reward)));
+            Finish(active);
+            return;
+        }
+
+        var fixer = _prototypes.Index(active.Fixer);
+        if (payment == NCFixerPayment.Employer && fixer.Employer is { } employer &&
+            _bank.TryPayContract(employer, fixer.EmployerCorporation ?? employer, mission.Reward, fixer.EmployerShare, mission.ID, null))
+        {
+            Notify(active, Loc.GetString("nc-fixer-mission-paid-employer", ("mission", name), ("reward", mission.Reward)));
             Finish(active);
             return;
         }
@@ -888,11 +878,12 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
             _reputation.TryGetProfile(actor, out var profileId);
             var reputation = _reputation.GetReputation(profileId);
             var offers = GetOffers(ent.Comp.Fixer);
+            var employee = CanWorkFor(ent.Comp.Fixer, actor);
             var lines = new List<NCFixerOffer>();
             for (var slot = 0; slot < offers.Count; slot++)
             {
                 if (offers[slot] is { } id && _prototypes.TryIndex(id, out var prototype))
-                    lines.Add(new NCFixerOffer(slot, id, reputation < prototype.MinimumReputation));
+                    lines.Add(new NCFixerOffer(slot, id, !employee || reputation < prototype.MinimumReputation));
             }
 
             NCFixerActiveMission? current = null;

@@ -26,10 +26,9 @@ public sealed partial class NCPharmaStationWindow : FancyWindow
     private readonly List<NCPharmaFormulaSummary> _formulas = [];
     private readonly List<NCPharmaProductionProfilePrototype> _profiles = [];
     private int _units = 5;
-    private float _sourceUnits;
     private bool _busy;
-    private bool _sourcePresent;
-    private string? _sourceFeedstock;
+    private NCPharmaSourceSummary? _source;
+    private NCPharmaSourceSummary? _secondSource;
     private NCPharmaReagentAmount[] _additive = [];
 
     public event Action<string, string, int>? StartRequested;
@@ -65,19 +64,16 @@ public sealed partial class NCPharmaStationWindow : FancyWindow
 
     public void UpdateState(NCPharmaStationState state)
     {
-        _sourcePresent = state.SourcePresent;
-        _sourceFeedstock = state.SourceFeedstock;
+        _source = state.SourcePresent
+            ? new NCPharmaSourceSummary(state.SourceUnits, state.SourcePurity, state.SourceFeedstock ?? string.Empty)
+            : null;
+        _secondSource = state.SecondSource;
         _additive = state.Additive;
-        _sourceUnits = state.SourceUnits;
         UpdateFormulas(state.Formulas);
         _busy = state.Busy;
         Progress.Value = state.Progress;
-        SourceLabel.Text = state.SourcePresent
-            ? Loc.GetString("nc-pharma-station-source-present",
-                ("units", state.SourceUnits.ToString("0.#")),
-                ("purity", state.SourcePurity.ToString("P0")),
-                ("type", FeedstockName(state.SourceFeedstock)))
-            : Loc.GetString("nc-pharma-station-source-missing");
+        SourceLabel.Text = NCPharmaSourceView.Describe(_prototypes, _source, false);
+        SecondSourceLabel.Text = NCPharmaSourceView.Describe(_prototypes, _secondSource, true);
         NoticeLabel.Text = NoticeText(state.Notice);
         if (state.Notice == NCPharmaStationNotice.MissingAdditive && SelectedFormula() is { } needing &&
             RequiredReagent(needing) is { } missing)
@@ -111,10 +107,7 @@ public sealed partial class NCPharmaStationWindow : FancyWindow
         return name + " + " + (Loc.TryGetString(NCLabText.DrugKey(second), out var secondName) ? secondName : second);
     }
 
-    private string FeedstockName(string? id) =>
-        id != null && _prototypes.TryIndex<NCPharmaFeedstockPrototype>(id, out var type)
-            ? Loc.GetString(type.Name)
-            : Loc.GetString("nc-pharma-feedstock-none");
+    private string FeedstockName(string? id) => NCPharmaSourceView.FeedstockName(_prototypes, id);
 
     /// <summary>The reagent a formula uses up from the additive vial when it is produced, if a modifier asks for it.</summary>
     private (string Id, float Amount)? RequiredReagent(NCPharmaFormulaSummary formula)
@@ -139,18 +132,8 @@ public sealed partial class NCPharmaStationWindow : FancyWindow
         _prototypes.TryIndex<ReagentPrototype>(reagentId, out var reagent) ? reagent.LocalizedName : reagentId;
 
     /// <summary>Share of doses the inserted material gives for the formula: 1 main, below 1 alternative, 0 unfit.</summary>
-    private float SourceYield(NCPharmaFormulaSummary formula)
-    {
-        if (formula.Feedstocks is not { Length: > 0 } options)
-            return 1f;
-        foreach (var option in options)
-        {
-            if (option.Id == _sourceFeedstock)
-                return option.Yield;
-        }
-
-        return 0f;
-    }
+    private float SourceYield(NCPharmaFormulaSummary formula) =>
+        NCPharmaSourceView.Plan(_prototypes, formula, _source, _secondSource, _units).Yield;
 
     private void ChangeUnits(int delta)
     {
@@ -181,7 +164,7 @@ public sealed partial class NCPharmaStationWindow : FancyWindow
         UnitsValue.Text = _units.ToString();
         var formula = SelectedFormula();
         var profile = SelectedProfile();
-        StartButton.Disabled = _busy || !_sourcePresent || _sourceUnits < _units || formula == null || profile == null ||
+        StartButton.Disabled = _busy || formula == null || profile == null ||
                                SourceYield(formula.Value) <= 0f ||
                                !HasRequiredReagent(formula.Value);
         if (formula == null || profile == null)
@@ -217,19 +200,45 @@ public sealed partial class NCPharmaStationWindow : FancyWindow
                           prototype.Description is { } key
             ? "\n" + Loc.GetString(key)
             : string.Empty;
-        var feedstocks = formula.Feedstocks is { Length: > 0 } options
-            ? "\n" + Loc.GetString("nc-pharma-station-feedstock-line", ("types", string.Join(", ", options.Select(option =>
-                option.Yield >= 1f
-                    ? FeedstockName(option.Id)
-                    : Loc.GetString("nc-pharma-station-feedstock-alternative",
-                        ("type", FeedstockName(option.Id)), ("yield", option.Yield.ToString("P0")))))))
-            : string.Empty;
+        var feedstocks = FeedstockText(formula);
         var additive = RequiredReagent(formula) is { } needed
             ? "\n" + Loc.GetString("nc-pharma-station-additive-line",
                 ("amount", needed.Amount.ToString("0.#")), ("item", ReagentName(needed.Id)))
             : string.Empty;
         return card + description + feedstocks + additive;
     }
+
+    /// <summary>
+    /// What a formula is made from. A formula of two compounds lists each of them, since each may come from its own
+    /// canister; a formula of one compound lists its materials.
+    /// </summary>
+    private string FeedstockText(NCPharmaFormulaSummary formula)
+    {
+        if (formula.SecondCompound == null)
+        {
+            return formula.Feedstocks is { Length: > 0 } options
+                ? "\n" + Loc.GetString("nc-pharma-station-feedstock-line", ("types", OptionsText(options)))
+                : string.Empty;
+        }
+
+        var text = string.Empty;
+        foreach (var core in NCPharmaSourceView.Cores(_prototypes, formula))
+        {
+            if (NCPharmaSourceView.Options(core) is not { Length: > 0 } options)
+                continue;
+            text += "\n" + Loc.GetString("nc-pharma-station-feedstock-compound-line",
+                ("compound", Loc.TryGetString(NCLabText.DrugKey(core.ID), out var name) ? name : core.ID),
+                ("types", OptionsText(options)));
+        }
+
+        return text;
+    }
+
+    private string OptionsText(NCPharmaFeedstockOption[] options) => string.Join(", ", options.Select(option =>
+        option.Yield >= 1f
+            ? FeedstockName(option.Id)
+            : Loc.GetString("nc-pharma-station-feedstock-alternative",
+                ("type", FeedstockName(option.Id)), ("yield", option.Yield.ToString("P0")))));
 
     private static string NoticeText(NCPharmaStationNotice notice) => notice switch
     {

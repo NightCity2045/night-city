@@ -10,7 +10,7 @@
   supervisors: nc-job-supervisors-militech-command
   weight: 60
   startingGear: MilitechNetrunnerGear
-  icon: JobIconScientist
+  icon: NCJobIconMilitechNetrunner
   accessGroups: [ MilitechBasic ]
   access: [ Militech_Tech ]
 
@@ -22,9 +22,47 @@
     shoes: ClothingShoesColorBlack
     head: ClothingHeadHatMilitechCap
     eyes: ClothingEyesGlasses
-    id: SciencePDA
+    id: MilitechNetrunnerPDA
     ears: ClothingHeadsetEngineering
   storage:
     back:
     - NetProbeCartridge
     - LogProbeCartridge
+
+- type: jobIcon
+  parent: JobIcon
+  id: NCJobIconMilitechNetrunner
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons_extra.rsi
+    state: militech_netrunner
+  jobName: job-name-militech-netrunner
+
+- type: entity
+  parent: IDCardStandard
+  id: MilitechNetrunnerIDCard
+  name: Militech netrunner ID
+  components:
+  - type: Sprite
+    layers:
+    - state: default
+    - state: stripe_top
+      color: "#8A8C91"
+    - state: stripe_bottom
+      color: "#5B5E64"
+    - sprite: _NC/Interface/Misc/job_icons_extra.rsi
+      offset: -0.09375, 0.0625
+      state: militech_netrunner
+  - type: PresetIdCard
+    job: MilitechNetrunner
+
+# Keeps the department tools of the SciencePDA it replaces.
+- type: entity
+  parent: SciencePDA
+  id: MilitechNetrunnerPDA
+  name: Militech netrunner PDA
+  description: A rugged department terminal tied to its owner's persistent position.
+  components:
+  - type: Pda
+    id: MilitechNetrunnerIDCard
+  - type: PdaBorderColor
+    borderColor: "#8A8C91"

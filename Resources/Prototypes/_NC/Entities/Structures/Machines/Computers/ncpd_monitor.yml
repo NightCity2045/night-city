@@ -1,0 +1,48 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: entity
+  parent: BaseComputerAiAccess
+  id: NCComputerPoliceMonitor
+  name: NCPD city monitoring console
+  description: The police network's view of the city. Every dot is a person; how fresh it is depends on the district.
+  components:
+  - type: NCPoliceMonitorConsole
+  - type: UserInterface
+    interfaces:
+      enum.NCPoliceMonitorUiKey.Key:
+        type: NCPoliceMonitorBoundUserInterface
+      enum.WiresUiKey.Key:
+        type: WiresBoundUserInterface
+  - type: ActivatableUI
+    key: enum.NCPoliceMonitorUiKey.Key
+  - type: Sprite
+    layers:
+    - map: ["computerLayerBody"]
+      state: computer
+    - map: ["computerLayerKeyboard"]
+      state: generic_keyboard
+    - map: ["computerLayerScreen"]
+      state: cameras
+    - map: ["computerLayerKeys"]
+      state: security_key
+    - map: ["enum.WiresVisualLayers.MaintenancePanel"]
+      state: generic_panel_open
+  - type: PointLight
+    radius: 1.5
+    energy: 4.0
+    color: "#4777C8"
+  - type: Computer
+    board: NCPoliceMonitorComputerCircuitboard
+  - type: AccessReader
+    access: [[NCPD_Patrol]]
+
+- type: entity
+  parent: BaseComputerCircuitboard
+  id: NCPoliceMonitorComputerCircuitboard
+  name: NCPD city monitoring console board
+  description: A computer printed circuit board for an NCPD city monitoring console.
+  components:
+  - type: Sprite
+    state: cpu_security
+  - type: ComputerBoard
+    prototype: NCComputerPoliceMonitor

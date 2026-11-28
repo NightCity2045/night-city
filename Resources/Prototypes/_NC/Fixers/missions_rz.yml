@@ -1,0 +1,59 @@
+# Reclamation Zone: 6th Street holds the empty blocks they claim to be rebuilding.
+
+- type: ncFixerMission
+  id: NCFixerVanceReclamationPatrols
+  fixer: NCFixerVance
+  kind: Recon
+  name: nc-fixer-mission-vance-reclamation-patrols
+  description: nc-fixer-mission-vance-reclamation-patrols-desc
+  owner: SixthStreet
+  reconPoints: 3
+  encounter: SixthStreetPost
+  reward: 2500
+  reputationGain: 3
+  timeLimit: 1800
+
+- type: ncFixerMission
+  id: NCFixerFengReclamationVeteran
+  fixer: NCFixerFeng
+  kind: Beating
+  name: nc-fixer-mission-feng-reclamation-veteran
+  description: nc-fixer-mission-feng-reclamation-veteran-desc
+  minimumReputation: 10
+  owner: SixthStreet
+  item: NCMobHumanSixthStreetVeteran
+  encounter: SixthStreetPost
+  reward: 3000
+  reputationGain: 4
+  reputationLoss: 4
+  timeLimit: 1800
+
+- type: ncFixerMission
+  id: NCFixerVladReclamationRent
+  fixer: NCFixerVlad
+  kind: Sabotage
+  name: nc-fixer-mission-vlad-reclamation-rent
+  description: nc-fixer-mission-vlad-reclamation-rent-desc
+  minimumReputation: 15
+  owner: SixthStreet
+  item: NCMissionLedgerCabinet
+  encounter: SixthStreetStronghold
+  reward: 3000
+  reputationGain: 5
+  reputationLoss: 4
+  timeLimit: 1800
+
+- type: ncFixerMission
+  id: NCFixerBothaReclamationArms
+  fixer: NCFixerBotha
+  kind: Retrieval
+  name: nc-fixer-mission-botha-reclamation-arms
+  description: nc-fixer-mission-botha-reclamation-arms-desc
+  minimumReputation: 20
+  owner: SixthStreet
+  item: NCMissionMilitaryPrototype
+  encounter: SixthStreetStronghold
+  reward: 4000
+  reputationGain: 5
+  reputationLoss: 4
+  timeLimit: 2400

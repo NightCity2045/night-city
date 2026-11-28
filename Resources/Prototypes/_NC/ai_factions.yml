@@ -45,3 +45,23 @@
 - type: npcFaction
   id: NCScavengers
   friendly: [NCScavengers]
+
+- type: npcFaction
+  id: NCMedicalTechnologiesSecurity
+  friendly: [NCMedicalTechnologiesSecurity]
+
+- type: npcFaction
+  id: NCNightCityUniversitySecurity
+  friendly: [NCNightCityUniversitySecurity]
+
+- type: npcFaction
+  id: NCNetwork54Security
+  friendly: [NCNetwork54Security]
+
+- type: npcFaction
+  id: NCMarinaSecurity
+  friendly: [NCMarinaSecurity]
+
+- type: npcFaction
+  id: NCArasakaRemnant
+  friendly: [NCArasakaRemnant]

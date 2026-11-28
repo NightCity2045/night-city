@@ -1,0 +1,183 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Street patrols: while a player is on an owner's ground, one or two of its people walk between its places.
+
+- type: ncFixerEncounter
+  id: PatrolHotZoneScavengers
+  extraPerLevel: 0
+  warnings: [ nc-gang-scavengers-warning-1, nc-gang-scavengers-warning-2 ]
+  alarms: [ nc-gang-scavengers-alarm-1, nc-gang-scavengers-alarm-2 ]
+  entries:
+  - mob: NCMobHumanGangScavengersGanger
+    min: 1
+    max: 1
+  - mob: NCMobHumanGangScavengersEnforcer
+    min: 0
+    max: 1
+
+- type: ncFixerEncounter
+  id: PatrolScavengerTunnels
+  extraPerLevel: 0
+  warnings: [ nc-gang-scavengers-warning-1, nc-gang-scavengers-warning-2 ]
+  alarms: [ nc-gang-scavengers-alarm-1, nc-gang-scavengers-alarm-2 ]
+  entries:
+  - mob: NCMobHumanGangScavengersGanger
+    min: 1
+    max: 1
+  - mob: NCMobHumanGangScavengersEnforcer
+    min: 0
+    max: 1
+
+- type: ncFixerEncounter
+  id: PatrolArasakaRemnant
+  extraPerLevel: 0
+  aggressive: true
+  warnings: [ nc-arasaka-warning-1, nc-arasaka-warning-2 ]
+  alarms: [ nc-arasaka-alarm-1, nc-arasaka-alarm-2 ]
+  entries:
+  - mob: NCMobHumanArasakaRemnantSleeper
+    min: 1
+    max: 1
+  - mob: NCMobHumanArasakaRemnantNinja
+    min: 0
+    max: 1
+
+- type: ncFixerEncounter
+  id: PatrolValentinos
+  extraPerLevel: 0
+  warnings: [ nc-gang-valentinos-warning-1, nc-gang-valentinos-warning-2 ]
+  alarms: [ nc-gang-valentinos-alarm-1, nc-gang-valentinos-alarm-2 ]
+  entries:
+  - mob: NCMobHumanGangValentinosGanger
+    min: 1
+    max: 1
+  - mob: NCMobHumanGangValentinosEnforcer
+    min: 0
+    max: 1
+
+- type: ncFixerEncounter
+  id: PatrolBozos
+  extraPerLevel: 0
+  warnings: [ nc-gang-bozos-warning-1, nc-gang-bozos-warning-2 ]
+  alarms: [ nc-gang-bozos-alarm-1, nc-gang-bozos-alarm-2 ]
+  entries:
+  - mob: NCMobHumanGangBozosGanger
+    min: 1
+    max: 1
+  - mob: NCMobHumanGangBozosEnforcer
+    min: 0
+    max: 1
+
+- type: ncFixerEncounter
+  id: PatrolTygerClaws
+  extraPerLevel: 0
+  warnings: [ nc-gang-tygerclaws-warning-1, nc-gang-tygerclaws-warning-2 ]
+  alarms: [ nc-gang-tygerclaws-alarm-1, nc-gang-tygerclaws-alarm-2 ]
+  entries:
+  - mob: NCMobHumanGangTygerClawsGanger
+    min: 1
+    max: 1
+  - mob: NCMobHumanGangTygerClawsEnforcer
+    min: 0
+    max: 1
+
+- type: ncFixerEncounter
+  id: PatrolMaelstrom
+  extraPerLevel: 0
+  warnings: [ nc-gang-maelstrom-warning-1, nc-gang-maelstrom-warning-2 ]
+  alarms: [ nc-gang-maelstrom-alarm-1, nc-gang-maelstrom-alarm-2 ]
+  entries:
+  - mob: NCMobHumanGangMaelstromGanger
+    min: 1
+    max: 1
+  - mob: NCMobHumanGangMaelstromEnforcer
+    min: 0
+    max: 1
+
+- type: ncFixerEncounter
+  id: PatrolSixthStreet
+  extraPerLevel: 0
+  entries:
+  - mob: NCMobHumanSixthStreetGuard
+    min: 1
+    max: 1
+  - mob: NCMobHumanSixthStreetPatrol
+    min: 0
+    max: 1
+
+- type: ncFixerEncounter
+  id: PatrolInquisitors
+  extraPerLevel: 0
+  warnings: [ nc-gang-inquisitors-warning-1, nc-gang-inquisitors-warning-2 ]
+  alarms: [ nc-gang-inquisitors-alarm-1, nc-gang-inquisitors-alarm-2 ]
+  entries:
+  - mob: NCMobHumanGangInquisitorsGanger
+    min: 1
+    max: 1
+  - mob: NCMobHumanGangInquisitorsEnforcer
+    min: 0
+    max: 1
+
+- type: ncFixerEncounter
+  id: PatrolPhilharmonicVampyres
+  extraPerLevel: 0
+  warnings: [ nc-gang-philharmonicvampyres-warning-1, nc-gang-philharmonicvampyres-warning-2 ]
+  alarms: [ nc-gang-philharmonicvampyres-alarm-1, nc-gang-philharmonicvampyres-alarm-2 ]
+  entries:
+  - mob: NCMobHumanGangPhilharmonicVampyresGanger
+    min: 1
+    max: 1
+  - mob: NCMobHumanGangPhilharmonicVampyresEnforcer
+    min: 0
+    max: 1
+
+- type: ncMissionPatrol
+  id: HotZoneScavengers
+  owners: [ HotZone, Scavengers ]
+  encounter: PatrolHotZoneScavengers
+  groups: 2
+
+- type: ncMissionPatrol
+  id: ScavengerTunnels
+  owners: [ ScavengerTunnels ]
+  encounter: PatrolScavengerTunnels
+
+- type: ncMissionPatrol
+  id: ArasakaRemnant
+  owners: [ ArasakaRemnant ]
+  encounter: PatrolArasakaRemnant
+
+- type: ncMissionPatrol
+  id: Valentinos
+  owners: [ Valentinos ]
+  encounter: PatrolValentinos
+
+- type: ncMissionPatrol
+  id: Bozos
+  owners: [ Bozos ]
+  encounter: PatrolBozos
+
+- type: ncMissionPatrol
+  id: TygerClaws
+  owners: [ TygerClaws ]
+  encounter: PatrolTygerClaws
+
+- type: ncMissionPatrol
+  id: Maelstrom
+  owners: [ Maelstrom ]
+  encounter: PatrolMaelstrom
+
+- type: ncMissionPatrol
+  id: SixthStreet
+  owners: [ SixthStreet ]
+  encounter: PatrolSixthStreet
+
+- type: ncMissionPatrol
+  id: Inquisitors
+  owners: [ Inquisitors ]
+  encounter: PatrolInquisitors
+
+- type: ncMissionPatrol
+  id: PhilharmonicVampyres
+  owners: [ PhilharmonicVampyres ]
+  encounter: PatrolPhilharmonicVampyres

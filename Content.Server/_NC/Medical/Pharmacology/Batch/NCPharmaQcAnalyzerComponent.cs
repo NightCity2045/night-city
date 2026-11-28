@@ -40,4 +40,7 @@ public sealed partial class NCPharmaQcRunComponent : Component
     public TimeSpan FinishAt;
     public string Operator = string.Empty;
     public EntityUid OperatorEntity;
+
+    /// <summary>What the sampled pack had lost to warmth when its dose was taken.</summary>
+    public float PurityLoss;
 }

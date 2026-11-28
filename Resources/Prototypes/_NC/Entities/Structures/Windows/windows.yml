@@ -1,0 +1,16 @@
+- type: entity
+  parent: Window
+  id: NCWindowMegablock
+  name: megablock window
+  description: Tinted glass set into a precast concrete facade. The streaks are neon off the wet street.
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Windows/megablock.rsi
+  - type: Icon
+    sprite: _NC/Structures/Windows/megablock.rsi
+    state: full
+  - type: IconSmooth
+    key: windows
+    additionalKeys:
+    - walls
+    base: megablockwindow

@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Robust.Client.Graphics;
+using Robust.Client.ResourceManagement;
 using Robust.Shared.Configuration;
 using Robust.Shared.Prototypes;
 
@@ -17,6 +18,7 @@ public sealed partial class NCPostProcessClientSystem : EntitySystem
     [Dependency] private IConfigurationManager _configuration = default!;
     [Dependency] private IOverlayManager _overlays = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
+    [Dependency] private IResourceCache _resources = default!;
 
     private NCPostProcessOverlay? _overlay;
 
@@ -24,7 +26,7 @@ public sealed partial class NCPostProcessClientSystem : EntitySystem
     {
         base.Initialize();
 
-        _overlay = new NCPostProcessOverlay(_clyde, _configuration, _prototypes);
+        _overlay = new NCPostProcessOverlay(_clyde, _configuration, _prototypes, _resources);
         if (_overlays.AddOverlay(_overlay))
             return;
 

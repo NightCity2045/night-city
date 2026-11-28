@@ -10,7 +10,7 @@
   supervisors: nc-job-supervisors-militech-command
   weight: 55
   startingGear: MilitechRiggerGear
-  icon: JobIconStationEngineer
+  icon: NCJobIconMilitechRigger
   accessGroups: [ MilitechBasic ]
   access: [ Militech_Tech ]
 
@@ -23,10 +23,48 @@
     head: ClothingHeadHatMilitechCap
     eyes: ClothingEyesGlassesMeson
     gloves: ClothingHandsGlovesColorYellow
-    id: EngineerPDA
+    id: MilitechRiggerPDA
     ears: ClothingHeadsetEngineering
     belt: ClothingBeltUtilityFilled
   storage:
     back:
     - LogProbeCartridge
     - AstroNavCartridge
+
+- type: jobIcon
+  parent: JobIcon
+  id: NCJobIconMilitechRigger
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons_extra.rsi
+    state: militech_rigger
+  jobName: job-name-militech-rigger
+
+- type: entity
+  parent: IDCardStandard
+  id: MilitechRiggerIDCard
+  name: Militech rigger ID
+  components:
+  - type: Sprite
+    layers:
+    - state: default
+    - state: stripe_top
+      color: "#8A8C91"
+    - state: stripe_bottom
+      color: "#5B5E64"
+    - sprite: _NC/Interface/Misc/job_icons_extra.rsi
+      offset: -0.09375, 0.0625
+      state: militech_rigger
+  - type: PresetIdCard
+    job: MilitechRigger
+
+# Keeps the department tools of the EngineerPDA it replaces.
+- type: entity
+  parent: EngineerPDA
+  id: MilitechRiggerPDA
+  name: Militech rigger PDA
+  description: A rugged department terminal tied to its owner's persistent position.
+  components:
+  - type: Pda
+    id: MilitechRiggerIDCard
+  - type: PdaBorderColor
+    borderColor: "#8A8C91"

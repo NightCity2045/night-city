@@ -103,23 +103,40 @@ public sealed partial class NCPharmaBatchSystem
         if (_restore.Manifest?.SnapshotId is not { } snapshotId)
             return;
 
-        try
+        // Each section comes back on its own: a broken one is left empty instead of leaving its neighbours half loaded.
+        // Formulas first: a batch is only valid if the version it was made from exists.
+        RestoreSection("formulas", snapshotId, () => RestoreFormulas(snapshotId), _derived.Clear);
+        RestoreSection("batches", snapshotId, () =>
         {
             var read = _database.GetNCRoundSnapshotSectionsAsync(
                     snapshotId, SnapshotSectionType, SnapshotOwnerType, SnapshotOwnerId)
                 .WaitAsync(TimeSpan.FromSeconds(30));
             _tasks.BlockWaitOnTask(read);
-            // Formulas first: a batch is only valid if the version it was made from exists.
-            RestoreFormulas(snapshotId);
             Restore(read.GetAwaiter().GetResult());
-            RestoreJournal(snapshotId);
-            RestoreKnowledge(snapshotId);
-            RestoreExperiments(snapshotId);
+        }, () =>
+        {
+            _batches.Clear();
+            _nextBatchNumber = 1;
+        });
+        RestoreSection("journal", snapshotId, () => RestoreJournal(snapshotId), _journal.Clear);
+        RestoreSection("knowledge", snapshotId, () => RestoreKnowledge(snapshotId), _knowledge.Clear);
+        RestoreSection("experiments", snapshotId, () => RestoreExperiments(snapshotId), () =>
+        {
+            _experiments.Clear();
+            _nextExperiment = 1;
+        });
+    }
+
+    private void RestoreSection(string name, Guid snapshotId, Action restore, Action clear)
+    {
+        try
+        {
+            restore();
         }
         catch (Exception exception)
         {
-            _batches.Clear();
-            Log.Error($"Pharmaceutical batches of snapshot {snapshotId} could not be restored: {exception}");
+            clear();
+            Log.Error($"Pharmaceutical {name} of snapshot {snapshotId} could not be restored: {exception}");
         }
     }
 
@@ -192,6 +209,11 @@ public sealed partial class NCPharmaBatchSystem
             QcState = batch.QcState,
             QcPerformed = batch.LastQc?.Performed,
             QcFailed = batch.LastQc?.Failed,
+            QcConcentration = batch.LastQc?.Concentration,
+            QcPurity = batch.LastQc?.Purity,
+            QcSterility = batch.LastQc?.Sterility,
+            QcHomogeneity = batch.LastQc?.Homogeneity,
+            QcStability = batch.LastQc?.Stability,
             ModifierToxicity = batch.ModifierToxicity,
             Masking = batch.Masking,
             Contaminants = batch.Contaminants,
@@ -201,6 +223,8 @@ public sealed partial class NCPharmaBatchSystem
             DosesProduced = batch.DosesProduced,
             DosesPacked = batch.DosesPacked,
             DosesAdministered = batch.DosesAdministered,
+            DosesSampled = batch.DosesSampled,
+            DosesLost = batch.DosesLost,
             Audit = audit
                 .Select(entry => new NCPharmaAuditSnapshot
                 {
@@ -235,7 +259,8 @@ public sealed partial class NCPharmaBatchSystem
             !Enum.IsDefined(value.QcState) ||
             value.DosesProduced < 0 ||
             value.DosesPacked < 0 || value.DosesPacked > value.DosesProduced ||
-            value.DosesAdministered < 0 || value.DosesAdministered > value.DosesPacked ||
+            value.DosesAdministered < 0 || value.DosesSampled < 0 || value.DosesLost < 0 ||
+            (long) value.DosesAdministered + value.DosesSampled + value.DosesLost > value.DosesPacked ||
             value.CreatedTicks < 0 ||
             !IsText(value.Producer, 0) || !IsText(value.Facility, 0) ||
             value.Audit == null || value.Audit.Count > PersistedAuditEntries)
@@ -278,10 +303,23 @@ public sealed partial class NCPharmaBatchSystem
             DosesProduced = value.DosesProduced,
             DosesPacked = value.DosesPacked,
             DosesAdministered = value.DosesAdministered,
+            DosesSampled = value.DosesSampled,
+            DosesLost = value.DosesLost,
         };
         batch.Audit.AddRange(audit);
+        // The last quality-control report comes back with the batch; saves made before it was kept have none.
+        if (value.QcPerformed is { } performed && value.QcFailed is { } failed &&
+            IsReading(value.QcConcentration, 1000f) && IsReading(value.QcPurity, 1f) && IsReading(value.QcSterility, 1f) &&
+            IsReading(value.QcHomogeneity, 1f) && IsReading(value.QcStability, 1f))
+        {
+            batch.LastQc = new NCPharmaQcReport(value.BatchId, performed & NCPharmaQcTests.All, failed & NCPharmaQcTests.All,
+                value.QcConcentration, value.QcPurity, value.QcSterility, value.QcHomogeneity, value.QcStability);
+        }
+
         return true;
     }
+
+    private static bool IsReading(float? value, float maximum) => value is not { } reading || IsRange(reading, 0f, maximum * 2f);
 
     private void CaptureFormulas(NCRoundSnapshotCaptureEvent args)
     {
@@ -483,6 +521,13 @@ public sealed class NCPharmaBatchSnapshot
     public NCPharmaQcState QcState { get; set; }
     public NCPharmaQcTests? QcPerformed { get; set; }
     public NCPharmaQcTests? QcFailed { get; set; }
+
+    /// <summary>The values the last quality-control run read. Absent in saves made before they were kept.</summary>
+    public float? QcConcentration { get; set; }
+    public float? QcPurity { get; set; }
+    public float? QcSterility { get; set; }
+    public float? QcHomogeneity { get; set; }
+    public float? QcStability { get; set; }
     public float ModifierToxicity { get; set; } = 1f;
     public float Masking { get; set; }
     public float Contaminants { get; set; }
@@ -492,6 +537,12 @@ public sealed class NCPharmaBatchSnapshot
     public int DosesProduced { get; set; }
     public int DosesPacked { get; set; }
     public int DosesAdministered { get; set; }
+
+    /// <summary>Absent, so zero, in saves made before samples were counted.</summary>
+    public int DosesSampled { get; set; }
+
+    /// <summary>Absent, so zero, in saves made before spilled doses were counted.</summary>
+    public int DosesLost { get; set; }
     public List<NCPharmaAuditSnapshot> Audit { get; set; } = [];
 }
 

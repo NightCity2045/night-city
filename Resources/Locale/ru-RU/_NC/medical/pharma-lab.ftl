@@ -178,6 +178,7 @@ nc-pharma-isolated = Соединение выделено и получило �
 nc-pharma-isolation-failed = Соединение не удалось выделить.
 nc-pharma-treated = Партия обработана.
 nc-pharma-filled = Дозы разложены по упаковкам: {$count}.
+nc-pharma-fill-spilled = При фасовке пролита одна доза.
 nc-pharma-waste-full = Поставьте в слот отходов канистру, в которой есть место.
 nc-pharma-waste-nothing = В канистре нет отходов.
 nc-pharma-waste-disposed = Мусоросжигатель сжигает отходы.
@@ -396,7 +397,8 @@ nc-pharma-feedstock-examine = Вид сырья: {$type}.
 nc-pharma-feedstock-none = неизвестно
 nc-pharma-station-feedstock-line = Делается из: {$types}.
 nc-pharma-station-feedstock-alternative = {$type} ({$yield} доз)
-nc-pharma-station-notice-wrong-feedstock = Из этого сырья такую формулу не сделать.
+nc-pharma-station-feedstock-compound-line = {$compound} делается из: {$types}.
+nc-pharma-station-notice-wrong-feedstock = Из вставленного сырья не сделать все вещества этой формулы.
 
 # --- Расходники процесса ------------------------------------------------------------------------------------
 reagent-name-nc-pharma-catalyst = катализатор реакции

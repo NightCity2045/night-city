@@ -30,6 +30,7 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private NCMedicalBodySystem _medicalBodies = default!;
     [Dependency] private NCSystemicSystem _systemic = default!;
+    [Dependency] private Robust.Shared.Random.IRobustRandom _random = default!;
 
     public override void Initialize()
     {
@@ -286,6 +287,7 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
             Initialized = state.StateInitialized,
             OverdoseBurden = state.OverdoseBurden,
             StrainEpisode = state.StrainEpisode,
+            StrainSeed = state.StrainSeed,
         };
         if (!TryCaptureDependence(state, timestamp, captured))
             return false; // NC
@@ -340,16 +342,20 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
         return TryComp<NCPharmacologyComponent>(body, out var state) ? ResolveSusceptibility(state, drugId) : 1f;
     }
 
-    /// <summary>Picks the character's strain once, by name, so it is stable across restarts without being stored.</summary>
+    /// <summary>
+    /// Picks the strain of the current infection from the body's own seed, so it is stable across restarts and two
+    /// people with the same name do not share their infections. A body from before the seed keeps using its name.
+    /// </summary>
     private void AssignStrain(EntityUid body, NCPharmacologyComponent state)
     {
+        var key = state.StrainSeed != 0 ? $"seed:{state.StrainSeed}" : MetaData(body).EntityName;
         var strains = _prototypes.EnumeratePrototypes<NCPathogenStrainPrototype>()
             .OrderBy(strain => strain.ID, StringComparer.Ordinal)
             .Select(strain => (strain.ID, strain.Weight))
             .ToList();
         state.Strain = strains.Count == 0
             ? null
-            : NCLabSeed.Pick(strains, NCLabSeed.Hash(MetaData(body).EntityName + ":" + state.StrainEpisode));
+            : NCLabSeed.Pick(strains, NCLabSeed.Hash(key + ":" + state.StrainEpisode));
     }
 
     /// <summary>
@@ -387,6 +393,7 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
         state.StateInitialized = snapshot.Initialized;
         state.OverdoseBurden = snapshot.OverdoseBurden;
         state.StrainEpisode = Math.Max(0, snapshot.StrainEpisode);
+        state.StrainSeed = snapshot.StrainSeed;
         state.ActiveDrugs.Clear();
         foreach (var exposure in snapshot.ActiveDrugs)
         {
@@ -492,6 +499,8 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
         state.StateInitialized = true;
         state.LastEvaluation = _timing.CurTime;
         state.CachedModifiers = NCPharmacologyModifiers.Neutral;
+        if (state.StrainSeed == 0)
+            state.StrainSeed = _random.Next(1, int.MaxValue);
         AssignStrain(body, state); // NC
         return true;
     }

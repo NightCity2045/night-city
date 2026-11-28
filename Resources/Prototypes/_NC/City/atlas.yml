@@ -192,25 +192,25 @@
     position: -13.5,-5.5
   - name: "G 103 Building"
     position: -31.4,-23.9
-  - name: "DT 12th Street Building 01"
+  - name: "DT Sushi Bar"
     position: -97.5,118.5
-  - name: "DT 12th Street Building 02"
+  - name: "DT 12th Street Department Store"
     position: -75,115
-  - name: "DT 12th Street Building 03"
+  - name: "DT Night City Bank Branch"
     position: -96.5,91
   - name: "DT 14th Street Building 01"
     position: -166.5,107.9
   - name: "DT 14th Street Building 02"
     position: -130.2,101.1
-  - name: "DT 14th Street Building 03"
+  - name: "DT Network 54 Bureau"
     position: -164,90
   - name: "DT 14th Street Building 04"
     position: -126.9,86
   - name: "DT 9th Street Building 01"
     position: -126.5,121
-  - name: "DT Stone Beach Building 01"
+  - name: "DT Stone Beach Hotel"
     position: -163.5,130.5
-  - name: "DT Stone Beach Building 02"
+  - name: "DT Club Nocturne"
     position: -189,133
   - name: "G Parkway Street Building 01"
     position: 38.8,40.1
@@ -224,72 +224,349 @@
     position: -65.5,-9.5
   - name: "G Potomac Ave. Building 03"
     position: -57.1,-28.8
-  - name: "LC S. Mall Street Building 01"
-    position: 149,126.5
-  - name: "LC S. Mall Street Building 02"
-    position: 133,101.5
-  - name: "LC Vine Street Building 01"
-    position: 193,129.5
-  - name: "LC Vine Street Building 02"
-    position: 185.5,103.5
-  - name: "LE Barkeley Ave. Building 01"
-    position: -71,173.5
-  - name: "LE Barkeley Ave. Building 02"
-    position: -71.6,138.1
-  - name: "LE Republic Way Building 01"
-    position: -97,185.5
-  - name: "LE Republic Way Building 02"
-    position: -119.2,177.8
-  - name: "LE Republic Way Building 03"
-    position: -169.5,179
-  - name: "LE Republic Way Building 04"
-    position: -145,174.5
-  - name: "LE Republic Way Building 05"
-    position: -170.5,156.5
-  - name: "LE Republic Way Building 06"
-    position: -119,156.5
-  - name: "LE Republic Way Building 07"
-    position: -141,154.5
-  - name: "LE Republic Way Building 08"
-    position: -191.5,150
-  - name: "OCZ 27th Street Building 01"
-    position: 78.5,-53.5
-  - name: "OCZ Ventura Street Building 01"
-    position: 101.9,-53.6
-  - name: "OCZ Ventura Street Building 02"
-    position: 119.5,-59
-  - name: "OCZ Ventura Street Building 03"
+  - name: "LC Golden Dragon"
+    position: 148.5,122.5
+  - name: "LC Golden Dragon"
+    position: 148.5,122.5
+    z: 1
+  - name: "LC Golden Dragon Residences"
+    position: 148.5,122.5
+    z: 2
+  - name: "LC Little China Capsules"
+    position: 132.5,100.5
+  - name: "LC Little China Capsules"
+    position: 132.5,100.5
+    z: 1
+  - name: "LC Little China Capsules"
+    position: 132.5,100.5
+    z: 2
+  - name: "LC Mall Street Apartments"
+    position: 152.5,100.5
+  - name: "LC Mall Street Apartments"
+    position: 152.5,100.5
+    z: 1
+  - name: "LC Mall Street Apartments"
+    position: 152.5,100.5
+    z: 2
+  - name: "LC Vine Street Clinic"
+    position: 183.5,108.5
+  - name: "LC Vine Street Clinic Flats"
+    position: 191.5,108.5
+    z: 1
+  - name: "LC Vine Street Clinic Flats"
+    position: 191.5,108.5
+    z: 2
+  - name: "LC Vine Street Apartments"
+    position: 173.5,135.5
+  - name: "LC Vine Street Apartments"
+    position: 173.5,135.5
+    z: 1
+  - name: "LC Vine Street Apartments"
+    position: 173.5,135.5
+    z: 2
+  - name: "LC Golden Noodle"
+    position: 190.5,121.5
+  - name: "LC Neon Lotus Bar"
+    position: 190.5,127.5
+  - name: "LC Silk Road Clothing"
+    position: 190.5,132.5
+  - name: "LC Vine Street Hardware"
+    position: 190.5,137.5
+  - name: "LC Vine Street Row"
+    position: 198.5,135.5
+    z: 1
+  - name: "LC Vine Street Row"
+    position: 198.5,135.5
+    z: 2
+  - name: "LC Dim Sum House"
+    position: 147.5,144.5
+  - name: "LC Dim Sum House Flats"
+    position: 147.5,146.5
+    z: 1
+  - name: "LC Noodle Bar"
+    position: 104.5,133.5
+  - name: "LC Noodle Bar"
+    position: 104.5,133.5
+    z: 1
+  - name: "LC Herbal Pharmacy"
+    position: 111.5,126.5
+  - name: "LC Herbalist Flat"
+    position: 111.5,126.5
+    z: 1
+  - name: "LC Jade Tiger Mahjong"
+    position: 190.5,147.5
+  - name: "LC Night Market Stall 1"
+    position: 101.5,118.5
+  - name: "LC Night Market Stall 2"
+    position: 105.5,118.5
+  - name: "LC Night Market Stall 3"
+    position: 109.5,118.5
+  - name: "LC Night Market Stall 4"
+    position: 113.5,118.5
+  - name: "LC Night Market Stall 5"
+    position: 117.5,118.5
+  - name: "LC Night Market Stall 6"
+    position: 121.5,118.5
+  - name: "LC Night Market Stall 7"
+    position: 101.5,109.5
+  - name: "LC Night Market Stall 8"
+    position: 105.5,109.5
+  - name: "LC Night Market Stall 9"
+    position: 109.5,109.5
+  - name: "LC Night Market Stall 10"
+    position: 113.5,109.5
+  - name: "LC Night Market Stall 11"
+    position: 117.5,109.5
+  - name: "LE Café Montmartre"
+    position: -171.5,178.5
+  - name: "LE Hotel Europa"
+    position: -147.5,174.5
+  - name: "LE Maison Vermont"
+    position: -172.5,156.5
+  - name: "LE Galerie Moderne"
+    position: -139.5,154.5
+  - name: "LE Vinothek Europa"
+    position: -193.5,149.5
+  - name: "LE Apotheke Little Europe"
+    position: -121.5,156.5
+  - name: "LE Rue de la Paix"
+    position: -117.5,177.5
+  - name: "LE Ristorante Roma"
+    position: -101.5,171.5
+  - name: "LE Libreria Europa"
+    position: -99.5,185.5
+  - name: "LE Café Europa"
+    position: -73.5,173.5
+  - name: "LE Markthalle"
+    position: -68.5,139.5
+  - name: "LE Café Montmartre"
+    position: -171.5,175.5
+    z: 1
+  - name: "LE Hotel Europa"
+    position: -146.5,173.5
+    z: 1
+  - name: "LE Rue Vermont Apartments"
+    position: -172.5,156.5
+    z: 1
+  - name: "LE Galerie Moderne"
+    position: -138.5,153.5
+    z: 1
+  - name: "LE Vinothek Europa"
+    position: -193.5,146.5
+    z: 1
+  - name: "LE Apotheke Little Europe"
+    position: -120.5,155.5
+    z: 1
+  - name: "LE Rue de la Paix"
+    position: -119.5,177.5
+    z: 1
+  - name: "LE Ristorante Roma"
+    position: -96.5,171.5
+    z: 1
+  - name: "LE Libreria Europa"
+    position: -98.5,182.5
+    z: 1
+  - name: "LE Europa Residences"
+    position: -72.5,172.5
+    z: 1
+  - name: "LE Markthalle"
+    position: -73.5,139.5
+    z: 1
+  - name: "LE Café Montmartre"
+    position: -171.5,175.5
+    z: 2
+  - name: "LE Hotel Europa"
+    position: -146.5,173.5
+    z: 2
+  - name: "LE Rue Vermont Apartments"
+    position: -172.5,156.5
+    z: 2
+  - name: "LE Galerie Moderne"
+    position: -138.5,153.5
+    z: 2
+  - name: "LE Ristorante Roma"
+    position: -96.5,171.5
+    z: 2
+  - name: "LE Europa Residences"
+    position: -72.5,172.5
+    z: 2
+  - name: "OCZ 27th Street Bodega"
+    position: 74.5,-51.5
+  - name: "OCZ 27th Street Flats"
+    position: 74.5,-51.5
+    z: 1
+  - name: "OCZ 27th Street Flats"
+    position: 74.5,-51.5
+    z: 2
+  - name: "OCZ Valentinos Cantina"
+    position: 102.5,-50.5
+  - name: "OCZ Valentinos Cantina"
+    position: 102.5,-50.5
+    z: 1
+  - name: "OCZ Valentinos Cantina"
+    position: 102.5,-50.5
+    z: 2
+  - name: "OCZ Valentinos Cellar"
+    position: 104.5,-57.5
+    z: -1
+  - name: "OCZ Valentinos Garage"
+    position: 121.5,-56.5
+  - name: "OCZ Valentinos Garage"
+    position: 121.5,-56.5
+    z: 1
+  - name: "OCZ Valentinos Garage"
+    position: 121.5,-56.5
+    z: 2
+  - name: "OCZ Back-Alley Clinic"
+    position: 75.5,-72.5
+  - name: "OCZ The Hole Bar"
+    position: 84.5,-70.5
+  - name: "OCZ Ventura Street Lofts"
     position: 80.5,-70
-  - name: "OCZ Ventura Street Building 04"
-    position: 109.8,-73.5
+    z: 1
+  - name: "OCZ Ventura Cinema"
+    position: 116.5,-72.5
+  - name: "OCZ Ventura Cinema"
+    position: 116.5,-72.5
+    z: 1
+  - name: "OCZ Combat Zone Flophouse"
+    position: 110.5,-39.5
+  - name: "OCZ Combat Zone Flophouse"
+    position: 110.5,-39.5
+    z: 1
+  - name: "OCZ Combat Zone Flophouse"
+    position: 110.5,-39.5
+    z: 2
+  - name: "OCZ Ventura Street Apartments"
+    position: 83.5,-35.5
+  - name: "OCZ Ventura Street Apartments"
+    position: 83.5,-35.5
+    z: 1
+  - name: "OCZ Ventura Street Apartments"
+    position: 83.5,-35.5
+    z: 2
+  - name: "OCZ 27th Street Duplex"
+    position: 63.5,-65.5
+  - name: "OCZ 27th Street Duplex"
+    position: 63.5,-65.5
+    z: 1
+  - name: "OCZ 27th Street Duplex"
+    position: 63.5,-73.5
+  - name: "OCZ 27th Street Duplex"
+    position: 63.5,-73.5
+    z: 1
+  - name: "UM Marina View Residences"
+    position: 151.5,165.5
+  - name: "UM Marina View Residences"
+    position: 147.5,156.5
+    z: 1
+  - name: "UM Marina View Residences"
+    position: 147.5,156.5
+    z: 2
+  - name: "UM Yacht Club"
+    position: 113.5,155.5
+  - name: "UM Yacht Club"
+    position: 113.5,155.5
+    z: 1
+  - name: "UM Yacht Club"
+    position: 113.5,155.5
+    z: 2
+  - name: "UM Marina Hotel"
+    position: 171.5,189.5
+  - name: "UM Marina Hotel"
+    position: 171.5,189.5
+    z: 1
+  - name: "UM Marina Hotel"
+    position: 171.5,189.5
+    z: 2
+  - name: "UM Seafood House"
+    position: 112.5,169.5
+  - name: "UM Seafood House Flat"
+    position: 112.5,170.5
+    z: 1
+  - name: "UM Marina Fashion"
+    position: 138.5,195.5
+  - name: "UM Marina Home"
+    position: 146.5,194.5
+  - name: "UM Harbour Cafe"
+    position: 151.5,195.5
+  - name: "UM Marina Row Flats"
+    position: 146.5,193.5
+    z: 1
+  - name: "UM Marina Office"
+    position: 148.5,186.5
+  - name: "UM Marina Office Flat"
+    position: 148.5,186.5
+    z: 1
+  - name: "UM Boat Workshop"
+    position: 135.5,163.5
+  - name: "UM Biotechnica Field Office"
+    position: 110.5,186.5
+  - name: "UM Biotechnica Field Office"
+    position: 110.5,186.5
+    z: 1
+  - name: "UM Biotechnica Field Office"
+    position: 110.5,186.5
+    z: 2
+  - name: "UM Biotechnica Field Office"
+    position: 110.5,186.5
+    z: 3
   - name: "OJT 18th Street Building 01"
     position: 140,51
-  - name: "OJT 19th Street Building 01"
+  - name: "OJT Japantown Ripperdoc"
     position: 71,39
   - name: "OJT 19th Street Building 02"
     position: 155.5,31
-  - name: "OJT 19th Street Building 03"
+  - name: "OJT Teahouse"
     position: 120.3,31.9
-  - name: "OJT 19th Street Building 04"
+  - name: "OJT Japantown Capsules"
     position: 139.5,30.5
-  - name: "OJT 19th Street Building 05"
+  - name: "OJT Maelstrom Garage"
+    position: 63.5,-5.5
+  - name: "OJT Bike Parts"
+    position: 90.5,36.5
+  - name: "OJT Shrine"
+    position: 183.5,59.5
+  - name: "OJT Tyger Claws Pachinko"
     position: 177.5,23.5
-  - name: "OJT 26th Street Building 01"
+  - name: "OJT Japantown Market"
     position: 176.7,0.5
-  - name: "OJT 26th Street Building 02"
+  - name: "OJT Ramen Bar"
     position: 152.2,-3.5
   - name: "OJT 26th Street Building 03"
     position: 103.3,-7.1
-  - name: "OJT 29th Street Building 01"
-    position: 180.5,66
+  - name: "OJT 29th Street Apartments"
+    position: 181.5,71.5
   - name: "PNC W 25th Street Building 01"
     position: -134,-15.4
   - name: "PNC W 25th Street Building 02"
     position: -119.6,-25
-  - name: "PNC W 26th Street Building 01"
+  - name: "PNC Medical Technologies"
     position: -153.9,-61.9
   - name: "PNC W 26th Street Building 02"
     position: -105.7,-64
+  - name: "PNC W 25th Street Building 03"
+    position: -91.5,-9.5
+  - name: "PNC W 25th Street Building 04"
+    position: -91.5,-22.5
+    z: 0
+  - name: "PNC W 25th Street Building 05"
+    position: -76.5,-22.5
+  - name: "PNC Pier Terminal"
+    position: -157.5,-18.5
+  - name: "PNC W 25th Street Building 06"
+    position: -121.5,-9.5
+  - name: "PNC W 26th Street Building 03"
+    position: -135.5,-35.5
+  - name: "PNC W 26th Street Building 04"
+    position: -97.5,-54.5
+    z: 0
+  - name: "PNC W 27th Street Building 01"
+    position: -150.5,-81.5
+  - name: "PNC W 27th Street Building 02"
+    position: -134.5,-88.5
+  - name: "PNC W 27th Street Building 03"
+    position: -115.5,-89.5
   - name: "RZ 30rd Street Building 01"
     position: -34,-43.5
   - name: "RZ 30rd Street Building 02"
@@ -313,25 +590,76 @@
     position: -128.5,18.5
   - name: "SNC W 22nd Street Building 02"
     position: -92,11.5
-  - name: "UD Alexandria Building 01"
+  - name: "OCC Arasaka Tower Ruins"
+    position: 46.5,112.5
+    z: 0
+  - name: "OCC Hot Warehouse"
+    position: -20.5,64.5
+    z: 0
+  - name: "OCC Scavenger Camp"
+    position: 38.5,67.5
+    z: 0
+  - name: "OCC Metro Entrance"
+    position: -13.5,90.5
+    z: 0
+  - name: "OCC Stalker Outpost"
+    position: 9.5,80.5
+    z: 0
+  - name: "OCC Scavenger Chop Shop"
+    position: 9.5,110.5
+    z: 0
+  - name: "OCC Collapsed Offices"
+    position: -20.5,135.5
+    z: 0
+  - name: "OCC Metro Platform"
+    position: -13.5,95.5
+    z: -1
+  - name: "OCC Scavenger Workshop"
+    position: 38.5,67.5
+    z: -1
+  - name: "OCC Arasaka Data Center"
+    position: 28.5,119.5
+    z: -2
+  - name: "OCC Arasaka Black Vault"
+    position: 47.5,118.5
+    z: -3
+  - name: "OCC Black Vault Core"
+    position: 47.5,118.5
+    z: -4
+  - name: "SNC Gun Shop"
+    position: -137.5,5.5
+    z: 0
+  - name: "SNC Back-Alley Ripperdoc"
+    position: -137.5,-2.5
+    z: 0
+  - name: "SNC Noodle Bar"
+    position: -123.5,0.5
+    z: 0
+  - name: "SNC Furniture and Clothes"
+    position: -117.5,1.5
+    z: 0
+  - name: "SNC Shop Storage"
+    position: -120.5,8.5
+    z: 0
+  - name: "UD University Quad"
     position: -119.5,65.5
-  - name: "UD Alexandria Building 02"
+  - name: "UD Alexandria Street Shops"
     position: -126.6,39.9
-  - name: "UD Bay Street Building 01"
+  - name: "UD Net Cafe and Diner"
     position: -85.5,41.5
   - name: "UD Farren Building 01"
     position: -74.5,92
-  - name: "UD Farren Building 02"
-    position: -51,87
-  - name: "UD Farren Building 03"
+  - name: "UD NCU Student Residence"
+    position: -52.5,87.5
+  - name: "UD Student Bar"
     position: -91,65.5
-  - name: "UD Farren Building 04"
-    position: -74,65.5
-  - name: "UD Farren Building 05"
-    position: -50,63.5
-  - name: "UD Skyline Building 01"
+  - name: "UD Old Lecture Annex"
+    position: -77.5,65.5
+  - name: "UD Lecture Annex"
+    position: -56.5,63.5
+  - name: "UD Campus Clinic"
     position: -135.5,65.5
-  - name: "UD Skyline Building 02"
+  - name: "UD Night City University"
     position: -165.5,52.7
   - name: "G Potomac Ave. building 04"
     position: -42,-7.5

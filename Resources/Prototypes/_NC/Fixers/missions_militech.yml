@@ -1,0 +1,132 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Militech field operations board: jobs for Militech staff that fund the field office and HQ.
+# No street reputation is needed or earned; the reward is split between the Militech and MilitechHQ accounts.
+
+- type: ncFixerMission
+  id: NCMilitechContractArasakaPrototype
+  fixer: NCFixerMilitechOps
+  kind: Retrieval
+  name: nc-militech-contract-arasaka-prototype
+  description: nc-militech-contract-arasaka-prototype-desc
+  owner: ArasakaRemnant
+  item: NCMissionMilitaryPrototype
+  encounter: ArasakaVaultStronghold
+  reward: 20000
+  reputationGain: 0
+  reputationLoss: 0
+  timeLimit: 3000
+
+- type: ncFixerMission
+  id: NCMilitechContractVaultData
+  fixer: NCFixerMilitechOps
+  kind: Retrieval
+  name: nc-militech-contract-vault-data
+  description: nc-militech-contract-vault-data-desc
+  owner: ArasakaRemnant
+  terminal: NCMissionIntelTerminal
+  item: NCMissionDataShard
+  encounter: ArasakaVaultStronghold
+  reward: 18000
+  reputationGain: 0
+  reputationLoss: 0
+  timeLimit: 3000
+
+- type: ncFixerMission
+  id: NCMilitechContractVaultRecon
+  fixer: NCFixerMilitechOps
+  kind: Recon
+  name: nc-militech-contract-vault-recon
+  description: nc-militech-contract-vault-recon-desc
+  owner: ArasakaRemnant
+  reconPoints: 3
+  encounter: ArasakaVaultPost
+  reward: 12000
+  reputationGain: 0
+  reputationLoss: 0
+  timeLimit: 2400
+
+- type: ncFixerMission
+  id: NCMilitechContractStolenCrates
+  fixer: NCFixerMilitechOps
+  kind: Retrieval
+  name: nc-militech-contract-stolen-crates
+  description: nc-militech-contract-stolen-crates-desc
+  owner: SixthStreet
+  item: NCMissionHotZoneTechCrate
+  encounter: SixthStreetStronghold
+  reward: 8000
+  reputationGain: 0
+  reputationLoss: 0
+  timeLimit: 2400
+
+- type: ncFixerMission
+  id: NCMilitechContractMaelstromBroker
+  fixer: NCFixerMilitechOps
+  kind: Elimination
+  name: nc-militech-contract-maelstrom-broker
+  description: nc-militech-contract-maelstrom-broker-desc
+  owner: Maelstrom
+  item: NCMobHumanGangMaelstromBoss
+  encounter: GangMaelstromStronghold
+  reward: 9000
+  reputationGain: 0
+  reputationLoss: 0
+  timeLimit: 2400
+
+- type: ncFixerMission
+  id: NCMilitechContractTygerCache
+  fixer: NCFixerMilitechOps
+  kind: Sabotage
+  name: nc-militech-contract-tyger-cache
+  description: nc-militech-contract-tyger-cache-desc
+  owner: TygerClaws
+  item: NCMissionSabotageTarget
+  encounter: GangTygerClawsStronghold
+  reward: 7000
+  reputationGain: 0
+  reputationLoss: 0
+  timeLimit: 2400
+
+- type: ncFixerMission
+  id: NCMilitechContractN54Leak
+  fixer: NCFixerMilitechOps
+  kind: Retrieval
+  name: nc-militech-contract-n-5-4-leak
+  description: nc-militech-contract-n-5-4-leak-desc
+  owner: Network54
+  terminal: NCMissionIntelTerminal
+  item: NCMissionDataShard
+  encounter: SecurityNetwork54Bureau
+  reward: 10000
+  reputationGain: 0
+  reputationLoss: 0
+  timeLimit: 2400
+
+- type: ncFixerMission
+  id: NCMilitechContractHotZoneSalvage
+  fixer: NCFixerMilitechOps
+  kind: Retrieval
+  name: nc-militech-contract-hot-zone-salvage
+  description: nc-militech-contract-hot-zone-salvage-desc
+  owner: HotZone
+  item: NCMissionHotZoneTechCrate
+  encounter: GangScavengersStronghold
+  reward: 7000
+  reputationGain: 0
+  reputationLoss: 0
+  timeLimit: 2400
+
+- type: ncFixerMission
+  id: NCMilitechContractMedTechLine
+  fixer: NCFixerMilitechOps
+  kind: Sabotage
+  name: nc-militech-contract-med-tech-line
+  description: nc-militech-contract-med-tech-line-desc
+  owner: MedicalTechnologies
+  item: NCMedTechVatController
+  encounter: SecurityMedicalTechnologiesLab
+  reward: 9000
+  reputationGain: 0
+  reputationLoss: 0
+  timeLimit: 2400

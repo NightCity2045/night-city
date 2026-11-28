@@ -176,6 +176,28 @@
   ablationGroup: body
   repairProfile: NCArmorRepairFabricField
 
+# Captain and Centcomm style rigid chestpieces: flak-grade plates over the whole torso.
+- type: ncArmorSection
+  id: NCArmorSectionCarapaceTorso
+  displayName: nc-armor-section-carapace-torso
+  coveredZones: [ NCZoneChest, NCZoneAbdomen, NCZoneGroin ]
+  maxSp: 15
+  applicableDamageClasses: [ Ballistic, Blunt, Slash, Pierce, Blast ]
+  conditionProfile: NCArmorConditionStandard
+  ablationGroup: torsoPlate
+  rigid: true
+  repairProfile: NCArmorRepairPlateField
+
+# Cardboard costume armour: turns a slap, not a bullet.
+- type: ncArmorSection
+  id: NCArmorSectionCardboardBody
+  displayName: nc-armor-section-cardboard-body
+  coveredZones: [ NCZoneChest, NCZoneAbdomen ]
+  maxSp: 2
+  applicableDamageClasses: [ Ballistic, Blunt, Slash, Pierce ]
+  conditionProfile: NCArmorConditionStandard
+  ablationGroup: body
+
 - type: ncArmorProfile
   id: NCArmorKevlar
   sections: [ NCArmorSectionKevlarBody ]
@@ -211,6 +233,14 @@
 - type: ncArmorProfile
   id: NCArmorTraumaMedSuit
   sections: [ NCArmorSectionTraumaMedChest, NCArmorSectionTraumaMedBody ]
+
+- type: ncArmorProfile
+  id: NCArmorCarapace
+  sections: [ NCArmorSectionCarapaceTorso ]
+
+- type: ncArmorProfile
+  id: NCArmorCardboard
+  sections: [ NCArmorSectionCardboardBody ]
 
 # Consumable field service kit. It can patch common fabric, plate and composite sections to 75% of MaxSP.
 - type: entity

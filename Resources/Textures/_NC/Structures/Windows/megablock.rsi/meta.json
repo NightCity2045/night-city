@@ -1,0 +1,46 @@
+{
+    "version": 1,
+    "license": "CC-BY-SA-4.0",
+    "copyright": "Generated for Night City 2045 in the layout of beton.rsi by alze_1",
+    "size": {
+        "x": 32,
+        "y": 64
+    },
+    "states": [
+        {
+            "name": "full"
+        },
+        {
+            "name": "megablockwindow0",
+            "directions": 4
+        },
+        {
+            "name": "megablockwindow1",
+            "directions": 4
+        },
+        {
+            "name": "megablockwindow2",
+            "directions": 4
+        },
+        {
+            "name": "megablockwindow3",
+            "directions": 4
+        },
+        {
+            "name": "megablockwindow4",
+            "directions": 4
+        },
+        {
+            "name": "megablockwindow5",
+            "directions": 4
+        },
+        {
+            "name": "megablockwindow6",
+            "directions": 4
+        },
+        {
+            "name": "megablockwindow7",
+            "directions": 4
+        }
+    ]
+}

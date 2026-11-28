@@ -159,3 +159,79 @@ ent-NCGangScavengersVest = Scavengers scrap plates
     .desc = Sheet metal and road signs strapped on as armour.
 ent-NCGangScavengersMask = Scavengers gas mask
     .desc = An old gas mask against the dust of the Hot Zone.
+
+nc-medtech-warning-1 = This is a sterile facility. Visitors are not permitted.
+nc-medtech-warning-2 = Clinic's closed, choom. Come back with an appointment.
+nc-medtech-alarm-1 = Breach! Harvest them!
+nc-medtech-alarm-2 = Nobody leaves with our stock!
+
+ent-NCMobHumanSecurityMedicalTechnologiesGuard = Medical Technologies security guard
+    .desc = Corporate security in a surgical cap. The pistol is not for show.
+ent-NCMobHumanSecurityMedicalTechnologiesOrderly = Medical Technologies orderly
+    .desc = Carries bodies and parts between floors, and a machete for anyone who asks questions.
+ent-NCMobHumanSecurityMedicalTechnologiesSurgeon = Medical Technologies surgeon
+    .desc = Grows limbs by day and fits chrome to boosters by night.
+ent-NCMobHumanSecurityMedicalTechnologiesChief = Medical Technologies chief of staff
+    .desc = Runs the limb farm and the side business that keeps it profitable.
+
+nc-ncu-warning-1 = Campus ID, please. No ID, no entry.
+nc-ncu-warning-2 = Visiting hours are over. Turn around.
+nc-ncu-alarm-1 = Intruder on campus! Lock down the labs!
+nc-ncu-alarm-2 = Protect the research, all units!
+
+ent-NCMobHumanSecurityNightCityUniversityOfficer = NCU campus officer
+    .desc = Walks the corridors of Night City University with a stun baton and a short temper.
+ent-NCMobHumanSecurityNightCityUniversityGuard = NCU security guard
+    .desc = Campus security. The fortress of learning pays for real guns.
+ent-NCMobHumanSecurityNightCityUniversityResponder = NCU response officer
+    .desc = Helmet, vest, pistol. Called in when someone goes after the labs.
+ent-NCMobHumanSecurityNightCityUniversityChief = NCU chief of campus security
+    .desc = Takes the university's mission of protecting knowledge very seriously.
+
+nc-n54-warning-1 = Press passes only. Step back from the door.
+nc-n54-warning-2 = This is a private broadcast facility. Leave now.
+nc-n54-alarm-1 = Breach in the bureau! Lock the servers!
+nc-n54-alarm-2 = Nobody walks out with our footage!
+
+nc-marina-warning-1 = Residents and guests only. Turn around.
+nc-marina-warning-2 = This is a private marina. You have been asked to leave.
+nc-marina-alarm-1 = Intruder on the waterfront! All units!
+nc-marina-alarm-2 = Protect the residents, drop the trespasser!
+
+ent-NCMobHumanSecurityMarinaConcierge = Marina concierge
+    .desc = A smile, a blue suit and a stun baton for guests who forget their manners.
+ent-NCMobHumanSecurityMarinaGuard = Marina security guard
+    .desc = White suit, dark glasses, a pistol under the jacket. The residents pay for discretion.
+ent-NCMobHumanSecurityMarinaResponder = Marina response officer
+    .desc = Armoured and carrying a shotgun. Called when someone gets past the concierge.
+ent-NCMobHumanSecurityMarinaChief = Marina chief of security
+    .desc = Knows every yacht, every resident and every secret on the waterfront.
+
+ent-NCMobHumanSecurityNetwork54Doorman = Network 54 doorman
+    .desc = A suit with an earpiece and a stun baton, minding the bureau door.
+ent-NCMobHumanSecurityNetwork54Guard = Network 54 security guard
+    .desc = Corporate security for the news. The pistol is not for the cameras.
+ent-NCMobHumanSecurityNetwork54Responder = Network 54 response officer
+    .desc = Armoured, with a submachine gun. Called when someone goes after the footage.
+ent-NCMobHumanSecurityNetwork54Chief = Network 54 head of security
+    .desc = Keeps the bureau's secrets off the air and out of other people's hands.
+
+nc-arasaka-warning-1 = Unregistered contact. Leave the sector.
+nc-arasaka-warning-2 = This facility does not exist. Neither will you.
+nc-arasaka-alarm-1 = Containment breach. Sanitise.
+nc-arasaka-alarm-2 = For the Company!
+
+ent-NCMobHumanArasakaRemnantSleeper = Arasaka sleeper
+    .desc = Kept on station under ground zero for twenty years, still following orders nobody remembers giving.
+ent-NCMobHumanArasakaRemnantNinja = Arasaka blade
+    .desc = Silent, fast and very sharp.
+ent-NCMobHumanArasakaRemnantNetrunner = Arasaka vault netrunner
+    .desc = Guards the vault's subnet from the inside.
+ent-NCMobHumanArasakaRemnantCommander = Black Vault commander
+    .desc = The last officer of a facility that was never built.
+ent-NCArasakaRemnantTurret = Black Vault turret
+    .desc = An old Arasaka sentry gun. It still works.
+ent-NCHotZoneFalloutWeak = fallout
+    .desc = Low background radiation from the 2023 blast.
+ent-NCHotZoneFalloutStrong = heavy fallout
+    .desc = Dangerous radiation from the 2023 blast.

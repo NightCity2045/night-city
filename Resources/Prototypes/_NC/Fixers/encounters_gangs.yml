@@ -240,3 +240,133 @@
   - mob: NCMobHumanGangScavengersBoss
     min: 1
     max: 1
+
+# Medical Technologies' limb farm in the port: armed staff on every floor.
+- type: ncFixerEncounter
+  id: SecurityMedicalTechnologiesLab
+  extraPerLevel: 1
+  warnings: [ nc-medtech-warning-1, nc-medtech-warning-2 ]
+  alarms: [ nc-medtech-alarm-1, nc-medtech-alarm-2 ]
+  entries:
+  - mob: NCMobHumanSecurityMedicalTechnologiesGuard
+    min: 3
+    max: 4
+  - mob: NCMobHumanSecurityMedicalTechnologiesOrderly
+    min: 2
+    max: 3
+  - mob: NCMobHumanSecurityMedicalTechnologiesSurgeon
+    min: 1
+    max: 2
+  - mob: NCMobHumanSecurityMedicalTechnologiesChief
+    min: 1
+    max: 1
+
+# Night City University: campus security sweeps every floor of the main building.
+- type: ncFixerEncounter
+  id: SecurityNightCityUniversityCampus
+  extraPerLevel: 1
+  warnings: [ nc-ncu-warning-1, nc-ncu-warning-2 ]
+  alarms: [ nc-ncu-alarm-1, nc-ncu-alarm-2 ]
+  entries:
+  - mob: NCMobHumanSecurityNightCityUniversityOfficer
+    min: 2
+    max: 3
+  - mob: NCMobHumanSecurityNightCityUniversityGuard
+    min: 2
+    max: 3
+  - mob: NCMobHumanSecurityNightCityUniversityResponder
+    min: 1
+    max: 2
+  - mob: NCMobHumanSecurityNightCityUniversityChief
+    min: 1
+    max: 1
+
+# Network 54: bureau security covers the newsroom and the server room.
+- type: ncFixerEncounter
+  id: SecurityNetwork54Bureau
+  extraPerLevel: 1
+  warnings: [ nc-n54-warning-1, nc-n54-warning-2 ]
+  alarms: [ nc-n54-alarm-1, nc-n54-alarm-2 ]
+  entries:
+  - mob: NCMobHumanSecurityNetwork54Doorman
+    min: 1
+    max: 2
+  - mob: NCMobHumanSecurityNetwork54Guard
+    min: 2
+    max: 3
+  - mob: NCMobHumanSecurityNetwork54Responder
+    min: 1
+    max: 2
+  - mob: NCMobHumanSecurityNetwork54Chief
+    min: 1
+    max: 1
+
+# Upper Marina: private security for the residences, the hotel and the marina office.
+- type: ncFixerEncounter
+  id: SecurityMarinaPatrol
+  warnings: [ nc-marina-warning-1, nc-marina-warning-2 ]
+  alarms: [ nc-marina-alarm-1, nc-marina-alarm-2 ]
+  entries:
+  - mob: NCMobHumanSecurityMarinaConcierge
+    min: 1
+    max: 1
+  - mob: NCMobHumanSecurityMarinaGuard
+    min: 2
+    max: 3
+
+- type: ncFixerEncounter
+  id: SecurityMarinaStronghold
+  extraPerLevel: 1
+  warnings: [ nc-marina-warning-1, nc-marina-warning-2 ]
+  alarms: [ nc-marina-alarm-1, nc-marina-alarm-2 ]
+  entries:
+  - mob: NCMobHumanSecurityMarinaGuard
+    min: 2
+    max: 3
+  - mob: NCMobHumanSecurityMarinaResponder
+    min: 1
+    max: 2
+  - mob: NCMobHumanSecurityMarinaChief
+    min: 1
+    max: 1
+
+# Arasaka Black Vault under ground zero: sleepers, blades, a netrunner and turrets.
+- type: ncFixerEncounter
+  id: ArasakaVaultPost
+  aggressive: true
+  extraPerLevel: 1
+  warnings: [ nc-arasaka-warning-1, nc-arasaka-warning-2 ]
+  alarms: [ nc-arasaka-alarm-1, nc-arasaka-alarm-2 ]
+  entries:
+  - mob: NCMobHumanArasakaRemnantSleeper
+    min: 2
+    max: 3
+  - mob: NCMobHumanArasakaRemnantNinja
+    min: 1
+    max: 2
+  - mob: NCArasakaRemnantTurret
+    min: 1
+    max: 1
+
+- type: ncFixerEncounter
+  id: ArasakaVaultStronghold
+  aggressive: true
+  extraPerLevel: 2
+  warnings: [ nc-arasaka-warning-1, nc-arasaka-warning-2 ]
+  alarms: [ nc-arasaka-alarm-1, nc-arasaka-alarm-2 ]
+  entries:
+  - mob: NCMobHumanArasakaRemnantSleeper
+    min: 3
+    max: 4
+  - mob: NCMobHumanArasakaRemnantNinja
+    min: 2
+    max: 3
+  - mob: NCMobHumanArasakaRemnantNetrunner
+    min: 1
+    max: 1
+  - mob: NCArasakaRemnantTurret
+    min: 2
+    max: 2
+  - mob: NCMobHumanArasakaRemnantCommander
+    min: 1
+    max: 1

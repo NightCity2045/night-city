@@ -88,12 +88,16 @@ public sealed partial class NCPharmaBatchSystem
             localConcentration,
             drug.TherapeuticConcentration,
             perfusion);
-        if (relief <= 0f)
+        if (relief > 0f)
+        {
+            foreach (var wound in wounds.Wounds.Values)
+                wound.Infection = Math.Clamp(wound.Infection - relief, 0f, 1f);
+        }
+
+        if (hemostasis <= 0f && analgesia <= 0f && relief <= 0f)
             return;
 
-        foreach (var wound in wounds.Wounds.Values)
-            wound.Infection = Math.Clamp(wound.Infection - relief, 0f, 1f);
-
+        // Every local effect changes the wounds, so each one is saved and shown, not only the antibiotic.
         _medicalBodies.TryMarkDirty(patient, NCMedicalDirtyDomains.Wounds | NCMedicalDirtyDomains.Diagnostics | NCMedicalDirtyDomains.Persistence);
     }
 }

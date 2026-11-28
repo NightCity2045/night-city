@@ -21,6 +21,9 @@
                 <Label Text="{Loc 'ui-options-nc-post-processing-label'}" StyleClasses="LabelKeyText"/>
                 <CheckBox Name="NCBloomCheckBox" Text="{Loc 'ui-options-nc-bloom'}" />
                 <ui:OptionSlider Name="NCBloomIntensitySlider" Title="{Loc 'ui-options-nc-bloom-intensity'}" />
+                <CheckBox Name="NCColorGradeCheckBox" Text="{Loc 'ui-options-nc-color-grade'}" />
+                <ui:OptionSlider Name="NCColorGradeStrengthSlider" Title="{Loc 'ui-options-nc-color-grade-strength'}" />
+                <CheckBox Name="NCNeonGlowCheckBox" Text="{Loc 'ui-options-nc-neon-glow'}" />
                 <CheckBox Name="NCVignetteCheckBox" Text="{Loc 'ui-options-nc-vignette'}" />
                 <CheckBox Name="NCFilmGrainCheckBox" Text="{Loc 'ui-options-nc-film-grain'}" />
                 <ui:OptionSlider Name="NCFilmGrainStrengthSlider" Title="{Loc 'ui-options-nc-film-grain-strength'}" />

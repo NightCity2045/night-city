@@ -14,6 +14,7 @@ public abstract partial class ServerDbContext
         ConfigureNCPoliceModels(modelBuilder);
         ConfigureNCBankModels(modelBuilder);
         ConfigureNCFixerModels(modelBuilder);
+        ConfigureNCDispatchModels(modelBuilder);
         ConfigureNCHousingModels(modelBuilder);
         ConfigureNCMedicalModels(modelBuilder);
         ConfigureNCCyberwarePresetModels(modelBuilder);

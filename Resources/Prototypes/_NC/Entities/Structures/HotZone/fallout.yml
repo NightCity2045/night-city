@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Fallout left by the 2023 blast at ground zero. Invisible in game; mappers see a marker.
+- type: entity
+  abstract: true
+  parent: MarkerBase
+  id: NCHotZoneFalloutBase
+  components:
+  - type: Sprite
+    sprite: Markers/cross.rsi
+    state: green
+
+- type: entity
+  parent: NCHotZoneFalloutBase
+  id: NCHotZoneFalloutWeak
+  suffix: Weak
+  components:
+  - type: RadiationSource
+    intensity: 0.4
+    slope: 0.3
+
+- type: entity
+  parent: NCHotZoneFalloutBase
+  id: NCHotZoneFalloutStrong
+  suffix: Strong
+  components:
+  - type: RadiationSource
+    intensity: 2.5
+    slope: 0.35

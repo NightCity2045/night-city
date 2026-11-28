@@ -10,7 +10,7 @@
   supervisors: nc-job-supervisors-medical-command
   weight: 80
   startingGear: NCMedicalPsychologistGear
-  icon: JobIconMedicalDoctor
+  icon: NCJobIconNCMedicalPsychologist
   accessGroups: [ MedicalBasic ]
 
 - type: startingGear
@@ -19,6 +19,44 @@
     jumpsuit: ClothingUniformJumpsuitPsychologist
     back: ClothingBackpackMedical
     shoes: ClothingShoesColorWhite
-    id: PsychologistPDA
+    id: NCMedicalPsychologistPDA
     ears: ClothingHeadsetMedical
     outerClothing: ClothingOuterCoatLab
+
+- type: jobIcon
+  parent: JobIcon
+  id: NCJobIconNCMedicalPsychologist
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: trauma-psihologophobia
+  jobName: job-name-medical-psychologist
+
+- type: entity
+  parent: IDCardStandard
+  id: NCMedicalPsychologistIDCard
+  name: psychologist ID
+  components:
+  - type: Sprite
+    layers:
+    - state: default
+    - state: stripe_top
+      color: "#66C58D"
+    - state: stripe_bottom
+      color: "#3F9A65"
+    - sprite: _NC/Interface/Misc/job_icons.rsi
+      offset: -0.09375, 0.0625
+      state: trauma-psihologophobia
+  - type: PresetIdCard
+    job: NCMedicalPsychologist
+
+# Keeps the department tools of the PsychologistPDA it replaces.
+- type: entity
+  parent: PsychologistPDA
+  id: NCMedicalPsychologistPDA
+  name: psychologist PDA
+  description: A rugged department terminal tied to its owner's persistent position.
+  components:
+  - type: Pda
+    id: NCMedicalPsychologistIDCard
+  - type: PdaBorderColor
+    borderColor: "#66C58D"

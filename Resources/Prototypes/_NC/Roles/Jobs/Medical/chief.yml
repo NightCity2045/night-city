@@ -10,7 +10,7 @@
   supervisors: nc-job-supervisors-city-administration
   weight: 100
   startingGear: NCMedicalChiefGear
-  icon: JobIconChiefMedicalOfficer
+  icon: NCJobIconNCMedicalChief
   accessGroups: [ MedicalBasic ]
   access: [ Medical_Command, Medical_Morgue ]
 
@@ -24,10 +24,48 @@
     eyes: ClothingEyesHudMedical
     mask: ClothingMaskSterile
     gloves: ClothingHandsGlovesNitrile
-    id: CMOPDA
+    id: NCMedicalChiefPDA
     ears: ClothingHeadsetMedical
     belt: ClothingBeltMedicalFilled
     outerClothing: ClothingOuterCoatLabCmo
   storage:
     back:
     - MedTekCartridge
+
+- type: jobIcon
+  parent: JobIcon
+  id: NCJobIconNCMedicalChief
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: trauma-glava
+  jobName: job-name-medical-chief
+
+- type: entity
+  parent: IDCardStandard
+  id: NCMedicalChiefIDCard
+  name: chief physician ID
+  components:
+  - type: Sprite
+    layers:
+    - state: default
+    - state: stripe_top
+      color: "#66C58D"
+    - state: stripe_bottom
+      color: "#3F9A65"
+    - sprite: _NC/Interface/Misc/job_icons.rsi
+      offset: -0.09375, 0.0625
+      state: trauma-glava
+  - type: PresetIdCard
+    job: NCMedicalChief
+
+# Keeps the department tools of the CMOPDA it replaces.
+- type: entity
+  parent: CMOPDA
+  id: NCMedicalChiefPDA
+  name: chief physician PDA
+  description: A rugged department terminal tied to its owner's persistent position.
+  components:
+  - type: Pda
+    id: NCMedicalChiefIDCard
+  - type: PdaBorderColor
+    borderColor: "#66C58D"

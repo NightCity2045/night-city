@@ -4,6 +4,21 @@ using Content.Shared.Pinpointer;
 
 namespace Content.Server._NC.City.Atlas;
 
+/// <summary>What the detection saw on one floor, for mappers checking why buildings are missing.</summary>
+public sealed class NCCityBuildingStats
+{
+    public int Grids;
+    public int FloorTiles;
+    public int WallTiles;
+    public int DoorTiles;
+    public int StreetSeeds;
+    public int StreetTiles;
+    public int Regions;
+    public int LargestRegion;
+    public int DroppedSmall;
+    public int DroppedLarge;
+}
+
 /// <summary>One detected building on one floor, in world-tile coordinates.</summary>
 public sealed class NCCityBuildingFootprint
 {
@@ -25,6 +40,7 @@ public sealed class NCCityBuildingIndex
 
     public readonly Dictionary<Vector2i, int> TileToBuilding = new();
     public readonly List<NCCityBuildingFootprint> Buildings = [];
+    public readonly NCCityBuildingStats Stats = new();
     public int Signature;
 
     private enum TileKind : byte
@@ -78,6 +94,23 @@ public sealed class NCCityBuildingIndex
             }
         }
 
+        Stats.Grids++;
+        foreach (var kind in tiles.Values)
+        {
+            switch (kind)
+            {
+                case TileKind.Floor:
+                    Stats.FloorTiles++;
+                    break;
+                case TileKind.Wall:
+                    Stats.WallTiles++;
+                    break;
+                case TileKind.Door:
+                    Stats.DoorTiles++;
+                    break;
+            }
+        }
+
         // Street: open floor flood-filled from every tile that touches the void around the paved area.
         var outdoor = new HashSet<Vector2i>();
         var queue = new Queue<Vector2i>();
@@ -97,6 +130,7 @@ public sealed class NCCityBuildingIndex
             }
         }
 
+        Stats.StreetSeeds += outdoor.Count;
         while (queue.TryDequeue(out var tile))
         {
             foreach (var step in Neighbours)
@@ -106,6 +140,8 @@ public sealed class NCCityBuildingIndex
                     queue.Enqueue(next);
             }
         }
+
+        Stats.StreetTiles += outdoor.Count;
 
         // Buildings: connected enclosed floor, joined through doors. Walls separate buildings.
         var visited = new HashSet<Vector2i>();
@@ -137,8 +173,19 @@ public sealed class NCCityBuildingIndex
                 }
             }
 
-            if (floorTiles < MinimumFloorTiles || region.Count > MaximumTiles)
+            Stats.Regions++;
+            Stats.LargestRegion = Math.Max(Stats.LargestRegion, region.Count);
+            if (floorTiles < MinimumFloorTiles)
+            {
+                Stats.DroppedSmall++;
                 continue;
+            }
+
+            if (region.Count > MaximumTiles)
+            {
+                Stats.DroppedLarge++;
+                continue;
+            }
 
             var building = new NCCityBuildingFootprint();
             building.Tiles.AddRange(region);

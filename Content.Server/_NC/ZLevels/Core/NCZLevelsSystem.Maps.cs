@@ -158,6 +158,80 @@ public sealed partial class NCZLevelsSystem
         QueueDel(networkUid);
     }
 
+    // NC start: a level map that goes away must leave its network. The network replicates its maps, so a
+    // deleted map left in it breaks every state the server sends for the network and its neighbours.
+    private void OnZMapShutdown(Entity<NCZMapComponent> ent, ref ComponentShutdown args)
+    {
+        var networkUid = ent.Comp.NetworkUid;
+        if (TerminatingOrDeleted(networkUid) || !TryComp<NCZMapNetworkComponent>(networkUid, out var network))
+            return;
+
+        RemoveMapFromNetwork((networkUid, network), ent.Owner);
+    }
+
+    /// <summary>
+    /// Removes a map from its z-level network and unlinks the levels above and below it.
+    /// </summary>
+    [PublicAPI]
+    public bool RemoveMapFromNetwork(Entity<NCZMapNetworkComponent> network, EntityUid mapUid)
+    {
+        if (!network.Comp.ZLevelByEntity.Remove(mapUid, out var depth))
+            return false;
+
+        network.Comp.ZLevels.Remove(depth);
+        RemoveFromQuickApiCache(network.Comp, mapUid, depth);
+        Dirty(network);
+
+        if (network.Comp.ZLevels.TryGetValue(depth + 1, out var above) && above is { } aboveUid &&
+            !TerminatingOrDeleted(aboveUid) && TryComp<NCZMapComponent>(aboveUid, out var aboveMap) &&
+            aboveMap.MapBelow == mapUid)
+        {
+            aboveMap.MapBelow = null;
+            Dirty(aboveUid, aboveMap);
+        }
+
+        if (network.Comp.ZLevels.TryGetValue(depth - 1, out var below) && below is { } belowUid &&
+            !TerminatingOrDeleted(belowUid) && TryComp<NCZMapComponent>(belowUid, out var belowMap) &&
+            belowMap.MapAbove == mapUid)
+        {
+            belowMap.MapAbove = null;
+            Dirty(belowUid, belowMap);
+        }
+
+        RaiseLocalEvent(network, new NCZLevelMapNetworkUpdatedEvent());
+        return true;
+    }
+
+    private static void RemoveFromQuickApiCache(NCZMapNetworkComponent comp, EntityUid value, int depth)
+    {
+        var list = comp.SortedZLevels;
+        var index = depth - comp.SortedMin;
+        if (index < 0 || index >= list.Count || list[index] != value)
+            return;
+
+        // Gaps inside the range stay as invalid placeholders, like the ones QuickApiCache inserts.
+        list[index] = EntityUid.Invalid;
+
+        while (list.Count > 0 && !list[0].IsValid())
+        {
+            list.RemoveAt(0);
+            comp.SortedMin++;
+        }
+
+        while (list.Count > 0 && !list[^1].IsValid())
+        {
+            list.RemoveAt(list.Count - 1);
+            comp.SortedMax--;
+        }
+
+        if (list.Count == 0)
+        {
+            comp.SortedMin = 0;
+            comp.SortedMax = 0;
+        }
+    }
+    // NC end
+
     private void QuickApiCache(Entity<NCZMapNetworkComponent> network, EntityUid value, int depth)
     {
         var comp = network.Comp;

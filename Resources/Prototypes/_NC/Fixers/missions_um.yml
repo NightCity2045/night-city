@@ -1,0 +1,75 @@
+# Upper Marina: Marina Security on the waterfront and the Philharmonic Vampyres in the yacht club.
+
+- type: ncFixerMission
+  id: NCFixerVanceWaterfrontSurvey
+  fixer: NCFixerVance
+  kind: Recon
+  name: nc-fixer-mission-vance-waterfront-survey
+  description: nc-fixer-mission-vance-waterfront-survey-desc
+  minimumReputation: 5
+  owner: MarinaSecurity
+  reconPoints: 3
+  encounter: SecurityMarinaPatrol
+  reward: 2500
+  reputationGain: 3
+  timeLimit: 1800
+
+- type: ncFixerMission
+  id: NCFixerFengMarinaDebtor
+  fixer: NCFixerFeng
+  kind: Beating
+  name: nc-fixer-mission-feng-marina-debtor
+  description: nc-fixer-mission-feng-marina-debtor-desc
+  minimumReputation: 10
+  owner: MarinaSecurity
+  item: NCMobHumanDebtor
+  encounter: SecurityMarinaPatrol
+  reward: 3000
+  reputationGain: 4
+  reputationLoss: 4
+  timeLimit: 1800
+
+- type: ncFixerMission
+  id: NCFixerBothaHotelSafe
+  fixer: NCFixerBotha
+  kind: Retrieval
+  name: nc-fixer-mission-botha-hotel-safe
+  description: nc-fixer-mission-botha-hotel-safe-desc
+  minimumReputation: 20
+  owner: MarinaSecurity
+  item: NCMissionCorporateFiles
+  encounter: SecurityMarinaStronghold
+  reward: 4000
+  reputationGain: 5
+  reputationLoss: 4
+  timeLimit: 2400
+
+- type: ncFixerMission
+  id: NCFixerVladVampyresGuestBook
+  fixer: NCFixerVlad
+  kind: Sabotage
+  name: nc-fixer-mission-vlad-vampyres-guest-book
+  description: nc-fixer-mission-vlad-vampyres-guest-book-desc
+  minimumReputation: 20
+  owner: PhilharmonicVampyres
+  item: NCMissionLedgerCabinet
+  encounter: GangPhilharmonicVampyresStronghold
+  reward: 3500
+  reputationGain: 5
+  reputationLoss: 4
+  timeLimit: 1800
+
+- type: ncFixerMission
+  id: NCFixerFengVampyreElder
+  fixer: NCFixerFeng
+  kind: Elimination
+  name: nc-fixer-mission-feng-vampyre-elder
+  description: nc-fixer-mission-feng-vampyre-elder-desc
+  minimumReputation: 30
+  owner: PhilharmonicVampyres
+  item: NCMobHumanGangPhilharmonicVampyresBoss
+  encounter: GangPhilharmonicVampyresStronghold
+  reward: 5000
+  reputationGain: 7
+  reputationLoss: 6
+  timeLimit: 1800

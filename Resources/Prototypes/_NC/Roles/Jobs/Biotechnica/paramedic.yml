@@ -10,7 +10,7 @@
   supervisors: nc-job-supervisors-biotechnica-management
   weight: 60
   startingGear: BiotechnicaParamedicGear
-  icon: JobIconParamedic
+  icon: NCJobIconBiotechnicaParamedic
   accessGroups: [ BiotechBasic ]
   access: [ Biotech_MedTech, Biotech_Operative ]
 
@@ -24,7 +24,7 @@
     eyes: ClothingEyesHudMedical
     mask: ClothingMaskBiotechnicaMedtech
     gloves: ClothingHandsGlovesBiotechnica
-    id: ParamedicPDA
+    id: BiotechnicaParamedicPDA
     ears: ClothingHeadsetScience
     belt: ClothingBeltMedicalFilled
     armor: ClothingOuterArmorBiotechBulletproof
@@ -32,3 +32,41 @@
   storage:
     back:
     - MedTekCartridge
+
+- type: jobIcon
+  parent: JobIcon
+  id: NCJobIconBiotechnicaParamedic
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: biotech_zaparamedick
+  jobName: job-name-biotechnica-paramedic
+
+- type: entity
+  parent: IDCardStandard
+  id: BiotechnicaParamedicIDCard
+  name: Biotechnica paramedic ID
+  components:
+  - type: Sprite
+    layers:
+    - state: default
+    - state: stripe_top
+      color: "#6DB15C"
+    - state: stripe_bottom
+      color: "#4A8A3B"
+    - sprite: _NC/Interface/Misc/job_icons.rsi
+      offset: -0.09375, 0.0625
+      state: biotech_zaparamedick
+  - type: PresetIdCard
+    job: BiotechnicaParamedic
+
+# Keeps the department tools of the ParamedicPDA it replaces.
+- type: entity
+  parent: ParamedicPDA
+  id: BiotechnicaParamedicPDA
+  name: Biotechnica paramedic PDA
+  description: A rugged department terminal tied to its owner's persistent position.
+  components:
+  - type: Pda
+    id: BiotechnicaParamedicIDCard
+  - type: PdaBorderColor
+    borderColor: "#6DB15C"

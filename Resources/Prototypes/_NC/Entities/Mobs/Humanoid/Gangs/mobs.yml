@@ -347,3 +347,237 @@
 - type: entity
   parent: NCMobHumanDebtor
   id: NCMobHumanTroublemaker
+
+# Medical Technologies: grows replacement limbs and quietly sells cyberware to boostergangs.
+- type: entity
+  abstract: true
+  parent: MobHuman
+  id: NCMobHumanSecurityMedicalTechnologiesBase
+  components:
+  - type: RandomHumanoidAppearance
+    randomizeName: false
+    allowedMarkingLayers: [ Hair, FacialHair, UndergarmentTop, UndergarmentBottom ]
+  - type: NpcFactionMember
+    factions: [ NCMedicalTechnologiesSecurity ]
+  - type: FactionException
+  - type: NPCRetaliation
+  - type: HTN
+    rootTask:
+      task: SimpleHumanoidHostileCompound
+
+- type: entity
+  parent: NCMobHumanSecurityMedicalTechnologiesBase
+  id: NCMobHumanSecurityMedicalTechnologiesGuard
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityMedicalTechnologiesGuardGear ]
+
+- type: entity
+  parent: NCMobHumanSecurityMedicalTechnologiesBase
+  id: NCMobHumanSecurityMedicalTechnologiesOrderly
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityMedicalTechnologiesOrderlyGear ]
+
+- type: entity
+  parent: NCMobHumanSecurityMedicalTechnologiesBase
+  id: NCMobHumanSecurityMedicalTechnologiesSurgeon
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityMedicalTechnologiesSurgeonGear ]
+
+- type: entity
+  parent: NCMobHumanSecurityMedicalTechnologiesBase
+  id: NCMobHumanSecurityMedicalTechnologiesChief
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityMedicalTechnologiesChiefGear ]
+
+# Night City University campus security: the "fortress of learning" guards its knowledge seriously.
+- type: entity
+  abstract: true
+  parent: MobHuman
+  id: NCMobHumanSecurityNightCityUniversityBase
+  components:
+  - type: RandomHumanoidAppearance
+    randomizeName: false
+    allowedMarkingLayers: [ Hair, FacialHair, UndergarmentTop, UndergarmentBottom ]
+  - type: NpcFactionMember
+    factions: [ NCNightCityUniversitySecurity ]
+  - type: FactionException
+  - type: NPCRetaliation
+  - type: HTN
+    rootTask:
+      task: SimpleHumanoidHostileCompound
+
+- type: entity
+  parent: NCMobHumanSecurityNightCityUniversityBase
+  id: NCMobHumanSecurityNightCityUniversityOfficer
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityNightCityUniversityOfficerGear ]
+
+- type: entity
+  parent: NCMobHumanSecurityNightCityUniversityBase
+  id: NCMobHumanSecurityNightCityUniversityGuard
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityNightCityUniversityGuardGear ]
+
+- type: entity
+  parent: NCMobHumanSecurityNightCityUniversityBase
+  id: NCMobHumanSecurityNightCityUniversityResponder
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityNightCityUniversityResponderGear ]
+
+- type: entity
+  parent: NCMobHumanSecurityNightCityUniversityBase
+  id: NCMobHumanSecurityNightCityUniversityChief
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityNightCityUniversityChiefGear ]
+
+# Network 54 news bureau security: suits, earpieces and real guns.
+- type: entity
+  abstract: true
+  parent: MobHuman
+  id: NCMobHumanSecurityNetwork54Base
+  components:
+  - type: RandomHumanoidAppearance
+    randomizeName: false
+    allowedMarkingLayers: [ Hair, FacialHair, UndergarmentTop, UndergarmentBottom ]
+  - type: NpcFactionMember
+    factions: [ NCNetwork54Security ]
+  - type: FactionException
+  - type: NPCRetaliation
+  - type: HTN
+    rootTask:
+      task: SimpleHumanoidHostileCompound
+
+- type: entity
+  parent: NCMobHumanSecurityNetwork54Base
+  id: NCMobHumanSecurityNetwork54Doorman
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityNetwork54DoormanGear ]
+
+- type: entity
+  parent: NCMobHumanSecurityNetwork54Base
+  id: NCMobHumanSecurityNetwork54Guard
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityNetwork54GuardGear ]
+
+- type: entity
+  parent: NCMobHumanSecurityNetwork54Base
+  id: NCMobHumanSecurityNetwork54Responder
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityNetwork54ResponderGear ]
+
+- type: entity
+  parent: NCMobHumanSecurityNetwork54Base
+  id: NCMobHumanSecurityNetwork54Chief
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityNetwork54ChiefGear ]
+
+# Upper Marina private security: white suits for the residents, guns for everyone else.
+- type: entity
+  abstract: true
+  parent: MobHuman
+  id: NCMobHumanSecurityMarinaBase
+  components:
+  - type: RandomHumanoidAppearance
+    randomizeName: false
+    allowedMarkingLayers: [ Hair, FacialHair, UndergarmentTop, UndergarmentBottom ]
+  - type: NpcFactionMember
+    factions: [ NCMarinaSecurity ]
+  - type: FactionException
+  - type: NPCRetaliation
+  - type: HTN
+    rootTask:
+      task: SimpleHumanoidHostileCompound
+
+- type: entity
+  parent: NCMobHumanSecurityMarinaBase
+  id: NCMobHumanSecurityMarinaConcierge
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityMarinaConciergeGear ]
+
+- type: entity
+  parent: NCMobHumanSecurityMarinaBase
+  id: NCMobHumanSecurityMarinaGuard
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityMarinaGuardGear ]
+
+- type: entity
+  parent: NCMobHumanSecurityMarinaBase
+  id: NCMobHumanSecurityMarinaResponder
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityMarinaResponderGear ]
+
+- type: entity
+  parent: NCMobHumanSecurityMarinaBase
+  id: NCMobHumanSecurityMarinaChief
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityMarinaChiefGear ]
+
+# Arasaka remnant: the sleepers who never left the Black Vault under ground zero.
+- type: entity
+  abstract: true
+  parent: MobHuman
+  id: NCMobHumanArasakaRemnantBase
+  components:
+  - type: RandomHumanoidAppearance
+    randomizeName: false
+    allowedMarkingLayers: [ Hair, FacialHair, UndergarmentTop, UndergarmentBottom ]
+  - type: NpcFactionMember
+    factions: [ NCArasakaRemnant ]
+  - type: FactionException
+  - type: NPCRetaliation
+  - type: HTN
+    rootTask:
+      task: SimpleHumanoidHostileCompound
+
+- type: entity
+  parent: NCMobHumanArasakaRemnantBase
+  id: NCMobHumanArasakaRemnantSleeper
+  components:
+  - type: Loadout
+    prototypes: [ NCArasakaRemnantSleeperGear ]
+
+- type: entity
+  parent: NCMobHumanArasakaRemnantBase
+  id: NCMobHumanArasakaRemnantNinja
+  components:
+  - type: Loadout
+    prototypes: [ NCArasakaRemnantNinjaGear ]
+
+- type: entity
+  parent: NCMobHumanArasakaRemnantBase
+  id: NCMobHumanArasakaRemnantNetrunner
+  components:
+  - type: Loadout
+    prototypes: [ NCArasakaRemnantNetrunnerGear ]
+
+- type: entity
+  parent: NCMobHumanArasakaRemnantBase
+  id: NCMobHumanArasakaRemnantCommander
+  components:
+  - type: Loadout
+    prototypes: [ NCArasakaRemnantCommanderGear ]
+
+# Vault defence turret. Neutral until the vault's guards are alarmed, then it fires at the intruder.
+- type: entity
+  parent: WeaponTurretHostile
+  id: NCArasakaRemnantTurret
+  components:
+  - type: NpcFactionMember
+    factions: [ NCArasakaRemnant ]
+  - type: FactionException

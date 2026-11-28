@@ -11,6 +11,8 @@ nc-armor-section-trauma-armored-torso = бронеплиты корпуса Trau
 nc-armor-section-trauma-armored-limbs = защита рук и ног Trauma Team
 nc-armor-section-trauma-armored-helmet = корпус бронированного шлема Trauma Team
 nc-armor-section-trauma-med-chest = защита груди медика Trauma Team
+nc-armor-section-carapace-torso = пластины карапаса
+nc-armor-section-cardboard-body = картонный нагрудник
 nc-armor-section-subdermal = подкожная броня
 
 nc-armor-condition-intact = цела

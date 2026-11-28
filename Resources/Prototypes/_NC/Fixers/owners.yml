@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 
 # Who holds a mission place. Markers carry one, missions ask for one, and the owner picks the defenders.
+# ambient: people the owner keeps at its places even without a mission (they show up when someone wanders in).
+# Corporate offices players work in and public buildings (NCU, Network 54, Marina) stay empty until a mission.
 
 - type: ncMissionOwner
   id: Neutral
@@ -21,35 +23,71 @@
 - type: ncMissionOwner
   id: SixthStreet
   name: nc-mission-owner-sixth-street
+  ambient: SixthStreetPost
 
 - type: ncMissionOwner
   id: TygerClaws
   name: nc-mission-owner-tyger-claws
+  ambient: GangTygerClawsPost
 
 - type: ncMissionOwner
   id: Maelstrom
   name: nc-mission-owner-maelstrom
+  ambient: GangMaelstromPost
 
 - type: ncMissionOwner
   id: Valentinos
   name: nc-mission-owner-valentinos
+  ambient: GangValentinosPost
 
 - type: ncMissionOwner
   id: Bozos
   name: nc-mission-owner-bozos
+  ambient: GangBozosPost
 
 - type: ncMissionOwner
   id: Inquisitors
   name: nc-mission-owner-inquisitors
+  ambient: GangInquisitorsPost
 
 - type: ncMissionOwner
   id: PhilharmonicVampyres
   name: nc-mission-owner-philharmonic-vampyres
+  ambient: GangPhilharmonicVampyresPost
 
 - type: ncMissionOwner
   id: HotZone
   name: nc-mission-owner-hot-zone
+  ambient: GangScavengersPost
 
 - type: ncMissionOwner
   id: Scavengers
   name: nc-mission-owner-scavengers
+  ambient: GangScavengersPost
+
+- type: ncMissionOwner
+  id: MedicalTechnologies
+  name: nc-mission-owner-medical-technologies
+  ambient: SecurityMedicalTechnologiesLab
+
+- type: ncMissionOwner
+  id: NightCityUniversity
+  name: nc-mission-owner-night-city-university
+
+- type: ncMissionOwner
+  id: Network54
+  name: nc-mission-owner-network-54
+
+- type: ncMissionOwner
+  id: MarinaSecurity
+  name: nc-mission-owner-marina-security
+
+- type: ncMissionOwner
+  id: ArasakaRemnant
+  name: nc-mission-owner-arasaka-remnant
+  ambient: ArasakaVaultPost
+
+- type: ncMissionOwner
+  id: ScavengerTunnels
+  name: nc-mission-owner-scavenger-tunnels
+  ambient: GangScavengersPost

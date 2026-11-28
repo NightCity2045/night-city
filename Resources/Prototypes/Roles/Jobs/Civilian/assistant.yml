@@ -4,7 +4,7 @@
   description: job-description-passenger
   playTimeTracker: JobPassenger
   startingGear: PassengerGear
-  icon: "JobIconPassenger"
+  icon: NCJobIconPassenger # NC
   supervisors: job-supervisors-everyone
   access:
   - NCGeneral # NC
@@ -12,7 +12,7 @@
 - type: startingGear
   id: PassengerGear
   equipment:
-    id: PassengerPDA
+    id: NCResidentPDA # NC
     # NC: Residents start without a radio headset.
   #storage:
     #back:

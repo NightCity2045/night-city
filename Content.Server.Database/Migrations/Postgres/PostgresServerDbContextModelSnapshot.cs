@@ -2052,6 +2052,24 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.ToTable("nc_street_reputation", (string)null);
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCTraumaSubscription", b =>
+                {
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("integer")
+                        .HasColumnName("profile_id");
+
+                    b.Property<string>("PlanId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("plan_id");
+
+                    b.HasKey("ProfileId")
+                        .HasName("PK_nc_trauma_subscription");
+
+                    b.ToTable("nc_trauma_subscription", (string)null);
+                });
+
             modelBuilder.Entity("Content.Server.Database.PlayTime", b =>
                 {
                     b.Property<int>("Id")
@@ -3167,6 +3185,16 @@ namespace Content.Server.Database.Migrations.Postgres
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_nc_street_reputation_profile_profile_id");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCTraumaSubscription", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", null)
+                        .WithOne()
+                        .HasForeignKey("Content.Server.Database.NCTraumaSubscription", "ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_trauma_subscription_profile_profile_id");
                 });
 
             modelBuilder.Entity("Content.Server.Database.Player", b =>

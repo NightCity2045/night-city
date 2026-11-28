@@ -23,7 +23,7 @@
             </BoxContainer>
             <PanelContainer StyleClasses="LowDivider" />
         </BoxContainer>
-        <Label Text="{Loc 'nc-fixer-offers-title'}" StyleClasses="LabelHeading" />
+        <Label Name="OffersTitleLabel" Text="{Loc 'nc-fixer-offers-title'}" StyleClasses="LabelHeading" />
         <ScrollContainer VerticalExpand="True" HScrollEnabled="False">
             <BoxContainer Name="OffersContainer" Orientation="Vertical" SeparationOverride="8" />
         </ScrollContainer>

@@ -1,0 +1,77 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Services residents call from the PDA emergency program. Times are in seconds.
+- type: ncEmergencyService
+  id: NCPD
+  name: nc-emergency-service-ncpd
+  department: NCPD
+  account: NCPD
+  callCooldown: 120
+  usesCoverage: true
+
+# Trauma Team serves subscribers for free; anyone else pays for a one-off call up front and gets it back when the
+# crew arrives late or never comes.
+- type: ncEmergencyService
+  id: TraumaTeam
+  name: nc-emergency-service-trauma
+  department: TraumaTeam
+  account: TraumaTeam
+  callPrice: 1000
+  callResponseTime: 600
+  callCooldown: 60
+
+# Trauma Team plans: paid when the subscription starts and on every payday (30 minutes). A crew later than the
+# response time refunds one payment.
+- type: ncTraumaPlan
+  id: Silver
+  name: nc-trauma-plan-silver
+  description: nc-trauma-plan-silver-desc
+  price: 150
+  responseTime: 600
+  rank: 1
+
+- type: ncTraumaPlan
+  id: Gold
+  name: nc-trauma-plan-gold
+  description: nc-trauma-plan-gold-desc
+  price: 300
+  responseTime: 420
+  rank: 2
+
+- type: ncTraumaPlan
+  id: Platinum
+  name: nc-trauma-plan-platinum
+  description: nc-trauma-plan-platinum-desc
+  price: 600
+  responseTime: 300
+  rank: 3
+
+- type: entity
+  parent: BasePDACartridge
+  id: NCEmergencyCartridge
+  components:
+  - type: Sprite
+    state: cart-med
+  - type: UIFragment
+    ui: !type:NCEmergencyCartridgeUi
+  - type: Cartridge
+    programName: nc-emergency-program-name
+    icon:
+      sprite: _NC/Interface/Misc/emergency_program.rsi
+      state: emergency
+  - type: NCEmergencyCartridge
+
+- type: entity
+  parent: BasePDACartridge
+  id: NCDispatchCartridge
+  components:
+  - type: Sprite
+    state: cart-s
+  - type: UIFragment
+    ui: !type:NCDispatchCartridgeUi
+  - type: Cartridge
+    programName: nc-dispatch-program-name
+    icon:
+      sprite: _NC/Interface/Misc/dispatch_program.rsi
+      state: dispatch
+  - type: NCDispatchCartridge
