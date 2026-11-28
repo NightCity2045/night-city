@@ -30,6 +30,7 @@
     mask: ClothingMaskSterile
     gloves: ClothingHandsGlovesLatex
     id: ParamedicPDA
+    ears: ClothingHeadsetCargo
     belt: ClothingBeltMedicalFilled
     outerClothing: ClothingOuterHardsuitTraumaMed
   storage:

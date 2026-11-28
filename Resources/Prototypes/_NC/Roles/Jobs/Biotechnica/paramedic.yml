@@ -25,6 +25,7 @@
     mask: ClothingMaskBiotechnicaMedtech
     gloves: ClothingHandsGlovesBiotechnica
     id: ParamedicPDA
+    ears: ClothingHeadsetScience
     belt: ClothingBeltMedicalFilled
     armor: ClothingOuterArmorBiotechBulletproof
     outerClothing: ClothingOuterCoatBiotechnicaMedtechAdvanced

@@ -24,6 +24,7 @@
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesCombat
     id: HoSPDA
+    ears: ClothingHeadsetEngineering
     belt: ClothingBeltSecurity
     armor: ClothingOuterArmorMilitechBulletproof
     outerClothing: ClothingOuterCoatHoSTrench
