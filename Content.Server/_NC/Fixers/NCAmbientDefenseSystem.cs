@@ -152,6 +152,8 @@ public sealed class NCAmbientDefenseSystem : EntitySystem
     /// </summary>
     public bool TryAdopt(EntityUid place, int mission, List<EntityUid> spawned)
     {
+        // Places removed from the world (a deleted map, an admin cleaning up) are forgotten first.
+        _sites.RemoveAll(site => TerminatingOrDeleted(site.Place));
         for (var i = 0; i < _sites.Count; i++)
         {
             var site = _sites[i];

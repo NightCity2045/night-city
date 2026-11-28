@@ -183,6 +183,9 @@ public sealed class NCMissionGuardSystem : EntitySystem
     /// </summary>
     public bool IsNearby(EntityUid place, EntityUid post, float range = PostRange, int floors = PostFloorRange)
     {
+        if (TerminatingOrDeleted(place) || TerminatingOrDeleted(post))
+            return false;
+
         if (_mapCoordinates.TryGetCoordinates(place, out var origin) &&
             _mapCoordinates.TryGetCoordinates(post, out var coordinates))
         {
