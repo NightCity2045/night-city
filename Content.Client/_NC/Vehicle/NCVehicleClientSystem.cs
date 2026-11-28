@@ -40,7 +40,7 @@ public sealed partial class NCVehicleClientSystem : EntitySystem
         var functions = new[] { NCVehicleKeyFunctions.Throttle, NCVehicleKeyFunctions.Brake,
             NCVehicleKeyFunctions.Clutch, NCVehicleKeyFunctions.Handbrake, NCVehicleKeyFunctions.GearUp,
             NCVehicleKeyFunctions.GearDown, NCVehicleKeyFunctions.GearLeft, NCVehicleKeyFunctions.GearRight,
-            NCVehicleKeyFunctions.SteerLeft, NCVehicleKeyFunctions.SteerRight };
+            NCVehicleKeyFunctions.SteerLeft, NCVehicleKeyFunctions.SteerRight, NCVehicleKeyFunctions.Reverse };
         var builder = CommandBinds.Builder;
         foreach (var function in functions)
         {

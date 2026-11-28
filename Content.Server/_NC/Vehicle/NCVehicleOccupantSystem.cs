@@ -7,10 +7,13 @@ using Content.Shared._NC.Vehicle;
 using Content.Shared._NC.Vehicle.Components;
 using Content.Shared._NC.Vehicle.Prototypes;
 using Content.Shared.ActionBlocker;
+using Content.Shared.Camera;
 using Content.Shared.DoAfter;
 using Content.Shared.IdentityManagement;
 using Content.Shared.Interaction;
 using Content.Shared.Mobs.Components;
+using Content.Shared.Movement.Components;
+using Content.Shared.Movement.Systems;
 using Content.Shared.Movement.Pulling.Components;
 using Content.Shared.Verbs;
 using Robust.Shared.Containers;
@@ -38,11 +41,19 @@ public sealed partial class NCVehicleOccupantSystem : EntitySystem
     [Dependency] private EntityLookupSystem _lookup = default!;
     [Dependency] private NCVehicleAccessSystem _access = default!;
     [Dependency] private SharedDoAfterSystem _doAfter = default!;
+    [Dependency] private SharedContentEyeSystem _contentEye = default!;
+
+    /// <summary>The driver sees this much farther than on foot: the view is zoomed out by half.</summary>
+    public const float DriverZoom = 1.5f;
+
+    /// <summary>Zoom each driver had before taking the wheel, and the zoom the wheel applied.</summary>
+    private readonly Dictionary<EntityUid, (Vector2 Saved, Vector2 Applied)> _driverViews = new();
 
     public override void Initialize()
     {
         base.Initialize();
         SubscribeLocalEvent<NCVehicleDriveComponent, MapInitEvent>(OnMapInit);
+        SubscribeLocalEvent<NCVehicleOccupantComponent, GetEyePvsScaleEvent>(OnDriverPvsScale);
         SubscribeLocalEvent<NCVehicleDriveComponent, GetVerbsEvent<AlternativeVerb>>(OnVerbs);
         SubscribeLocalEvent<NCVehicleDriveComponent, NCVehicleExitMessage>(OnExit);
         SubscribeLocalEvent<NCVehicleDriveComponent, NCVehicleBeltMessage>(OnBelt);
@@ -251,6 +262,7 @@ public sealed partial class NCVehicleOccupantSystem : EntitySystem
         if (!definition!.Driver)
             return true;
         drive.Driver = user;
+        SetDriverView(user, true);
         drive.Authority++;
         drive.LastInput = 0;
         drive.SteeringTarget = 0;
@@ -349,12 +361,44 @@ public sealed partial class NCVehicleOccupantSystem : EntitySystem
         ClearDriver(ent, args.Entity);
     }
 
+    /// <summary>
+    /// Zooms the driver's view out while they hold the wheel and widens what the server sends them to match.
+    /// A zoom the driver changed meanwhile is kept on leaving.
+    /// </summary>
+    private void SetDriverView(EntityUid user, bool driving)
+    {
+        if (!TryComp<ContentEyeComponent>(user, out var eye))
+            return;
+
+        if (driving)
+        {
+            var saved = _driverViews.TryGetValue(user, out var view) ? view.Saved : eye.TargetZoom;
+            var applied = saved * DriverZoom;
+            _driverViews[user] = (saved, applied);
+            _contentEye.SetZoom(user, applied, ignoreLimits: true, eye: eye);
+        }
+        else if (_driverViews.Remove(user, out var view))
+        {
+            if (eye.TargetZoom == view.Applied)
+                _contentEye.SetZoom(user, view.Saved, ignoreLimits: true, eye: eye);
+        }
+
+        _contentEye.UpdatePvsScale(user, eye);
+    }
+
+    private void OnDriverPvsScale(Entity<NCVehicleOccupantComponent> ent, ref GetEyePvsScaleEvent args)
+    {
+        if (_driverViews.ContainsKey(ent.Owner))
+            args.Scale += DriverZoom - 1f;
+    }
+
     private void ClearDriver(Entity<NCVehicleDriveComponent> ent, EntityUid user)
     {
         // Driver seats may have any chassis-defined ID; authority follows the occupant.
         if (ent.Comp.Driver != user)
             return;
         ent.Comp.Driver = null;
+        SetDriverView(user, false);
         ent.Comp.Cranking = false;
         ent.Comp.Authority++;
         ent.Comp.PendingShift = null;

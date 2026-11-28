@@ -19,4 +19,5 @@ public static class NCVehicleKeyFunctions
     public static readonly BoundKeyFunction GearRight = "NCVehicleGearRight";
     public static readonly BoundKeyFunction SteerLeft = "NCVehicleSteerLeft";
     public static readonly BoundKeyFunction SteerRight = "NCVehicleSteerRight";
+    public static readonly BoundKeyFunction Reverse = "NCVehicleReverse";
 }
