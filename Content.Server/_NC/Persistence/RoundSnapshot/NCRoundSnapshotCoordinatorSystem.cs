@@ -23,6 +23,9 @@ public sealed partial class NCRoundSnapshotCoordinatorSystem : EntitySystem
     private const string MetadataSection = "system-metadata";
     private const string WorldOwnerType = "world";
 
+    /// <summary>Owner type of per-character sections; characters absent from a round keep their last ones.</summary>
+    private const string CharacterOwnerType = "character";
+
     [Dependency] private IServerDbManager _database = default!;
     [Dependency] private IGameMapManager _maps = default!;
     [Dependency] private GameTicker _ticker = default!;
@@ -115,7 +118,8 @@ public sealed partial class NCRoundSnapshotCoordinatorSystem : EntitySystem
             DateTime.UtcNow,
             sections,
             capture.DeletedCharacterIds.ToArray(),
-            RetainedSnapshots);
+            RetainedSnapshots,
+            CharacterOwnerType);
         _pendingCommit = CommitAsync(request);
         args.AddPendingWrite(_pendingCommit);
     }
