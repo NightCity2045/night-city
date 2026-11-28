@@ -695,4 +695,7 @@ binds:
 - function: NCVehicleSteerRight
   type: State
   key: D
+- function: NCVehicleReverse
+  type: State
+  key: R
 # NC-Edit-End
