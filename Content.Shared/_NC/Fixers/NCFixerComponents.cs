@@ -31,7 +31,7 @@ public sealed partial class NCMissionMarkerComponent : Component
     public NCMissionMarkerKind Kind = NCMissionMarkerKind.Objective;
 
     [DataField(required: true)]
-    public ProtoId<NCMissionOwnerPrototype> Owner;
+    public new ProtoId<NCMissionOwnerPrototype> Owner;
 }
 
 /// <summary>Marks an entity spawned for a fixer mission so it can be recognised and cleaned up.</summary>

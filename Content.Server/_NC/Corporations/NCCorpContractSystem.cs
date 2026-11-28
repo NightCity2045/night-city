@@ -25,7 +25,7 @@ namespace Content.Server._NC.Corporations;
 /// contract is fulfilled in full from the goods on the sales pallets next to the console, which pays the reward
 /// split between the field department and the corporation account and draws a new contract into the slot.
 /// </summary>
-public sealed class NCCorpContractSystem : EntitySystem
+public sealed partial class NCCorpContractSystem : EntitySystem
 {
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IRobustRandom _random = default!;

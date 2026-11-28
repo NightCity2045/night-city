@@ -13,7 +13,7 @@ namespace Content.Client._NC.City.Map;
 /// NC: Opens the city map window from its keybind, feeds it the server's cartography and live position, and
 /// forwards admin markup edits to the server.
 /// </summary>
-public sealed class NCCityMapClientSystem : EntitySystem
+public sealed partial class NCCityMapClientSystem : EntitySystem
 {
     [Dependency] private IPlayerManager _player = default!;
 

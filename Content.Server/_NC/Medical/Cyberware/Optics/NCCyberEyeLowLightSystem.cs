@@ -25,7 +25,7 @@ public sealed partial class NCCyberEyeLowLightComponent : Component
 }
 
 /// <summary>Owns the low-light filter of cybereyes: ambient light sampling and the borrowed night-vision component.</summary>
-public sealed class NCCyberEyeLowLightSystem : EntitySystem
+public sealed partial class NCCyberEyeLowLightSystem : EntitySystem
 {
     [Dependency] private NCCyberwareSystem _cyberware = default!;
     [Dependency] private SharedNightVisionSystem _nightVision = default!;

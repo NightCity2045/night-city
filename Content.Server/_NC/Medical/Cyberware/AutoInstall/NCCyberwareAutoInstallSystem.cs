@@ -23,7 +23,7 @@ namespace Content.Server._NC.Medical.Cyberware.AutoInstall;
 /// on (power bus and cell, neural foundation, skeletal support grafts, a cyberarm for arm modules) is fitted first,
 /// skeletal anchoring is completed and the implant is calibrated. Used by the event auto-implanter and role presets.
 /// </summary>
-public sealed class NCCyberwareAutoInstallSystem : EntitySystem
+public sealed partial class NCCyberwareAutoInstallSystem : EntitySystem
 {
     private const int MaximumDepth = 4;
     private const int MaximumModules = 64;

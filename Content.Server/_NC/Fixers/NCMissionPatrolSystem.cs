@@ -21,7 +21,7 @@ namespace Content.Server._NC.Fixers;
 /// any defender group (warns, then fights). Nobody on the ground for a while sends it home; a beaten patrol stays
 /// away for <see cref="NCMissionPatrolPrototype.RespawnDelay"/>.
 /// </summary>
-public sealed class NCMissionPatrolSystem : EntitySystem
+public sealed partial class NCMissionPatrolSystem : EntitySystem
 {
     private static readonly TimeSpan ScanInterval = TimeSpan.FromSeconds(3);
     private static readonly TimeSpan DespawnDelay = TimeSpan.FromMinutes(2);

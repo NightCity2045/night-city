@@ -13,7 +13,7 @@ using Robust.Shared.Prototypes;
 namespace Content.Server._NC.Medical.Cyberware.AutoInstall;
 
 /// <summary>Serves the event auto-implanter: lists everything installable and fits the chosen item into the user.</summary>
-public sealed class NCAutoImplanterSystem : EntitySystem
+public sealed partial class NCAutoImplanterSystem : EntitySystem
 {
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IComponentFactory _factory = default!;

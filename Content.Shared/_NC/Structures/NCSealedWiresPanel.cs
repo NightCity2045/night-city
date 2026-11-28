@@ -12,7 +12,7 @@ namespace Content.Shared._NC.Structures;
 [RegisterComponent]
 public sealed partial class NCSealedWiresPanelComponent : Component;
 
-public sealed class NCSealedWiresPanelSystem : EntitySystem
+public sealed partial class NCSealedWiresPanelSystem : EntitySystem
 {
     [Dependency] private SharedPopupSystem _popup = default!;
 
