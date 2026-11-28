@@ -52,6 +52,8 @@ nc-bank-kind-contract = Contract reward
 nc-bank-kind-fixer = Fixer payment
 nc-bank-kind-rent = Rent
 nc-bank-kind-purchase = Purchase
+nc-bank-kind-service-payment = Service payment
+nc-bank-kind-service-refund = Service refund
 nc-bank-kind-unknown = Operation
 
 nc-bank-atm-title = Night City Bank ATM

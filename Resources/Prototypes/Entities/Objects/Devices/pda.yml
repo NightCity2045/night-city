@@ -98,6 +98,7 @@
         - id: NewsReaderCartridge
         - id: NanoTaskCartridge
         - id: NCBankCartridge # NC
+        - id: NCEmergencyCartridge # NC
   - type: ActivatableUI
     key: enum.PdaUiKey.Key
     singleUser: true
@@ -164,6 +165,8 @@
         - id: NewsReaderCartridge
         - id: NanoTaskCartridge
         - id: NCBankCartridge # NC
+        - id: NCEmergencyCartridge # NC
+        - id: NCDispatchCartridge # NC
         - id: WantedListCartridge
 
 - type: entity
@@ -180,6 +183,7 @@
         - id: NewsReaderCartridge
         - id: NanoTaskCartridge
         - id: NCBankCartridge # NC
+        - id: NCEmergencyCartridge # NC
         - id: MedTekCartridge
 
 - type: entity
@@ -445,6 +449,7 @@
         - id: NewsReaderCartridge
         - id: NanoTaskCartridge
         - id: NCBankCartridge # NC
+        - id: NCEmergencyCartridge # NC
 
 - type: entity
   name: chaplain PDA
@@ -502,6 +507,7 @@
         - id: NewsReaderCartridge
         - id: NanoTaskCartridge
         - id: NCBankCartridge # NC
+        - id: NCEmergencyCartridge # NC
 
 - type: entity
   parent: BasePDA
@@ -548,6 +554,7 @@
         - id: NewsReaderCartridge
         - id: NanoTaskCartridge
         - id: NCBankCartridge # NC
+        - id: NCEmergencyCartridge # NC
         - id: AstroNavCartridge
 
 - type: entity
@@ -804,6 +811,20 @@
   components:
   - type: Pda
     id: ParamedicIDCard
+  # NC-Edit-Start
+  - type: EntityTableContainerFill
+    containers:
+      preinstalled-program-container: !type:AllSelector
+        children:
+        - id: CrewManifestCartridge
+        - id: NotekeeperCartridge
+        - id: NewsReaderCartridge
+        - id: NanoTaskCartridge
+        - id: NCBankCartridge
+        - id: NCEmergencyCartridge
+        - id: NCDispatchCartridge
+        - id: MedTekCartridge
+  # NC-Edit-End
   - type: Appearance
     appearanceDataInit:
      enum.PdaVisuals.PdaType:
@@ -900,6 +921,7 @@
         - id: NewsReaderCartridge
         - id: NanoTaskCartridge
         - id: NCBankCartridge # NC
+        - id: NCEmergencyCartridge # NC
         - id: WantedListCartridge
 
 - type: entity
@@ -971,6 +993,7 @@
         - id: NewsReaderCartridge
         - id: NanoTaskCartridge
         - id: NCBankCartridge # NC
+        - id: NCEmergencyCartridge # NC
         - id: MedTekCartridge
         - id: WantedListCartridge
         - id: LogProbeCartridge
@@ -1001,6 +1024,7 @@
         - id: NewsReaderCartridge
         - id: NanoTaskCartridge
         - id: NCBankCartridge # NC
+        - id: NCEmergencyCartridge # NC
         - id: MedTekCartridge
         - id: WantedListCartridge
         - id: LogProbeCartridge
@@ -1126,6 +1150,7 @@
         - id: NotekeeperCartridge
         - id: NanoTaskCartridge
         - id: NCBankCartridge # NC
+        - id: NCEmergencyCartridge # NC
 
 - type: entity
   parent: [ SyndiPDA, BaseSyndicateContraband ]
@@ -1167,6 +1192,7 @@
         - id: NewsReaderCartridge
         - id: NanoTaskCartridge
         - id: NCBankCartridge # NC
+        - id: NCEmergencyCartridge # NC
         - id: MedTekCartridge
 
 - type: entity
@@ -1214,6 +1240,7 @@
         - id: NewsReaderCartridge
         - id: NanoTaskCartridge
         - id: NCBankCartridge # NC
+        - id: NCEmergencyCartridge # NC
         - id: WantedListCartridge
 
 - type: entity
@@ -1385,6 +1412,7 @@
         - id: NewsReaderCartridge
         - id: NanoTaskCartridge
         - id: NCBankCartridge # NC
+        - id: NCEmergencyCartridge # NC
         - id: WantedListCartridge
         - id: LogProbeCartridge
 
@@ -1416,6 +1444,7 @@
         - id: NewsReaderCartridge
         - id: NanoTaskCartridge
         - id: NCBankCartridge # NC
+        - id: NCEmergencyCartridge # NC
         - id: WantedListCartridge
         - id: MedTekCartridge
 

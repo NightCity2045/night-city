@@ -20,4 +20,6 @@ public enum NCBankTransactionKind : byte
     FixerPayment,
     Rent,
     Purchase,
+    ServicePayment,
+    ServiceRefund,
 }
