@@ -24,9 +24,39 @@
     eyes: ClothingEyesHudMedical
     mask: ClothingMaskSterile
     gloves: ClothingHandsGlovesLatex
-    id: ParamedicPDA
+    id: TraumaTeamParamedicPDA
     belt: ClothingBeltMedicalFilled
     outerClothing: ClothingOuterHardsuitTraumaMed
   storage:
     back:
     - MedTekCartridge
+
+- type: entity
+  parent: IDCardStandard
+  id: TraumaTeamParamedicIDCard
+  name: Trauma Team paramedic ID
+  components:
+  - type: Sprite
+    layers:
+    - state: default
+    - state: stripe_top
+      color: "#4FB9D7"
+    - state: stripe_bottom
+      color: "#2F8FAD"
+    - sprite: _NC/Interface/Misc/job_icons.rsi
+      offset: -0.09375, 0.0625
+      state: trauma-paramed
+  - type: PresetIdCard
+    job: TraumaTeamParamedic
+
+# Keeps the department tools of the ParamedicPDA it replaces.
+- type: entity
+  parent: ParamedicPDA
+  id: TraumaTeamParamedicPDA
+  name: Trauma Team paramedic PDA
+  description: A rugged department terminal tied to its owner's persistent position.
+  components:
+  - type: Pda
+    id: TraumaTeamParamedicIDCard
+  - type: PdaBorderColor
+    borderColor: "#4FB9D7"

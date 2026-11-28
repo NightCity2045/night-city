@@ -10,14 +10,17 @@
   - NCWeaponPistolFederalX9
   - NCWeaponPistolAvenger
   - NCWeaponPistolMarkIII
+  - NCWeaponPistolSuperChief
   - NCWeaponPistolOverlord
   - NCWeaponPistolBoomerBuster
   - NCWeaponSMGSaratoga
   - NCWeaponSMGShingen
   - NCWeaponRifleCopperhead
   - NCWeaponRifleNowaki
+  - NCWeaponRifleRonin
   - NCWeaponRifleNomadSniper
   - NCWeaponShotgunCrusher
+  - NCWeaponShotgunCarnage
 
 - type: latheRecipePack
   id: NCWeaponBoardsStatic

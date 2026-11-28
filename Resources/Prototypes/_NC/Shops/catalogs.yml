@@ -439,6 +439,9 @@
   - item: NCWeaponPistolAvenger
     price: 1100
     stock: 2
+  - item: NCWeaponPistolSuperChief
+    price: 1200
+    stock: 2
   - item: NCWeaponPistolBoomerBuster
     price: 1300
     stock: 1

@@ -278,3 +278,31 @@
     singleHandDamage:
       types:
         Blunt: 18
+
+- type: entity
+  id: NCWeaponPistolSuperChief
+  parent: BaseWeaponRevolver
+  name: Federated Arms Super Chief
+  description: A snub-nosed six-shot 12mm revolver. Old-school, reliable and loud enough to end an argument.
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Weapons/Guns/Pistol/Fed_Arms_Super_Chief.rsi
+    layers:
+    - state: base
+      map: [ "enum.GunVisualLayers.Base" ]
+  - type: Item
+    sprite: _NC/Objects/Weapons/Guns/Pistol/Fed_Arms_Super_Chief.rsi
+  - type: Clothing
+    sprite: _NC/Objects/Weapons/Guns/Pistol/Fed_Arms_Super_Chief.rsi
+  - type: Gun
+    fireRate: 1.5
+    cameraRecoilScalar: 2
+    selectedMode: SemiAuto
+    availableModes: [ SemiAuto ]
+  - type: RevolverAmmoProvider
+    whitelist:
+      tags: [ NCCartridge12mm ]
+    proto: NCCartridge12mm
+    capacity: 6
+    chambers: [ true, true, true, true, true, true ]
+    ammoSlots: [ null, null, null, null, null, null ]

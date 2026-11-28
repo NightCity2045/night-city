@@ -10,7 +10,7 @@
   supervisors: nc-job-supervisors-militech-command
   weight: 45
   startingGear: MilitechQuartermasterGear
-  icon: JobIconQuarterMaster
+  icon: NCJobIconMilitechQuartermaster
   accessGroups: [ MilitechBasic ]
   access: [ Militech_Armory ]
 
@@ -21,7 +21,45 @@
     back: ClothingBackpackCargo
     shoes: ClothingShoesBootsWork
     head: ClothingHeadHatMilitechCap
-    id: QuartermasterPDA
+    id: MilitechQuartermasterPDA
     belt: BoxFolderClipboardThreePapers
     pocket1: AppraisalTool
     outerClothing: ClothingOuterWinterQM
+
+- type: jobIcon
+  parent: JobIcon
+  id: NCJobIconMilitechQuartermaster
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons_extra.rsi
+    state: militech_quartermaster
+  jobName: job-name-militech-quartermaster
+
+- type: entity
+  parent: IDCardStandard
+  id: MilitechQuartermasterIDCard
+  name: Militech quartermaster ID
+  components:
+  - type: Sprite
+    layers:
+    - state: default
+    - state: stripe_top
+      color: "#8A8C91"
+    - state: stripe_bottom
+      color: "#5B5E64"
+    - sprite: _NC/Interface/Misc/job_icons_extra.rsi
+      offset: -0.09375, 0.0625
+      state: militech_quartermaster
+  - type: PresetIdCard
+    job: MilitechQuartermaster
+
+# Keeps the department tools of the QuartermasterPDA it replaces.
+- type: entity
+  parent: QuartermasterPDA
+  id: MilitechQuartermasterPDA
+  name: Militech quartermaster PDA
+  description: A rugged department terminal tied to its owner's persistent position.
+  components:
+  - type: Pda
+    id: MilitechQuartermasterIDCard
+  - type: PdaBorderColor
+    borderColor: "#8A8C91"

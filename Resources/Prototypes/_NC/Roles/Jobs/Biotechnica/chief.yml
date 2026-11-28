@@ -10,7 +10,7 @@
   supervisors: nc-job-supervisors-biotechnica-management
   weight: 100
   startingGear: BiotechnicaChiefGear
-  icon: JobIconResearchDirector
+  icon: NCJobIconBiotechnicaChief
   accessGroups: [ BiotechBasic ]
   access: [ Biotech_Director, Biotech_HeadOfDepartment, Biotech_Botany, Biotech_MedTech, Biotech_Tech, Biotech_Operative ]
 
@@ -23,6 +23,44 @@
     head: ClothingHeadHatBiotechCap
     eyes: ClothingEyesGlasses
     gloves: ClothingHandsGlovesBiotechnica
-    id: RnDPDA
+    id: BiotechnicaChiefPDA
     armor: ClothingOuterArmorBiotechBulletproof
     outerClothing: ClothingOuterCoatBiotechnicaMedtechAdvanced
+
+- type: jobIcon
+  parent: JobIcon
+  id: NCJobIconBiotechnicaChief
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: biotech_rukuvoditel
+  jobName: job-name-biotechnica-chief
+
+- type: entity
+  parent: IDCardStandard
+  id: BiotechnicaChiefIDCard
+  name: Biotechnica director ID
+  components:
+  - type: Sprite
+    layers:
+    - state: default
+    - state: stripe_top
+      color: "#6DB15C"
+    - state: stripe_bottom
+      color: "#4A8A3B"
+    - sprite: _NC/Interface/Misc/job_icons.rsi
+      offset: -0.09375, 0.0625
+      state: biotech_rukuvoditel
+  - type: PresetIdCard
+    job: BiotechnicaChief
+
+# Keeps the department tools of the RnDPDA it replaces.
+- type: entity
+  parent: RnDPDA
+  id: BiotechnicaChiefPDA
+  name: Biotechnica director PDA
+  description: A rugged department terminal tied to its owner's persistent position.
+  components:
+  - type: Pda
+    id: BiotechnicaChiefIDCard
+  - type: PdaBorderColor
+    borderColor: "#6DB15C"

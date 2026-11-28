@@ -10,7 +10,7 @@
   supervisors: nc-job-supervisors-biotechnica-management
   weight: 50
   startingGear: BiotechnicaTechGear
-  icon: JobIconStationEngineer
+  icon: NCJobIconBiotechnicaTech
   accessGroups: [ BiotechBasic ]
   access: [ Biotech_Tech ]
 
@@ -23,9 +23,47 @@
     head: ClothingHeadHatBiotechCap
     eyes: ClothingEyesGogglesBiotechnicaTech
     gloves: ClothingHandsGlovesBiotechnica
-    id: EngineerPDA
+    id: BiotechnicaTechPDA
     belt: ClothingBeltUtilityEngineering
   storage:
     back:
     - LogProbeCartridge
     - AstroNavCartridge
+
+- type: jobIcon
+  parent: JobIcon
+  id: NCJobIconBiotechnicaTech
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: biotech_teh
+  jobName: job-name-biotechnica-tech
+
+- type: entity
+  parent: IDCardStandard
+  id: BiotechnicaTechIDCard
+  name: Biotechnica technician ID
+  components:
+  - type: Sprite
+    layers:
+    - state: default
+    - state: stripe_top
+      color: "#6DB15C"
+    - state: stripe_bottom
+      color: "#4A8A3B"
+    - sprite: _NC/Interface/Misc/job_icons.rsi
+      offset: -0.09375, 0.0625
+      state: biotech_teh
+  - type: PresetIdCard
+    job: BiotechnicaTech
+
+# Keeps the department tools of the EngineerPDA it replaces.
+- type: entity
+  parent: EngineerPDA
+  id: BiotechnicaTechPDA
+  name: Biotechnica technician PDA
+  description: A rugged department terminal tied to its owner's persistent position.
+  components:
+  - type: Pda
+    id: BiotechnicaTechIDCard
+  - type: PdaBorderColor
+    borderColor: "#6DB15C"

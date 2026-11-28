@@ -22,7 +22,7 @@
     shoes: ClothingShoesBootsJack
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesCombat
-    id: SecurityPDA
+    id: TraumaTeamOperativePDA
     belt: ClothingBeltSecurity
     outerClothing: ClothingOuterHardsuitTraumaArmored
   storage:
@@ -31,3 +31,33 @@
     - Handcuffs
     - HoloprojectorSecurity
     - RadioHandheldSecurity
+
+- type: entity
+  parent: IDCardStandard
+  id: TraumaTeamOperativeIDCard
+  name: Trauma Team operative ID
+  components:
+  - type: Sprite
+    layers:
+    - state: default
+    - state: stripe_top
+      color: "#4FB9D7"
+    - state: stripe_bottom
+      color: "#2F8FAD"
+    - sprite: _NC/Interface/Misc/job_icons.rsi
+      offset: -0.09375, 0.0625
+      state: trauma
+  - type: PresetIdCard
+    job: TraumaTeamOperative
+
+# Keeps the department tools of the SecurityPDA it replaces.
+- type: entity
+  parent: SecurityPDA
+  id: TraumaTeamOperativePDA
+  name: Trauma Team operative PDA
+  description: A rugged department terminal tied to its owner's persistent position.
+  components:
+  - type: Pda
+    id: TraumaTeamOperativeIDCard
+  - type: PdaBorderColor
+    borderColor: "#4FB9D7"

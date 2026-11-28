@@ -10,7 +10,7 @@
   supervisors: nc-job-supervisors-medical-command
   weight: 90
   startingGear: NCMedicalCoronerGear
-  icon: JobIconMedicalDoctor
+  icon: NCJobIconNCMedicalCoroner
   accessGroups: [ MedicalBasic ]
   access: [ Medical_Morgue ]
 
@@ -23,7 +23,7 @@
     eyes: ClothingEyesHudMedical
     mask: ClothingMaskSterile
     gloves: ClothingHandsGlovesForensic
-    id: MedicalPDA
+    id: NCMedicalCoronerPDA
     belt: ClothingBeltMedicalFilled
     outerClothing: ClothingOuterCoatLab
   storage:
@@ -31,3 +31,41 @@
     - ForensicPad
     - ForensicScanner
     - MedTekCartridge
+
+- type: jobIcon
+  parent: JobIcon
+  id: NCJobIconNCMedicalCoroner
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: trauma_coroner
+  jobName: job-name-medical-coroner
+
+- type: entity
+  parent: IDCardStandard
+  id: NCMedicalCoronerIDCard
+  name: coroner ID
+  components:
+  - type: Sprite
+    layers:
+    - state: default
+    - state: stripe_top
+      color: "#66C58D"
+    - state: stripe_bottom
+      color: "#3F9A65"
+    - sprite: _NC/Interface/Misc/job_icons.rsi
+      offset: -0.09375, 0.0625
+      state: trauma_coroner
+  - type: PresetIdCard
+    job: NCMedicalCoroner
+
+# Keeps the department tools of the MedicalPDA it replaces.
+- type: entity
+  parent: MedicalPDA
+  id: NCMedicalCoronerPDA
+  name: coroner PDA
+  description: A rugged department terminal tied to its owner's persistent position.
+  components:
+  - type: Pda
+    id: NCMedicalCoronerIDCard
+  - type: PdaBorderColor
+    borderColor: "#66C58D"

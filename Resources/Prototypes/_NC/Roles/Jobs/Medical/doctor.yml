@@ -10,7 +10,7 @@
   supervisors: nc-job-supervisors-medical-command
   weight: 50
   startingGear: NCMedicalDoctorGear
-  icon: JobIconMedicalDoctor
+  icon: NCJobIconNCMedicalDoctor
   accessGroups: [ MedicalBasic ]
 
 - type: startingGear
@@ -22,9 +22,47 @@
     eyes: ClothingEyesHudMedical
     mask: ClothingMaskSterile
     gloves: ClothingHandsGlovesLatex
-    id: MedicalPDA
+    id: NCMedicalDoctorPDA
     belt: ClothingBeltMedicalFilled
     outerClothing: ClothingOuterCoatLab
   storage:
     back:
     - MedTekCartridge
+
+- type: jobIcon
+  parent: JobIcon
+  id: NCJobIconNCMedicalDoctor
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: traumator
+  jobName: job-name-medical-doctor
+
+- type: entity
+  parent: IDCardStandard
+  id: NCMedicalDoctorIDCard
+  name: doctor ID
+  components:
+  - type: Sprite
+    layers:
+    - state: default
+    - state: stripe_top
+      color: "#66C58D"
+    - state: stripe_bottom
+      color: "#3F9A65"
+    - sprite: _NC/Interface/Misc/job_icons.rsi
+      offset: -0.09375, 0.0625
+      state: traumator
+  - type: PresetIdCard
+    job: NCMedicalDoctor
+
+# Keeps the department tools of the MedicalPDA it replaces.
+- type: entity
+  parent: MedicalPDA
+  id: NCMedicalDoctorPDA
+  name: doctor PDA
+  description: A rugged department terminal tied to its owner's persistent position.
+  components:
+  - type: Pda
+    id: NCMedicalDoctorIDCard
+  - type: PdaBorderColor
+    borderColor: "#66C58D"

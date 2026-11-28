@@ -10,7 +10,7 @@
   supervisors: nc-job-supervisors-biotechnica-management
   weight: 10
   startingGear: BiotechnicaBotanistGear
-  icon: JobIconBotanist
+  icon: NCJobIconBiotechnicaBotanist
   accessGroups: [ BiotechBasic ]
   access: [ Biotech_Botany ]
 
@@ -24,7 +24,7 @@
     eyes: ClothingEyesGogglesBiotechnicaBotany
     mask: ClothingMaskBiotechnicaBotany
     gloves: ClothingHandsGlovesBiotechnica
-    id: BotanistPDA
+    id: BiotechnicaBotanistPDA
     belt: ClothingBeltBiotechnicaBotany
     outerClothing: ClothingOuterApronBiotechnicaBotany
   storage:
@@ -33,3 +33,41 @@
     - HydroponicsToolSpade
     - HydroponicsToolClippers
     - ChemistryBottleRobustHarvest
+
+- type: jobIcon
+  parent: JobIcon
+  id: NCJobIconBiotechnicaBotanist
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: biotech_agrariy
+  jobName: job-name-biotechnica-botanist
+
+- type: entity
+  parent: IDCardStandard
+  id: BiotechnicaBotanistIDCard
+  name: Biotechnica agronomist ID
+  components:
+  - type: Sprite
+    layers:
+    - state: default
+    - state: stripe_top
+      color: "#6DB15C"
+    - state: stripe_bottom
+      color: "#4A8A3B"
+    - sprite: _NC/Interface/Misc/job_icons.rsi
+      offset: -0.09375, 0.0625
+      state: biotech_agrariy
+  - type: PresetIdCard
+    job: BiotechnicaBotanist
+
+# Keeps the department tools of the BotanistPDA it replaces.
+- type: entity
+  parent: BotanistPDA
+  id: BiotechnicaBotanistPDA
+  name: Biotechnica agronomist PDA
+  description: A rugged department terminal tied to its owner's persistent position.
+  components:
+  - type: Pda
+    id: BiotechnicaBotanistIDCard
+  - type: PdaBorderColor
+    borderColor: "#6DB15C"

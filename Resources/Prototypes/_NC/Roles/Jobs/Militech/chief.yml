@@ -10,7 +10,7 @@
   supervisors: nc-job-supervisors-militech-command
   weight: 100
   startingGear: MilitechChiefGear
-  icon: JobIconHeadOfSecurity
+  icon: NCJobIconMilitechChief
   accessGroups: [ MilitechBasic ]
   access: [ Militech_Command, Militech_Operative, Militech_Armory, Militech_Tech, Militech_Medical ]
 
@@ -23,7 +23,7 @@
     head: ClothingHeadHatMilitechCap
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesCombat
-    id: HoSPDA
+    id: MilitechChiefPDA
     belt: ClothingBeltSecurity
     armor: ClothingOuterArmorMilitechBulletproof
     outerClothing: ClothingOuterCoatHoSTrench
@@ -33,3 +33,41 @@
     - Handcuffs
     - HoloprojectorSecurity
     - RadioHandheldSecurity
+
+- type: jobIcon
+  parent: JobIcon
+  id: NCJobIconMilitechChief
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons_extra.rsi
+    state: militech_chief
+  jobName: job-name-militech-chief
+
+- type: entity
+  parent: IDCardStandard
+  id: MilitechChiefIDCard
+  name: Militech director ID
+  components:
+  - type: Sprite
+    layers:
+    - state: default
+    - state: stripe_top
+      color: "#8A8C91"
+    - state: stripe_bottom
+      color: "#5B5E64"
+    - sprite: _NC/Interface/Misc/job_icons_extra.rsi
+      offset: -0.09375, 0.0625
+      state: militech_chief
+  - type: PresetIdCard
+    job: MilitechChief
+
+# Keeps the department tools of the HoSPDA it replaces.
+- type: entity
+  parent: HoSPDA
+  id: MilitechChiefPDA
+  name: Militech director PDA
+  description: A rugged department terminal tied to its owner's persistent position.
+  components:
+  - type: Pda
+    id: MilitechChiefIDCard
+  - type: PdaBorderColor
+    borderColor: "#8A8C91"
