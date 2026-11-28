@@ -109,6 +109,7 @@ public sealed partial class NCCyberwareSystem
         var allowance = 0f;
         var boneMultiplier = 1f;
         var hasEnhancement = false;
+        var reinforced = false;
         foreach (var uid in modules)
         {
             var module = Comp<NCCyberwareComponent>(uid);
@@ -118,6 +119,7 @@ public sealed partial class NCCyberwareSystem
             var efficiency = module.FunctionalEfficiency;
             if (profile.RequiresPower)
                 efficiency *= module.CrisisBlocksActiveModes ? 0f : module.CrisisEfficiency;
+            reinforced |= efficiency > 0f;
             allowance = MathF.Max(allowance, profile.HardsuitPenaltyAllowance * efficiency);
             boneMultiplier = MathF.Min(boneMultiplier, 1f - (1f - profile.BoneTraumaMultiplier) * efficiency);
         }
@@ -127,6 +129,7 @@ public sealed partial class NCCyberwareSystem
             state = EnsureComp<NCSkeletalSupportBodyComponent>(body);
         }
         state.BoneTraumaMultiplier = Math.Clamp(boneMultiplier, 0f, 1f);
+        state.Reinforced = reinforced;
         allowance = Math.Clamp(allowance, 0f, 1f);
         if (MathHelper.CloseTo(state.HardsuitPenaltyAllowance, allowance)) return;
         state.HardsuitPenaltyAllowance = allowance;

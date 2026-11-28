@@ -18,6 +18,12 @@ public sealed partial class NCSkeletalSupportBodyComponent : Component
 
     [ViewVariables]
     public float BoneTraumaMultiplier = 1f;
+
+    /// <summary>
+    /// At least one skeletal enhancement (a muscle-bone lace or a linear frame) is installed and operational.
+    /// </summary>
+    [ViewVariables]
+    public bool Reinforced;
 }
 
 public static class NCSkeletalSupportMath
