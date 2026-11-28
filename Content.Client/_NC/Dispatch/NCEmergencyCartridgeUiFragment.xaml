@@ -1,0 +1,17 @@
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<dispatch:NCEmergencyCartridgeUiFragment xmlns="https://spacestation14.io"
+                                         xmlns:dispatch="clr-namespace:Content.Client._NC.Dispatch"
+                                         Margin="5"
+                                         VerticalExpand="True">
+    <ScrollContainer VerticalExpand="True" HScrollEnabled="False">
+        <BoxContainer Orientation="Vertical" SeparationOverride="6">
+            <Label Name="BalanceLabel" FontColorOverride="#AAAAAA" />
+            <BoxContainer Name="ServicesContainer" Orientation="Vertical" SeparationOverride="8" />
+            <PanelContainer StyleClasses="LowDivider" />
+            <Label Text="{Loc 'nc-trauma-subscription-title'}" StyleClasses="LabelHeading" />
+            <Label Name="PlanLabel" />
+            <Button Name="UnsubscribeButton" Text="{Loc 'nc-trauma-unsubscribe'}" HorizontalAlignment="Left" />
+            <BoxContainer Name="PlansContainer" Orientation="Vertical" SeparationOverride="6" />
+        </BoxContainer>
+    </ScrollContainer>
+</dispatch:NCEmergencyCartridgeUiFragment>

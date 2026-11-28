@@ -52,6 +52,8 @@ nc-bank-kind-contract = Оплата контракта
 nc-bank-kind-fixer = Оплата фиксера
 nc-bank-kind-rent = Аренда
 nc-bank-kind-purchase = Покупка
+nc-bank-kind-service-payment = Оплата услуги
+nc-bank-kind-service-refund = Возврат за услугу
 nc-bank-kind-unknown = Операция
 
 nc-bank-atm-title = Банкомат Банка Найт-Сити

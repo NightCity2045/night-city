@@ -40,6 +40,8 @@ public static class NCBankFormat
             NCBankTransactionKind.FixerPayment => "nc-bank-kind-fixer",
             NCBankTransactionKind.Rent => "nc-bank-kind-rent",
             NCBankTransactionKind.Purchase => "nc-bank-kind-purchase",
+            NCBankTransactionKind.ServicePayment => "nc-bank-kind-service-payment",
+            NCBankTransactionKind.ServiceRefund => "nc-bank-kind-service-refund",
             _ => "nc-bank-kind-unknown",
         });
     }

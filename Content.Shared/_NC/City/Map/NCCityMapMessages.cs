@@ -137,3 +137,10 @@ public sealed class NCCityMapEditResultEvent(bool success, string message) : Ent
     public readonly bool Success = success;
     public readonly string Message = message;
 }
+
+/// <summary>
+/// A person shown as a dot on a monitoring map. <see cref="Id"/> keeps the selection across updates; the name and
+/// detail appear only when the viewer picks the dot.
+/// </summary>
+[Serializable, NetSerializable]
+public sealed record NCCityMapContact(int Id, string Name, string Detail, string NetworkId, int Z, Vector2 Position);

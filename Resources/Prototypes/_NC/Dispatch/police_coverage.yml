@@ -1,0 +1,33 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# How often the NCPD monitoring console refreshes a person in each district, in seconds. A district without a
+# refresh is outside police coverage: nobody shows on the console there and gunfire raises no alert. Streets
+# outside every district and districts not listed use `outside`.
+- type: ncPoliceCoverage
+  id: Default
+  outside: 30
+  districts:
+  # High coverage: cameras on every corner.
+  - district: eca1baef-2094-4278-95dc-88ac7e2c6a40 # Downtown
+    refresh: 5
+  - district: e49d1531-7134-4212-bb1f-44fc76f325ec # Upper Marina
+    refresh: 5
+  - district: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2 # Little Europe
+    refresh: 5
+  - district: c4f78018-c60c-4e1f-b114-0ce90b7424c5 # University District
+    refresh: 5
+  # Medium coverage.
+  - district: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f # Little China
+    refresh: 20
+  - district: e2e35b70-5277-4359-91a6-0792e01fb477 # Old Japantown
+    refresh: 20
+  - district: 504dd7a0-4f25-43df-a96c-3f4069ea6de5 # Port of Night City
+    refresh: 20
+  - district: 88684957-b4da-4f20-862d-b67b4b030882 # South Night City
+    refresh: 20
+  - district: c20733c2-faa0-4d43-aaf6-37c3f6bd886b # Glen
+    refresh: 20
+  # No coverage: NCPD does not patrol here.
+  - district: 0122fb70-1fcc-46c7-968a-0245372d8484 # Old Combat Zone
+  - district: dab954b5-52a7-4551-a874-d6101d1f1429 # Old City Center (Hot Zone)
+  - district: a54f1778-e26b-4dc9-af62-267003c660c7 # Reclamation Zone

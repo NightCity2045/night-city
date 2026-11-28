@@ -117,6 +117,8 @@ public sealed partial class NCBankSystem : EntitySystem
 
         _sincePayday = TimeSpan.Zero;
         PaySalaries();
+        var payday = new NCBankPaydayEvent();
+        RaiseLocalEvent(ref payday);
     }
 
     private void OnPrototypesReloaded(PrototypesReloadedEventArgs args)
@@ -531,6 +533,39 @@ public sealed partial class NCBankSystem : EntitySystem
         _adminLog.Add(LogType.NCBank, LogImpact.Low,
             $"{ToPrettyString(actor):actor} paid {amount} rent for {property} from {account.Number}");
         return true;
+    }
+
+    /// <summary>
+    /// Pays an organization for a service (a Trauma subscription or call). No bank fee applies.
+    /// </summary>
+    public bool TryPayService(NCBankAccountRecord payer, ProtoId<NCBankDepartmentPrototype> department, long amount, string service, EntityUid? actor)
+    {
+        if (amount <= 0 || payer.Balance < amount || !_byDepartment.TryGetValue(department, out var target))
+            return false;
+
+        Apply(payer, NCBankTransactionKind.ServicePayment, -amount, 0, target.Number, service);
+        Apply(target, NCBankTransactionKind.ServicePayment, amount, 0, payer.Number, service);
+        _adminLog.Add(LogType.NCBank, LogImpact.Low,
+            $"{ToPrettyString(actor):actor} paid {amount} for {service} from {payer.Number} to {target.Number}");
+        return true;
+    }
+
+    /// <summary>
+    /// Refunds a service payment from the organization, as far as its account allows. Returns what was refunded.
+    /// </summary>
+    public long RefundService(ProtoId<NCBankDepartmentPrototype> department, NCBankAccountRecord client, long amount, string service)
+    {
+        if (amount <= 0 || !_byDepartment.TryGetValue(department, out var source))
+            return 0;
+
+        var refunded = Math.Min(amount, source.Balance);
+        if (refunded <= 0)
+            return 0;
+
+        Apply(source, NCBankTransactionKind.ServiceRefund, -refunded, 0, client.Number, service);
+        Apply(client, NCBankTransactionKind.ServiceRefund, refunded, 0, source.Number, service);
+        _adminLog.Add(LogType.NCBank, LogImpact.Low, $"{source.Number} refunded {refunded} for {service} to {client.Number}");
+        return refunded;
     }
 
     /// <summary>This round's operations on the account, newest first. History is not stored between rounds.</summary>

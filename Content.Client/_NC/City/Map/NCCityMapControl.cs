@@ -52,6 +52,11 @@ public sealed partial class NCCityMapControl : LayoutContainer
     private static readonly Color SelectedLine = Color.FromHex("#FFFFFFF0");
     private static readonly Color DraftLine = Color.FromHex("#FF5AF0F0");
     private static readonly Color DraftFill = Color.FromHex("#FF5AF030");
+    private static readonly Color ContactColor = Color.FromHex("#9BE7FF");
+    private static readonly Color SelectedContactColor = Color.FromHex("#FFFFFF");
+
+    /// <summary>A right click this close to a dot, in pixels, picks it.</summary>
+    private const float ContactPickRadius = 10f;
 
     [Dependency] private IEntityManager _entities = default!;
     [Dependency] private IGameTiming _timing = default!;
@@ -66,6 +71,8 @@ public sealed partial class NCCityMapControl : LayoutContainer
     private readonly Button _labelsButton;
     private readonly List<MapFeature> _features = [];
     private readonly List<NCCityMapMarker> _markers = [];
+    private readonly List<NCCityMapContact> _contacts = [];
+    private int? _selectedContact;
     private readonly HashSet<string> _drawnLabels = [];
     private readonly List<UIBox2> _labelRects = [];
     private readonly List<ArchitectureChunk> _architecture = [];
@@ -215,9 +222,53 @@ public sealed partial class NCCityMapControl : LayoutContainer
         _coordinateLabel.Text = $"X {_userPosition.X:0.0} // Y {_userPosition.Y:0.0} // Z {_z:+0;-0;0}";
     }
 
+    /// <summary>
+    /// Replaces the people shown as dots (a monitoring console). The picked dot stays picked while it is listed.
+    /// </summary>
+    public void SetContacts(IEnumerable<NCCityMapContact> contacts)
+    {
+        _contacts.Clear();
+        _contacts.AddRange(contacts);
+        if (_selectedContact is { } selected && _contacts.All(contact => contact.Id != selected))
+            _selectedContact = null;
+    }
+
+    /// <summary>Replaces the operational markers without touching the rest of the map.</summary>
+    public void SetMarkers(IEnumerable<NCCityMapMarker> markers)
+    {
+        _markers.Clear();
+        _markers.AddRange(markers);
+    }
+
+    /// <summary>Picks the dot under a right click, or clears the pick when there is none.</summary>
+    private void PickContact(Vector2 screenPoint)
+    {
+        _selectedContact = null;
+        var best = ContactPickRadius;
+        foreach (var contact in _contacts)
+        {
+            if (!string.Equals(contact.NetworkId, _networkId, StringComparison.Ordinal))
+                continue;
+
+            var distance = (MapToScreen(contact.Position) - screenPoint).Length();
+            if (distance > best)
+                continue;
+
+            best = distance;
+            _selectedContact = contact.Id;
+        }
+    }
+
     protected override void KeyBindDown(GUIBoundKeyEventArgs args)
     {
         base.KeyBindDown(args);
+        if (args.Function == EngineKeyFunctions.UseSecondary && _contacts.Count > 0)
+        {
+            PickContact(args.RelativePixelPosition);
+            args.Handle();
+            return;
+        }
+
         if (args.Function != EngineKeyFunctions.Use)
             return;
 
@@ -302,6 +353,7 @@ public sealed partial class NCCityMapControl : LayoutContainer
 
         DrawEditing(handle);
         DrawUserMarker(handle);
+        DrawContacts(handle);
         DrawOperationalMarkers(handle);
         DrawSignalOverlay(handle);
     }
@@ -1009,6 +1061,42 @@ public sealed partial class NCCityMapControl : LayoutContainer
         handle.DrawLine(marker + new Vector2(7f, 0f), marker + new Vector2(13f, 0f), SignalColor.WithAlpha(0.7f));
         handle.DrawLine(marker - new Vector2(0f, 13f), marker - new Vector2(0f, 7f), SignalColor.WithAlpha(0.7f));
         handle.DrawLine(marker + new Vector2(0f, 7f), marker + new Vector2(0f, 13f), SignalColor.WithAlpha(0.7f));
+    }
+
+    private void DrawContacts(DrawingHandleScreen handle)
+    {
+        NCCityMapContact? selected = null;
+        foreach (var contact in _contacts)
+        {
+            if (!string.Equals(contact.NetworkId, _networkId, StringComparison.Ordinal))
+                continue;
+
+            var point = MapToScreen(contact.Position);
+            if (!IsInCanvas(point))
+                continue;
+
+            if (contact.Id == _selectedContact)
+            {
+                selected = contact;
+                continue;
+            }
+
+            // People on other floors stay visible but dimmed.
+            var color = ContactColor.WithAlpha(contact.Z == _z ? 0.95f : 0.45f);
+            handle.DrawCircle(point, 2.5f, color);
+        }
+
+        if (selected is not { } picked)
+            return;
+
+        var at = MapToScreen(picked.Position);
+        handle.DrawCircle(at, 7f, SelectedContactColor.WithAlpha(0.25f));
+        handle.DrawCircle(at, 3.5f, SelectedContactColor);
+        var label = $"{picked.Name} // {picked.Detail} // Z {picked.Z:+0;-0;0}";
+        var dimensions = handle.GetDimensions(_smallFont, label, 1f);
+        var origin = at + new Vector2(10f, -dimensions.Y / 2f);
+        handle.DrawRect(new UIBox2(origin - new Vector2(3f, 2f), origin + dimensions + new Vector2(3f, 2f)), CanvasColor.WithAlpha(0.85f));
+        handle.DrawString(_smallFont, origin, label, SelectedContactColor);
     }
 
     private NCCityMapMarker? _mission;
