@@ -1,0 +1,82 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Street-grade doses for the black market: the clinical formulas brewed in a back-room lab, so purity, sterility and
+# mixing are worse and the label promises more than the dose delivers.
+
+- type: entity
+  parent: NCSyringeStimulant
+  id: NCSyringeStimulantStreet
+  suffix: street grade
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaFieldStimulant
+    profile: NCPharmaProductionStreet
+    doses: 1
+    inputPurity: 0.8
+    sterility: 0.7
+    mixing: 0.7
+
+- type: entity
+  parent: NCSyringeTraumaAnalgesic
+  id: NCSyringeTraumaAnalgesicStreet
+  suffix: street grade
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaTraumaAnalgesic
+    profile: NCPharmaProductionStreet
+    doses: 1
+    inputPurity: 0.8
+    sterility: 0.7
+    mixing: 0.7
+
+- type: entity
+  parent: NCSyringeProcoagulant
+  id: NCSyringeProcoagulantStreet
+  suffix: street grade
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaProcoagulant
+    profile: NCPharmaProductionStreet
+    doses: 1
+    inputPurity: 0.8
+    sterility: 0.7
+    mixing: 0.7
+
+- type: entity
+  parent: NCSyringeAntitoxin
+  id: NCSyringeAntitoxinStreet
+  suffix: street grade
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaAntitoxin
+    profile: NCPharmaProductionStreet
+    doses: 1
+    inputPurity: 0.8
+    sterility: 0.7
+    mixing: 0.7
+
+- type: entity
+  parent: NCSyringeVasopressor
+  id: NCSyringeVasopressorStreet
+  suffix: street grade
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaVasopressorAutoinjector
+    profile: NCPharmaProductionStreet
+    doses: 1
+    inputPurity: 0.8
+    sterility: 0.7
+    mixing: 0.7
+
+- type: entity
+  parent: NCSyringeSedative
+  id: NCSyringeSedativeStreet
+  suffix: street grade
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaSedative
+    profile: NCPharmaProductionStreet
+    doses: 1
+    inputPurity: 0.8
+    sterility: 0.7
+    mixing: 0.7

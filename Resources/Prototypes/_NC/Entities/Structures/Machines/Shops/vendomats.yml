@@ -118,3 +118,14 @@
     color: "#3FF0FF"
   - type: NCShop
     catalog: NCShopImplants
+
+- type: entity
+  parent: NCShopVendomatBase
+  id: NCShopBlackMarketVendomat
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Machines/Shops/blackmarket.rsi
+  - type: PointLight
+    color: "#C43CFF"
+  - type: NCShop
+    catalog: NCShopBlackMarket

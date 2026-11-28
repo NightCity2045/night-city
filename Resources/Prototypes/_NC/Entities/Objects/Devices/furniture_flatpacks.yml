@@ -9,6 +9,7 @@
   description: A compact package containing a basic chair.
   components:
   - type: Flatpack
+    qualityNeeded: Screwing
     entity: Chair
 
 - type: entity
@@ -18,6 +19,7 @@
   description: A compact package containing a dark office chair.
   components:
   - type: Flatpack
+    qualityNeeded: Screwing
     entity: ChairOfficeDark
 
 - type: entity
@@ -27,6 +29,7 @@
   description: A compact package containing a metal table.
   components:
   - type: Flatpack
+    qualityNeeded: Screwing
     entity: Table
 
 - type: entity
@@ -36,6 +39,7 @@
   description: A compact package containing a standard bed.
   components:
   - type: Flatpack
+    qualityNeeded: Screwing
     entity: Bed
 
 - type: entity
@@ -45,6 +49,7 @@
   description: A compact package containing an empty bookshelf.
   components:
   - type: Flatpack
+    qualityNeeded: Screwing
     entity: Bookshelf
 
 - type: entity
@@ -54,4 +59,135 @@
   description: A compact package containing an industrial storage rack.
   components:
   - type: Flatpack
+    qualityNeeded: Screwing
     entity: Rack
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCFurnitureWoodChairFlatpack
+  name: wooden chair flatpack
+  description: A compact package containing a wooden chair.
+  components:
+  - type: Flatpack
+    qualityNeeded: Screwing
+    entity: ChairWood
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCFurnitureComfyChairFlatpack
+  name: armchair flatpack
+  description: A compact package containing a padded armchair.
+  components:
+  - type: Flatpack
+    qualityNeeded: Screwing
+    entity: ComfyChair
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCFurnitureBarStoolFlatpack
+  name: bar stool flatpack
+  description: A compact package containing a bar stool.
+  components:
+  - type: Flatpack
+    qualityNeeded: Screwing
+    entity: StoolBar
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCFurnitureWoodTableFlatpack
+  name: wooden table flatpack
+  description: A compact package containing a wooden table.
+  components:
+  - type: Flatpack
+    qualityNeeded: Screwing
+    entity: TableWood
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCFurnitureGlassTableFlatpack
+  name: glass table flatpack
+  description: A compact package containing a glass table.
+  components:
+  - type: Flatpack
+    qualityNeeded: Screwing
+    entity: TableGlass
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCFurnitureFancyTableFlatpack
+  name: fancy table flatpack
+  description: A compact package containing a black dining table.
+  components:
+  - type: Flatpack
+    qualityNeeded: Screwing
+    entity: TableFancyBlack
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCFurnitureDresserFlatpack
+  name: dresser flatpack
+  description: A compact package containing a dresser.
+  components:
+  - type: Flatpack
+    qualityNeeded: Screwing
+    entity: Dresser
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCFurnitureWardrobeFlatpack
+  name: wardrobe flatpack
+  description: A compact package containing a black wardrobe.
+  components:
+  - type: Flatpack
+    qualityNeeded: Screwing
+    entity: WardrobeBlack
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCFurniturePlantFlatpack
+  name: potted plant flatpack
+  description: A compact package containing a potted plant.
+  components:
+  - type: Flatpack
+    qualityNeeded: Screwing
+    entity: PottedPlantRandom
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCFurnitureMicrowaveFlatpack
+  name: microwave flatpack
+  description: A compact package containing a kitchen microwave.
+  components:
+  - type: Flatpack
+    qualityNeeded: Screwing
+    entity: KitchenMicrowave
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCFurnitureFreezerFlatpack
+  name: freezer flatpack
+  description: A compact package containing a freezer locker.
+  components:
+  - type: Flatpack
+    qualityNeeded: Screwing
+    entity: LockerFreezer
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCFurnitureTelevisionFlatpack
+  name: television flatpack
+  description: A compact package containing a television.
+  components:
+  - type: Flatpack
+    qualityNeeded: Screwing
+    entity: ComputerTelevision
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCFurnitureMirrorFlatpack
+  name: mirror flatpack
+  description: A compact package containing a mirror.
+  components:
+  - type: Flatpack
+    qualityNeeded: Screwing
+    entity: Mirror
