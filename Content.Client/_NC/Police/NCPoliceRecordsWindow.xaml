@@ -15,11 +15,21 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                       PlaceHolder="{Loc 'nc-police-records-search-placeholder'}"
                       HorizontalExpand="True" />
             <Button Name="SearchButton" Text="{Loc 'nc-police-records-search'}" MinWidth="120" />
+            <Button Name="PawnLogButton" Text="{Loc 'nc-police-pawn-log'}" ToggleMode="True" MinWidth="160" />
         </BoxContainer>
 
         <PanelContainer StyleClasses="LowDivider" />
 
-        <BoxContainer Orientation="Horizontal" VerticalExpand="True" SeparationOverride="10">
+        <BoxContainer Name="PawnLogPanel" Orientation="Vertical" VerticalExpand="True" Visible="False" SeparationOverride="6">
+            <BoxContainer Orientation="Horizontal" SeparationOverride="6">
+                <Label Text="{Loc 'nc-police-pawn-log-title'}" StyleClasses="LabelHeading" HorizontalExpand="True" />
+                <Button Name="PawnLogRefreshButton" Text="{Loc 'nc-police-pawn-log-refresh'}" />
+            </BoxContainer>
+            <Label Name="PawnLogEmptyLabel" Text="{Loc 'nc-police-pawn-log-empty'}" FontColorOverride="DarkGray" Align="Center" />
+            <ItemList Name="PawnLogList" VerticalExpand="True" />
+        </BoxContainer>
+
+        <BoxContainer Name="RecordsPanel" Orientation="Horizontal" VerticalExpand="True" SeparationOverride="10">
             <BoxContainer Orientation="Vertical" MinWidth="260" MaxWidth="260">
                 <Label Text="{Loc 'nc-police-records-results'}" StyleClasses="LabelHeading" />
                 <Label Name="NoResultsLabel"

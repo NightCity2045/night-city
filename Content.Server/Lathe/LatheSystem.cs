@@ -239,6 +239,10 @@ namespace Content.Server.Lathe
                 if (currentRecipe.Result is { } resultProto)
                 {
                     var result = Spawn(resultProto, Transform(uid).Coordinates);
+                    // NC-Edit-Start: printed goods are marked so buyers value them by their materials.
+                    var produced = new Content.Shared._NC.Pawn.NCLatheProducedEvent(result, uid, currentRecipe.ID);
+                    RaiseLocalEvent(ref produced);
+                    // NC-Edit-End
                     _stack.TryMergeToContacts(result);
                 }
 

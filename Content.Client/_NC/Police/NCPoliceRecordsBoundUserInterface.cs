@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using Content.Shared._NC.Pawn;
 using Content.Shared._NC.Police.UI;
 
 namespace Content.Client._NC.Police;
@@ -36,6 +37,7 @@ public sealed partial class NCPoliceRecordsBoundUserInterface(EntityUid owner, E
             SendMessage(new NCPoliceCreateFineMessage(article, reason, amount));
         _window.OnFineStatusChanged += (fineId, status, reason) =>
             SendMessage(new NCPoliceSetFineStatusMessage(fineId, status, reason));
+        _window.OnPawnLogRequested += () => SendMessage(new NCPolicePawnLogRequestMessage());
         _window.OpenCentered();
     }
 
@@ -44,6 +46,8 @@ public sealed partial class NCPoliceRecordsBoundUserInterface(EntityUid owner, E
         base.ReceiveMessage(message);
         if (message is NCPoliceRecordsUpdateMessage update)
             _window?.UpdateData(update);
+        else if (message is NCPolicePawnLogMessage log)
+            _window?.UpdatePawnLog(log);
     }
 
     protected override void Dispose(bool disposing)
