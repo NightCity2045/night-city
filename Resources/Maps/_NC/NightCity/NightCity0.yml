@@ -5,7 +5,7 @@ meta:
   forkId: EchoCyber
   forkVersion: be524da4b41781c61399952aad42f92f7e1b6dd0
   time: 11/26/2026 07:14:57
-  entityCount: 20998
+  entityCount: 21003
 maps:
 - 1
 grids:
@@ -26713,6 +26713,20 @@ entities:
     - type: Transform
       parent: 1
       pos: -1.5,79.5
+- proto: NCFixerDeadDropFeng
+  entities:
+  - uid: 24848
+    components:
+    - type: Transform
+      parent: 1
+      pos: -153.5,118.5
+- proto: NCFixerDeadDropInsider
+  entities:
+  - uid: 24851
+    components:
+    - type: Transform
+      parent: 1
+      pos: 157.5,119.5
 - proto: NCFixerDeadDropMilitechOps
   entities:
   - uid: 19510
@@ -26720,6 +26734,27 @@ entities:
     - type: Transform
       parent: 1
       pos: -9.5,35.5
+- proto: NCFixerDeadDropTabitha
+  entities:
+  - uid: 24849
+    components:
+    - type: Transform
+      parent: 1
+      pos: 179.5,57.5
+- proto: NCFixerDeadDropVance
+  entities:
+  - uid: 24850
+    components:
+    - type: Transform
+      parent: 1
+      pos: -78.5,44.5
+- proto: NCFixerDeadDropVlad
+  entities:
+  - uid: 24847
+    components:
+    - type: Transform
+      parent: 1
+      pos: -113.5,-88.5
 - proto: NCFixerMilitechOps
   entities:
   - uid: 19509
