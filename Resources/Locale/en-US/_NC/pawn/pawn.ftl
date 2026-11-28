@@ -1,16 +1,16 @@
-ent-NCPawnShopGoldenEddie = Golden Eddie pawnshop
-    .desc = A licensed pawnbroker. Takes anything, pays little, keeps tidy books for the NCPD.
-ent-NCPawnShopSecondChance = Second Chance buyback
-    .desc = A buyback kiosk. Fair-ish prices, no questions asked out loud.
+ent-NCPawnShopGoldenEddie = "Golden" Eddie
+    .desc = A licensed pawnbroker with a loupe in his eye. Takes anything, pays little, keeps tidy books for the NCPD.
+ent-NCPawnShopSecondChance = Second Chance buyer
+    .desc = Buys back whatever you bring. Fair-ish prices, no questions asked out loud.
 ent-NCPawnShopFence = back-alley fence
-    .desc = A battered machine in a bad part of town. The best prices in the city, if you live to collect.
+    .desc = Hood up, face covered. The best prices in the city, if you live to spend them.
 
 nc-pawn-shop-golden-eddie = Golden Eddie pawnshop
 nc-pawn-shop-second-chance = Second Chance buyback
 nc-pawn-shop-fence = Back-alley fence
 
-nc-pawn-hint = Hold what you want to sell. A bag or a box is offered together with everything inside. Cash lands on the counter.
-nc-pawn-empty-hands = Your hands are empty.
+nc-pawn-hint = Pile what you want to sell on the pallet: crates and bags go with everything inside. Cash is handed over in person.
+nc-pawn-empty-pallet = The pallet is empty.
 nc-pawn-line-count = { $name } ×{ $count }
 nc-pawn-offer = Offer: { $amount } €$
 nc-pawn-not-buying = Not buying this.
@@ -46,3 +46,5 @@ nc-police-pawn-log-title = Pawn buyers this round
 nc-police-pawn-log-refresh = Refresh
 nc-police-pawn-log-empty = Nobody has sold anything this round.
 nc-police-pawn-log-entry = [{ $time }] { $shop }: { $seller } sold { $item } ×{ $count } for { $amount } €$
+ent-NCPawnPallet = buyer's pallet
+    .desc = Pile the goods here, then talk to the buyer.

@@ -8,7 +8,7 @@
     <BoxContainer Margin="10" Orientation="Vertical" SeparationOverride="8">
         <Label Text="{Loc 'nc-pawn-hint'}" FontColorOverride="#888888" />
         <PanelContainer StyleClasses="LowDivider" />
-        <Label Name="EmptyLabel" Text="{Loc 'nc-pawn-empty-hands'}" FontColorOverride="#AAAAAA" Align="Center" />
+        <Label Name="EmptyLabel" Text="{Loc 'nc-pawn-empty-pallet'}" FontColorOverride="#AAAAAA" Align="Center" />
         <ScrollContainer VerticalExpand="True" HScrollEnabled="False">
             <BoxContainer Name="LinesContainer" Orientation="Vertical" SeparationOverride="4" />
         </ScrollContainer>

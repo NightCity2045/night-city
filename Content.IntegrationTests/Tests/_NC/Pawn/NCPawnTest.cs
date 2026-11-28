@@ -74,28 +74,35 @@ public sealed class NCPawnTest : GameTest
     }
 
     [Test, RunOnSide(Side.Server)]
-    public void SaleDestroysTheGoodsPaysCashAndIsLogged()
+    public void PalletGoodsSellForCashInHandAndAreLogged()
     {
         var coords = Coords();
         var shop = Shop("NCPawnShopGoldenEddie", coords);
-        var seller = SEntMan.SpawnEntity("MobHuman", coords);
-        var item = SEntMan.SpawnEntity("NCMissionDrugBrick", coords);
-        Assert.That(_hands.TryPickupAnyHand(seller, item), Is.True);
+        var palletCoords = coords.Offset(new Vector2(1, 0));
+        SEntMan.SpawnEntity("NCPawnPallet", palletCoords);
+        var seller = SEntMan.SpawnEntity("MobHuman", coords.Offset(new Vector2(0, 1)));
+        var crate = SEntMan.SpawnEntity("NCMissionPackage", palletCoords);
+        var brick = SEntMan.SpawnEntity("NCMissionDrugBrick", palletCoords);
+        var id = SEntMan.SpawnEntity("PassengerIDCard", palletCoords);
+        var faraway = SEntMan.SpawnEntity("NCMissionDrugBrick", coords.Offset(new Vector2(8, 0)));
 
-        var payout = _pawn.GetPayout(shop, item);
-        Assert.That(payout, Is.EqualTo((int) (900 * 0.35f)));
+        var goods = _pawn.GetGoods(shop);
+        Assert.That(goods, Does.Contain(crate).And.Contain(brick).And.Contain(id));
+        Assert.That(goods, Does.Not.Contain(faraway));
+
         var before = _pawn.Log.Count;
-        Assert.That(_pawn.TrySell(shop, seller, item), Is.True);
-        Assert.That(SEntMan.Deleted(item) || SEntMan.IsQueuedForDeletion(item), Is.True);
-        Assert.That(_pawn.Log.Count, Is.EqualTo(before + 1));
-        var entry = _pawn.Log[^1];
-        Assert.That(entry.Payout, Is.EqualTo(payout));
-        Assert.That(entry.Seller, Is.Not.Empty);
+        var expected = _pawn.GetPayout(shop, crate) + _pawn.GetPayout(shop, brick);
+        Assert.That(_pawn.GetPayout(shop, brick), Is.EqualTo((int) (900 * 0.35f)));
+        Assert.That(_pawn.SellAll(shop, seller), Is.EqualTo(2));
+        Assert.That(SEntMan.IsQueuedForDeletion(brick) || SEntMan.Deleted(brick), Is.True);
+        Assert.That(SEntMan.Deleted(id) || SEntMan.IsQueuedForDeletion(id), Is.False, "the ID card is refused and stays");
+        Assert.That(_pawn.Log.Count, Is.EqualTo(before + 2));
+        Assert.That(_pawn.Log[^1].Seller, Is.Not.Empty);
 
-        var cash = SEntMan.EntityQuery<StackComponent>()
-            .Where(stack => stack.StackTypeId == "Credit")
-            .Sum(stack => stack.Count);
-        Assert.That(cash, Is.GreaterThanOrEqualTo(payout));
+        var held = _hands.EnumerateHeld(seller)
+            .Where(SEntMan.HasComponent<StackComponent>)
+            .Sum(uid => SComp<StackComponent>(uid).Count);
+        Assert.That(held, Is.EqualTo(expected), "cash is handed over in person");
     }
 
     private EntityCoordinates Coords()

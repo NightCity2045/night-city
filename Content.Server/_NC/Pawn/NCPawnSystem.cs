@@ -10,16 +10,15 @@ using Content.Shared._NC.Police.UI;
 using Content.Shared._NC.Shops;
 using Content.Shared.Damage.Components;
 using Content.Shared.GameTicking;
-using Content.Shared.Hands.EntitySystems;
 using Content.Shared.IdentityManagement;
-using Content.Shared.Interaction;
+using Content.Shared.Mobs.Components;
+using Robust.Shared.Containers;
 using Content.Shared.Materials;
 using Content.Shared.Popups;
 using Content.Shared.Power.Components;
 using Content.Shared.Power.EntitySystems;
 using Content.Shared.Research.Prototypes;
 using Content.Shared.Stacks;
-using Content.Shared.Storage;
 using Robust.Server.Audio;
 using Robust.Server.GameObjects;
 using Robust.Shared.Audio;
@@ -28,8 +27,9 @@ using Robust.Shared.Prototypes;
 namespace Content.Server._NC.Pawn;
 
 /// <summary>
-/// NPC buyers. A seller holds an item (a bag or box counts with its contents); the buyer prices it from the street
-/// value table, pays its share in cash on the counter and destroys the goods. Every sale goes into a round log that
+/// NPC buyers. A seller piles goods on the buyer's pallet (crates and bags count with their contents), talks to the
+/// buyer and sells; the buyer prices each item from the street value table, hands over its share in cash and
+/// destroys the goods. Every sale goes into a round log that
 /// the NCPD records console can read.
 /// </summary>
 public sealed class NCPawnSystem : EntitySystem
@@ -41,12 +41,13 @@ public sealed class NCPawnSystem : EntitySystem
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IComponentFactory _factory = default!;
     [Dependency] private UserInterfaceSystem _ui = default!;
-    [Dependency] private SharedHandsSystem _hands = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private SharedBatterySystem _battery = default!;
     [Dependency] private AudioSystem _audio = default!;
     [Dependency] private GameTicker _ticker = default!;
     [Dependency] private NCBankSystem _bank = default!;
+    [Dependency] private EntityLookupSystem _lookup = default!;
+    [Dependency] private SharedContainerSystem _containers = default!;
     [Dependency] private Content.Shared.Damage.Systems.DamageableSystem _damage = default!;
 
     private readonly List<NCPawnLogEntry> _log = new();
@@ -63,7 +64,6 @@ public sealed class NCPawnSystem : EntitySystem
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<NCPawnShopComponent, InteractUsingEvent>(OnInteractUsing);
         SubscribeLocalEvent<NCPawnShopComponent, BoundUIOpenedEvent>(OnOpened);
         SubscribeLocalEvent<NCPawnShopComponent, BoundUIClosedEvent>(OnClosed);
         SubscribeLocalEvent<NCPawnShopComponent, NCPawnSellMessage>(OnSell);
@@ -239,16 +239,51 @@ public sealed class NCPawnSystem : EntitySystem
 
     #region Selling
 
-    /// <summary>The item in the seller's active hand and, for a bag or box, everything inside it.</summary>
-    public List<EntityUid> GetOffered(EntityUid user)
+    /// <summary>Everything on the buyer's pallets, contents of crates and bags included; never mobs or fixtures.</summary>
+    public List<EntityUid> GetGoods(Entity<NCPawnShopComponent> shop)
     {
-        var offered = new List<EntityUid>();
-        if (!_hands.TryGetActiveItem(user, out var held))
-            return offered;
-        if (TryComp<StorageComponent>(held, out var storage))
-            offered.AddRange(storage.Container.ContainedEntities);
-        offered.Add(held.Value);
-        return offered;
+        var goods = new List<EntityUid>();
+        var seen = new HashSet<EntityUid>();
+        foreach (var pallet in _lookup.GetEntitiesInRange<NCPawnPalletComponent>(Transform(shop).Coordinates, shop.Comp.PalletRange))
+        {
+            foreach (var entity in _lookup.GetEntitiesIntersecting(pallet, LookupFlags.Dynamic | LookupFlags.Sundries))
+            {
+                if (entity != pallet.Owner)
+                    Collect(entity, goods, seen);
+            }
+        }
+
+        return goods;
+    }
+
+    private void Collect(EntityUid entity, List<EntityUid> goods, HashSet<EntityUid> seen)
+    {
+        if (!seen.Add(entity) || HasComp<MobStateComponent>(entity) || Transform(entity).Anchored)
+            return;
+        if (TryComp<ContainerManagerComponent>(entity, out var manager))
+        {
+            // Contents come first, so selling everything empties a crate before the crate itself is priced.
+            foreach (var container in _containers.GetAllContainers(entity, manager))
+            {
+                foreach (var contained in container.ContainedEntities)
+                    Collect(contained, goods, seen);
+            }
+        }
+
+        goods.Add(entity);
+    }
+
+    private bool HoldsUnsold(EntityUid item)
+    {
+        if (!TryComp<ContainerManagerComponent>(item, out var manager))
+            return false;
+        foreach (var container in _containers.GetAllContainers(item, manager))
+        {
+            if (container.ContainedEntities.Any(contained => !TerminatingOrDeleted(contained)))
+                return true;
+        }
+
+        return false;
     }
 
     public bool TrySell(Entity<NCPawnShopComponent> shop, EntityUid user, EntityUid item)
@@ -256,21 +291,16 @@ public sealed class NCPawnSystem : EntitySystem
         if (!CanSell(shop, user, item, out var payout))
             return false;
 
-        var name = Name(item);
-        var count = TryComp<StackComponent>(item, out var stack) ? Math.Max(1, stack.Count) : 1;
-        QueueDel(item);
-        _bank.SpawnCash(Transform(shop).Coordinates, payout);
-        _audio.PlayPvs(SaleSound, shop);
-        Record(shop, user, name, count, payout);
+        Sell(shop, user, item, payout);
         return true;
     }
 
     public bool CanSell(Entity<NCPawnShopComponent> shop, EntityUid user, EntityUid item, out int payout)
     {
         payout = 0;
-        if (TerminatingOrDeleted(item) || !GetOffered(user).Contains(item))
+        if (TerminatingOrDeleted(item) || !GetGoods(shop).Contains(item))
             return false;
-        if (TryComp<StorageComponent>(item, out var storage) && storage.Container.ContainedEntities.Count > 0)
+        if (HoldsUnsold(item))
         {
             _popup.PopupEntity(Loc.GetString("nc-pawn-empty-first"), shop, user);
             return false;
@@ -283,9 +313,37 @@ public sealed class NCPawnSystem : EntitySystem
         return false;
     }
 
+    /// <summary>Sells every priced item on the pallet; a crate goes too once nothing unsold is left in it.</summary>
+    public int SellAll(Entity<NCPawnShopComponent> shop, EntityUid user)
+    {
+        var sold = 0;
+        foreach (var item in GetGoods(shop))
+        {
+            if (TerminatingOrDeleted(item) || HoldsUnsold(item))
+                continue;
+            var payout = GetPayout(shop, item);
+            if (payout <= 0)
+                continue;
+            Sell(shop, user, item, payout);
+            sold++;
+        }
+
+        return sold;
+    }
+
+    private void Sell(Entity<NCPawnShopComponent> shop, EntityUid user, EntityUid item, int payout)
+    {
+        var name = Name(item);
+        var count = TryComp<StackComponent>(item, out var stack) ? Math.Max(1, stack.Count) : 1;
+        QueueDel(item);
+        _bank.GiveCashTo(user, payout);                       // paid in person, cash into the seller's hands
+        _audio.PlayPvs(SaleSound, shop);
+        Record(shop, user, name, count, payout);
+    }
+
     private void Record(Entity<NCPawnShopComponent> shop, EntityUid user, string item, int count, int payout)
     {
-        // The buyer writes down whoever they see across the counter: a masked seller stays unknown.
+        // The buyer writes down whoever they see in front of them: a masked seller stays unknown.
         _log.Add(new NCPawnLogEntry(_ticker.RoundDuration(), Loc.GetString(shop.Comp.Name),
             Content.Shared.IdentityManagement.Identity.Name(user, EntityManager), item, count, payout));
         if (_log.Count > MaximumLog)
@@ -301,43 +359,13 @@ public sealed class NCPawnSystem : EntitySystem
 
     private void OnSellAll(Entity<NCPawnShopComponent> ent, ref NCPawnSellAllMessage args)
     {
-        // Contents first, so the bag itself is empty (and sellable) by the time its turn comes.
-        foreach (var item in GetOffered(args.Actor))
-        {
-            if (GetPayout(ent, item) > 0 &&
-                (!TryComp<StorageComponent>(item, out var storage) || storage.Container.ContainedEntities.All(e => TerminatingOrDeleted(e))))
-            {
-                SellQuiet(ent, args.Actor, item);
-            }
-        }
-
+        SellAll(ent, args.Actor);
         SendState(ent, args.Actor);
-    }
-
-    private void SellQuiet(Entity<NCPawnShopComponent> shop, EntityUid user, EntityUid item)
-    {
-        var payout = GetPayout(shop, item);
-        if (payout <= 0)
-            return;
-        var name = Name(item);
-        var count = TryComp<StackComponent>(item, out var stack) ? Math.Max(1, stack.Count) : 1;
-        QueueDel(item);
-        _bank.SpawnCash(Transform(shop).Coordinates, payout);
-        _audio.PlayPvs(SaleSound, shop);
-        Record(shop, user, name, count, payout);
     }
 
     #endregion
 
     #region UI
-
-    /// <summary>Holding something out to the buyer opens the counter.</summary>
-    private void OnInteractUsing(Entity<NCPawnShopComponent> ent, ref InteractUsingEvent args)
-    {
-        if (args.Handled)
-            return;
-        args.Handled = _ui.TryOpenUi(ent.Owner, NCPawnUiKey.Key, args.User);
-    }
 
     private void OnOpened(Entity<NCPawnShopComponent> ent, ref BoundUIOpenedEvent args)
     {
@@ -374,13 +402,13 @@ public sealed class NCPawnSystem : EntitySystem
     private void SendState(Entity<NCPawnShopComponent> shop, EntityUid user)
     {
         var lines = new List<NCPawnLine>();
-        foreach (var item in GetOffered(user))
+        foreach (var item in GetGoods(shop))
         {
             if (TerminatingOrDeleted(item))
                 continue;
             lines.Add(new NCPawnLine(GetNetEntity(item), MetaData(item).EntityPrototype?.ID ?? string.Empty, Name(item),
                 TryComp<StackComponent>(item, out var stack) ? Math.Max(1, stack.Count) : 1,
-                GetPayout(shop, item), HasComp<StorageComponent>(item)));
+                GetPayout(shop, item), HasComp<ContainerManagerComponent>(item) && HoldsUnsold(item)));
         }
 
         _ui.ServerSendUiMessage(shop.Owner, NCPawnUiKey.Key, new NCPawnUpdateMessage(Loc.GetString(shop.Comp.Name), lines), user);
