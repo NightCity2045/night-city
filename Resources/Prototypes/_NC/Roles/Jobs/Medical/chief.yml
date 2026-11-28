@@ -25,6 +25,7 @@
     mask: ClothingMaskSterile
     gloves: ClothingHandsGlovesNitrile
     id: CMOPDA
+    ears: ClothingHeadsetMedical
     belt: ClothingBeltMedicalFilled
     outerClothing: ClothingOuterCoatLabCmo
   storage:

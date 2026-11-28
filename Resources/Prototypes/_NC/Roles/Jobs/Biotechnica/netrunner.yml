@@ -23,6 +23,7 @@
     head: ClothingHeadHatBiotechCap
     eyes: ClothingEyesGlasses
     id: SciencePDA
+    ears: ClothingHeadsetScience
     outerClothing: ClothingOuterCoatBiotechnicaMedtechRadiation
   storage:
     back:

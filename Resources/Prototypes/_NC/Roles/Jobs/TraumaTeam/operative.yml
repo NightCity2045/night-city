@@ -28,6 +28,7 @@
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesCombat
     id: SecurityPDA
+    ears: ClothingHeadsetCargo
     belt: ClothingBeltSecurity
     outerClothing: ClothingOuterHardsuitTraumaArmored
   storage:

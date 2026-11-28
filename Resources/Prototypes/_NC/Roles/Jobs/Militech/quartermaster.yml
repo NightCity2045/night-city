@@ -22,6 +22,7 @@
     shoes: ClothingShoesBootsWork
     head: ClothingHeadHatMilitechCap
     id: QuartermasterPDA
+    ears: ClothingHeadsetEngineering
     belt: BoxFolderClipboardThreePapers
     pocket1: AppraisalTool
     outerClothing: ClothingOuterWinterQM
