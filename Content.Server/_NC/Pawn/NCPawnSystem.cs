@@ -32,7 +32,7 @@ namespace Content.Server._NC.Pawn;
 /// destroys the goods. Every sale goes into a round log that
 /// the NCPD records console can read.
 /// </summary>
-public sealed class NCPawnSystem : EntitySystem
+public sealed partial class NCPawnSystem : EntitySystem
 {
     private static readonly SoundSpecifier SaleSound = new SoundPathSpecifier("/Audio/Effects/kaching.ogg");
     private const float RefreshInterval = 0.5f;
@@ -56,7 +56,7 @@ public sealed class NCPawnSystem : EntitySystem
     private readonly Dictionary<(string, string), bool> _ancestry = new();
     private float _refresh;
 
-    public IReadOnlyList<NCPawnLogEntry> Log => _log;
+    public IReadOnlyList<NCPawnLogEntry> Entries => _log;
 
     /// <summary>Cheapest retail price per unit of an item the city's shops sell.</summary>
     public bool TryGetRetail(EntProtoId item, out float perUnit) => _retail.TryGetValue(item, out perUnit);

@@ -18,7 +18,7 @@ namespace Content.Server._NC.Shops;
 /// (the money leaves the economy) and holds a fixed stock that refills every round. Small goods go into the
 /// buyer's hands; furniture and other big things appear at the nearest pickup point, or in front of the machine.
 /// </summary>
-public sealed class NCShopSystem : EntitySystem
+public sealed partial class NCShopSystem : EntitySystem
 {
     private const float PickupRange = 8f;
 

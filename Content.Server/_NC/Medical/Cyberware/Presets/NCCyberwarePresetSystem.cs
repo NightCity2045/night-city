@@ -14,7 +14,7 @@ namespace Content.Server._NC.Medical.Cyberware.Presets;
 /// Fits a role's cyberware preset once per character. The preset waits for the character's stored medical state to
 /// load, so the restore cannot overwrite it, and the grant is recorded so the next round does not fit it again.
 /// </summary>
-public sealed class NCCyberwarePresetSystem : EntitySystem
+public sealed partial class NCCyberwarePresetSystem : EntitySystem
 {
     [Dependency] private IServerDbManager _db = default!;
     [Dependency] private ITaskManager _tasks = default!;

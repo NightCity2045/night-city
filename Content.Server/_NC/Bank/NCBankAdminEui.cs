@@ -15,7 +15,7 @@ namespace Content.Server._NC.Bank;
 /// <summary>
 /// Admin bank window: department balances, manual grants and withdrawals on any account, and fee rates.
 /// </summary>
-public sealed class NCBankAdminEui : BaseEui
+public sealed partial class NCBankAdminEui : BaseEui
 {
     public const AdminFlags RequiredFlags = AdminFlags.Admin;
 
@@ -118,7 +118,7 @@ public sealed class NCBankAdminEui : BaseEui
 }
 
 [AdminCommand(NCBankAdminEui.RequiredFlags)]
-public sealed class NCBankAdminCommand : LocalizedEntityCommands
+public sealed partial class NCBankAdminCommand : LocalizedEntityCommands
 {
     [Dependency] private EuiManager _eui = default!;
 

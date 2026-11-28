@@ -26,7 +26,7 @@ namespace Content.Server._NC.City.Atlas;
 /// walls and doors per floor and only carry a name. Admin edits apply live and are saved to the server's user data
 /// in prototype form, so the file can be copied into <c>Resources/Prototypes/_NC/City/</c> as-is.
 /// </summary>
-public sealed class NCCityAtlasSystem : EntitySystem
+public sealed partial class NCCityAtlasSystem : EntitySystem
 {
     public const int MaximumNameLength = 64;
     public const int MaximumDistrictVertices = 128;

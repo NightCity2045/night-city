@@ -90,14 +90,14 @@ public sealed class NCPawnTest : GameTest
         Assert.That(goods, Does.Contain(crate).And.Contain(brick).And.Contain(id));
         Assert.That(goods, Does.Not.Contain(faraway));
 
-        var before = _pawn.Log.Count;
+        var before = _pawn.Entries.Count;
         var expected = _pawn.GetPayout(shop, crate) + _pawn.GetPayout(shop, brick);
         Assert.That(_pawn.GetPayout(shop, brick), Is.EqualTo((int) (900 * 0.35f)));
         Assert.That(_pawn.SellAll(shop, seller), Is.EqualTo(2));
         Assert.That(SEntMan.IsQueuedForDeletion(brick) || SEntMan.Deleted(brick), Is.True);
         Assert.That(SEntMan.Deleted(id) || SEntMan.IsQueuedForDeletion(id), Is.False, "the ID card is refused and stays");
-        Assert.That(_pawn.Log.Count, Is.EqualTo(before + 2));
-        Assert.That(_pawn.Log[^1].Seller, Is.Not.Empty);
+        Assert.That(_pawn.Entries.Count, Is.EqualTo(before + 2));
+        Assert.That(_pawn.Entries[^1].Seller, Is.Not.Empty);
 
         var held = _hands.EnumerateHeld(seller)
             .Where(SEntMan.HasComponent<StackComponent>)

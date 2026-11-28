@@ -35,6 +35,7 @@ public sealed partial class NCVehicleDriverBoundUserInterface(EntityUid owner, E
     private bool _gearDown;
     private bool _gearLeft;
     private bool _gearRight;
+    private bool _reverse;
 
     protected override void Open()
     {
@@ -190,6 +191,7 @@ public sealed partial class NCVehicleDriverBoundUserInterface(EntityUid owner, E
         UpdateGearKey(NCVehicleKeyFunctions.GearDown, NCVehicleDriverAction.GearDown, focused, ref _gearDown);
         UpdateGearKey(NCVehicleKeyFunctions.GearLeft, NCVehicleDriverAction.GearLeft, focused, ref _gearLeft);
         UpdateGearKey(NCVehicleKeyFunctions.GearRight, NCVehicleDriverAction.GearRight, focused, ref _gearRight);
+        UpdateGearKey(NCVehicleKeyFunctions.Reverse, NCVehicleDriverAction.Reverse, focused, ref _reverse);
     }
 
     private void UpdateGearKey(BoundKeyFunction function, NCVehicleDriverAction action, bool focused, ref bool previous)

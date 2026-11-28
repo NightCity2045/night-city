@@ -5,7 +5,7 @@ using Content.Shared.Containers.ItemSlots;
 namespace Content.Shared._NC.Bank;
 
 /// <summary>Registers the cash slot of bank machines on both sides so inserting cash is predicted.</summary>
-public sealed class NCBankMachineSystem : EntitySystem
+public sealed partial class NCBankMachineSystem : EntitySystem
 {
     [Dependency] private ItemSlotsSystem _itemSlots = default!;
 
