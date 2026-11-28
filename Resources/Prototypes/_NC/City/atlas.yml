@@ -317,26 +317,79 @@
     position: 113.5,109.5
   - name: "LC Night Market Stall 11"
     position: 117.5,109.5
-  - name: "LE Barkeley Ave. Building 01"
-    position: -71,173.5
-  - name: "LE Barkeley Ave. Building 02"
-    position: -71.6,138.1
-  - name: "LE Republic Way Building 01"
-    position: -97,185.5
-  - name: "LE Republic Way Building 02"
-    position: -119.2,177.8
-  - name: "LE Republic Way Building 03"
-    position: -169.5,179
-  - name: "LE Republic Way Building 04"
-    position: -145,174.5
-  - name: "LE Republic Way Building 05"
-    position: -170.5,156.5
-  - name: "LE Republic Way Building 06"
-    position: -119,156.5
-  - name: "LE Republic Way Building 07"
-    position: -141,154.5
-  - name: "LE Republic Way Building 08"
-    position: -191.5,150
+  - name: "LE Café Montmartre"
+    position: -171.5,178.5
+  - name: "LE Hotel Europa"
+    position: -147.5,174.5
+  - name: "LE Maison Vermont"
+    position: -172.5,156.5
+  - name: "LE Galerie Moderne"
+    position: -139.5,154.5
+  - name: "LE Vinothek Europa"
+    position: -193.5,149.5
+  - name: "LE Apotheke Little Europe"
+    position: -121.5,156.5
+  - name: "LE Rue de la Paix"
+    position: -117.5,177.5
+  - name: "LE Ristorante Roma"
+    position: -101.5,171.5
+  - name: "LE Libreria Europa"
+    position: -99.5,185.5
+  - name: "LE Café Europa"
+    position: -73.5,173.5
+  - name: "LE Markthalle"
+    position: -68.5,139.5
+  - name: "LE Café Montmartre"
+    position: -171.5,175.5
+    z: 1
+  - name: "LE Hotel Europa"
+    position: -146.5,173.5
+    z: 1
+  - name: "LE Rue Vermont Apartments"
+    position: -172.5,156.5
+    z: 1
+  - name: "LE Galerie Moderne"
+    position: -138.5,153.5
+    z: 1
+  - name: "LE Vinothek Europa"
+    position: -193.5,146.5
+    z: 1
+  - name: "LE Apotheke Little Europe"
+    position: -120.5,155.5
+    z: 1
+  - name: "LE Rue de la Paix"
+    position: -119.5,177.5
+    z: 1
+  - name: "LE Ristorante Roma"
+    position: -96.5,171.5
+    z: 1
+  - name: "LE Libreria Europa"
+    position: -98.5,182.5
+    z: 1
+  - name: "LE Europa Residences"
+    position: -72.5,172.5
+    z: 1
+  - name: "LE Markthalle"
+    position: -73.5,139.5
+    z: 1
+  - name: "LE Café Montmartre"
+    position: -171.5,175.5
+    z: 2
+  - name: "LE Hotel Europa"
+    position: -146.5,173.5
+    z: 2
+  - name: "LE Rue Vermont Apartments"
+    position: -172.5,156.5
+    z: 2
+  - name: "LE Galerie Moderne"
+    position: -138.5,153.5
+    z: 2
+  - name: "LE Ristorante Roma"
+    position: -96.5,171.5
+    z: 2
+  - name: "LE Europa Residences"
+    position: -72.5,172.5
+    z: 2
   - name: "OCZ 27th Street Bodega"
     position: 74.5,-51.5
   - name: "OCZ 27th Street Flats"
