@@ -9,6 +9,8 @@
   components:
   - type: NCVehicle
     chassis: NCVehicleDevelopmentSedan
+  # Rides vehicle ramps between Z-levels and drops through open floor like any other body.
+  - type: NCZPhysics
   - type: NCVehicleAccess
     keyPrototype: NCVehicleKey
     currency: Credit

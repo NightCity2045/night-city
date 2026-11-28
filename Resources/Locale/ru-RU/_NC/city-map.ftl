@@ -26,3 +26,12 @@ nc-city-map-edit-building-named = Здание названо «{$name}». Со�
 nc-city-map-edit-building-cleared = Подпись здания снята. Сохранено в {$path}.
 nc-city-map-edit-district-saved = Район «{$name}» сохранён в {$path}.
 nc-city-map-edit-district-deleted = Район удалён. Сохранено в {$path}.
+
+cmd-nccitybuildings-desc = Показывает, что видит определение зданий карты города на вашем этаже.
+cmd-nccitybuildings-help = Использование: nccitybuildings
+cmd-nccitybuildings-no-floor = Вы не на карте этажа.
+cmd-nccitybuildings-grid = Грид NavMap {$grid}: чанков {$chunks}, позиция {$x}, {$y}, поворот {$rotation}°.
+cmd-nccitybuildings-tiles = Использовано гридов: {$grids}. Тайлов пола: {$floor}, стен: {$walls}, дверей: {$doors}.
+cmd-nccitybuildings-street = Заливка улицы: краевых тайлов для старта {$seeds}, тайлов улицы {$street}.
+cmd-nccitybuildings-regions = Замкнутых областей: {$regions}, самая большая {$largest} тайлов. Отброшено: {$small} слишком маленьких, {$large} больше {$limit} тайлов.
+cmd-nccitybuildings-result = Найдено зданий: {$buildings}.

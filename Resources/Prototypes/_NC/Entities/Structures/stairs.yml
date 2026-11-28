@@ -22,3 +22,50 @@
   parent: Stairs
   name: stairs down
   description: Stairs leading to the Z-level below.
+
+# Vehicle ramp: three tiles in a row on the lower level, bottom to top in the direction of travel (sprite top is
+# the upper end, as for NCStairsUp). Each piece carries a third of the climb, so a car's centre rises smoothly
+# from the floor to 1.05 and crosses into the level above on the top piece. Leave the floor of the upper level
+# open above the top piece, and wide enough for the car's body.
+- type: entity
+  abstract: true
+  parent: Stairs
+  id: NCVehicleRampBase
+  name: vehicle ramp
+  description: A grooved concrete ramp that takes cars up to the next level.
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/vehicle_ramp.rsi
+    drawdepth: FloorTiles
+  - type: NCZLevelHighGround
+    stick: true
+
+- type: entity
+  parent: NCVehicleRampBase
+  id: NCVehicleRampBottom
+  suffix: bottom
+  components:
+  - type: Sprite
+    state: bottom
+  - type: NCZLevelHighGround
+    heightCurve: [0.35, 0]
+
+- type: entity
+  parent: NCVehicleRampBase
+  id: NCVehicleRampMiddle
+  suffix: middle
+  components:
+  - type: Sprite
+    state: middle
+  - type: NCZLevelHighGround
+    heightCurve: [0.7, 0.35]
+
+- type: entity
+  parent: NCVehicleRampBase
+  id: NCVehicleRampTop
+  suffix: top
+  components:
+  - type: Sprite
+    state: top
+  - type: NCZLevelHighGround
+    heightCurve: [1.05, 0.7]
