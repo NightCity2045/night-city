@@ -5,6 +5,7 @@
 using System.Numerics;
 using Content.Server._NC.Combat.Damage;
 using Content.Shared._NC.ActionResolution;
+using Content.Shared._NC.Medical.Cyberware;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Weapons.Recoil;
 using Content.Shared.Damage;
@@ -49,6 +50,10 @@ public sealed partial class NCHeavyWeaponRecoilSystem : EntitySystem
             // The stock gun impulse remains intact; this is the exceptional force unique to NC heavy weapons.
             _physics.ApplyLinearImpulse(args.User, -shotDirection * weapon.Comp.AdditionalImpulse, body: body);
         }
+
+        // An operational reinforced skeleton (muscle-bone lace or a linear frame) carries the recoil safely.
+        if (CompOrNull<NCSkeletalSupportBodyComponent>(args.User)?.Reinforced == true)
+            return;
 
         var wielded = TryComp<WieldableComponent>(weapon.Owner, out var wieldable) && wieldable.Wielded;
         var resolution = NCActionResolutionId.New();
