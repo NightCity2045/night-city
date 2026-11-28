@@ -162,7 +162,6 @@
     locked: false
   - type: LockedWiresPanel
   - type: AccessReader
-    access: [[ "Research" ]]
   - type: Emitter
     onState: firing
     powerUseActive: 100
@@ -329,7 +328,6 @@
   - type: StaticPrice
     price: 5000
   - type: AccessReader
-    access: [["Research"]]
   - type: GuideHelp
     guides:
     - AnomalousResearch

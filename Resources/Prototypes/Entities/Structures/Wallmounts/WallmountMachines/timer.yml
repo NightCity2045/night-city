@@ -90,7 +90,6 @@
   description: It's a timer for brig cells.
   components:
   - type: AccessReader
-    access: [["Security"]]
   - type: Construction
     graph: Timer
     node: brig

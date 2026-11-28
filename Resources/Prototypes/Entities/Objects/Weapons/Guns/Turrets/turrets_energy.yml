@@ -145,7 +145,6 @@
   suffix: AI, Silicon
   components:
   - type: AccessReader
-    access: [["StationAi"], ["ResearchDirector"]]
   - type: StationAiTurret
   - type: TurretTargetSettings
     exemptAccessLevels:
@@ -163,7 +162,6 @@
   suffix: Security
   components:
   - type: AccessReader
-    access: [["StationAi"], ["Security"]]
   - type: TurretTargetSettings
     exemptAccessLevels:
     - Security
@@ -181,7 +179,6 @@
   suffix: Command
   components:
   - type: AccessReader
-    access: [["StationAi"], ["Command"]]
   - type: TurretTargetSettings
     exemptAccessLevels:
     - Command
