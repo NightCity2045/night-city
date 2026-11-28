@@ -25,6 +25,7 @@
     mask: ClothingMaskBiotechnicaBotany
     gloves: ClothingHandsGlovesBiotechnica
     id: BiotechnicaBotanistPDA
+    ears: ClothingHeadsetScience
     belt: ClothingBeltBiotechnicaBotany
     outerClothing: ClothingOuterApronBiotechnicaBotany
   storage:

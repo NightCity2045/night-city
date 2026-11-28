@@ -136,121 +136,39 @@
 
     - node: wall
       entity: WallSolid
-      edges:
-        - to: girder
-          completed:
-            - !type:GivePrototype
-              prototype: SheetSteel1
-              amount: 2
-          steps:
-            - tool: Welding
-              doAfter: 10
+      # NC: walls come down only with an RCD; the hand deconstruction edge was removed.
 
     - node: wallChitin
       entity: WallSolidChitin
-      edges:
-        - to: girder
-          completed:
-            - !type:GivePrototype
-              prototype: SheetSteel1
-              amount: 2
-          steps:
-            - tool: Welding
-              doAfter: 10
+      # NC: walls come down only with an RCD; the hand deconstruction edge was removed.
 
     - node: uraniumWall
       entity: WallUranium
-      edges:
-        - to: girder
-          completed:
-            - !type:GivePrototype
-              prototype: SheetUranium1
-              amount: 2
-          steps:
-            - tool: Welding
-              doAfter: 10
-            - tool: Prying
-              doAfter: 10
+      # NC: walls come down only with an RCD; the hand deconstruction edge was removed.
 
     - node: silverWall
       entity: WallSilver
-      edges:
-        - to: girder
-          completed:
-            - !type:GivePrototype
-              prototype: IngotSilver1
-              amount: 2
-          steps:
-            - tool: Welding
-              doAfter: 20
-            - tool: Prying
-              doAfter: 10
+      # NC: walls come down only with an RCD; the hand deconstruction edge was removed.
 
     - node: plasticWall
       entity: WallPlastic
-      edges:
-        - to: girder
-          completed:
-            - !type:GivePrototype
-              prototype: SheetPlastic1
-              amount: 2
-          steps:
-            - tool: Prying
-              doAfter: 10
+      # NC: walls come down only with an RCD; the hand deconstruction edge was removed.
 
     - node: plasmaWall
       entity: WallPlasma
-      edges:
-        - to: girder
-          completed:
-            - !type:GivePrototype
-              prototype: SheetPlasma1
-              amount: 2
-          steps:
-            - tool: Welding
-              doAfter: 20
-            - tool: Prying
-              doAfter: 10
+      # NC: walls come down only with an RCD; the hand deconstruction edge was removed.
 
     - node: goldWall
       entity: WallGold
-      edges:
-        - to: girder
-          completed:
-            - !type:GivePrototype
-              prototype: IngotGold1
-              amount: 2
-          steps:
-            - tool: Welding
-              doAfter: 20
-            - tool: Prying
-              doAfter: 10
+      # NC: walls come down only with an RCD; the hand deconstruction edge was removed.
 
     - node: bananiumWall
       entity: WallClown
-      edges:
-        - to: girder
-          completed:
-            - !type:GivePrototype
-              prototype: MaterialBananium1
-              amount: 2
-          steps:
-            - tool: Welding
-              doAfter: 20
-            - tool: Prying
-              doAfter: 10
+      # NC: walls come down only with an RCD; the hand deconstruction edge was removed.
 
     - node: meatWall
       entity: WallMeat
-      edges:
-        - to: girder
-          completed:
-            - !type:GivePrototype
-              prototype: MaterialSheetMeat1
-              amount: 2
-          steps:
-            - tool: Prying
-              doAfter: 5
+      # NC: walls come down only with an RCD; the hand deconstruction edge was removed.
 
     - node: reinforcedGirder
       entity: ReinforcedGirder
@@ -310,198 +228,19 @@
 
     - node: reinforcedWall
       entity: WallReinforced
-      edges:
-        - to: reinforcedGirder
-          completed:
-            - !type:SpawnPrototype
-              prototype: SheetPlasteel1
-              amount: 2
-          steps:
-            - tool: Cutting
-              doAfter: 1
-              completed:
-                - !type:VisualizerDataInt
-                  key: "enum.ReinforcedWallVisuals.DeconstructionStage"
-                  data: 5
-            - tool: Screwing
-              doAfter: 1
-            - tool: Welding
-              doAfter: 5
-              completed:
-                - !type:VisualizerDataInt
-                  key: "enum.ReinforcedWallVisuals.DeconstructionStage"
-                  data: 4
-            - tool: Prying
-              doAfter: 1
-            - tool: Anchoring
-              doAfter: 1
-              completed:
-                - !type:VisualizerDataInt
-                  key: "enum.ReinforcedWallVisuals.DeconstructionStage"
-                  data: 3
-            - tool: Welding
-              doAfter: 10
-              completed:
-                - !type:VisualizerDataInt
-                  key: "enum.ReinforcedWallVisuals.DeconstructionStage"
-                  data: 2
-            - tool: Prying
-              doAfter: 1
-              completed:
-                - !type:VisualizerDataInt
-                  key: "enum.ReinforcedWallVisuals.DeconstructionStage"
-                  data: 1
-            - tool: Screwing
-              doAfter: 1
-              completed:
-                - !type:VisualizerDataInt
-                  key: "enum.ReinforcedWallVisuals.DeconstructionStage"
-                  data: 0
-            - tool: Cutting
-              doAfter: 1
+      # NC: walls come down only with an RCD; the hand deconstruction edge was removed.
 
     - node: reinforcedWallChitin
       entity: WallReinforcedChitin
-      edges:
-        - to: reinforcedGirder
-          completed:
-            - !type:SpawnPrototype
-              prototype: SheetPlasteel1
-              amount: 2
-          steps:
-            - tool: Cutting
-              doAfter: 1
-              completed:
-                - !type:VisualizerDataInt
-                  key: "enum.ReinforcedWallVisuals.DeconstructionStage"
-                  data: 5
-            - tool: Screwing
-              doAfter: 1
-            - tool: Welding
-              doAfter: 5
-              completed:
-                - !type:VisualizerDataInt
-                  key: "enum.ReinforcedWallVisuals.DeconstructionStage"
-                  data: 4
-            - tool: Prying
-              doAfter: 1
-            - tool: Anchoring
-              doAfter: 1
-              completed:
-                - !type:VisualizerDataInt
-                  key: "enum.ReinforcedWallVisuals.DeconstructionStage"
-                  data: 3
-            - tool: Welding
-              doAfter: 10
-              completed:
-                - !type:VisualizerDataInt
-                  key: "enum.ReinforcedWallVisuals.DeconstructionStage"
-                  data: 2
-            - tool: Prying
-              doAfter: 1
-              completed:
-                - !type:VisualizerDataInt
-                  key: "enum.ReinforcedWallVisuals.DeconstructionStage"
-                  data: 1
-            - tool: Screwing
-              doAfter: 1
-              completed:
-                - !type:VisualizerDataInt
-                  key: "enum.ReinforcedWallVisuals.DeconstructionStage"
-                  data: 0
-            - tool: Cutting
-              doAfter: 1
+      # NC: walls come down only with an RCD; the hand deconstruction edge was removed.
 
     - node: shuttleWall
       entity: WallShuttle
-      edges:
-        - to: reinforcedGirder
-          completed:
-            - !type:SpawnPrototype
-              prototype: SheetPlasteel1
-              amount: 2
-            - !type:SpawnPrototype
-              prototype: PartRodMetal1
-              amount: 4
-          steps:
-            - tool: Welding
-              doAfter: 10
-            - tool: Cutting
-              doAfter: 1
-              completed:
-                - !type:VisualizerDataInt
-                  key: "enum.ShuttleWallVisuals.DeconstructionStage"
-                  data: 5
-            - tool: Screwing
-              doAfter: 2
-            - tool: Welding
-              doAfter: 5
-              completed:
-                - !type:VisualizerDataInt
-                  key: "enum.ShuttleWallVisuals.DeconstructionStage"
-                  data: 4
-            - tool: Prying
-              doAfter: 2
-            - tool: Anchoring
-              doAfter: 1
-              completed:
-                - !type:VisualizerDataInt
-                  key: "enum.ShuttleWallVisuals.DeconstructionStage"
-                  data: 3
-            - tool: Welding
-              doAfter: 10
-              completed:
-                - !type:VisualizerDataInt
-                  key: "enum.ShuttleWallVisuals.DeconstructionStage"
-                  data: 2
-            - tool: Prying
-              doAfter: 1
-              completed:
-                - !type:VisualizerDataInt
-                  key: "enum.ShuttleWallVisuals.DeconstructionStage"
-                  data: 1
-            - tool: Screwing
-              doAfter: 1
-              completed:
-                - !type:VisualizerDataInt
-                  key: "enum.ShuttleWallVisuals.DeconstructionStage"
-                  data: 0
-            - tool: Cutting
-              doAfter: 4
+      # NC: walls come down only with an RCD; the hand deconstruction edge was removed.
 
     - node: diagonalshuttleWall
       entity: WallShuttleDiagonal
-      edges:
-        - to: reinforcedGirder
-          completed:
-            - !type:SpawnPrototype
-              prototype: SheetPlasteel1
-              amount: 1
-            - !type:SpawnPrototype
-              prototype: SheetSteel1
-              amount: 1
-          steps:
-          #To-Do: Add deconstruct visuals
-            - tool: Welding
-              doAfter: 5
-            - tool: Cutting
-              doAfter: 1
-            - tool: Screwing
-              doAfter: 1
-            - tool: Welding
-              doAfter: 5
-            - tool: Prying
-              doAfter: 1
-            - tool: Anchoring
-              doAfter: 1
-            - tool: Welding
-              doAfter: 10
-            - tool: Prying
-              doAfter: 1
-            - tool: Screwing
-              doAfter: 1
-            - tool: Cutting
-              doAfter: 1
+      # NC: walls come down only with an RCD; the hand deconstruction edge was removed.
 
     - node: wallrust
       entity: WallSolidRust

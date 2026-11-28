@@ -38,3 +38,7 @@ ent-NCShopGunsVendomat = gun store vendomat
 nc-shop-implants = Cyberware store
 ent-NCShopImplantsVendomat = cyberware vendomat
     .desc = Civilian cyberware. No combat implants.
+
+nc-shop-black-market = Black market
+ent-NCShopBlackMarketVendomat = black market vendomat
+    .desc = Bolted into a back alley. No questions, no receipts, no refunds.

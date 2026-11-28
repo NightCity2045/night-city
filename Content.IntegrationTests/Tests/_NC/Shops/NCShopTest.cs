@@ -42,7 +42,7 @@ public sealed class NCShopTest : GameTest
     }
 
     /// <summary>
-    /// Small goods go into the buyer's hands, furniture to the pickup point; the account pays the price, stock
+    /// Goods, flatpacked furniture included, go into the buyer's hands; the account pays the price, stock
     /// runs out, and an empty account cannot buy.
     /// </summary>
     [Test]
@@ -57,7 +57,6 @@ public sealed class NCShopTest : GameTest
             var coords = map.GridCoords;
             var groceryUid = SEntMan.SpawnEntity("NCShopGroceriesVendomat", coords);
             var furnitureUid = SEntMan.SpawnEntity("NCShopFurnitureVendomat", coords.Offset(new System.Numerics.Vector2(3, 0)));
-            var pickup = SEntMan.SpawnEntity("NCShopPickupPoint", coords.Offset(new System.Numerics.Vector2(3, 2)));
             var buyer = SEntMan.SpawnEntity("MobHuman", coords.Offset(new System.Numerics.Vector2(1, 0)));
             var account = new NCBankAccountRecord(990010, "NC-990010", 4250, null, 1000);
             var poor = new NCBankAccountRecord(990011, "NC-990011", 4251, null, 0);
@@ -78,19 +77,41 @@ public sealed class NCShopTest : GameTest
             Assert.That(shops.TryBuy(grocery, buyer, poor, bread, out var funds), Is.False);
             Assert.That(funds, Is.EqualTo("nc-shop-error-funds"));
 
-            var bed = furnitureCatalog.Entries.FindIndex(entry => entry.Item == "Bed");
+            // Furniture comes flatpacked, so it is carried home like any other item.
+            var bed = furnitureCatalog.Entries.FindIndex(entry => entry.Item == "NCFurnitureBedFlatpack");
             Assert.That(shops.TryBuy(furniture, buyer, account, bed, out _), Is.True);
-            var pickupPosition = SEntMan.GetComponent<TransformComponent>(pickup).Coordinates.Position;
-            var beds = SEntMan.EntityQuery<MetaDataComponent>()
-                .Where(meta => meta.EntityPrototype?.ID == "Bed")
-                .Select(meta => SEntMan.GetComponent<TransformComponent>(meta.Owner).Coordinates.Position)
-                .ToList();
-            Assert.That(beds, Does.Contain(pickupPosition), "The bed waits at the pickup point.");
+            Assert.That(hands.EnumerateHeld(buyer)
+                .Select(uid => SEntMan.GetComponent<MetaDataComponent>(uid).EntityPrototype?.ID),
+                Does.Contain("NCFurnitureBedFlatpack"));
 
             var stock = shops.GetStock(furniture);
             stock[bed] = 0;
             Assert.That(shops.TryBuy(furniture, buyer, account, bed, out var soldOut), Is.False);
             Assert.That(soldOut, Is.EqualTo("nc-shop-error-sold-out"));
         });
+    }
+
+    /// <summary>The furniture store sells structures only as flatpacks that unpack into a real prototype.</summary>
+    [Test]
+    public async Task FurnitureComesFlatpacked()
+    {
+        var prototypes = Server.ResolveDependency<IPrototypeManager>();
+        var factory = Server.ResolveDependency<IComponentFactory>();
+        var catalog = prototypes.Index<NCShopCatalogPrototype>("NCShopFurniture");
+        foreach (var entry in catalog.Entries)
+        {
+            var item = prototypes.Index(entry.Item);
+            if (!item.TryGetComponent<Content.Shared.Construction.Components.FlatpackComponent>(out var flatpack, factory))
+            {
+                Assert.That(item.TryGetComponent<Content.Shared.Item.ItemComponent>(out _, factory), Is.True,
+                    $"{entry.Item} is neither a flatpack nor a carriable item");
+                continue;
+            }
+
+            Assert.That(flatpack.Entity, Is.Not.Null, entry.Item.Id);
+            Assert.That(prototypes.HasIndex(flatpack.Entity!.Value), Is.True, entry.Item.Id);
+        }
+
+        await Task.CompletedTask;
     }
 }

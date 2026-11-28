@@ -7,7 +7,7 @@
   id: NCShopFurniture
   name: nc-shop-furniture
   entries:
-  - item: Bed
+  - item: NCFurnitureBedFlatpack
     price: 200
     stock: 4
   - item: BedsheetBlue
@@ -16,40 +16,40 @@
   - item: BedsheetBlack
     price: 30
     stock: 6
-  - item: Chair
+  - item: NCFurnitureChairFlatpack
     price: 40
     stock: 8
-  - item: ChairWood
+  - item: NCFurnitureWoodChairFlatpack
     price: 50
     stock: 8
-  - item: ChairOfficeDark
+  - item: NCFurnitureOfficeChairFlatpack
     price: 90
     stock: 4
-  - item: ComfyChair
+  - item: NCFurnitureComfyChairFlatpack
     price: 150
     stock: 4
-  - item: StoolBar
+  - item: NCFurnitureBarStoolFlatpack
     price: 40
     stock: 6
-  - item: Table
+  - item: NCFurnitureTableFlatpack
     price: 80
     stock: 4
-  - item: TableWood
+  - item: NCFurnitureWoodTableFlatpack
     price: 120
     stock: 4
-  - item: TableGlass
+  - item: NCFurnitureGlassTableFlatpack
     price: 150
     stock: 3
-  - item: TableFancyBlack
+  - item: NCFurnitureFancyTableFlatpack
     price: 220
     stock: 2
-  - item: Dresser
+  - item: NCFurnitureDresserFlatpack
     price: 180
     stock: 3
-  - item: Bookshelf
+  - item: NCFurnitureBookshelfFlatpack
     price: 150
     stock: 3
-  - item: WardrobeBlack
+  - item: NCFurnitureWardrobeFlatpack
     price: 200
     stock: 3
   - item: Lamp
@@ -58,22 +58,22 @@
   - item: LampGold
     price: 60
     stock: 5
-  - item: PottedPlantRandom
+  - item: NCFurniturePlantFlatpack
     price: 50
     stock: 5
-  - item: Mirror
+  - item: NCFurnitureMirrorFlatpack
     price: 70
     stock: 3
   - item: FloorCarpetItemBlack
     price: 15
     stock: 20
-  - item: KitchenMicrowave
+  - item: NCFurnitureMicrowaveFlatpack
     price: 250
     stock: 2
-  - item: LockerFreezer
+  - item: NCFurnitureFreezerFlatpack
     price: 300
     stock: 2
-  - item: ComputerTelevision
+  - item: NCFurnitureTelevisionFlatpack
     price: 300
     stock: 2
 
@@ -513,3 +513,145 @@
   - item: NCCyberwareChromeFinishKit
     price: 600
     stock: 2
+
+# Black market: off-the-books pharmacology, production gear, heavier guns, combat chrome and a forged ID.
+# Prices sit well above what the city's pawn buyers pay for the same goods.
+- type: ncShopCatalog
+  id: NCShopBlackMarket
+  name: nc-shop-black-market
+  entries:
+  # clinical pharmacology
+  - item: NCSyringeTraumaAnalgesic
+    price: 350
+    stock: 4
+  - item: NCSyringeStimulant
+    price: 300
+    stock: 4
+  - item: NCSyringeProcoagulant
+    price: 350
+    stock: 3
+  - item: NCSyringeAntitoxin
+    price: 300
+    stock: 3
+  - item: NCSyringeVasopressor
+    price: 400
+    stock: 2
+  - item: NCSyringeImmunosuppressant
+    price: 450
+    stock: 3
+  - item: NCSyringeBroadAntibiotic
+    price: 350
+    stock: 3
+  - item: NCSyringeSyntheticOxygenCarrier
+    price: 500
+    stock: 2
+  # street pharmacology
+  - item: NCSyringeStimulantStreet
+    price: 150
+    stock: 6
+  - item: NCSyringeTraumaAnalgesicStreet
+    price: 170
+    stock: 6
+  - item: NCSyringeProcoagulantStreet
+    price: 170
+    stock: 4
+  - item: NCSyringeAntitoxinStreet
+    price: 150
+    stock: 4
+  - item: NCSyringeVasopressorStreet
+    price: 200
+    stock: 3
+  - item: NCSyringeSedativeStreet
+    price: 160
+    stock: 3
+  - item: NCPharmaKitStreetLab
+    price: 2500
+    stock: 1
+  # production gear
+  - item: NCWeaponFabricatorFlatpack
+    price: 9000
+    stock: 1
+  - item: NCArmorFabricatorFlatpack
+    price: 8000
+    stock: 1
+  - item: NCImplantFabricatorFlatpack
+    price: 10000
+    stock: 1
+  - item: NCCyberwareWorkbenchFlatpack
+    price: 6000
+    stock: 1
+  - item: NCPharmaSynthesizerStreetFlatpack
+    price: 5000
+    stock: 1
+  # heavier guns and their ammunition
+  - item: NCWeaponSMGSaratoga
+    price: 1800
+    stock: 2
+  - item: NCWeaponSMGShingen
+    price: 2200
+    stock: 2
+  - item: NCWeaponShotgunCrusher
+    price: 2000
+    stock: 2
+  - item: NCWeaponRifleCopperhead
+    price: 3200
+    stock: 1
+  - item: NCWeaponRifleNowaki
+    price: 3000
+    stock: 1
+  - item: NCMagazine9x19SMG
+    price: 120
+    stock: 6
+  - item: NCMagazine11mmSMG
+    price: 140
+    stock: 6
+  - item: NCMagazine12GaugeCrusher
+    price: 150
+    stock: 6
+  - item: NCMagazine556Rifle
+    price: 180
+    stock: 6
+  - item: NCBox12Gauge
+    price: 300
+    stock: 3
+  - item: NCBox556
+    price: 350
+    stock: 3
+  # combat cyberware and armour
+  - item: NCSandevistanImplant
+    price: 6500
+    stock: 1
+  - item: NCKerenzikovImplant
+    price: 4800
+    stock: 1
+  - item: NCMantisBladeImplant
+    price: 4000
+    stock: 1
+  - item: NCArmBladeImplant
+    price: 3200
+    stock: 1
+  - item: NCArmClawsImplant
+    price: 2500
+    stock: 1
+  - item: NCArmMonowireImplant
+    price: 4000
+    stock: 1
+  - item: NCArmPistolImplant
+    price: 3200
+    stock: 1
+  - item: NCArmImpactImplant
+    price: 2900
+    stock: 1
+  - item: NCImplantSubdermalArmorTorso
+    price: 4000
+    stock: 1
+  - item: ClothingOuterArmorBulletproof
+    price: 1200
+    stock: 2
+  - item: ClothingHeadHelmetBasic
+    price: 500
+    stock: 2
+  # paperwork
+  - item: AgentIDCard
+    price: 3000
+    stock: 1

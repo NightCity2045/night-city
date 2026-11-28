@@ -13,6 +13,11 @@
   icon: NCJobIconTraumaTeamOperative
   accessGroups: [ TraumaBasic ]
   access: [ Trauma_Operative ]
+  special:
+  - !type:AddComponentSpecial
+    components:
+    - type: NCCyberwarePreset
+      preset: NCPresetTraumaTeamFrame
 
 - type: startingGear
   id: TraumaTeamOperativeGear
@@ -23,6 +28,7 @@
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesCombat
     id: TraumaTeamOperativePDA
+    ears: ClothingHeadsetCargo
     belt: ClothingBeltSecurity
     outerClothing: ClothingOuterHardsuitTraumaArmored
   storage:

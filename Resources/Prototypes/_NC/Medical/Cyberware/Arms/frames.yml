@@ -9,15 +9,19 @@
   - type: NCArmFrame
     volume: 4
     heavy: false
+    defaultHand: NCOrganHumanCivilianCyberHandLeft
   - type: Sprite
     sprite: _NC/Objects/Cyberware/arms.rsi
     state: civilian_left
   - type: VisualOrgan
     layer: enum.HumanoidVisualLayers.LArm
     data:
-      sprite: _NC/Mobs/Cyberware/parts.rsi
+      sprite: _NC/Mobs/Cyberware/Limbs/civilian.rsi
       state: l_arm
-      color: '#D0D4D8'
+      color: '#FFFFFF'
+  - type: NCCyberwareExterior
+    rsi: _NC/Mobs/Cyberware/Limbs/civilian.rsi
+    tint: false
 
 - type: entity
   parent: NCOrganHumanCivilianCyberArmLeft
@@ -38,15 +42,19 @@
   - type: NCArmFrame
     volume: 4
     heavy: false
+    defaultHand: NCOrganHumanCivilianCyberHandRight
   - type: Sprite
     sprite: _NC/Objects/Cyberware/arms.rsi
     state: civilian_right
   - type: VisualOrgan
     layer: enum.HumanoidVisualLayers.RArm
     data:
-      sprite: _NC/Mobs/Cyberware/parts.rsi
+      sprite: _NC/Mobs/Cyberware/Limbs/civilian.rsi
       state: r_arm
-      color: '#D0D4D8'
+      color: '#FFFFFF'
+  - type: NCCyberwareExterior
+    rsi: _NC/Mobs/Cyberware/Limbs/civilian.rsi
+    tint: false
 
 - type: entity
   parent: NCOrganHumanCivilianCyberArmRight
@@ -67,15 +75,19 @@
   - type: NCArmFrame
     volume: 4
     heavy: true
+    defaultHand: NCOrganHumanArmoredCyberHandLeft
   - type: Sprite
     sprite: _NC/Objects/Cyberware/arms.rsi
     state: armored_left
   - type: VisualOrgan
     layer: enum.HumanoidVisualLayers.LArm
     data:
-      sprite: _NC/Mobs/Cyberware/parts.rsi
+      sprite: _NC/Mobs/Cyberware/Limbs/armored.rsi
       state: l_arm
-      color: '#697A86'
+      color: '#FFFFFF'
+  - type: NCCyberwareExterior
+    rsi: _NC/Mobs/Cyberware/Limbs/armored.rsi
+    tint: false
 
 - type: entity
   parent: NCOrganHumanArmoredCyberArmLeft
@@ -96,15 +108,19 @@
   - type: NCArmFrame
     volume: 4
     heavy: true
+    defaultHand: NCOrganHumanArmoredCyberHandRight
   - type: Sprite
     sprite: _NC/Objects/Cyberware/arms.rsi
     state: armored_right
   - type: VisualOrgan
     layer: enum.HumanoidVisualLayers.RArm
     data:
-      sprite: _NC/Mobs/Cyberware/parts.rsi
+      sprite: _NC/Mobs/Cyberware/Limbs/armored.rsi
       state: r_arm
-      color: '#697A86'
+      color: '#FFFFFF'
+  - type: NCCyberwareExterior
+    rsi: _NC/Mobs/Cyberware/Limbs/armored.rsi
+    tint: false
 
 - type: entity
   parent: NCOrganHumanArmoredCyberArmRight

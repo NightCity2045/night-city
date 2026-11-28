@@ -137,4 +137,3 @@
   - type: SmartFridge
     flavorText: smart-fridge-request-chemistry
   - type: AccessReader
-    access: [["Medical"]]

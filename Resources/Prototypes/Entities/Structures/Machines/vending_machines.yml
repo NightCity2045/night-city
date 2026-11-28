@@ -256,7 +256,6 @@
     - state: panel
       map: ["enum.WiresVisualLayers.MaintenancePanel"]
   - type: AccessReader
-    access: [["Bar"]]
   - type: GuideHelp
     guides:
     - Bartender
@@ -290,7 +289,6 @@
     - state: panel
       map: ["enum.WiresVisualLayers.MaintenancePanel"]
   - type: AccessReader
-    access: [["SyndicateAgent"]]
   - type: GuideHelp
     guides:
     - Bartender
@@ -324,7 +322,6 @@
     energy: 2.0
     color: "#ffb0b0"
   - type: AccessReader
-    access: [["HeadOfPersonnel"]]
 
 - type: entity
   parent: VendingMachine
@@ -353,7 +350,6 @@
     - state: panel
       map: ["enum.WiresVisualLayers.MaintenancePanel"]
   - type: AccessReader
-    access: [["Service"]]
   - type: PointLight
     radius: 1.5
     energy: 3.0
@@ -806,7 +802,6 @@
     - state: panel
       map: ["enum.WiresVisualLayers.MaintenancePanel"]
   - type: AccessReader
-    access: [["Kitchen"]]
   - type: PointLight
     radius: 1.5
     energy: 3.0
@@ -899,7 +894,6 @@
     - state: panel
       map: ["enum.WiresVisualLayers.MaintenancePanel"]
   - type: AccessReader
-    access: [["Engineering"]]
   - type: PointLight
     radius: 1.5
     energy: 3.0
@@ -963,7 +957,6 @@
     - state: panel
       map: ["enum.WiresVisualLayers.MaintenancePanel"]
   - type: AccessReader
-    access: [["Medical"]]
 
 - type: entity
   parent: VendingMachine
@@ -993,7 +986,6 @@
     - state: panel
       map: ["enum.WiresVisualLayers.MaintenancePanel"]
   - type: AccessReader
-    access: [["Hydroponics"]]
   - type: PointLight
     radius: 1.5
     energy: 3.0
@@ -1027,7 +1019,6 @@
     - state: panel
       map: ["enum.WiresVisualLayers.MaintenancePanel"]
   - type: AccessReader
-    access: [["Security"]]
   - type: PointLight
     radius: 1
     energy: 2.0
@@ -1076,7 +1067,6 @@
   suffix: Hydroponics
   components:
   - type: AccessReader
-    access: [["Hydroponics"]]
 
 - type: entity
   parent: VendingMachine
@@ -1356,7 +1346,6 @@
     - state: panel
       map: ["enum.WiresVisualLayers.MaintenancePanel"]
   - type: AccessReader
-    access: [["Research"]]
   - type: PointLight
     radius: 1.5
     energy: 3.0
@@ -1485,7 +1474,6 @@
     energy: 3.0
     color: "#b89f25"
   - type: AccessReader
-    access: [["Salvage"]]
   - type: GuideHelp
     guides:
     - Salvage
@@ -1555,7 +1543,6 @@
     energy: 3.0
     color: "#326e3f"
   - type: AccessReader
-    access: [["Hydroponics"]]
 
 - type: entity
   parent: VendingMachine
@@ -1583,7 +1570,6 @@
     - state: panel
       map: ["enum.WiresVisualLayers.MaintenancePanel"]
   - type: AccessReader
-    access: [["Lawyer"]]
 
 - type: entity
   parent: VendingMachine
@@ -1615,7 +1601,6 @@
     energy: 3.0
     color: "#d82929"
   - type: AccessReader
-    access: [["Security"]]
 
 - type: entity
   parent: VendingMachine
@@ -1643,7 +1628,6 @@
     - state: panel
       map: ["enum.WiresVisualLayers.MaintenancePanel"]
   - type: AccessReader
-    access: [["Bar"]]
 
 - type: entity
   parent: VendingMachine
@@ -1667,7 +1651,6 @@
     - state: panel
       map: ["enum.WiresVisualLayers.MaintenancePanel"]
   - type: AccessReader
-    access: [["Chapel"]]
   - type: PointLight
     radius: 1.5
     energy: 3.0
@@ -1703,7 +1686,6 @@
     energy: 3.0
     color: "#b89e2a"
   - type: AccessReader
-    access: [["Cargo"]]
 
 - type: entity
   parent: VendingMachine
@@ -1731,7 +1713,6 @@
     - state: panel
       map: ["enum.WiresVisualLayers.MaintenancePanel"]
   - type: AccessReader
-    access: [["Medical"]]
 
 - type: entity
   parent: VendingMachine
@@ -1759,7 +1740,6 @@
     - state: panel
       map: ["enum.WiresVisualLayers.MaintenancePanel"]
   - type: AccessReader
-    access: [["Chemistry"]]
   - type: AmbientMusicMarkerMedical
 
 - type: entity
@@ -1788,7 +1768,6 @@
     - state: panel
       map: ["enum.WiresVisualLayers.MaintenancePanel"]
   - type: AccessReader
-    access: [["Service"]]
 
 - type: entity
   parent: VendingMachine
@@ -1820,7 +1799,6 @@
     energy: 3.0
     color: "#b89e2a"
   - type: AccessReader
-    access: [["Engineering"]]
   - type: AmbientMusicMarkerEngineering
 
 - type: entity
@@ -1853,7 +1831,6 @@
     energy: 3.0
     color: "#b89e2a"
   - type: AccessReader
-    access: [["Engineering"]]
   - type: AmbientMusicMarkerEngineering
 
 - type: entity
@@ -1882,7 +1859,6 @@
     - state: panel
       map: ["enum.WiresVisualLayers.MaintenancePanel"]
   - type: AccessReader
-    access: [["Kitchen"]]
 
 - type: entity
   parent: VendingMachine
@@ -1910,7 +1886,6 @@
     - state: panel
       map: ["enum.WiresVisualLayers.MaintenancePanel"]
   - type: AccessReader
-    access: [["Detective"]]
 
 - type: entity
   parent: VendingMachine
@@ -1942,7 +1917,6 @@
     energy: 3.0
     color: "#6927C5"
   - type: AccessReader
-    access: [["Janitor"]]
 
 - type: entity
   parent: VendingMachine
@@ -1970,7 +1944,6 @@
     - state: panel
       map: ["enum.WiresVisualLayers.MaintenancePanel"]
   - type: AccessReader
-    access: [["Research"]]
 
 - type: entity
   parent: VendingMachine
@@ -2002,7 +1975,6 @@
     energy: 3.0
     color: "#d82929"
   - type: AccessReader
-    access: [["NuclearOperative"], ["SyndicateAgent"]]
 
 - type: entity
   parent: VendingMachine
@@ -2030,7 +2002,6 @@
     - state: panel
       map: ["enum.WiresVisualLayers.MaintenancePanel"]
   - type: AccessReader
-    access: [["Research"]]
 
 - type: entity
   parent: VendingMachine
@@ -2058,7 +2029,6 @@
     - state: panel
       map: ["enum.WiresVisualLayers.MaintenancePanel"]
   - type: AccessReader
-    access: [["Medical"]]
   - type: AmbientMusicMarkerMedical
 
 - type: entity
@@ -2087,7 +2057,6 @@
     - state: panel
       map: ["enum.WiresVisualLayers.MaintenancePanel"]
   - type: AccessReader
-    access: [["Medical"]]
   - type: AmbientMusicMarkerMedical
 
 - type: entity
@@ -2116,7 +2085,6 @@
     energy: 3.0
     color: "#48CF48"
   - type: AccessReader
-    access: [["CentralCommand"]]
 
 - type: entity
   parent: VendingMachine
@@ -2154,7 +2122,6 @@
   - type: SpeakOnUIClosed
     pack: HappyHonkGoodbyes
   - type: AccessReader
-    access: [["Kitchen"], ["Theatre"]]
 
 # Pride Vending Machine
 
@@ -2242,7 +2209,6 @@
     - state: panel
       map: ["enum.WiresVisualLayers.MaintenancePanel"]
   - type: AccessReader
-    access: [["Chemistry"]]
   - type: GuideHelp
     guides:
     - Chemicals
@@ -2263,7 +2229,6 @@
     denyState: deny
     ejectDelay: 2
   - type: AccessReader
-    access: [["SyndicateAgent"]]
 
 # wallmount
 - type: entity
@@ -2314,4 +2279,3 @@
     - texture: Structures/Machines/VendingMachines/maintenance_panel.png
       map: ["enum.WiresVisualLayers.MaintenancePanel"]
   - type: AccessReader
-    access: [["Medical"]]

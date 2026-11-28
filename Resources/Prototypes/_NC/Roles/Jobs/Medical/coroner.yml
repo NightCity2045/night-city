@@ -24,6 +24,7 @@
     mask: ClothingMaskSterile
     gloves: ClothingHandsGlovesForensic
     id: NCMedicalCoronerPDA
+    ears: ClothingHeadsetMedical
     belt: ClothingBeltMedicalFilled
     outerClothing: ClothingOuterCoatLab
   storage:

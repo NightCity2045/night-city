@@ -30,9 +30,8 @@
 
     # Head
     - map: [ "enum.HumanoidVisualLayers.Head" ]
-      sprite: _NC/Mobs/Cyberware/parts.rsi
+      sprite: _NC/Mobs/Cyberware/Borg/standard.rsi
       state: head_m
-      color: "#A8BAC9"
       visible: false
     - map: [ "enum.HumanoidVisualLayers.Snout" ]
     - map: [ "enum.HumanoidVisualLayers.Eyes" ]
@@ -96,8 +95,8 @@
       sprite: Objects/Misc/handcuffs.rsi
       state: body-overlay-2
       visible: false
-    - sprite: Objects/Specific/Robotics/mmi.rsi
-      state: mmi_off
+    - sprite: _NC/Objects/Cyberware/borg.rsi
+      state: pod
       map: [ pod ]
   - type: GenericVisualizer
     visuals:
@@ -152,8 +151,8 @@
   id: NCBorgMechanicalOrganBase
   components:
   - type: Sprite
-    sprite: Objects/Misc/stock_parts.rsi
-    state: micro_mani
+    sprite: _NC/Objects/Cyberware/borg.rsi
+    state: frame_node
   - type: NCOrganIntegrity
     material: Mechanical
   - type: NCAnatomicalRegion

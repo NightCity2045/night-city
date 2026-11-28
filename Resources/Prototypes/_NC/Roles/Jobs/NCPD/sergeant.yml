@@ -23,6 +23,7 @@
     head: ClothingHeadHatBeretSecurity
     eyes: ClothingEyesGlassesSecurity
     id: NCPDSergeantPDA
+    ears: ClothingHeadsetSecurity
     belt: ClothingBeltSecurity
     armor: ClothingOuterArmorBulletproof
   storage:

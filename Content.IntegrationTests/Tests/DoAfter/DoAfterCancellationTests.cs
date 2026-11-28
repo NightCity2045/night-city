@@ -15,16 +15,10 @@ public sealed class DoAfterCancellationTests : InteractionTest
     [Test]
     public async Task CancelWallDeconstruct()
     {
-        await StartDeconstruction(WallConstruction.WallSolid);
-        await InteractUsing(Weld, awaitDoAfters: false);
-
-        // Failed do-after has no effect
-        await CancelDoAfters();
-        AssertPrototype(WallConstruction.WallSolid);
-
-        // Second attempt works fine
-        await InteractUsing(Weld);
+        // NC-Edit-Start: walls cannot be welded down any more, so the cancellation checks start from a girder.
+        await StartDeconstruction(WallConstruction.Girder);
         AssertPrototype(WallConstruction.Girder);
+        // NC-Edit-End
 
         // Repeat for wrenching interaction
         AssertAnchored();

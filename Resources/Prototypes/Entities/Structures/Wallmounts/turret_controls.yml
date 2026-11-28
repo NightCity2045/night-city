@@ -170,7 +170,6 @@
   suffix: AI, Silicon
   components:
   - type: AccessReader
-    access: [["StationAi"], ["ResearchDirector"]]
   - type: ContainerFill
     containers:
       board:
@@ -195,7 +194,6 @@
   suffix: Security
   components:
   - type: AccessReader
-    access: [["StationAi"], ["Security"]]
   - type: ContainerFill
     containers:
       board:
@@ -212,7 +210,6 @@
   suffix: Command
   components:
   - type: AccessReader
-    access: [["StationAi"], ["Command"]]
   - type: ContainerFill
     containers:
       board:

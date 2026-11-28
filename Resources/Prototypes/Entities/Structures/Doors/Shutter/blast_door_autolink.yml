@@ -57,7 +57,6 @@
   suffix: Autolink, Bridge
   components:
   - type: AccessReader
-    access: [["Command"]]
   - type: AutoLinkReceiver
     channel: Bridge
 
@@ -67,7 +66,6 @@
   suffix: Open, Autolink, Bridge
   components:
   - type: AccessReader
-    access: [["Command"]]
   - type: AutoLinkReceiver
     channel: Bridge
 
@@ -77,7 +75,6 @@
   suffix: Autolink, Engineering
   components:
   - type: AccessReader
-    access: [["Command"], ["Engineering"]]
   - type: AutoLinkReceiver
     channel: Engineering
 
@@ -87,7 +84,6 @@
   suffix: Open, Autolink, Engineering
   components:
   - type: AccessReader
-    access: [["Command"], ["Engineering"]]
   - type: AutoLinkReceiver
     channel: Engineering
 
@@ -97,7 +93,6 @@
   suffix: Autolink, Science
   components:
   - type: AccessReader
-    access: [["Command"], ["Research"]]
   - type: AutoLinkReceiver
     channel: Research
 
@@ -107,7 +102,6 @@
   suffix: Open, Autolink, Science
   components:
   - type: AccessReader
-    access: [["Command"], ["Research"]]
   - type: AutoLinkReceiver
     channel: Research
 

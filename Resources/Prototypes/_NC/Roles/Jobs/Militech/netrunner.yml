@@ -23,6 +23,7 @@
     head: ClothingHeadHatMilitechCap
     eyes: ClothingEyesGlasses
     id: MilitechNetrunnerPDA
+    ears: ClothingHeadsetEngineering
   storage:
     back:
     - NetProbeCartridge

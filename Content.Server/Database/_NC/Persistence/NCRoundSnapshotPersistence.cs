@@ -38,7 +38,8 @@ public sealed record NCRoundSnapshotCommitRequest(
     DateTime CapturedAt,
     IReadOnlyList<NCRoundSnapshotSectionWrite> Sections,
     IReadOnlyList<int> DeletedCharacterIds,
-    int RetainCommittedSnapshots = 3);
+    int RetainCommittedSnapshots = 3,
+    string? CarryForwardCharacterOwnerType = null);
 
 public sealed record NCRoundSnapshotCommitResult(
     NCRoundSnapshotCommitStatus Status,
@@ -146,7 +147,9 @@ public abstract partial class ServerDbBase
                 "The snapshot does not belong to the active world epoch.");
         }
 
-        var payloadBytes = request.Sections.Sum(value => (long) Encoding.UTF8.GetByteCount(value.Payload));
+        var carried = await CollectCarriedCharacterSectionsAsync(db.DbContext, request);
+        var payloadBytes = request.Sections.Sum(value => (long) Encoding.UTF8.GetByteCount(value.Payload)) +
+                           carried.Sum(value => (long) Encoding.UTF8.GetByteCount(value.Payload));
         var now = DateTime.UtcNow;
         var manifest = new NCRoundSnapshot
         {
@@ -158,7 +161,7 @@ public abstract partial class ServerDbBase
             MapRevision = request.MapRevision,
             MapHash = request.MapHash,
             Status = NCRoundSnapshotStatus.Staging,
-            SectionCount = request.Sections.Count,
+            SectionCount = request.Sections.Count + carried.Count,
             PayloadBytes = payloadBytes,
             Checksum = request.Checksum,
             CapturedAt = request.CapturedAt,
@@ -179,6 +182,7 @@ public abstract partial class ServerDbBase
                 Checksum = section.Checksum,
             });
         }
+        db.DbContext.NCRoundSnapshotSections.AddRange(carried);
 
         await db.DbContext.SaveChangesAsync();
 
@@ -271,7 +275,9 @@ public abstract partial class ServerDbBase
             request.MapId.Length > 128 || request.MapHash.Length > 64 ||
             request.Checksum.Length != 64 || request.Sections.Count > MaximumRoundSnapshotSections ||
             request.DeletedCharacterIds.Count > 1024 ||
-            request.RetainCommittedSnapshots is < 1 or > 32)
+            request.RetainCommittedSnapshots is < 1 or > 32 ||
+            request.CarryForwardCharacterOwnerType is { } carryOwnerType &&
+            (string.IsNullOrWhiteSpace(carryOwnerType) || carryOwnerType.Length > 64))
         {
             throw new ArgumentException("The round snapshot manifest is invalid.", nameof(request));
         }
@@ -303,6 +309,81 @@ public abstract partial class ServerDbBase
         {
             throw new ArgumentException("The round snapshot payload is invalid.", nameof(request));
         }
+    }
+
+    /// <summary>
+    /// Copies every character-owned section of the newest committed snapshot for characters that wrote nothing
+    /// this round, so a character who skips a round keeps their body and belongings. A character that wrote any
+    /// section is captured in full by its own systems and never mixes in older state. Deleted or missing
+    /// profiles are dropped, which keeps reused profile ids from inheriting another character's data.
+    /// </summary>
+    private static async Task<List<NCRoundSnapshotSection>> CollectCarriedCharacterSectionsAsync(
+        ServerDbContext context,
+        NCRoundSnapshotCommitRequest request)
+    {
+        if (request.CarryForwardCharacterOwnerType is not { } ownerType)
+            return [];
+
+        var previousSnapshotId = await context.NCRoundSnapshots
+            .AsNoTracking()
+            .Where(value => value.Status == NCRoundSnapshotStatus.Committed)
+            .OrderByDescending(value => value.CommittedAt)
+            .Select(value => (Guid?) value.SnapshotId)
+            .FirstOrDefaultAsync();
+        if (previousSnapshotId is not { } previousId)
+            return [];
+
+        var writtenOwners = request.Sections
+            .Where(value => value.OwnerType == ownerType)
+            .Select(value => value.OwnerId)
+            .ToHashSet(StringComparer.Ordinal);
+        var deleted = request.DeletedCharacterIds.ToHashSet();
+        var previousOwners = await context.NCRoundSnapshotSections
+            .AsNoTracking()
+            .Where(value => value.SnapshotId == previousId && value.OwnerType == ownerType)
+            .Select(value => value.OwnerId)
+            .Distinct()
+            .ToListAsync();
+
+        var candidates = new Dictionary<int, string>();
+        foreach (var ownerId in previousOwners)
+        {
+            if (writtenOwners.Contains(ownerId) ||
+                !int.TryParse(ownerId, System.Globalization.NumberStyles.None,
+                    System.Globalization.CultureInfo.InvariantCulture, out var characterId) ||
+                characterId <= 0 || deleted.Contains(characterId))
+            {
+                continue;
+            }
+
+            candidates[characterId] = ownerId;
+        }
+
+        if (candidates.Count == 0)
+            return [];
+
+        var candidateIds = candidates.Keys.ToList();
+        var existingIds = await context.Profile
+            .AsNoTracking()
+            .Where(value => candidateIds.Contains(value.Id))
+            .Select(value => value.Id)
+            .ToListAsync();
+        var carriedOwners = existingIds.Select(value => candidates[value]).ToList();
+        if (carriedOwners.Count == 0)
+            return [];
+
+        var sections = await context.NCRoundSnapshotSections
+            .AsNoTracking()
+            .Where(value => value.SnapshotId == previousId &&
+                            value.OwnerType == ownerType &&
+                            carriedOwners.Contains(value.OwnerId))
+            .ToListAsync();
+        foreach (var section in sections)
+        {
+            section.SnapshotId = request.SnapshotId;
+        }
+
+        return sections;
     }
 
     private static async Task DeleteCharactersAsync(ServerDbContext context, IReadOnlyList<int> characterIds)

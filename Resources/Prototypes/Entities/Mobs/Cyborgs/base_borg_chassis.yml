@@ -330,7 +330,6 @@
     tags:
     - Borg
   - type: AccessReader
-    access: [["Command"], ["Research"]]
   - type: ShowJobIcons
   - type: ShowCrewIcons
   - type: InteractionPopup
@@ -350,7 +349,6 @@
     - NuclearOperative
     - SyndicateAgent
   - type: AccessReader
-    access: [["SyndicateAgent"], ["NuclearOperative"]]
   - type: SiliconLawProvider
     laws: SyndicateStatic
     subverted: true
@@ -387,7 +385,6 @@
     groups:
     - AllAccess #Randomized access would be fun. AllAccess is the best i can think of right now that does make it too hard for it to enter the station or navigate it..
   - type: AccessReader
-    access: [["Command"], ["Research"]]
   - type: StartIonStormed
     ionStormAmount: 3
   - type: IonStormTarget
@@ -416,7 +413,6 @@
     - NuclearOperative
     - SyndicateAgent
   - type: AccessReader
-    access: [ [ "SyndicateAgent" ], [ "NuclearOperative" ] ]
   - type: IntrinsicRadioTransmitter # Copy components from base SyndiBorg but without the stuff we don't want
     channels:
     - Binary #1984
@@ -514,7 +510,6 @@
     tags:
     - Xenoborg
   - type: AccessReader
-    access: [["Xenoborg"]]
   - type: ShowJobIcons # not sure if it is needed
   - type: ShowCrewIcons
   - type: InteractionPopup

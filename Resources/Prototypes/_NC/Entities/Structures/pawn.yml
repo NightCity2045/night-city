@@ -1,0 +1,93 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Pawn buyers are people standing at their spot, each with a pallet next to them. Sellers pile goods on the pallet,
+# talk to the buyer and sell; cash is handed over in person. Every sale goes into the round log the NCPD reads.
+- type: entity
+  abstract: true
+  id: NCPawnShopBase
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Transform
+    anchored: true
+  - type: Clickable
+  - type: InteractionOutline
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeCircle
+          radius: 0.25
+        density: 100
+        mask:
+        - MachineMask
+        layer:
+        - MidImpassable
+  - type: Sprite
+    noRot: false
+    layers:
+    - state: fixer
+    - state: fixer-unshaded
+      shader: unshaded
+  - type: ActivatableUI
+    key: enum.NCPawnUiKey.Key
+  - type: UserInterface
+    interfaces:
+      enum.NCPawnUiKey.Key:
+        type: NCPawnShopBoundUserInterface
+
+- type: entity
+  parent: NCPawnShopBase
+  id: NCPawnShopGoldenEddie
+  name: '"Golden" Eddie'
+  description: A licensed pawnbroker with a loupe in his eye. Takes anything, pays little, keeps tidy books for the NCPD.
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Pawn/golden_eddie.rsi
+  - type: NCPawnShop
+    name: nc-pawn-shop-golden-eddie
+    payout: 0.35
+
+- type: entity
+  parent: NCPawnShopBase
+  id: NCPawnShopSecondChance
+  name: Second Chance buyer
+  description: Buys back whatever you bring. Fair-ish prices, no questions asked out loud.
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Pawn/second_chance.rsi
+  - type: NCPawnShop
+    name: nc-pawn-shop-second-chance
+    payout: 0.5
+
+- type: entity
+  parent: NCPawnShopBase
+  id: NCPawnShopFence
+  name: back-alley fence
+  description: Hood up, face covered. The best prices in the city, if you live to spend them.
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Pawn/fence.rsi
+  - type: NCPawnShop
+    name: nc-pawn-shop-fence
+    payout: 0.65
+
+- type: entity
+  parent: BaseCargoPallet
+  id: NCPawnPallet
+  name: buyer's pallet
+  description: Pile the goods here, then talk to the buyer.
+  components:
+  - type: NCPawnPallet
+  - type: Damageable
+    damageModifierSet: Metallic
+  - type: Sprite
+    drawdepth: FloorTiles
+    layers:
+    - sprite: Structures/catwalk.rsi
+      state: catwalk_preview
+    - sprite: Structures/catwalk.rsi
+      state: catwalk_preview
+      color: "#E0B02A55"

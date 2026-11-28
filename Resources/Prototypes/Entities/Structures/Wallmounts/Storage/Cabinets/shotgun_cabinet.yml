@@ -24,7 +24,6 @@
           tags:
           - WeaponShotgunKammerer
   - type: AccessReader
-    access: [["Security"], ["Command"]]
 
 - type: entity
   parent: ShotGunCabinet

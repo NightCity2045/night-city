@@ -10,7 +10,7 @@ public sealed class PanelScrewing : InteractionTest
     // Test wires panel on both airlocks & tcomms servers. These both use the same component, but comms may have
     // conflicting interactions due to encryption key removal interactions.
     [Test]
-    [TestCase("Airlock")]
+    // NC: airlock panels are sealed (NCSealedWiresPanel); see NCSealedStructuresTest.
     [TestCase("TelecomServerFilled")]
     public async Task WiresPanelScrewing(string prototype)
     {

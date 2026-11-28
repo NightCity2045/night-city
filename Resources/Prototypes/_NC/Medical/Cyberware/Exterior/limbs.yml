@@ -11,15 +11,15 @@
   name: clinical cyberarm
   manufacturer: Night City clinical adaptation
   icon:
-    sprite: _NC/Objects/Cyberware/implants.rsi
-    state: cyberarm_right
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: clinical_right
   hostIcons:
     ArmLeft:
-      sprite: _NC/Objects/Cyberware/implants.rsi
-      state: cyberarm_left
+      sprite: _NC/Objects/Cyberware/arms.rsi
+      state: clinical_left
     ArmRight:
-      sprite: _NC/Objects/Cyberware/implants.rsi
-      state: cyberarm_right
+      sprite: _NC/Objects/Cyberware/arms.rsi
+      state: clinical_right
   form: LimbReplacement
   size: 5
   maximumIntegrity: 160
@@ -111,24 +111,34 @@
   parent: NCOrganHumanCyberArmLeft
   id: NCOrganHumanClinicalCyberArmLeft
   components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: clinical_left
   - type: NCCyberware
     profile: NCClinicalCyberArm
   - type: NCCyberwareExterior
     finish: NCFinishMedical
+    rsi: _NC/Mobs/Cyberware/Limbs/clinical.rsi
+    tint: false
+  - type: NCArmFrame
+    heavy: true
+    defaultHand: NCOrganHumanClinicalCyberHandLeft
 
 - type: entity
   parent: NCOrganHumanDetachableParentRegionBase
   id: NCOrganHumanCyberLegLeft
   components:
   - type: Sprite
-    sprite: _NC/Mobs/Cyberware/parts.rsi
+    sprite: _NC/Mobs/Cyberware/Limbs/clinical.rsi
     state: l_leg
   - type: VisualOrgan
     layer: enum.HumanoidVisualLayers.LLeg
     data:
-      sprite: _NC/Mobs/Cyberware/parts.rsi
+      sprite: _NC/Mobs/Cyberware/Limbs/clinical.rsi
       state: l_leg
   - type: NCCyberwareExterior
+    rsi: _NC/Mobs/Cyberware/Limbs/clinical.rsi
+    tint: false
     finish: NCFinishMedical
   - type: Organ
     category: LegLeft
@@ -152,24 +162,34 @@
   parent: NCOrganHumanCyberArmRight
   id: NCOrganHumanClinicalCyberArmRight
   components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: clinical_right
   - type: NCCyberware
     profile: NCClinicalCyberArm
   - type: NCCyberwareExterior
     finish: NCFinishMedical
+    rsi: _NC/Mobs/Cyberware/Limbs/clinical.rsi
+    tint: false
+  - type: NCArmFrame
+    heavy: true
+    defaultHand: NCOrganHumanClinicalCyberHandRight
 
 - type: entity
   parent: NCOrganHumanDetachableParentRegionBase
   id: NCOrganHumanCyberLegRight
   components:
   - type: Sprite
-    sprite: _NC/Mobs/Cyberware/parts.rsi
+    sprite: _NC/Mobs/Cyberware/Limbs/clinical.rsi
     state: r_leg
   - type: VisualOrgan
     layer: enum.HumanoidVisualLayers.RLeg
     data:
-      sprite: _NC/Mobs/Cyberware/parts.rsi
+      sprite: _NC/Mobs/Cyberware/Limbs/clinical.rsi
       state: r_leg
   - type: NCCyberwareExterior
+    rsi: _NC/Mobs/Cyberware/Limbs/clinical.rsi
+    tint: false
     finish: NCFinishMedical
   - type: Organ
     category: LegRight

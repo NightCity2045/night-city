@@ -4,6 +4,7 @@
   keycode: ";"
   frequency: 1459
   color: "#2cdb2c"
+  longRange: true # NC - Z-levels are separate maps; city radio needs no telecom server
 
 - type: radioChannel
   id: CentCom
@@ -26,6 +27,7 @@
   keycode: 'e'
   frequency: 1357
   color: "#ff733c"
+  longRange: true # NC - Z-levels are separate maps; city radio needs no telecom server
 
 - type: radioChannel
   id: Medical
@@ -33,6 +35,7 @@
   keycode: 'm'
   frequency: 1355
   color: "#57b8f0"
+  longRange: true # NC - Z-levels are separate maps; city radio needs no telecom server
 
 - type: radioChannel
   id: Science
@@ -40,6 +43,7 @@
   keycode: 'n'
   frequency: 1351
   color: "#cd7ccd"
+  longRange: true # NC - Z-levels are separate maps; city radio needs no telecom server
 
 - type: radioChannel
   id: Security
@@ -47,6 +51,7 @@
   keycode: 's'
   frequency: 1359
   color: "#ff4242"
+  longRange: true # NC - Z-levels are separate maps; city radio needs no telecom server
 
 - type: radioChannel
   id: Service
@@ -54,6 +59,7 @@
   keycode: 'v'
   frequency: 1349
   color: "#539c00"
+  longRange: true # NC - Z-levels are separate maps; city radio needs no telecom server
 
 - type: radioChannel
   id: Supply
@@ -61,6 +67,7 @@
   keycode: 'u'
   frequency: 1347
   color: "#b48b57"
+  longRange: true # NC - Z-levels are separate maps; city radio needs no telecom server
 
 - type: radioChannel
   id: Syndicate

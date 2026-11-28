@@ -24,6 +24,7 @@
     eyes: ClothingEyesGogglesBiotechnicaTech
     gloves: ClothingHandsGlovesBiotechnica
     id: BiotechnicaRiggerPDA
+    ears: ClothingHeadsetScience
     belt: ClothingBeltUtilityFilled
   storage:
     back:

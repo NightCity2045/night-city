@@ -1,0 +1,126 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Street values the pawn buyers work from; each buyer pays its own share of them.
+# Order: explicit items, then shop goods (retailShare of retail), printed goods (their materials), loose materials,
+# the first matching category, junk.
+- type: ncPawnPrices
+  id: NCPawnPrices
+  retailShare: 0.9
+  printedMarkup: 1.1
+  junk: 2
+  materialFallback: 3
+  materials:
+    Steel: 3
+    Glass: 2
+    Plastic: 2
+    Wood: 1
+    Cloth: 1
+    Durathread: 5
+    Plasteel: 10
+    Plasma: 20
+    Silver: 25
+    Uranium: 30
+    Gold: 40
+    Diamond: 80
+  refusedComponents: [ IdCard, Pda, NCPropertyCard, Brain, MobState, Currency ]
+  refusedStacks: [ Credit ]
+  items:
+    # fixer mission goods
+    NCMissionPackage: 250
+    NCMissionDataShard: 600
+    NCMissionDrugBrick: 900
+    NCMissionPeaceOffering: 400
+    NCMissionPartyCrate: 500
+    NCMissionCashEnvelope: 250
+    NCMissionHotZoneTechCrate: 800
+    NCMissionMilitaryPrototype: 2000
+    NCMissionCorporateFiles: 700
+    # combat and heavy cyberware the city's shops never sell
+    NCSandevistanImplant: 4000
+    NCKerenzikovImplant: 3000
+    NCMantisBladeImplant: 2500
+    NCArmBladeImplant: 2000
+    NCArmClawsImplant: 1500
+    NCArmMonowireImplant: 2500
+    NCArmPistolImplant: 2000
+    NCArmLauncherImplant: 3000
+    NCArmImpactImplant: 1800
+    NCImplantLinearFrameSigma: 3500
+    NCImplantLinearFrameBeta: 5000
+    NCImplantMuscleBoneLace: 1500
+    NCImplantSubdermalArmorTorso: 2500
+    NCImplantSkinweaveTorso: 1800
+    NCOpticRadarImplantStandard: 2000
+    NCOrganHumanCyberEyes: 2000
+    NCOrganHumanCyberHeart: 3000
+    NCImplantPowerBusMk1: 800
+    NCImplantBioconverterMk1: 900
+    NCOrganHumanCyberArmLeft: 2500
+    NCOrganHumanCyberArmRight: 2500
+    NCOrganHumanArmoredCyberArmLeft: 3000
+    NCOrganHumanArmoredCyberArmRight: 3000
+    NCOrganHumanClinicalCyberArmLeft: 2500
+    NCOrganHumanClinicalCyberArmRight: 2500
+    NCOrganHumanCyberLegLeft: 2500
+    NCOrganHumanCyberLegRight: 2500
+  categories:
+  - name: nc-pawn-category-lmg
+    price: 2500
+    parents: [ BaseWeaponLightMachineGun ]
+  - name: nc-pawn-category-sniper
+    price: 2000
+    parents: [ BaseWeaponSniper ]
+  - name: nc-pawn-category-rifle
+    price: 1400
+    parents: [ BaseWeaponRifle ]
+  - name: nc-pawn-category-smg
+    price: 900
+    parents: [ BaseWeaponSubMachineGun ]
+  - name: nc-pawn-category-shotgun
+    price: 900
+    parents: [ BaseWeaponShotgun ]
+  - name: nc-pawn-category-pistol
+    price: 450
+    parents: [ BaseWeaponPistol ]
+  - name: nc-pawn-category-gun
+    price: 500
+    components: [ Gun ]
+  - name: nc-pawn-category-cyberware
+    price: 1200
+    components: [ NCCyberware ]
+  - name: nc-pawn-category-cyberware-part
+    price: 150
+    components: [ NCCyberwarePart ]
+  - name: nc-pawn-category-armor
+    price: 300
+    components: [ Armor ]
+  - name: nc-pawn-category-organ
+    price: 250
+    components: [ Organ ]
+  - name: nc-pawn-category-blood
+    price: 80
+    components: [ NCBloodBag ]
+  - name: nc-pawn-category-pharma
+    price: 60
+    components: [ NCPharmaPrefilled ]
+  - name: nc-pawn-category-pharma-raw
+    price: 25
+    components: [ NCPharmaRawMaterial ]
+  - name: nc-pawn-category-magazine
+    price: 40
+    components: [ BallisticAmmoProvider ]
+  - name: nc-pawn-category-cartridge
+    price: 2
+    components: [ CartridgeAmmo ]
+  - name: nc-pawn-category-board
+    price: 120
+    components: [ MachineBoard, ComputerBoard ]
+  - name: nc-pawn-category-melee
+    price: 60
+    components: [ MeleeWeapon ]
+  - name: nc-pawn-category-clothing
+    price: 15
+    components: [ Clothing ]
+  - name: nc-pawn-category-food
+    price: 3
+    components: [ Edible ]

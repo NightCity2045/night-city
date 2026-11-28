@@ -5,13 +5,13 @@
   parent: OrganHumanHandLeft
   components:
   - type: Sprite
-    sprite: _NC/Mobs/Cyberware/parts.rsi
+    sprite: _NC/Mobs/Cyberware/Limbs/industrial.rsi
     state: l_hand
   - type: VisualOrgan
     data:
-      sprite: _NC/Mobs/Cyberware/parts.rsi
+      sprite: _NC/Mobs/Cyberware/Limbs/industrial.rsi
       state: l_hand
-      color: "#A8BAC9"
+      color: "#FFFFFF"
   - type: NCAnatomicalRegion
     tissueProfile: NCHumanMechanicalTissue
     movementContribution: 0.25
@@ -33,13 +33,13 @@
   parent: OrganHumanHandRight
   components:
   - type: Sprite
-    sprite: _NC/Mobs/Cyberware/parts.rsi
+    sprite: _NC/Mobs/Cyberware/Limbs/industrial.rsi
     state: r_hand
   - type: VisualOrgan
     data:
-      sprite: _NC/Mobs/Cyberware/parts.rsi
+      sprite: _NC/Mobs/Cyberware/Limbs/industrial.rsi
       state: r_hand
-      color: "#A8BAC9"
+      color: "#FFFFFF"
   - type: NCAnatomicalRegion
     tissueProfile: NCHumanMechanicalTissue
     movementContribution: 0.25
@@ -55,3 +55,81 @@
     requiredParentCategory: ArmRight
     woundProfile: NCHumanWoundSystem
     treatmentProfile: NCHumanFieldTreatment
+
+- type: entity
+  parent: NCOrganHumanCyberHandLeft
+  id: NCOrganHumanCivilianCyberHandLeft
+  components:
+  - type: Sprite
+    sprite: _NC/Mobs/Cyberware/Limbs/civilian.rsi
+    state: l_hand
+  - type: VisualOrgan
+    data:
+      sprite: _NC/Mobs/Cyberware/Limbs/civilian.rsi
+      state: l_hand
+      color: "#FFFFFF"
+
+- type: entity
+  parent: NCOrganHumanCyberHandRight
+  id: NCOrganHumanCivilianCyberHandRight
+  components:
+  - type: Sprite
+    sprite: _NC/Mobs/Cyberware/Limbs/civilian.rsi
+    state: r_hand
+  - type: VisualOrgan
+    data:
+      sprite: _NC/Mobs/Cyberware/Limbs/civilian.rsi
+      state: r_hand
+      color: "#FFFFFF"
+
+- type: entity
+  parent: NCOrganHumanCyberHandLeft
+  id: NCOrganHumanArmoredCyberHandLeft
+  components:
+  - type: Sprite
+    sprite: _NC/Mobs/Cyberware/Limbs/armored.rsi
+    state: l_hand
+  - type: VisualOrgan
+    data:
+      sprite: _NC/Mobs/Cyberware/Limbs/armored.rsi
+      state: l_hand
+      color: "#FFFFFF"
+
+- type: entity
+  parent: NCOrganHumanCyberHandRight
+  id: NCOrganHumanArmoredCyberHandRight
+  components:
+  - type: Sprite
+    sprite: _NC/Mobs/Cyberware/Limbs/armored.rsi
+    state: r_hand
+  - type: VisualOrgan
+    data:
+      sprite: _NC/Mobs/Cyberware/Limbs/armored.rsi
+      state: r_hand
+      color: "#FFFFFF"
+
+- type: entity
+  parent: NCOrganHumanCyberHandLeft
+  id: NCOrganHumanClinicalCyberHandLeft
+  components:
+  - type: Sprite
+    sprite: _NC/Mobs/Cyberware/Limbs/clinical.rsi
+    state: l_hand
+  - type: VisualOrgan
+    data:
+      sprite: _NC/Mobs/Cyberware/Limbs/clinical.rsi
+      state: l_hand
+      color: "#FFFFFF"
+
+- type: entity
+  parent: NCOrganHumanCyberHandRight
+  id: NCOrganHumanClinicalCyberHandRight
+  components:
+  - type: Sprite
+    sprite: _NC/Mobs/Cyberware/Limbs/clinical.rsi
+    state: r_hand
+  - type: VisualOrgan
+    data:
+      sprite: _NC/Mobs/Cyberware/Limbs/clinical.rsi
+      state: r_hand
+      color: "#FFFFFF"

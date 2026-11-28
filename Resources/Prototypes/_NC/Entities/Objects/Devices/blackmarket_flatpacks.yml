@@ -1,0 +1,47 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Production gear sold off the books by the black market vendomat. Unpacked with a multitool like any machine flatpack.
+- type: entity
+  parent: BaseFlatpack
+  id: NCWeaponFabricatorFlatpack
+  name: weapon fabricator flatpack
+  description: A weapon fabricator, packed flat with its serials filed off.
+  components:
+  - type: Flatpack
+    entity: NCWeaponFabricator
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCArmorFabricatorFlatpack
+  name: armor fabricator flatpack
+  description: An armor fabricator, packed flat with its serials filed off.
+  components:
+  - type: Flatpack
+    entity: NCArmorFabricator
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCImplantFabricatorFlatpack
+  name: implant fabricator flatpack
+  description: A cyberware fabricator, packed flat with its serials filed off.
+  components:
+  - type: Flatpack
+    entity: NCImplantFabricator
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCCyberwareWorkbenchFlatpack
+  name: cyberware workbench flatpack
+  description: A ripperdoc's assembly bench for preparing implants, packed flat.
+  components:
+  - type: Flatpack
+    entity: NCCyberwareWorkbench
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCPharmaSynthesizerStreetFlatpack
+  name: street lab synthesizer flatpack
+  description: A back-room drug synthesizer, packed flat.
+  components:
+  - type: Flatpack
+    entity: NCPharmaSynthesizerStreet
