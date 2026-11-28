@@ -252,16 +252,71 @@
     position: -141,154.5
   - name: "LE Republic Way Building 08"
     position: -191.5,150
-  - name: "OCZ 27th Street Building 01"
-    position: 78.5,-53.5
-  - name: "OCZ Ventura Street Building 01"
-    position: 101.9,-53.6
-  - name: "OCZ Ventura Street Building 02"
-    position: 119.5,-59
-  - name: "OCZ Ventura Street Building 03"
+  - name: "OCZ 27th Street Bodega"
+    position: 74.5,-51.5
+  - name: "OCZ 27th Street Flats"
+    position: 74.5,-51.5
+    z: 1
+  - name: "OCZ 27th Street Flats"
+    position: 74.5,-51.5
+    z: 2
+  - name: "OCZ Valentinos Cantina"
+    position: 102.5,-50.5
+  - name: "OCZ Valentinos Cantina"
+    position: 102.5,-50.5
+    z: 1
+  - name: "OCZ Valentinos Cantina"
+    position: 102.5,-50.5
+    z: 2
+  - name: "OCZ Valentinos Cellar"
+    position: 104.5,-57.5
+    z: -1
+  - name: "OCZ Valentinos Garage"
+    position: 121.5,-56.5
+  - name: "OCZ Valentinos Garage"
+    position: 121.5,-56.5
+    z: 1
+  - name: "OCZ Valentinos Garage"
+    position: 121.5,-56.5
+    z: 2
+  - name: "OCZ Back-Alley Clinic"
+    position: 75.5,-72.5
+  - name: "OCZ The Hole Bar"
+    position: 84.5,-70.5
+  - name: "OCZ Ventura Street Lofts"
     position: 80.5,-70
-  - name: "OCZ Ventura Street Building 04"
-    position: 109.8,-73.5
+    z: 1
+  - name: "OCZ Ventura Cinema"
+    position: 116.5,-72.5
+  - name: "OCZ Ventura Cinema"
+    position: 116.5,-72.5
+    z: 1
+  - name: "OCZ Combat Zone Flophouse"
+    position: 110.5,-39.5
+  - name: "OCZ Combat Zone Flophouse"
+    position: 110.5,-39.5
+    z: 1
+  - name: "OCZ Combat Zone Flophouse"
+    position: 110.5,-39.5
+    z: 2
+  - name: "OCZ Ventura Street Apartments"
+    position: 83.5,-35.5
+  - name: "OCZ Ventura Street Apartments"
+    position: 83.5,-35.5
+    z: 1
+  - name: "OCZ Ventura Street Apartments"
+    position: 83.5,-35.5
+    z: 2
+  - name: "OCZ 27th Street Duplex"
+    position: 63.5,-65.5
+  - name: "OCZ 27th Street Duplex"
+    position: 63.5,-65.5
+    z: 1
+  - name: "OCZ 27th Street Duplex"
+    position: 63.5,-73.5
+  - name: "OCZ 27th Street Duplex"
+    position: 63.5,-73.5
+    z: 1
   - name: "OJT 18th Street Building 01"
     position: 140,51
   - name: "OJT Japantown Ripperdoc"

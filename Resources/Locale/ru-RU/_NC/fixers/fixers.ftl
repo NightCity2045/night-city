@@ -382,3 +382,16 @@ nc-fixer-mission-botha-vault-blueprints = Чертежи хранилища
 nc-fixer-mission-botha-vault-blueprints-desc = Где-то в Чёрном хранилище лежит папка чертежей Arasaka, которая так и не доехала до Токио. Принеси её мне, и в этом году тебе больше не понадобится работа.
 nc-fixer-mission-insider-ghost-in-the-core = Призрак в ядре
 nc-fixer-mission-insider-ghost-in-the-core-desc = Никто ещё не прошёл Чёрное хранилище и не рассказал об этом. Зайди, постой где надо, выйди. Эта история стоит больше любого шарда.
+
+nc-fixer-mission-vlad-valentinos-books = Сжечь книги
+nc-fixer-mission-vlad-valentinos-books-desc = Valentinos держат книгу долгов в шкафу где-то в кантине. Им должна половина 27-й улицы, и часть этих долгов моя. Разнеси его.
+nc-fixer-mission-vlad-valentinos-turf = Территория Valentinos
+nc-fixer-mission-vlad-valentinos-turf-desc = Кое-кто хочет знать, как Valentinos держат Вентура-стрит. Пройдись по их кантине, гаражу и свалке и расскажи мне, кто где сидит.
+nc-fixer-mission-feng-bozos-king = Король клоунов
+nc-fixer-mission-feng-bozos-king-desc = Bozos короновали нового короля в старом кинотеатре «Вентура», и первым указом он сжёг один из моих баров. Его нужно убрать.
+nc-fixer-mission-feng-bozos-party = Подарки к празднику
+nc-fixer-mission-feng-bozos-party-desc = Bozos устраивают вечеринку, а я покупаю мир ящиком хорошего товара. Отнеси его к их тайнику у кинотеатра и ни над кем не смейся.
+nc-fixer-mission-botha-valentinos-cash = Деньги гаража
+nc-fixer-mission-botha-valentinos-cash-desc = Valentinos пересчитывают выручку разборки, прежде чем отнести её в банк. Если по дороге пропадёт один конверт, для них это трагедия, а для нас день зарплаты.
+nc-fixer-mission-botha-bozos-stash = Клоунские конфетки
+nc-fixer-mission-botha-bozos-stash-desc = Bozos сидят в своём кинотеатре на брикете какой-то дряни. Мой покупатель хочет убрать его с улицы и получить себе.

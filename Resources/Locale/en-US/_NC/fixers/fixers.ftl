@@ -382,3 +382,16 @@ nc-fixer-mission-botha-vault-blueprints = Vault blueprints
 nc-fixer-mission-botha-vault-blueprints-desc = Somewhere in the Black Vault is a folder of Arasaka blueprints that never made it to Tokyo. Bring it to me and you will never need another job this year.
 nc-fixer-mission-insider-ghost-in-the-core = Ghost in the core
 nc-fixer-mission-insider-ghost-in-the-core-desc = Nobody has ever walked the Black Vault and talked about it. Go in, stand where it matters, come out. The story is worth more than any shard.
+
+nc-fixer-mission-vlad-valentinos-books = Burn the books
+nc-fixer-mission-vlad-valentinos-books-desc = The Valentinos keep their debt book in a cabinet somewhere in the cantina. Half of 27th Street owes them, and some of those debts are mine. Wreck it.
+nc-fixer-mission-vlad-valentinos-turf = Valentinos turf
+nc-fixer-mission-vlad-valentinos-turf-desc = Someone wants to know how the Valentinos hold Ventura Street. Walk their cantina, their garage and their junkyard, then tell me who sits where.
+nc-fixer-mission-feng-bozos-king = The clown king
+nc-fixer-mission-feng-bozos-king-desc = The Bozos crowned a new king in the old Ventura cinema, and his first decree was to burn one of my bars. He has to go.
+nc-fixer-mission-feng-bozos-party = Party favours
+nc-fixer-mission-feng-bozos-party-desc = The Bozos are throwing a party and I am buying peace with a crate of the good stuff. Take it to their drop at the cinema and do not laugh at anyone.
+nc-fixer-mission-botha-valentinos-cash = Garage money
+nc-fixer-mission-botha-valentinos-cash-desc = The Valentinos count the chop-shop money before it goes to the bank. One envelope going missing on the way is a tragedy for them and a pay day for us.
+nc-fixer-mission-botha-bozos-stash = Clown candy
+nc-fixer-mission-botha-bozos-stash-desc = The Bozos sit on a brick of something nasty in their cinema. My buyer wants it off the street and in his hands.
