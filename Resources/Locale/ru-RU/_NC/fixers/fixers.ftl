@@ -395,3 +395,12 @@ nc-fixer-mission-botha-valentinos-cash = Деньги гаража
 nc-fixer-mission-botha-valentinos-cash-desc = Valentinos пересчитывают выручку разборки, прежде чем отнести её в банк. Если по дороге пропадёт один конверт, для них это трагедия, а для нас день зарплаты.
 nc-fixer-mission-botha-bozos-stash = Клоунские конфетки
 nc-fixer-mission-botha-bozos-stash-desc = Bozos сидят в своём кинотеатре на брикете какой-то дряни. Мой покупатель хочет убрать его с улицы и получить себе.
+
+nc-fixer-mission-vlad-claws-collector = Сборщик
+nc-fixer-mission-vlad-claws-collector-desc = Сборщик Tyger Claws дважды в неделю трясёт ночной рынок Little China, а одна из лавок принадлежит моему кузену. Уложи его, но оставь дышать: мёртвые послания не передают.
+nc-fixer-mission-feng-mahjong-books = Книга маджонга
+nc-fixer-mission-feng-mahjong-books-desc = Когти записывают дань с каждой лавки в книгу в своём маджонг-клубе на Вайн-стрит. Без книги они не узнают, кто заплатил. Разбей её.
+nc-fixer-mission-vance-market-recon = Присмотр за ночным рынком
+nc-fixer-mission-vance-market-recon-desc = Клиент хочет открыть лавку в Little China и узнать, кому платить первым. Пройдись по рынку и маджонг-клубу и посмотри, где стоят Когти.
+nc-fixer-mission-botha-claws-tribute = Дань Когтей
+nc-fixer-mission-botha-claws-tribute-desc = Дань со всего ночного рынка лежит в одном конверте, прежде чем уйти наверх, в Японский квартал. Забери её, пока она не покинула Little China.

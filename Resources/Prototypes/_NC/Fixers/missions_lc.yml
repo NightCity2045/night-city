@@ -1,0 +1,59 @@
+# Little China: jobs around the Tyger Claws racket on the night market and their mahjong den.
+
+- type: ncFixerMission
+  id: NCFixerVladClawsCollector
+  fixer: NCFixerVlad
+  kind: Beating
+  name: nc-fixer-mission-vlad-claws-collector
+  description: nc-fixer-mission-vlad-claws-collector-desc
+  minimumReputation: 10
+  owner: TygerClaws
+  item: NCMobHumanGangTygerClawsEnforcer
+  encounter: GangTygerClawsPost
+  reward: 2500
+  reputationGain: 4
+  reputationLoss: 4
+  timeLimit: 1800
+
+- type: ncFixerMission
+  id: NCFixerFengMahjongBooks
+  fixer: NCFixerFeng
+  kind: Sabotage
+  name: nc-fixer-mission-feng-mahjong-books
+  description: nc-fixer-mission-feng-mahjong-books-desc
+  minimumReputation: 15
+  owner: TygerClaws
+  item: NCMissionLedgerCabinet
+  encounter: GangTygerClawsPost
+  reward: 3000
+  reputationGain: 5
+  reputationLoss: 4
+  timeLimit: 1800
+
+- type: ncFixerMission
+  id: NCFixerVanceMarketRecon
+  fixer: NCFixerVance
+  kind: Recon
+  name: nc-fixer-mission-vance-market-recon
+  description: nc-fixer-mission-vance-market-recon-desc
+  owner: TygerClaws
+  reconPoints: 3
+  encounter: GangTygerClawsPost
+  reward: 2000
+  reputationGain: 3
+  timeLimit: 1800
+
+- type: ncFixerMission
+  id: NCFixerBothaClawsTribute
+  fixer: NCFixerBotha
+  kind: Retrieval
+  name: nc-fixer-mission-botha-claws-tribute
+  description: nc-fixer-mission-botha-claws-tribute-desc
+  minimumReputation: 20
+  owner: TygerClaws
+  item: NCMissionCashEnvelope
+  encounter: GangTygerClawsStronghold
+  reward: 3500
+  reputationGain: 5
+  reputationLoss: 4
+  timeLimit: 2400

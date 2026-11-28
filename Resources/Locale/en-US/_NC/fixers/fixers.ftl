@@ -395,3 +395,12 @@ nc-fixer-mission-botha-valentinos-cash = Garage money
 nc-fixer-mission-botha-valentinos-cash-desc = The Valentinos count the chop-shop money before it goes to the bank. One envelope going missing on the way is a tragedy for them and a pay day for us.
 nc-fixer-mission-botha-bozos-stash = Clown candy
 nc-fixer-mission-botha-bozos-stash-desc = The Bozos sit on a brick of something nasty in their cinema. My buyer wants it off the street and in his hands.
+
+nc-fixer-mission-vlad-claws-collector = The collector
+nc-fixer-mission-vlad-claws-collector-desc = A Tyger Claws collector squeezes the Little China night market twice a week, and one of the stall owners is my cousin. Put him on the ground and leave him breathing; dead men do not deliver messages.
+nc-fixer-mission-feng-mahjong-books = Mahjong books
+nc-fixer-mission-feng-mahjong-books-desc = The Claws write every stall's tribute into a ledger in their mahjong den on Vine Street. Without the book they will not know who paid. Smash it.
+nc-fixer-mission-vance-market-recon = Night market watch
+nc-fixer-mission-vance-market-recon-desc = A client wants to open a stall in Little China and wants to know whom to pay first. Walk the market and the mahjong den and see where the Claws stand.
+nc-fixer-mission-botha-claws-tribute = Claws tribute
+nc-fixer-mission-botha-claws-tribute-desc = Tribute from the whole night market sits in one envelope before it goes up to Japantown. Take it before it leaves Little China.
