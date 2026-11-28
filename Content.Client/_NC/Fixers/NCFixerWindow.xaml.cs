@@ -48,11 +48,18 @@ public sealed partial class NCFixerWindow : FancyWindow
             levelName = Loc.GetString(levels.LevelNames[state.Level]);
         }
 
-        ReputationLabel.Text = Loc.GetString("nc-fixer-reputation", ("value", state.Reputation), ("level", levelName));
+        // A corporate job board is a console: no street cred, rewards go to the company.
+        _console = fixer.Employer != null;
+        ReputationLabel.Text = _console
+            ? Loc.GetString("nc-fixer-console-funds", ("share", (int) MathF.Round(fixer.EmployerShare * 100)))
+            : Loc.GetString("nc-fixer-reputation", ("value", state.Reputation), ("level", levelName));
+        OffersTitleLabel.Text = Loc.GetString(_console ? "nc-fixer-console-offers-title" : "nc-fixer-offers-title");
 
         UpdateActive(state);
         UpdateOffers(state);
     }
+
+    private bool _console;
 
     private void UpdateActive(NCFixerUiState state)
     {
@@ -105,14 +112,14 @@ public sealed partial class NCFixerWindow : FancyWindow
         var row = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 6 };
         row.AddChild(new Label
         {
-            Text = Loc.GetString("nc-fixer-offer-terms",
+            Text = Loc.GetString(_console ? "nc-fixer-console-offer-terms" : "nc-fixer-offer-terms",
                 ("reward", mission.Reward),
                 ("minutes", (int) mission.TimeLimit.TotalMinutes)),
             HorizontalExpand = true,
         });
         var accept = new Button
         {
-            Text = Loc.GetString(offer.Locked ? "nc-fixer-offer-locked" : "nc-fixer-accept"),
+            Text = Loc.GetString(offer.Locked ? (_console ? "nc-fixer-console-offer-locked" : "nc-fixer-offer-locked") : "nc-fixer-accept"),
             Disabled = offer.Locked || !free,
         };
         var slot = offer.Slot;

@@ -562,3 +562,36 @@
   - type: NCMissionMarker
     kind: Guard
     owner: ArasakaRemnant
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerObjectiveScavengerTunnels
+  suffix: Objective, Scavenger tunnels
+  components:
+  - type: Sprite
+    state: objective
+  - type: NCMissionMarker
+    kind: Objective
+    owner: ScavengerTunnels
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerDeadDropScavengerTunnels
+  suffix: DeadDrop, Scavenger tunnels
+  components:
+  - type: Sprite
+    state: drop
+  - type: NCMissionMarker
+    kind: DeadDrop
+    owner: ScavengerTunnels
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerGuardScavengerTunnels
+  suffix: Guard, Scavenger tunnels
+  components:
+  - type: Sprite
+    state: guard
+  - type: NCMissionMarker
+    kind: Guard
+    owner: ScavengerTunnels

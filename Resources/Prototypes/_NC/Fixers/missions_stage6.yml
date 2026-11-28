@@ -817,3 +817,111 @@
   reputationGain: 9
   reputationLoss: 8
   timeLimit: 3000
+
+# Old City Center underground: Scavenger tunnels under the plaza and more work in the Black Vault.
+- type: ncFixerMission
+  id: NCFixerVanceLightsOut
+  fixer: NCFixerVance
+  kind: Sabotage
+  name: nc-fixer-mission-vance-lights-out
+  description: nc-fixer-mission-vance-lights-out-desc
+  minimumReputation: 25
+  owner: ScavengerTunnels
+  item: NCMissionSabotageTarget
+  encounter: GangScavengersStronghold
+  reward: 4000
+  reputationGain: 5
+  reputationLoss: 4
+  timeLimit: 2400
+
+- type: ncFixerMission
+  id: NCFixerFengMetroButcher
+  fixer: NCFixerFeng
+  kind: Elimination
+  name: nc-fixer-mission-feng-metro-butcher
+  description: nc-fixer-mission-feng-metro-butcher-desc
+  minimumReputation: 25
+  owner: ScavengerTunnels
+  item: NCMobHumanGangScavengersBoss
+  encounter: GangScavengersPost
+  reward: 4500
+  reputationGain: 5
+  reputationLoss: 5
+  timeLimit: 2400
+
+- type: ncFixerMission
+  id: NCFixerTabithaMetroSurvey
+  fixer: NCFixerTabitha
+  kind: Recon
+  name: nc-fixer-mission-tabitha-metro-survey
+  description: nc-fixer-mission-tabitha-metro-survey-desc
+  minimumReputation: 10
+  owner: ScavengerTunnels
+  reconPoints: 4
+  encounter: GangScavengersPost
+  reward: 3000
+  reputationGain: 4
+  reputationLoss: 3
+  timeLimit: 2400
+
+- type: ncFixerMission
+  id: NCFixerVladDownTheLine
+  fixer: NCFixerVlad
+  kind: Delivery
+  name: nc-fixer-mission-vlad-down-the-line
+  description: nc-fixer-mission-vlad-down-the-line-desc
+  minimumReputation: 10
+  itemFromFixer: true
+  dropAtMarker: true
+  owner: ScavengerTunnels
+  item: NCMissionDrugBrick
+  encounter: GangScavengersPost
+  reward: 2500
+  reputationGain: 3
+  reputationLoss: 3
+  timeLimit: 1800
+
+- type: ncFixerMission
+  id: NCFixerBothaMetroCache
+  fixer: NCFixerBotha
+  kind: Retrieval
+  name: nc-fixer-mission-botha-metro-cache
+  description: nc-fixer-mission-botha-metro-cache-desc
+  minimumReputation: 10
+  owner: ScavengerTunnels
+  item: NCMissionHotZoneTechCrate
+  encounter: GangScavengersPost
+  reward: 3500
+  reputationGain: 4
+  reputationLoss: 4
+  timeLimit: 2400
+
+- type: ncFixerMission
+  id: NCFixerBothaVaultBlueprints
+  fixer: NCFixerBotha
+  kind: Retrieval
+  name: nc-fixer-mission-botha-vault-blueprints
+  description: nc-fixer-mission-botha-vault-blueprints-desc
+  minimumReputation: 50
+  owner: ArasakaRemnant
+  item: NCMissionCorporateFiles
+  encounter: ArasakaVaultPost
+  reward: 9000
+  reputationGain: 8
+  reputationLoss: 6
+  timeLimit: 3000
+
+- type: ncFixerMission
+  id: NCFixerInsiderGhostInTheCore
+  fixer: NCFixerInsider
+  kind: Recon
+  name: nc-fixer-mission-insider-ghost-in-the-core
+  description: nc-fixer-mission-insider-ghost-in-the-core-desc
+  minimumReputation: 50
+  owner: ArasakaRemnant
+  reconPoints: 3
+  encounter: ArasakaVaultPost
+  reward: 8000
+  reputationGain: 8
+  reputationLoss: 6
+  timeLimit: 3000

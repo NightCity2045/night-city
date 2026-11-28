@@ -5,7 +5,7 @@ meta:
   forkId: EchoCyber
   forkVersion: be524da4b41781c61399952aad42f92f7e1b6dd0
   time: 11/26/2026 07:14:57
-  entityCount: 19251
+  entityCount: 19253
 maps:
 - 1
 grids:
@@ -24336,6 +24336,22 @@ entities:
     - type: Transform
       parent: 1
       pos: -1.5,79.5
+- proto: NCFixerDeadDropMilitechOps
+  entities:
+  - uid: 20537
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: -9.5,35.5
+- proto: NCFixerMilitechOps
+  entities:
+  - uid: 20536
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: -9.5,36.5
 - proto: NCHotZoneFalloutStrong
   entities:
   - uid: 17539

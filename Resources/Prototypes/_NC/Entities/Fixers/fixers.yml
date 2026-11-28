@@ -137,3 +137,32 @@
   components:
   - type: NCFixerDeadDrop
     fixer: NCFixerBotha
+
+# Militech field operations console: the field office's list of operations for its staff.
+- type: entity
+  parent: NCFixerBase
+  id: NCFixerMilitechOps
+  components:
+  - type: Sprite
+    sprite: Structures/Machines/computers.rsi
+    layers:
+    - state: computer
+    - state: generic_keyboard
+    - state: comm
+      shader: unshaded
+    - state: generic_keys
+      shader: unshaded
+  - type: PointLight
+    radius: 1.5
+    energy: 0.6
+    color: "#FF1744"
+  - type: NCFixer
+    fixer: NCFixerMilitechOps
+
+- type: entity
+  parent: NCFixerDeadDropBase
+  id: NCFixerDeadDropMilitechOps
+  suffix: NCFixerMilitechOps
+  components:
+  - type: NCFixerDeadDrop
+    fixer: NCFixerMilitechOps

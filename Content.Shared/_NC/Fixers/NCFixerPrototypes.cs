@@ -44,6 +44,9 @@ public enum NCFixerPayment : byte
 
     /// <summary>Paid to the taker's bank account.</summary>
     Transfer,
+
+    /// <summary>A corporate job board: paid into the employer's department and corporation accounts.</summary>
+    Employer,
 }
 
 public enum NCMissionMarkerKind : byte
@@ -131,6 +134,21 @@ public sealed partial class NCFixerPrototype : IPrototype
 
     [DataField]
     public TimeSpan RefreshInterval = TimeSpan.FromMinutes(15);
+
+    /// <summary>
+    /// A corporation's internal job board: only employees of this account's department take its jobs.
+    /// With <see cref="NCFixerPayment.Employer"/> the reward goes to the employer instead of the taker.
+    /// </summary>
+    [DataField]
+    public ProtoId<NCBankDepartmentPrototype>? Employer;
+
+    /// <summary>Employer payment: the corporation account that receives what the field department does not.</summary>
+    [DataField]
+    public ProtoId<NCBankDepartmentPrototype>? EmployerCorporation;
+
+    /// <summary>Employer payment: the field department's share of each reward.</summary>
+    [DataField]
+    public float EmployerShare = 0.5f;
 }
 
 /// <summary>One mission of a fixer's pool.</summary>

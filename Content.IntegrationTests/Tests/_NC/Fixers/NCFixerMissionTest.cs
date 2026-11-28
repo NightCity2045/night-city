@@ -395,6 +395,57 @@ public sealed class NCFixerMissionTest : GameTest
         });
     }
 
+    /// <summary>
+    /// The Militech operations board takes only Militech staff, and a finished job funds the field office and HQ
+    /// instead of paying the taker.
+    /// </summary>
+    [Test]
+    public async Task EmployerBoardFundsTheCorporation()
+    {
+        var missions = Server.System<NCFixerMissionSystem>();
+        var transform = Server.System<SharedTransformSystem>();
+        var bank = Server.System<Content.Server._NC.Bank.NCBankSystem>();
+        await PoolManager.WaitUntil(Server, () => bank.Ready);
+        bank.TryGetDepartmentAccount("Militech", out var office);
+        bank.TryGetDepartmentAccount("MilitechHQ", out var hq);
+        var officeStart = office.Balance;
+        var hqStart = hq.Balance;
+        var map = await Pair.CreateTestMap();
+        var points = new List<EntityUid>();
+        EntityUid scout = default;
+        var profile = 0;
+
+        await Server.WaitAssertion(() =>
+        {
+            var coords = map.GridCoords;
+            var fixerUid = SEntMan.SpawnEntity("NCFixerMilitechOps", coords);
+            for (var i = 0; i < 3; i++)
+                points.Add(SEntMan.SpawnEntity("NCMissionMarkerObjectiveArasakaRemnant", coords.Offset(new System.Numerics.Vector2(8 + i * 6, 0))));
+            (scout, profile) = SpawnWorker(coords, 900040);
+            var fixer = new Entity<NCFixerComponent>(fixerUid, SEntMan.GetComponent<NCFixerComponent>(fixerUid));
+            Assert.That(missions.TrySetOffer("NCFixerMilitechOps", 0, "NCMilitechContractVaultRecon"), Is.True);
+            Assert.That(missions.TryAccept(fixer, 0, scout), Is.False, "Only Militech staff take board jobs.");
+
+            var minds = Server.System<SharedMindSystem>();
+            Assert.That(minds.TryGetMind(scout, out var mindId, out _), Is.True);
+            Server.System<Content.Shared.Roles.SharedRoleSystem>().MindAddJobRole(mindId, jobPrototype: "MilitechOperative");
+            Assert.That(missions.TryAccept(fixer, 0, scout), Is.True);
+        });
+
+        foreach (var point in points)
+        {
+            await Server.WaitPost(() => transform.SetCoordinates(scout, SEntMan.GetComponent<TransformComponent>(point).Coordinates));
+            await Pair.RunSeconds(2);
+        }
+
+        await Server.WaitAssertion(() =>
+        {
+            Assert.That(missions.TryGetActiveMission(profile, out _, out _), Is.False, "Paid on completion, nothing to collect.");
+            Assert.That(office.Balance, Is.EqualTo(officeStart + 6000), "Half to the field office.");
+            Assert.That(hq.Balance, Is.EqualTo(hqStart + 6000), "Half to HQ.");
+        });
+    }
+
     /// <summary>A peace offering job fails the moment the gang turns hostile.</summary>
     [Test]
     public async Task TruceFailsWhenTheGangTurns()

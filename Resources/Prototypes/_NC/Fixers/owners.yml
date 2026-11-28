@@ -69,3 +69,7 @@
 - type: ncMissionOwner
   id: ArasakaRemnant
   name: nc-mission-owner-arasaka-remnant
+
+- type: ncMissionOwner
+  id: ScavengerTunnels
+  name: nc-mission-owner-scavenger-tunnels

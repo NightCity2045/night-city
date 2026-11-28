@@ -65,3 +65,18 @@
   - nc-fixer-botha-greeting-1
   - nc-fixer-botha-greeting-2
   - nc-fixer-botha-greeting-3
+
+# Militech field operations console: internal operations for Militech staff. Rewards fund the field office and HQ.
+- type: ncFixer
+  id: NCFixerMilitechOps
+  name: nc-fixer-militech-ops-name
+  description: nc-fixer-militech-ops-desc
+  payment: Employer
+  employer: Militech
+  employerCorporation: MilitechHQ
+  employerShare: 0.5
+  offers: 5
+  greetings:
+  - nc-fixer-militech-ops-greeting-1
+  - nc-fixer-militech-ops-greeting-2
+  - nc-fixer-militech-ops-greeting-3
