@@ -224,14 +224,99 @@
     position: -65.5,-9.5
   - name: "G Potomac Ave. Building 03"
     position: -57.1,-28.8
-  - name: "LC S. Mall Street Building 01"
-    position: 149,126.5
-  - name: "LC S. Mall Street Building 02"
-    position: 133,101.5
-  - name: "LC Vine Street Building 01"
-    position: 193,129.5
-  - name: "LC Vine Street Building 02"
-    position: 185.5,103.5
+  - name: "LC Golden Dragon"
+    position: 148.5,122.5
+  - name: "LC Golden Dragon"
+    position: 148.5,122.5
+    z: 1
+  - name: "LC Golden Dragon Residences"
+    position: 148.5,122.5
+    z: 2
+  - name: "LC Little China Capsules"
+    position: 132.5,100.5
+  - name: "LC Little China Capsules"
+    position: 132.5,100.5
+    z: 1
+  - name: "LC Little China Capsules"
+    position: 132.5,100.5
+    z: 2
+  - name: "LC Mall Street Apartments"
+    position: 152.5,100.5
+  - name: "LC Mall Street Apartments"
+    position: 152.5,100.5
+    z: 1
+  - name: "LC Mall Street Apartments"
+    position: 152.5,100.5
+    z: 2
+  - name: "LC Vine Street Clinic"
+    position: 183.5,108.5
+  - name: "LC Vine Street Clinic Flats"
+    position: 191.5,108.5
+    z: 1
+  - name: "LC Vine Street Clinic Flats"
+    position: 191.5,108.5
+    z: 2
+  - name: "LC Vine Street Apartments"
+    position: 173.5,135.5
+  - name: "LC Vine Street Apartments"
+    position: 173.5,135.5
+    z: 1
+  - name: "LC Vine Street Apartments"
+    position: 173.5,135.5
+    z: 2
+  - name: "LC Golden Noodle"
+    position: 190.5,121.5
+  - name: "LC Neon Lotus Bar"
+    position: 190.5,127.5
+  - name: "LC Silk Road Clothing"
+    position: 190.5,132.5
+  - name: "LC Vine Street Hardware"
+    position: 190.5,137.5
+  - name: "LC Vine Street Row"
+    position: 198.5,135.5
+    z: 1
+  - name: "LC Vine Street Row"
+    position: 198.5,135.5
+    z: 2
+  - name: "LC Dim Sum House"
+    position: 147.5,144.5
+  - name: "LC Dim Sum House Flats"
+    position: 147.5,146.5
+    z: 1
+  - name: "LC Noodle Bar"
+    position: 104.5,133.5
+  - name: "LC Noodle Bar"
+    position: 104.5,133.5
+    z: 1
+  - name: "LC Herbal Pharmacy"
+    position: 111.5,126.5
+  - name: "LC Herbalist Flat"
+    position: 111.5,126.5
+    z: 1
+  - name: "LC Jade Tiger Mahjong"
+    position: 190.5,147.5
+  - name: "LC Night Market Stall 1"
+    position: 101.5,118.5
+  - name: "LC Night Market Stall 2"
+    position: 105.5,118.5
+  - name: "LC Night Market Stall 3"
+    position: 109.5,118.5
+  - name: "LC Night Market Stall 4"
+    position: 113.5,118.5
+  - name: "LC Night Market Stall 5"
+    position: 117.5,118.5
+  - name: "LC Night Market Stall 6"
+    position: 121.5,118.5
+  - name: "LC Night Market Stall 7"
+    position: 101.5,109.5
+  - name: "LC Night Market Stall 8"
+    position: 105.5,109.5
+  - name: "LC Night Market Stall 9"
+    position: 109.5,109.5
+  - name: "LC Night Market Stall 10"
+    position: 113.5,109.5
+  - name: "LC Night Market Stall 11"
+    position: 117.5,109.5
   - name: "LE Barkeley Ave. Building 01"
     position: -71,173.5
   - name: "LE Barkeley Ave. Building 02"
