@@ -193,6 +193,20 @@ nc-n54-warning-2 = Это закрытый вещательный объект. 
 nc-n54-alarm-1 = Проникновение в бюро! Блокировать серверы!
 nc-n54-alarm-2 = Никто не уйдёт с нашими записями!
 
+nc-marina-warning-1 = Только для жильцов и гостей. Разворачивайся.
+nc-marina-warning-2 = Это частная марина. Тебя попросили уйти.
+nc-marina-alarm-1 = Посторонний на набережной! Всем постам!
+nc-marina-alarm-2 = Защитить жильцов, уложить нарушителя!
+
+ent-NCMobHumanSecurityMarinaConcierge = консьерж (Marina)
+    .desc = Улыбка, синий костюм и шокер для гостей, забывших о манерах.
+ent-NCMobHumanSecurityMarinaGuard = охранник (Marina)
+    .desc = Белый костюм, тёмные очки, пистолет под пиджаком. Жильцы платят за молчание.
+ent-NCMobHumanSecurityMarinaResponder = боец группы реагирования (Marina)
+    .desc = В броне и с дробовиком. Его вызывают, когда кто-то прошёл мимо консьержа.
+ent-NCMobHumanSecurityMarinaChief = начальник охраны (Marina)
+    .desc = Знает каждую яхту, каждого жильца и каждую тайну набережной.
+
 ent-NCMobHumanSecurityNetwork54Doorman = швейцар (Network 54)
     .desc = Костюм, гарнитура и шоковая дубинка. Стережёт дверь бюро.
 ent-NCMobHumanSecurityNetwork54Guard = охранник (Network 54)

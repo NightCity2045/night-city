@@ -67,6 +67,10 @@
   name: nc-mission-owner-network-54
 
 - type: ncMissionOwner
+  id: MarinaSecurity
+  name: nc-mission-owner-marina-security
+
+- type: ncMissionOwner
   id: ArasakaRemnant
   name: nc-mission-owner-arasaka-remnant
 

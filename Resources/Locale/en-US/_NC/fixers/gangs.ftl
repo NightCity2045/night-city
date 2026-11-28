@@ -193,6 +193,20 @@ nc-n54-warning-2 = This is a private broadcast facility. Leave now.
 nc-n54-alarm-1 = Breach in the bureau! Lock the servers!
 nc-n54-alarm-2 = Nobody walks out with our footage!
 
+nc-marina-warning-1 = Residents and guests only. Turn around.
+nc-marina-warning-2 = This is a private marina. You have been asked to leave.
+nc-marina-alarm-1 = Intruder on the waterfront! All units!
+nc-marina-alarm-2 = Protect the residents, drop the trespasser!
+
+ent-NCMobHumanSecurityMarinaConcierge = Marina concierge
+    .desc = A smile, a blue suit and a stun baton for guests who forget their manners.
+ent-NCMobHumanSecurityMarinaGuard = Marina security guard
+    .desc = White suit, dark glasses, a pistol under the jacket. The residents pay for discretion.
+ent-NCMobHumanSecurityMarinaResponder = Marina response officer
+    .desc = Armoured and carrying a shotgun. Called when someone gets past the concierge.
+ent-NCMobHumanSecurityMarinaChief = Marina chief of security
+    .desc = Knows every yacht, every resident and every secret on the waterfront.
+
 ent-NCMobHumanSecurityNetwork54Doorman = Network 54 doorman
     .desc = A suit with an earpiece and a stun baton, minding the bureau door.
 ent-NCMobHumanSecurityNetwork54Guard = Network 54 security guard

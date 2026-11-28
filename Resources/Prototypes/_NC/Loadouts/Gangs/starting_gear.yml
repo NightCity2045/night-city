@@ -435,6 +435,50 @@
   - NCWeaponPistolOverlord
 
 - type: startingGear
+  id: NCSecurityMarinaConciergeGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitLawyerBlue
+    shoes: ClothingShoesColorWhite
+    outerClothing: ClothingOuterArmorBasicSlim
+    ears: ClothingHeadsetGrey
+  inhand:
+  - Stunbaton
+
+- type: startingGear
+  id: NCSecurityMarinaGuardGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorWhite
+    shoes: ClothingShoesColorWhite
+    outerClothing: ClothingOuterArmorBasicSlim
+    ears: ClothingHeadsetGrey
+    eyes: ClothingEyesGlassesSunglasses
+  inhand:
+  - NCWeaponPistolMarkIII
+
+- type: startingGear
+  id: NCSecurityMarinaResponderGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorWhite
+    shoes: ClothingShoesColorWhite
+    outerClothing: ClothingOuterArmorBasic
+    ears: ClothingHeadsetGrey
+    eyes: ClothingEyesGlassesSunglasses
+    head: ClothingHeadHatBeret
+  inhand:
+  - NCWeaponShotgunCrusher
+
+- type: startingGear
+  id: NCSecurityMarinaChiefGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitLawyerBlue
+    shoes: ClothingShoesColorWhite
+    outerClothing: ClothingOuterArmorBasic
+    ears: ClothingHeadsetGrey
+    eyes: ClothingEyesGlassesSunglasses
+  inhand:
+  - NCWeaponPistolMallorian
+
+- type: startingGear
   id: NCArasakaRemnantSleeperGear
   equipment:
     jumpsuit: ClothingUniformJumpsuitColorBlack

@@ -402,6 +402,62 @@
   - name: "OCZ 27th Street Duplex"
     position: 63.5,-73.5
     z: 1
+  - name: "UM Marina View Residences"
+    position: 151.5,165.5
+  - name: "UM Marina View Residences"
+    position: 147.5,156.5
+    z: 1
+  - name: "UM Marina View Residences"
+    position: 147.5,156.5
+    z: 2
+  - name: "UM Yacht Club"
+    position: 113.5,155.5
+  - name: "UM Yacht Club"
+    position: 113.5,155.5
+    z: 1
+  - name: "UM Yacht Club"
+    position: 113.5,155.5
+    z: 2
+  - name: "UM Marina Hotel"
+    position: 171.5,189.5
+  - name: "UM Marina Hotel"
+    position: 171.5,189.5
+    z: 1
+  - name: "UM Marina Hotel"
+    position: 171.5,189.5
+    z: 2
+  - name: "UM Seafood House"
+    position: 112.5,169.5
+  - name: "UM Seafood House Flat"
+    position: 112.5,170.5
+    z: 1
+  - name: "UM Marina Fashion"
+    position: 138.5,195.5
+  - name: "UM Marina Home"
+    position: 146.5,194.5
+  - name: "UM Harbour Cafe"
+    position: 151.5,195.5
+  - name: "UM Marina Row Flats"
+    position: 146.5,193.5
+    z: 1
+  - name: "UM Marina Office"
+    position: 148.5,186.5
+  - name: "UM Marina Office Flat"
+    position: 148.5,186.5
+    z: 1
+  - name: "UM Boat Workshop"
+    position: 135.5,163.5
+  - name: "UM Biotechnica Field Office"
+    position: 110.5,186.5
+  - name: "UM Biotechnica Field Office"
+    position: 110.5,186.5
+    z: 1
+  - name: "UM Biotechnica Field Office"
+    position: 110.5,186.5
+    z: 2
+  - name: "UM Biotechnica Field Office"
+    position: 110.5,186.5
+    z: 3
   - name: "OJT 18th Street Building 01"
     position: 140,51
   - name: "OJT Japantown Ripperdoc"

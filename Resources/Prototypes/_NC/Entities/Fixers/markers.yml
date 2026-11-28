@@ -532,6 +532,39 @@
 
 - type: entity
   parent: NCMissionMarkerBase
+  id: NCMissionMarkerObjectiveMarinaSecurity
+  suffix: Objective, Marina Security
+  components:
+  - type: Sprite
+    state: objective
+  - type: NCMissionMarker
+    kind: Objective
+    owner: MarinaSecurity
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerDeadDropMarinaSecurity
+  suffix: DeadDrop, Marina Security
+  components:
+  - type: Sprite
+    state: drop
+  - type: NCMissionMarker
+    kind: DeadDrop
+    owner: MarinaSecurity
+
+- type: entity
+  parent: NCMissionMarkerBase
+  id: NCMissionMarkerGuardMarinaSecurity
+  suffix: Guard, Marina Security
+  components:
+  - type: Sprite
+    state: guard
+  - type: NCMissionMarker
+    kind: Guard
+    owner: MarinaSecurity
+
+- type: entity
+  parent: NCMissionMarkerBase
   id: NCMissionMarkerObjectiveArasakaRemnant
   suffix: Objective, Arasaka remnant
   components:

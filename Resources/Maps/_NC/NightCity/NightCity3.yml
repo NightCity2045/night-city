@@ -5,7 +5,7 @@ meta:
   forkId: EchoCyber
   forkVersion: be524da4b41781c61399952aad42f92f7e1b6dd0
   time: 11/26/2026 07:14:58
-  entityCount: 2593
+  entityCount: 2595
 maps:
 - 1
 grids:
@@ -3054,6 +3054,13 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: -111.561386,-61.26154
+- proto: NCMissionMarkerGuardBiotechnica
+  entities:
+  - uid: 2711
+    components:
+    - type: Transform
+      parent: 1
+      pos: 110.5,189.5
 - proto: NCMissionMarkerGuardScavengers
   entities:
   - uid: 2709
@@ -3061,6 +3068,13 @@ entities:
     - type: Transform
       parent: 1
       pos: 44.5,118.5
+- proto: NCMissionMarkerObjectiveBiotechnica
+  entities:
+  - uid: 2712
+    components:
+    - type: Transform
+      parent: 1
+      pos: 118.5,190.5
 - proto: NCMissionMarkerObjectiveScavengers
   entities:
   - uid: 2710

@@ -60,6 +60,7 @@ nc-mission-owner-philharmonic-vampyres = Филармонические вамп
 nc-mission-owner-medical-technologies = Medical Technologies
 nc-mission-owner-night-city-university = Night City University
 nc-mission-owner-network-54 = Network 54
+nc-mission-owner-marina-security = Охрана Marina
 nc-mission-owner-arasaka-remnant = Остатки Arasaka
 nc-mission-owner-scavenger-tunnels = Тоннели Scavengers
 
@@ -404,3 +405,14 @@ nc-fixer-mission-vance-market-recon = Присмотр за ночным рын�
 nc-fixer-mission-vance-market-recon-desc = Клиент хочет открыть лавку в Little China и узнать, кому платить первым. Пройдись по рынку и маджонг-клубу и посмотри, где стоят Когти.
 nc-fixer-mission-botha-claws-tribute = Дань Когтей
 nc-fixer-mission-botha-claws-tribute-desc = Дань со всего ночного рынка лежит в одном конверте, прежде чем уйти наверх, в Японский квартал. Забери её, пока она не покинула Little China.
+
+nc-fixer-mission-vance-waterfront-survey = Осмотр набережной
+nc-fixer-mission-vance-waterfront-survey-desc = Клиент собирается навестить кое-кого в Upper Marina без приглашения. Пройдись по отелю, жилому дому и офису марины и запомни, где стоят белые костюмы.
+nc-fixer-mission-feng-marina-debtor = Счёт из марины
+nc-fixer-mission-feng-marina-debtor-desc = Житель Marina набрал долгов в моём клубе и думает, что консьерж делает его неприкасаемым. Напомни ему. Уложить, но не убивать.
+nc-fixer-mission-botha-hotel-safe = Сейф отеля
+nc-fixer-mission-botha-hotel-safe-desc = Корпоративный гость оставил папку в сейфе Marina Hotel. Охрана марины очень серьёзно относится к сейфу, мой покупатель тоже.
+nc-fixer-mission-vlad-vampyres-guest-book = Книга гостей
+nc-fixer-mission-vlad-vampyres-guest-book-desc = Philharmonic Vampyres хранят в яхт-клубе книгу гостей: все имена, что бывали в их салоне. Кое-кто из этих имён платит мне, чтобы она исчезла.
+nc-fixer-mission-feng-vampyre-elder = Старейшина
+nc-fixer-mission-feng-vampyre-elder-desc = Старейшина Vampyres спит в гробу на верхнем этаже яхт-клуба и выпивает девушек из моих клубов. Разбуди его навсегда.

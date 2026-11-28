@@ -483,6 +483,51 @@
   - type: Loadout
     prototypes: [ NCSecurityNetwork54ChiefGear ]
 
+# Upper Marina private security: white suits for the residents, guns for everyone else.
+- type: entity
+  abstract: true
+  parent: MobHuman
+  id: NCMobHumanSecurityMarinaBase
+  components:
+  - type: RandomHumanoidAppearance
+    randomizeName: false
+    allowedMarkingLayers: [ Hair, FacialHair, UndergarmentTop, UndergarmentBottom ]
+  - type: NpcFactionMember
+    factions: [ NCMarinaSecurity ]
+  - type: FactionException
+  - type: NPCRetaliation
+  - type: HTN
+    rootTask:
+      task: SimpleHumanoidHostileCompound
+
+- type: entity
+  parent: NCMobHumanSecurityMarinaBase
+  id: NCMobHumanSecurityMarinaConcierge
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityMarinaConciergeGear ]
+
+- type: entity
+  parent: NCMobHumanSecurityMarinaBase
+  id: NCMobHumanSecurityMarinaGuard
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityMarinaGuardGear ]
+
+- type: entity
+  parent: NCMobHumanSecurityMarinaBase
+  id: NCMobHumanSecurityMarinaResponder
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityMarinaResponderGear ]
+
+- type: entity
+  parent: NCMobHumanSecurityMarinaBase
+  id: NCMobHumanSecurityMarinaChief
+  components:
+  - type: Loadout
+    prototypes: [ NCSecurityMarinaChiefGear ]
+
 # Arasaka remnant: the sleepers who never left the Black Vault under ground zero.
 - type: entity
   abstract: true

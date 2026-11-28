@@ -60,6 +60,7 @@ nc-mission-owner-philharmonic-vampyres = Philharmonic Vampyres
 nc-mission-owner-medical-technologies = Medical Technologies
 nc-mission-owner-night-city-university = Night City University
 nc-mission-owner-network-54 = Network 54
+nc-mission-owner-marina-security = Marina Security
 nc-mission-owner-arasaka-remnant = Arasaka remnant
 nc-mission-owner-scavenger-tunnels = Scavenger tunnels
 
@@ -404,3 +405,14 @@ nc-fixer-mission-vance-market-recon = Night market watch
 nc-fixer-mission-vance-market-recon-desc = A client wants to open a stall in Little China and wants to know whom to pay first. Walk the market and the mahjong den and see where the Claws stand.
 nc-fixer-mission-botha-claws-tribute = Claws tribute
 nc-fixer-mission-botha-claws-tribute-desc = Tribute from the whole night market sits in one envelope before it goes up to Japantown. Take it before it leaves Little China.
+
+nc-fixer-mission-vance-waterfront-survey = Waterfront survey
+nc-fixer-mission-vance-waterfront-survey-desc = A client plans to visit somebody on the Upper Marina without an invitation. Walk the hotel, the residences and the marina office and note where the white suits stand.
+nc-fixer-mission-feng-marina-debtor = Marina tab
+nc-fixer-mission-feng-marina-debtor-desc = A Marina resident ran up a tab at my club and thinks his concierge makes him untouchable. Remind him. Down, not dead.
+nc-fixer-mission-botha-hotel-safe = The hotel safe
+nc-fixer-mission-botha-hotel-safe-desc = A corporate guest left a folder in the Marina Hotel safe. Marina Security takes the safe very seriously; so does my buyer.
+nc-fixer-mission-vlad-vampyres-guest-book = Guest book
+nc-fixer-mission-vlad-vampyres-guest-book-desc = The Philharmonic Vampyres keep a guest book at the yacht club: every name that ever came to their salon. Some of those names pay me to make it disappear.
+nc-fixer-mission-feng-vampyre-elder = The elder
+nc-fixer-mission-feng-vampyre-elder-desc = The Vampyres' elder sleeps in a coffin on the top floor of the yacht club and drains girls from my clubs. Wake him up for good.

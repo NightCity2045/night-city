@@ -59,5 +59,9 @@
   friendly: [NCNetwork54Security]
 
 - type: npcFaction
+  id: NCMarinaSecurity
+  friendly: [NCMarinaSecurity]
+
+- type: npcFaction
   id: NCArasakaRemnant
   friendly: [NCArasakaRemnant]
