@@ -7,7 +7,11 @@ using Content.Shared._NC.Vehicle;
 using Content.Shared._NC.Vehicle.Components;
 using Content.Shared._NC.Vehicle.Prototypes;
 using Content.Shared.ActionBlocker;
+using Content.Shared.DoAfter;
+using Content.Shared.IdentityManagement;
 using Content.Shared.Interaction;
+using Content.Shared.Mobs.Components;
+using Content.Shared.Movement.Pulling.Components;
 using Content.Shared.Verbs;
 using Robust.Shared.Containers;
 using Robust.Shared.Map;
@@ -22,6 +26,8 @@ namespace Content.Server._NC.Vehicle;
 public sealed partial class NCVehicleOccupantSystem : EntitySystem
 {
     private const string DriverContainer = "nc-vehicle-driver";
+    private static readonly TimeSpan ForceEnterDelay = TimeSpan.FromSeconds(3);
+    private static readonly TimeSpan PullOutDelay = TimeSpan.FromSeconds(3);
     [Dependency] private SharedContainerSystem _containers = default!;
     [Dependency] private SharedUserInterfaceSystem _ui = default!;
     [Dependency] private SharedInteractionSystem _interaction = default!;
@@ -31,6 +37,7 @@ public sealed partial class NCVehicleOccupantSystem : EntitySystem
     [Dependency] private NCVehicleAssemblySystem _assemblies = default!;
     [Dependency] private EntityLookupSystem _lookup = default!;
     [Dependency] private NCVehicleAccessSystem _access = default!;
+    [Dependency] private SharedDoAfterSystem _doAfter = default!;
 
     public override void Initialize()
     {
@@ -43,6 +50,8 @@ public sealed partial class NCVehicleOccupantSystem : EntitySystem
         SubscribeLocalEvent<NCVehicleDriveComponent, EntityTerminatingEvent>(OnTerminating);
         SubscribeLocalEvent<NCVehicleDriveComponent, NCVehicleDriveShutdownEvent>(OnShutdown);
         SubscribeLocalEvent<NCVehicleDriveComponent, BoundUIClosedEvent>(OnUiClosed);
+        SubscribeLocalEvent<NCVehicleDriveComponent, NCVehicleForceEnterDoAfterEvent>(OnForceEnterDoAfter);
+        SubscribeLocalEvent<NCVehicleDriveComponent, NCVehiclePullOutDoAfterEvent>(OnPullOutDoAfter);
     }
 
     private void OnMapInit(Entity<NCVehicleDriveComponent> ent, ref MapInitEvent args)
@@ -82,6 +91,146 @@ public sealed partial class NCVehicleOccupantSystem : EntitySystem
                 TextLocalizationId = definition.Name.Id,
                 Act = () => TryEnter(ent, user, seatId) });
         }
+        AddForcedVerbs(ent, user, args);
+    }
+
+    private void AddForcedVerbs(Entity<NCVehicleDriveComponent> ent, EntityUid user, GetVerbsEvent<AlternativeVerb> args)
+    {
+        if (TryComp<PullerComponent>(user, out var puller) && puller.Pulling is { } pulled &&
+            CanForceEnter(ent, user, pulled))
+        {
+            args.Verbs.Add(new AlternativeVerb
+            {
+                Text = Loc.GetString("nc-vehicle-force-enter", ("target", Identity.Entity(pulled, EntityManager))),
+                Act = () => TryForceEnter(ent, user, pulled),
+            });
+        }
+
+        foreach (var occupant in GetOccupants(ent))
+        {
+            if (!CanPullOut(ent, user, occupant))
+                continue;
+            var target = occupant;
+            args.Verbs.Add(new AlternativeVerb
+            {
+                Text = Loc.GetString("nc-vehicle-pull-out", ("target", Identity.Entity(target, EntityManager))),
+                Act = () => TryPullOut(ent, user, target),
+            });
+        }
+    }
+
+    /// <summary>
+    /// Whether <paramref name="user"/> can put the person they pull into a free passenger seat. The target does
+    /// not have to be conscious or a player; restraint is what keeps them inside afterwards.
+    /// </summary>
+    public bool CanForceEnter(EntityUid uid, EntityUid user, EntityUid target)
+    {
+        return user != target && HasComp<MobStateComponent>(target) &&
+               TryComp<PullerComponent>(user, out var puller) && puller.Pulling == target &&
+               !_containers.IsEntityInContainer(uid) && !_containers.IsEntityInContainer(user) &&
+               !_containers.IsEntityInContainer(target) && !HasComp<NCVehicleOccupantComponent>(user) &&
+               !HasComp<NCVehicleOccupantComponent>(target) && _access.CanOpen(uid) &&
+               _blocker.CanInteract(user, uid) && _interaction.InRangeUnobstructed(user, uid) &&
+               TryFindFreePassengerSeat(uid, out _);
+    }
+
+    public bool TryForceEnter(EntityUid uid, EntityUid user, EntityUid target)
+    {
+        if (!CanForceEnter(uid, user, target))
+            return false;
+        return _doAfter.TryStartDoAfter(new DoAfterArgs(EntityManager, user, ForceEnterDelay,
+            new NCVehicleForceEnterDoAfterEvent(), uid, target: target)
+        {
+            BreakOnMove = true,
+            BreakOnDamage = true,
+            NeedHand = true,
+        });
+    }
+
+    private void OnForceEnterDoAfter(Entity<NCVehicleDriveComponent> ent, ref NCVehicleForceEnterDoAfterEvent args)
+    {
+        if (args.Handled || args.Cancelled || args.Target is not { } target ||
+            !CanForceEnter(ent, args.User, target) || !TryFindFreePassengerSeat(ent, out var seatId))
+            return;
+        args.Handled = TrySeat(ent, target, seatId, out _);
+    }
+
+    /// <summary>Whether someone outside can drag an occupant out through an unlocked door.</summary>
+    public bool CanPullOut(EntityUid uid, EntityUid user, EntityUid occupant)
+    {
+        return user != occupant && !HasComp<NCVehicleOccupantComponent>(user) &&
+               !_containers.IsEntityInContainer(user) &&
+               TryComp<NCVehicleOccupantComponent>(occupant, out var link) && link.Vehicle == uid &&
+               _access.CanOpen(uid) && _blocker.CanInteract(user, uid) && _interaction.InRangeUnobstructed(user, uid);
+    }
+
+    public bool TryPullOut(EntityUid uid, EntityUid user, EntityUid occupant)
+    {
+        if (!CanPullOut(uid, user, occupant))
+            return false;
+        return _doAfter.TryStartDoAfter(new DoAfterArgs(EntityManager, user, PullOutDelay,
+            new NCVehiclePullOutDoAfterEvent(), uid, target: occupant)
+        {
+            BreakOnMove = true,
+            BreakOnDamage = true,
+            NeedHand = true,
+        });
+    }
+
+    private void OnPullOutDoAfter(Entity<NCVehicleDriveComponent> ent, ref NCVehiclePullOutDoAfterEvent args)
+    {
+        if (args.Handled || args.Cancelled || args.Target is not { } occupant || !CanPullOut(ent, args.User, occupant))
+            return;
+        // The ordinary exit keeps its speed limit and door clearance checks.
+        args.Handled = TryExit(ent, occupant);
+    }
+
+    private IEnumerable<EntityUid> GetOccupants(EntityUid uid)
+    {
+        if (!TryComp<ContainerManagerComponent>(uid, out var manager))
+            yield break;
+        foreach (var (id, seat) in manager.Containers)
+        {
+            if (!id.StartsWith("nc-vehicle-", StringComparison.Ordinal))
+                continue;
+            foreach (var occupant in seat.ContainedEntities)
+                yield return occupant;
+        }
+    }
+
+    private bool TryFindFreePassengerSeat(EntityUid uid, out string seatId)
+    {
+        seatId = string.Empty;
+        if (!TryGetChassis(uid, out var chassis))
+            return false;
+        foreach (var (id, definition) in chassis!.Seats.OrderBy(value => value.Key, StringComparer.Ordinal))
+        {
+            if (definition.Driver ||
+                !_containers.TryGetContainer(uid, "nc-vehicle-" + id, out var container) ||
+                container.ContainedEntities.Count != 0)
+            {
+                continue;
+            }
+
+            seatId = id;
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool TrySeat(EntityUid uid, EntityUid occupant, string seatId, out NCVehicleSeatDefinition? definition)
+    {
+        definition = null;
+        if (!TryGetChassis(uid, out var chassis) || !chassis!.Seats.TryGetValue(seatId, out definition) ||
+            !_containers.TryGetContainer(uid, "nc-vehicle-" + seatId, out var seat) || !_containers.Insert(occupant, seat))
+            return false;
+        var link = EnsureComp<NCVehicleOccupantComponent>(occupant);
+        link.Vehicle = uid;
+        link.Seat = seatId;
+        Dirty(occupant, link);
+        _transform.SetCoordinates(occupant, new EntityCoordinates(uid, definition.Position));
+        return true;
     }
 
     public bool CanEnter(EntityUid uid, EntityUid user, string seatId = "driver")
@@ -97,15 +246,9 @@ public sealed partial class NCVehicleOccupantSystem : EntitySystem
     public bool TryEnter(EntityUid uid, EntityUid user, string seatId = "driver")
     {
         if (!CanEnter(uid, user, seatId) || !TryComp<NCVehicleDriveComponent>(uid, out var drive) ||
-            !TryGetChassis(uid, out var chassis) || !chassis!.Seats.TryGetValue(seatId, out var definition) ||
-            !_containers.TryGetContainer(uid, "nc-vehicle-" + seatId, out var seat) || !_containers.Insert(user, seat))
+            !TrySeat(uid, user, seatId, out var definition))
             return false;
-        var occupant = EnsureComp<NCVehicleOccupantComponent>(user);
-        occupant.Vehicle = uid;
-        occupant.Seat = seatId;
-        Dirty(user, occupant);
-        _transform.SetCoordinates(user, new EntityCoordinates(uid, definition.Position));
-        if (!definition.Driver)
+        if (!definition!.Driver)
             return true;
         drive.Driver = user;
         drive.Authority++;
