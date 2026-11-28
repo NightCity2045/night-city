@@ -43,7 +43,11 @@ public sealed class NCStreetReputationSystem : EntitySystem
         catch (Exception exception)
         {
             Log.Error($"Unable to load the street reputation of profile {characterId.Value}: {exception}");
+            return;
         }
+
+        if (!TerminatingOrDeleted(args.Mob))
+            Mirror(args.Mob, GetReputation(characterId.Value));
     }
 
     /// <summary>The character profile a player-controlled entity belongs to.</summary>
@@ -78,6 +82,27 @@ public sealed class NCStreetReputationSystem : EntitySystem
         var value = Math.Clamp(GetReputation(profileId) + delta, 0, MaximumReputation);
         _reputation[profileId] = value;
         Persist(profileId, value);
+
+        var minds = EntityQueryEnumerator<NCCharacterIdentityComponent, MindComponent>();
+        while (minds.MoveNext(out var identity, out var mind))
+        {
+            if (identity.CharacterId.IsValid && identity.CharacterId.Value == profileId &&
+                mind.OwnedEntity is { } body && !TerminatingOrDeleted(body))
+            {
+                Mirror(body, value);
+            }
+        }
+    }
+
+    /// <summary>Shows the reputation in the owner's character window.</summary>
+    private void Mirror(EntityUid body, int value)
+    {
+        var mirror = EnsureComp<NCStreetReputationComponent>(body);
+        if (mirror.Reputation == value)
+            return;
+
+        mirror.Reputation = value;
+        Dirty(body, mirror);
     }
 
     private async void Persist(int profileId, int value)

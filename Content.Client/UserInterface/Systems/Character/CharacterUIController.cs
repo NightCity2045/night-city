@@ -1,4 +1,5 @@
 using System.Linq;
+using Content.Client._NC.Fixers; // NC
 using Content.Client._NC.Skill; // NC
 using Content.Client.CharacterInfo;
 using Content.Client.Gameplay;
@@ -6,6 +7,7 @@ using Content.Client.Stylesheets;
 using Content.Client.UserInterface.Controls;
 using Content.Client.UserInterface.Systems.Character.Windows;
 using Content.Client.UserInterface.Systems.Objectives.Controls;
+using Content.Shared._NC.Fixers; // NC
 using Content.Shared._NC.Skill; // NC
 using Content.Shared.Input;
 using Content.Shared.Mind;
@@ -28,7 +30,7 @@ namespace Content.Client.UserInterface.Systems.Character;
 
 [UsedImplicitly]
 public sealed partial class CharacterUIController : UIController, IOnStateEntered<GameplayState>, IOnStateExited<GameplayState>,
-    IOnSystemChanged<CharacterInfoSystem>, IOnSystemChanged<NCSkillClientSystem> // NC
+    IOnSystemChanged<CharacterInfoSystem>, IOnSystemChanged<NCSkillClientSystem>, IOnSystemChanged<NCStreetReputationClientSystem> // NC
 {
     [Dependency] private IEntityManager _ent = default!;
     [Dependency] private IPlayerManager _player = default!;
@@ -100,6 +102,16 @@ public sealed partial class CharacterUIController : UIController, IOnStateEntere
         system.ProgressChanged -= RefreshProgress;
     }
 
+    public void OnSystemLoaded(NCStreetReputationClientSystem system)
+    {
+        system.ReputationChanged += RefreshProgress;
+    }
+
+    public void OnSystemUnloaded(NCStreetReputationClientSystem system)
+    {
+        system.ReputationChanged -= RefreshProgress;
+    }
+
     private void RefreshProgress()
     {
         if (_window is not { IsOpen: true } window)
@@ -109,6 +121,10 @@ public sealed partial class CharacterUIController : UIController, IOnStateEntere
             window.SetProgress(skills.Experience, skills.Learned.Length);
         else
             window.SetProgress(-1, 0);
+
+        window.SetReputation(_ent.TryGetComponent<NCStreetReputationComponent>(_player.LocalEntity, out var reputation)
+            ? reputation.Reputation
+            : null);
     }
 
     private void OpenSkills() => _console.RemoteExecuteCommand(null, "ncskills");

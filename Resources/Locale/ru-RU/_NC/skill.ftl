@@ -38,3 +38,6 @@ nc-character-card-max-level = Максимальный уровень
 nc-character-card-briefing = Брифинг
 nc-character-card-additional = Дополнительные сведения
 nc-character-card-empty = Нет активных целей
+nc-character-card-reputation = Уличная репутация: {$level}
+nc-character-card-reputation-progress = {$value} / {$next}
+nc-character-card-reputation-max = {$value} · высший уровень

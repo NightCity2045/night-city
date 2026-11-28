@@ -2,7 +2,7 @@
     xmlns="https://spacestation14.io"
     xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
     xmlns:windows="clr-namespace:Content.Client.UserInterface.Systems.Character.Windows"
-    SetSize="460 430" MinSize="390 300">
+    SetSize="460 470" MinSize="390 300">
     <!-- NC-Edit-Start -->
     <PanelContainer>
         <PanelContainer.PanelOverride>
@@ -46,6 +46,20 @@
                             <Label Name="ExperienceLabel" FontColorOverride="#B9D3CF" />
                         </BoxContainer>
                         <Button Name="SkillsButton" Disabled="True" />
+                    </BoxContainer>
+                    <BoxContainer Name="ReputationSection" Orientation="Vertical" SeparationOverride="4" Visible="False">
+                        <BoxContainer Orientation="Horizontal" SeparationOverride="8">
+                            <Label Name="ReputationLevelLabel" FontColorOverride="#E0C27A" HorizontalExpand="True" />
+                            <Label Name="ReputationValueLabel" FontColorOverride="#B9D3CF" />
+                        </BoxContainer>
+                        <ProgressBar Name="ReputationBar" HorizontalExpand="True" SetHeight="6">
+                            <ProgressBar.BackgroundStyleBoxOverride>
+                                <gfx:StyleBoxFlat BackgroundColor="#11181E" />
+                            </ProgressBar.BackgroundStyleBoxOverride>
+                            <ProgressBar.ForegroundStyleBoxOverride>
+                                <gfx:StyleBoxFlat BackgroundColor="#C9A24B" />
+                            </ProgressBar.ForegroundStyleBoxOverride>
+                        </ProgressBar>
                     </BoxContainer>
                 </BoxContainer>
             </PanelContainer>

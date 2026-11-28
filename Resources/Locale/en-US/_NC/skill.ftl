@@ -39,3 +39,6 @@ nc-character-card-max-level = Maximum level
 nc-character-card-briefing = Briefing
 nc-character-card-additional = Additional information
 nc-character-card-empty = No active objectives
+nc-character-card-reputation = Street rep: {$level}
+nc-character-card-reputation-progress = {$value} / {$next}
+nc-character-card-reputation-max = {$value} · top level

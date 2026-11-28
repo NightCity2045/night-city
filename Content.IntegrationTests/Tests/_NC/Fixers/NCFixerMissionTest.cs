@@ -85,6 +85,25 @@ public sealed class NCFixerMissionTest : GameTest
         return (worker, profile);
     }
 
+    /// <summary>Reputation changes reach the character's body, where the character window reads them.</summary>
+    [Test]
+    public async Task ReputationIsMirroredOnTheBody()
+    {
+        var reputation = Server.System<NCStreetReputationSystem>();
+        var map = await Pair.CreateTestMap();
+
+        await Server.WaitAssertion(() =>
+        {
+            var (worker, profile) = SpawnWorker(map.GridCoords, 990077);
+            reputation.AddReputation(profile, 12);
+            Assert.That(SEntMan.GetComponent<NCStreetReputationComponent>(worker).Reputation,
+                Is.EqualTo(reputation.GetReputation(profile)));
+            reputation.AddReputation(profile, -5);
+            Assert.That(SEntMan.GetComponent<NCStreetReputationComponent>(worker).Reputation,
+                Is.EqualTo(reputation.GetReputation(profile)));
+        });
+    }
+
     /// <summary>
     /// Vlad's push: the brick goes straight into the courier's hands, the buyer's drop appears at a dead drop
     /// marker, and Vlad pays cash in person when the courier comes back.
