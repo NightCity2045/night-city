@@ -109,7 +109,8 @@ public sealed class NCDispatchTest : GameTest
     /// <summary>Every PDA has the emergency program; NCPD and Trauma PDAs also have the dispatcher.</summary>
     [TestCase("PassengerPDA", false)]
     [TestCase("NCPDOfficerPDA", true)]
-    [TestCase("ParamedicPDA", true)]
+    [TestCase("TraumaTeamParamedicPDA", true)]
+    [TestCase("TraumaTeamOperativePDA", true)]
     public async Task PdasCarryTheirPrograms(string pda, bool dispatcher)
     {
         var map = await CreateCityMap();
