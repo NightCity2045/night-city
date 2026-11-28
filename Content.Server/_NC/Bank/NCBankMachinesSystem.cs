@@ -16,7 +16,7 @@ namespace Content.Server._NC.Bank;
 /// <summary>
 /// ATMs, department finance terminals and the PDA bank program. All money logic lives in <see cref="NCBankSystem"/>.
 /// </summary>
-public sealed class NCBankMachinesSystem : EntitySystem
+public sealed partial class NCBankMachinesSystem : EntitySystem
 {
     [Dependency] private NCBankSystem _bank = default!;
     [Dependency] private UserInterfaceSystem _ui = default!;

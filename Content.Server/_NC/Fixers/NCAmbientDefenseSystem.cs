@@ -16,7 +16,7 @@ namespace Content.Server._NC.Fixers;
 /// keeps the place empty for <see cref="Cooldown"/>. A mission taken for the place adopts the group instead of
 /// spawning a second one.
 /// </summary>
-public sealed class NCAmbientDefenseSystem : EntitySystem
+public sealed partial class NCAmbientDefenseSystem : EntitySystem
 {
     private static readonly TimeSpan ScanInterval = TimeSpan.FromSeconds(2);
     private static readonly TimeSpan DespawnDelay = TimeSpan.FromMinutes(3);

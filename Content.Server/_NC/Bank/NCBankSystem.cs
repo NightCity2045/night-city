@@ -12,7 +12,6 @@ using Content.Server.Preferences.Managers;
 using Content.Server.Stack;
 using Content.Shared._NC.Bank;
 using Content.Shared.Database;
-using Content.Shared._NC.Bank;
 using Content.Shared.GameTicking;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Mind;

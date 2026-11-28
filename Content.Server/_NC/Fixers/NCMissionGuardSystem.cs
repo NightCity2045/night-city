@@ -29,7 +29,7 @@ namespace Content.Server._NC.Fixers;
 /// A group is a mission's defenders, or (with a negative id) people standing at a place or walking a patrol
 /// without one.
 /// </summary>
-public sealed class NCMissionGuardSystem : EntitySystem
+public sealed partial class NCMissionGuardSystem : EntitySystem
 {
     private static readonly TimeSpan ScanInterval = TimeSpan.FromSeconds(0.5);
     private const float PostRange = 24f;
@@ -38,7 +38,6 @@ public sealed class NCMissionGuardSystem : EntitySystem
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private EntityLookupSystem _lookup = default!;
     [Dependency] private IRobustRandom _random = default!;
-    [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private ChatSystem _chat = default!;
     [Dependency] private ExamineSystemShared _examine = default!;
     [Dependency] private SharedHandsSystem _hands = default!;

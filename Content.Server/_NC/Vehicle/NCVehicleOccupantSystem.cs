@@ -101,7 +101,7 @@ public sealed partial class NCVehicleOccupantSystem : EntitySystem
         {
             args.Verbs.Add(new AlternativeVerb
             {
-                Text = Loc.GetString("nc-vehicle-force-enter", ("target", Identity.Entity(pulled, EntityManager))),
+                Text = Loc.GetString("nc-vehicle-force-enter", ("target", Content.Shared.IdentityManagement.Identity.Entity(pulled, EntityManager))),
                 Act = () => TryForceEnter(ent, user, pulled),
             });
         }
@@ -113,7 +113,7 @@ public sealed partial class NCVehicleOccupantSystem : EntitySystem
             var target = occupant;
             args.Verbs.Add(new AlternativeVerb
             {
-                Text = Loc.GetString("nc-vehicle-pull-out", ("target", Identity.Entity(target, EntityManager))),
+                Text = Loc.GetString("nc-vehicle-pull-out", ("target", Content.Shared.IdentityManagement.Identity.Entity(target, EntityManager))),
                 Act = () => TryPullOut(ent, user, target),
             });
         }

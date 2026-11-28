@@ -13,7 +13,7 @@ namespace Content.Server._NC.Fixers;
 /// <summary>
 /// Street reputation shared by all fixers. Loaded when a character spawns and saved after every change.
 /// </summary>
-public sealed class NCStreetReputationSystem : EntitySystem
+public sealed partial class NCStreetReputationSystem : EntitySystem
 {
     public const int MaximumReputation = 1000;
 

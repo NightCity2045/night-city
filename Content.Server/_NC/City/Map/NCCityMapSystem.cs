@@ -19,7 +19,7 @@ namespace Content.Server._NC.City.Map;
 /// NC: The player's city map. It sends the districts and the detected buildings of the player's current floor,
 /// keeps the player's own position live while the window is open, and applies admin markup edits.
 /// </summary>
-public sealed class NCCityMapSystem : EntitySystem
+public sealed partial class NCCityMapSystem : EntitySystem
 {
     private static readonly TimeSpan TrackingInterval = TimeSpan.FromSeconds(0.5);
 

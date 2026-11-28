@@ -2,8 +2,6 @@
 
 using Content.Shared._NC.Bank;
 using Content.Shared._NC.Corporations;
-using Content.Shared._NC.Bank;
-using Content.Shared._NC.Corporations;
 using Content.Shared.Roles;
 using Robust.Client.UserInterface.Controls;
 using Robust.Shared.Prototypes;
