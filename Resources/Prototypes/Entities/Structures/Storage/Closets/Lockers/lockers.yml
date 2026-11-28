@@ -11,7 +11,6 @@
     stateDoorClosed: cabinet_door
 
   - type: AccessReader
-    access: [["Bar"]]
   - type: EntityStorage
     closeSound:
       path: /Audio/Effects/woodenclosetclose.ogg
@@ -44,7 +43,6 @@
     stateDoorOpen: qm_open
     stateDoorClosed: qm_door
   - type: AccessReader
-    access: [["Quartermaster"]]
 
 - type: entity
   id: LockerSalvageSpecialist
@@ -58,7 +56,6 @@
     stateDoorOpen: mining_open
     stateDoorClosed: mining_door
   - type: AccessReader
-    access: [["Salvage"]]
 
 # Command
 - type: entity
@@ -72,7 +69,6 @@
     stateDoorOpen: cap_open
     stateDoorClosed: cap_door
   - type: AccessReader
-    access: [["Captain"]]
 
 - type: entity
   id: LockerHeadOfPersonnel
@@ -85,7 +81,6 @@
     stateDoorOpen: hop_open
     stateDoorClosed: hop_door
   - type: AccessReader
-    access: [["HeadOfPersonnel"]]
 
 # CE
 - type: entity
@@ -99,7 +94,6 @@
     stateDoorOpen: ce_open
     stateDoorClosed: ce_door
   - type: AccessReader
-    access: [ [ "ChiefEngineer" ] ]
 
 # Electrical supplies
 - type: entity
@@ -113,7 +107,6 @@
     stateDoorOpen: eng_open
     stateDoorClosed: eng_elec_door
   - type: AccessReader
-    access: [ [ "Engineering" ] ]
 
 # Welding supplies
 - type: entity
@@ -127,7 +120,6 @@
     stateDoorOpen: eng_open
     stateDoorClosed: eng_weld_door
   - type: AccessReader
-    access: [ [ "Engineering" ] ]
 
 # Atmos tech
 - type: entity
@@ -141,7 +133,6 @@
     stateDoorOpen: atmos_open
     stateDoorClosed: atmos_door
   - type: AccessReader
-    access: [ [ "Atmospherics" ] ]
 
 # Engineer
 - type: entity
@@ -155,7 +146,6 @@
     stateDoorOpen: eng_secure_open
     stateDoorClosed: eng_secure_door
   - type: AccessReader
-    access: [ [ "Engineering" ] ]
 
 # Evac Repair
 - type: entity
@@ -170,7 +160,6 @@
     stateDoorOpen: eng_open
     stateDoorClosed: eng_evac_door
   - type: AccessReader
-    access: [ [ "Engineering" ] ]
 
 # Freezer
 - type: entity
@@ -202,7 +191,6 @@
   suffix: Kitchen, Locked
   components:
   - type: AccessReader
-    access: [ [ "Kitchen" ] ]
 
 # Botanist
 - type: entity
@@ -216,7 +204,6 @@
     stateDoorOpen: hydro_open
     stateDoorClosed: hydro_door
   - type: AccessReader
-    access: [ [ "Hydroponics" ] ]
 
 # Medicine
 - type: entity
@@ -231,7 +218,6 @@
     stateDoorOpen: med_open
     stateDoorClosed: med_door
   - type: AccessReader
-    access: [ [ "Medical" ] ]
 
 # Medical doctor
 - type: entity
@@ -245,7 +231,6 @@
     stateDoorOpen: med_secure_open
     stateDoorClosed: med_secure_door
   - type: AccessReader
-    access: [ [ "Medical" ] ]
 
 # Paramedic
 - type: entity
@@ -259,7 +244,6 @@
     stateDoorOpen: paramed_open
     stateDoorClosed: paramed_door
   - type: AccessReader
-    access: [ [ "Medical" ] ]
 
 
 # Chemical
@@ -274,7 +258,6 @@
     stateDoorOpen: med_open
     stateDoorClosed: chemical_door
   - type: AccessReader
-    access: [ [ "Chemistry" ] ]
 
 # CMO
 - type: entity
@@ -288,7 +271,6 @@
     stateDoorOpen: cmo_open
     stateDoorClosed: cmo_door
   - type: AccessReader
-    access: [ [ "ChiefMedicalOfficer" ] ]
 
 # Science
 - type: entity
@@ -302,7 +284,6 @@
     stateDoorOpen: rd_open
     stateDoorClosed: rd_door
   - type: AccessReader
-    access: [ [ "ResearchDirector" ] ]
 
 - type: entity
   id: LockerScientist
@@ -315,7 +296,6 @@
     stateDoorOpen: science_open
     stateDoorClosed: science_door
   - type: AccessReader
-    access: [ [ "Research" ] ]
 
 # HoS
 - type: entity
@@ -329,7 +309,6 @@
     stateDoorOpen: hos_open
     stateDoorClosed: hos_door
   - type: AccessReader
-    access: [["HeadOfSecurity"]]
 
 # Warden
 - type: entity
@@ -343,7 +322,6 @@
     stateDoorOpen: warden_open
     stateDoorClosed: warden_door
   - type: AccessReader
-    access: [["Armory"]]
 
 # Brigmedic
 - type: entity
@@ -357,7 +335,6 @@
     stateDoorOpen: armory_open
     stateDoorClosed: brigmedic_door
   - type: AccessReader
-    access: [["Medical"]]
 
 # Security Officer
 - type: entity
@@ -371,7 +348,6 @@
     stateDoorOpen: sec_open
     stateDoorClosed: sec_door
   - type: AccessReader
-    access: [["Security"]]
 
 - type: entity
   id: GunSafe
@@ -398,7 +374,6 @@
   suffix: Armory, Locked
   components:
   - type: AccessReader
-    access: [["Armory"]]
 
 # Genpop Storage
 - type: entity
@@ -520,7 +495,6 @@
   description: Usually cold and empty... like your heart.
   components:
   - type: AccessReader
-    access: [["Detective"]]
 
 - type: entity
   id: LockerEvidence
@@ -529,7 +503,6 @@
   description: To store bags of bullet casings and detainee belongings.
   components:
   - type: AccessReader
-    access: [["Security"]]
 
 # Syndicate
 - type: entity
@@ -545,7 +518,6 @@
     stateDoorOpen: syndicate_open
     stateDoorClosed: syndicate_door
   - type: AccessReader
-    access: [["SyndicateAgent"]]
 
 # Bluespace
 - type: entity
@@ -587,7 +559,6 @@
   components:
   - type: Appearance
   - type: AccessReader
-    access: [["Theatre"]]
   - type: EntityStorageVisuals
     stateBaseClosed: clown
     stateDoorOpen: clown_open
@@ -601,7 +572,6 @@
   components:
   - type: Appearance
   - type: AccessReader
-    access: [["Theatre"]]
   - type: EntityStorageVisuals
     stateBaseClosed: mime
     stateDoorOpen: mime_open
@@ -615,7 +585,6 @@
   components:
   - type: Appearance
   - type: AccessReader
-    access: [["Command"]]
   - type: EntityStorageVisuals
     stateBaseClosed: hop
     stateDoorOpen: hop_open

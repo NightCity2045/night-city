@@ -389,7 +389,6 @@
   parent: LockerFreezerBase
   components:
   - type: AccessReader
-    access: [ [ "Command" ] ]
   - type: EntityTableContainerFill
     containers:
       entity_storage: !type:NestedSelector

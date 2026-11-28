@@ -381,5 +381,4 @@
   suffix: Chemistry, Secure
   components:
   - type: AccessReader
-    access: [["Chemistry"]]
 

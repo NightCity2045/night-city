@@ -181,7 +181,6 @@
   suffix: Captain
   components:
   - type: AccessReader
-    access: [["Captain"]]
 
 - type: entity
   parent: LockableButton
@@ -189,7 +188,6 @@
   suffix: HeadOfPersonnel
   components:
   - type: AccessReader
-    access: [["HeadOfPersonnel"]]
 
 - type: entity
   parent: LockableButton
@@ -197,7 +195,6 @@
   suffix: ChiefEngineer
   components:
   - type: AccessReader
-    access: [["ChiefEngineer"]]
 
 - type: entity
   parent: LockableButton
@@ -205,7 +202,6 @@
   suffix: ChiefMedicalOfficer
   components:
   - type: AccessReader
-    access: [["ChiefMedicalOfficer"]]
 
 - type: entity
   parent: LockableButton
@@ -213,7 +209,6 @@
   suffix: HeadOfSecurity
   components:
   - type: AccessReader
-    access: [["HeadOfSecurity"]]
 
 - type: entity
   parent: LockableButton
@@ -221,7 +216,6 @@
   suffix: ResearchDirector
   components:
   - type: AccessReader
-    access: [["ResearchDirector"]]
 
 - type: entity
   parent: LockableButton
@@ -229,7 +223,6 @@
   suffix: Command
   components:
   - type: AccessReader
-    access: [["Command"]]
 
 - type: entity
   parent: LockableButton
@@ -237,7 +230,6 @@
   suffix: Cryogenics
   components:
   - type: AccessReader
-    access: [["Cryogenics"]]
 
 - type: entity
   parent: LockableButton
@@ -245,7 +237,6 @@
   suffix: Security
   components:
   - type: AccessReader
-    access: [["Security"]]
 
 - type: entity
   parent: LockableButton
@@ -253,7 +244,6 @@
   suffix: Detective
   components:
   - type: AccessReader
-    access: [["Detective"]]
 
 - type: entity
   parent: LockableButton
@@ -261,7 +251,6 @@
   suffix: Armory
   components:
   - type: AccessReader
-    access: [["Armory"]]
 
 - type: entity
   parent: LockableButton
@@ -269,7 +258,6 @@
   suffix: Brig
   components:
   - type: AccessReader
-    access: [["Brig"]]
 
 - type: entity
   parent: LockableButton
@@ -277,7 +265,6 @@
   suffix: Lawyer
   components:
   - type: AccessReader
-    access: [["Lawyer"]]
 
 - type: entity
   parent: LockableButton
@@ -285,7 +272,6 @@
   suffix: Engineering
   components:
   - type: AccessReader
-    access: [["Engineering"]]
 
 - type: entity
   parent: LockableButton
@@ -293,7 +279,6 @@
   suffix: Medical
   components:
   - type: AccessReader
-    access: [["Medical"]]
 
 - type: entity
   parent: LockableButton
@@ -301,7 +286,6 @@
   suffix: Quartermaster
   components:
   - type: AccessReader
-    access: [["Quartermaster"]]
 
 - type: entity
   parent: LockableButton
@@ -309,7 +293,6 @@
   suffix: Salvage
   components:
   - type: AccessReader
-    access: [["Salvage"]]
 
 - type: entity
   parent: LockableButton
@@ -317,7 +300,6 @@
   suffix: Cargo
   components:
   - type: AccessReader
-    access: [["Cargo"]]
 
 - type: entity
   parent: LockableButton
@@ -325,7 +307,6 @@
   suffix: Research
   components:
   - type: AccessReader
-    access: [["Research"]]
 
 - type: entity
   parent: LockableButton
@@ -333,7 +314,6 @@
   suffix: Service
   components:
   - type: AccessReader
-    access: [["Service"]]
 
 - type: entity
   parent: LockableButton
@@ -341,7 +321,6 @@
   suffix: Maintenance
   components:
   - type: AccessReader
-    access: [["Maintenance"]]
 
 - type: entity
   parent: LockableButton
@@ -349,7 +328,6 @@
   suffix: External
   components:
   - type: AccessReader
-    access: [["External"]]
 
 - type: entity
   parent: LockableButton
@@ -357,7 +335,6 @@
   suffix: Janitor
   components:
   - type: AccessReader
-    access: [["Janitor"]]
 
 - type: entity
   parent: LockableButton
@@ -365,7 +342,6 @@
   suffix: Theatre
   components:
   - type: AccessReader
-    access: [["Theatre"]]
 
 - type: entity
   parent: LockableButton
@@ -373,7 +349,6 @@
   suffix: Bar
   components:
   - type: AccessReader
-    access: [["Bar"]]
 
 - type: entity
   parent: LockableButton
@@ -381,7 +356,6 @@
   suffix: Chemistry
   components:
   - type: AccessReader
-    access: [["Chemistry"]]
 
 - type: entity
   parent: LockableButton
@@ -389,7 +363,6 @@
   suffix: Kitchen
   components:
   - type: AccessReader
-    access: [["Kitchen"]]
 
 - type: entity
   parent: LockableButton
@@ -397,7 +370,6 @@
   suffix: Chapel
   components:
   - type: AccessReader
-    access: [["Chapel"]]
 
 - type: entity
   parent: LockableButton
@@ -405,7 +377,6 @@
   suffix: Hydroponics
   components:
   - type: AccessReader
-    access: [["Hydroponics"]]
 
 - type: entity
   parent: LockableButton
@@ -413,7 +384,6 @@
   suffix: Atmospherics
   components:
   - type: AccessReader
-    access: [["Atmospherics"]]
 
 - type: entity
   parent: LockableButton
@@ -421,7 +391,6 @@
   suffix: CentComm
   components:
   - type: AccessReader
-    access: [["CentralCommand"]]
 
 # button frames
 

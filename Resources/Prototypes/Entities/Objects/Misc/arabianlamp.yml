@@ -6,7 +6,6 @@
   components:
   - type: Appearance
   - type: AccessReader
-    access: [ [ "CentralCommand" ] ]
     breakOnAccessBreaker: false
   - type: Lock
     lockOnClick: false

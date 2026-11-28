@@ -132,7 +132,6 @@
   - type: StaticPrice
     price: 200
   - type: AccessReader
-    access: [["Atmospherics"], ["Engineering"], ["Research"]]
   - type: Lock
     locked: false
   - type: GuideHelp
@@ -274,7 +273,6 @@
         Oxygen: 18710.71051 # oxygen
       temperature: 72
   - type: AccessReader
-    access: [["Atmospherics"]]
 
 - type: entity
   parent: GasCanister
@@ -326,7 +324,6 @@
         Nitrogen: 18710.71051 # nitrogen
       temperature: 72
   - type: AccessReader
-    access: [["Atmospherics"]]
 
 - type: entity
   parent: GasCanister
@@ -380,7 +377,6 @@
         CarbonDioxide: 18710.71051 # CO2
       temperature: 72
   - type: AccessReader
-    access: [["Atmospherics"]]
 
 - type: entity
   parent: GasCanister
