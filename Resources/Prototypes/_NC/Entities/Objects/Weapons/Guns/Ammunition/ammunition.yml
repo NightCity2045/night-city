@@ -302,6 +302,33 @@
       tags: [ NCCartridge556 ]
 
 - type: entity
+  id: NCMagazine556Ronin
+  parent: BaseMagazineLightRifle
+  name: Ronin magazine (5.56mm)
+  description: A proprietary 30-round Militech magazine. It only seats in a Ronin.
+  components:
+  - type: Tag
+    tags: [ NCMagazine556Ronin ]
+  - type: BallisticAmmoProvider
+    proto: NCCartridge556
+    capacity: 30
+    whitelist:
+      tags: [ NCCartridge556 ]
+  - type: Sprite
+    sprite: _NC/Objects/Weapons/Guns/Rifles/Militech_RONIN/mag.rsi
+    layers:
+    - state: base
+      map: [ "enum.GunVisualLayers.Base" ]
+    - state: mag-1
+      map: [ "enum.GunVisualLayers.Mag" ]
+  - type: Item
+    inhandVisuals:
+      left:
+      - state: inhand-left-mag
+      right:
+      - state: inhand-right-mag
+
+- type: entity
   id: NCMagazine762Sniper
   parent: BaseMagazineRifle
   name: sniper magazine (7.62mm)

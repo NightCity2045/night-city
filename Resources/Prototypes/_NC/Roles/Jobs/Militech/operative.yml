@@ -10,7 +10,7 @@
   supervisors: nc-job-supervisors-militech-command
   weight: 70
   startingGear: MilitechOperativeGear
-  icon: JobIconSecurityOfficer
+  icon: NCJobIconMilitechOperative
   accessGroups: [ MilitechBasic ]
   access: [ Militech_Operative, Militech_Armory ]
 
@@ -21,7 +21,7 @@
     back: ClothingBackpackSecurity
     shoes: ClothingShoesBootsJack
     eyes: ClothingEyesGlassesSecurity
-    id: SecurityPDA
+    id: MilitechOperativePDA
     belt: ClothingBeltSecurity
     armor: ClothingOuterArmorMilitechBulletproof
   storage:
@@ -29,3 +29,41 @@
     - Handcuffs
     - HoloprojectorSecurity
     - RadioHandheldSecurity
+
+- type: jobIcon
+  parent: JobIcon
+  id: NCJobIconMilitechOperative
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons_extra.rsi
+    state: militech
+  jobName: job-name-militech-operative
+
+- type: entity
+  parent: IDCardStandard
+  id: MilitechOperativeIDCard
+  name: Militech operative ID
+  components:
+  - type: Sprite
+    layers:
+    - state: default
+    - state: stripe_top
+      color: "#8A8C91"
+    - state: stripe_bottom
+      color: "#5B5E64"
+    - sprite: _NC/Interface/Misc/job_icons_extra.rsi
+      offset: -0.09375, 0.0625
+      state: militech
+  - type: PresetIdCard
+    job: MilitechOperative
+
+# Keeps the department tools of the SecurityPDA it replaces.
+- type: entity
+  parent: SecurityPDA
+  id: MilitechOperativePDA
+  name: Militech operative PDA
+  description: A rugged department terminal tied to its owner's persistent position.
+  components:
+  - type: Pda
+    id: MilitechOperativeIDCard
+  - type: PdaBorderColor
+    borderColor: "#8A8C91"

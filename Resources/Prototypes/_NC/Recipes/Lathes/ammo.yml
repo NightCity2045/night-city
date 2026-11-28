@@ -55,6 +55,13 @@
 
 - type: latheRecipe
   parent: BaseAmmoRecipe
+  id: NCMagazine556Ronin
+  result: NCMagazine556Ronin
+  materials:
+    Steel: 620
+
+- type: latheRecipe
+  parent: BaseAmmoRecipe
   id: NCMagazine762Sniper
   result: NCMagazine762Sniper
   materials:

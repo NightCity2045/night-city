@@ -10,7 +10,7 @@
   supervisors: nc-job-supervisors-zhirafa-management
   weight: 10
   startingGear: ZhirafaJanitorGear
-  icon: JobIconJanitor
+  icon: NCJobIconZhirafaJanitor
   accessGroups: [ ZhirafaBasic ]
 
 - type: startingGear
@@ -19,9 +19,47 @@
     jumpsuit: ClothingUniformJumpsuitJanitor
     back: ClothingBackpack
     shoes: ClothingShoesGaloshes
-    id: JanitorPDA
+    id: ZhirafaJanitorPDA
     belt: ClothingBeltJanitorFilled
     outerClothing: ClothingOuterWinterJani
   # NC: A physical worker must carry the same real tool a player uses. The professional adapter never invents one.
   inhand:
   - MopItem
+
+- type: jobIcon
+  parent: JobIcon
+  id: NCJobIconZhirafaJanitor
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons_extra.rsi
+    state: zhirafa_sanitation
+  jobName: job-name-zhirafa-janitor
+
+- type: entity
+  parent: IDCardStandard
+  id: ZhirafaJanitorIDCard
+  name: Zhirafa sanitation worker ID
+  components:
+  - type: Sprite
+    layers:
+    - state: default
+    - state: stripe_top
+      color: "#D8A650"
+    - state: stripe_bottom
+      color: "#B07F2E"
+    - sprite: _NC/Interface/Misc/job_icons_extra.rsi
+      offset: -0.09375, 0.0625
+      state: zhirafa_sanitation
+  - type: PresetIdCard
+    job: ZhirafaJanitor
+
+# Keeps the department tools of the JanitorPDA it replaces.
+- type: entity
+  parent: JanitorPDA
+  id: ZhirafaJanitorPDA
+  name: Zhirafa sanitation worker PDA
+  description: A rugged department terminal tied to its owner's persistent position.
+  components:
+  - type: Pda
+    id: ZhirafaJanitorIDCard
+  - type: PdaBorderColor
+    borderColor: "#D8A650"

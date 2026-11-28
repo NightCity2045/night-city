@@ -1,0 +1,41 @@
+{
+    "version": 1,
+    "license": "CC-BY-SA-4.0",
+    "copyright": "Generated for Night City 2045 in the style of _NC/Interface/Misc/job_icons.rsi",
+    "size": {
+        "x": 8,
+        "y": 8
+    },
+    "states": [
+        {
+            "name": "militech"
+        },
+        {
+            "name": "militech_chief"
+        },
+        {
+            "name": "militech_lead"
+        },
+        {
+            "name": "militech_security"
+        },
+        {
+            "name": "militech_netrunner"
+        },
+        {
+            "name": "militech_medic"
+        },
+        {
+            "name": "militech_tech"
+        },
+        {
+            "name": "militech_rigger"
+        },
+        {
+            "name": "militech_quartermaster"
+        },
+        {
+            "name": "zhirafa_sanitation"
+        }
+    ]
+}

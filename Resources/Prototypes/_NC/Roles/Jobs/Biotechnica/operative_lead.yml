@@ -10,7 +10,7 @@
   supervisors: nc-job-supervisors-biotechnica-management
   weight: 80
   startingGear: BiotechnicaOperativeLeadGear
-  icon: JobIconSecurityOfficer
+  icon: NCJobIconBiotechnicaOperativeLead
   accessGroups: [ BiotechBasic ]
   access: [ Biotech_HeadOfDepartment, Biotech_Operative ]
 
@@ -23,7 +23,7 @@
     head: ClothingHeadHatBiotechCap
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesBiotechnica
-    id: WardenPDA
+    id: BiotechnicaOperativeLeadPDA
     belt: ClothingBeltSecurity
     armor: ClothingOuterArmorBiotechBulletproof
   storage:
@@ -32,3 +32,41 @@
     - Handcuffs
     - HoloprojectorSecurity
     - RadioHandheldSecurity
+
+- type: jobIcon
+  parent: JobIcon
+  id: NCJobIconBiotechnicaOperativeLead
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: biotech_oficer
+  jobName: job-name-biotechnica-operative-lead
+
+- type: entity
+  parent: IDCardStandard
+  id: BiotechnicaOperativeLeadIDCard
+  name: Biotechnica operations lead ID
+  components:
+  - type: Sprite
+    layers:
+    - state: default
+    - state: stripe_top
+      color: "#6DB15C"
+    - state: stripe_bottom
+      color: "#4A8A3B"
+    - sprite: _NC/Interface/Misc/job_icons.rsi
+      offset: -0.09375, 0.0625
+      state: biotech_oficer
+  - type: PresetIdCard
+    job: BiotechnicaOperativeLead
+
+# Keeps the department tools of the WardenPDA it replaces.
+- type: entity
+  parent: WardenPDA
+  id: BiotechnicaOperativeLeadPDA
+  name: Biotechnica operations lead PDA
+  description: A rugged department terminal tied to its owner's persistent position.
+  components:
+  - type: Pda
+    id: BiotechnicaOperativeLeadIDCard
+  - type: PdaBorderColor
+    borderColor: "#6DB15C"

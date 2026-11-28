@@ -39,3 +39,35 @@
         whitelistFailPopup: gun-magazine-whitelist-fail
         insertSound: /Audio/Weapons/Guns/MagIn/smg_magin.ogg
         ejectSound: /Audio/Weapons/Guns/MagOut/smg_magout.ogg
+
+- type: entity
+  id: NCWeaponShotgunCarnage
+  parent: [ BaseWeaponShotgun, BaseGunWieldable ]
+  name: Budget Arms Carnage
+  description: A pump-action 12 gauge with a short tube and a kick that rearranges shoulders. Cheap, crude and devastating up close.
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Weapons/Guns/Shotguns/Budget_Arms_Carnage/big.rsi
+    scale: "0.7, 0.7"
+    layers:
+    - state: base
+      map: [ "enum.GunVisualLayers.Base" ]
+  - type: Item
+    sprite: _NC/Objects/Weapons/Guns/Shotguns/Budget_Arms_Carnage/tiny.rsi
+  # The new art has no worn sprites yet; on the back it looks like the stock pump shotgun.
+  - type: Clothing
+    sprite: Objects/Weapons/Guns/Shotguns/pump.rsi
+  - type: GunRequiresWield
+  - type: Gun
+    fireRate: 0.8
+    cameraRecoilScalar: 3
+    angleIncrease: 5
+  - type: GunSpreadModifier
+    spread: 0.8
+  - type: BallisticAmmoProvider
+    whitelist:
+      tags: [ NCShell12Gauge ]
+    proto: NCShell12Gauge
+    capacity: 4
+  - type: StaticPrice
+    price: 800
