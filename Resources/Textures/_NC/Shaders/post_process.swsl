@@ -1,9 +1,16 @@
 light_mode unshaded;
 uniform sampler2D SCREEN_TEXTURE;
 uniform sampler2D BLOOM_TEXTURE;
+uniform sampler2D BLOOM_WIDE_TEXTURE;
+uniform sampler2D LUT_TEXTURE;
 
-uniform highp float bloomIntensity;
 uniform bool bloomEnabled;
+uniform highp float bloomIntensity;
+uniform highp float bloomTightWeight;
+uniform highp float bloomWideWeight;
+
+uniform bool gradeEnabled;
+uniform highp float gradeStrength;
 
 uniform bool vignetteEnabled;
 uniform highp float vignetteRadius;
@@ -12,6 +19,8 @@ uniform highp vec4 vignetteColor;
 
 uniform bool grainEnabled;
 uniform highp float grainStrength;
+
+const highp float LUT_SIZE = 32.0;
 
 // ACES Filmic Tonemapping
 highp vec3 ACESFilm(highp vec3 x) {
@@ -23,32 +32,39 @@ highp vec3 ACESFilm(highp vec3 x) {
     return clamp((x*(a*x+b))/(x*(c*x+d)+e), 0.0, 1.0);
 }
 
+// Looks a linear colour up in a 32x32x32 table laid out as a 1024x32 strip:
+// red across each slice, green down the rows, blue picks the slice.
+highp vec3 applyLut(highp vec3 col) {
+    highp vec3 cell = clamp(zToSrgb(vec4(col, 1.0)).rgb, 0.0, 1.0) * (LUT_SIZE - 1.0);
+    highp float slice = floor(cell.b);
+    highp float nextSlice = min(slice + 1.0, LUT_SIZE - 1.0);
+    // Texture v runs from the bottom row up, while the strip keeps green 0 in its top row.
+    highp float y = 1.0 - (cell.g + 0.5) / LUT_SIZE;
+    highp vec2 uv0 = vec2((slice * LUT_SIZE + cell.r + 0.5) / (LUT_SIZE * LUT_SIZE), y);
+    highp vec2 uv1 = vec2((nextSlice * LUT_SIZE + cell.r + 0.5) / (LUT_SIZE * LUT_SIZE), y);
+    // The table is an sRGB texture, so samples come back linear.
+    return mix(texture(LUT_TEXTURE, uv0).rgb, texture(LUT_TEXTURE, uv1).rgb, cell.b - slice);
+}
+
 void fragment() {
     highp vec2 screenUV = FRAGCOORD.xy * SCREEN_PIXEL_SIZE.xy;
     highp vec4 scene = texture(SCREEN_TEXTURE, screenUV);
     highp vec3 result = scene.rgb;
 
-    // 1. Cinematic Color Grading (Teal & Orange / Split Toning)
-    highp float luma = dot(result, vec3(0.2126, 0.7152, 0.0722));
-    
-    // Shadows: Deep Teal/Blue
-    highp vec3 shadowColor = vec3(0.02, 0.04, 0.1); // Made slightly darker
-    // Midtones/Highlights: Warm/Orange boost
-    highp vec3 highlightColor = vec3(1.1, 1.05, 1.0);
-
-    // Only apply tint to areas that aren't pitch black
-    highp vec3 graded = mix(shadowColor, result * highlightColor, smoothstep(-0.2, 0.8, luma));
-    highp float tintWeight = smoothstep(0.0, 0.2, luma) * 0.7; // Protect absolute blacks
-    result = mix(result, graded, tintWeight); 
-
-    // 2. Bloom
+    // 1. Bloom: a tight halo hugs the source, a wide one spills colour into the surrounding dark.
     if (bloomEnabled) {
-        highp vec3 bloom = texture(BLOOM_TEXTURE, screenUV).rgb;
-        result += bloom * (bloomIntensity / 100.0);
+        highp vec3 tight = texture(BLOOM_TEXTURE, screenUV).rgb;
+        highp vec3 wide = texture(BLOOM_WIDE_TEXTURE, screenUV).rgb;
+        result += (tight * bloomTightWeight + wide * bloomWideWeight) * bloomIntensity;
     }
 
-    // 3. Tonemapping (Filmic Look)
+    // 2. Tonemapping (Filmic Look)
     result = ACESFilm(result * 1.1); // Slight exposure boost before tonemapping
+
+    // 3. Colour grade from the lookup table.
+    if (gradeEnabled) {
+        result = mix(result, applyLut(result), gradeStrength);
+    }
 
     // 4. Vignette
     if (vignetteEnabled) {

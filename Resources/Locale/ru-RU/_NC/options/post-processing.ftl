@@ -5,6 +5,9 @@
 ui-options-nc-post-processing-label = Постобработка Night City
 ui-options-nc-bloom = Свечение
 ui-options-nc-bloom-intensity = Интенсивность свечения
+ui-options-nc-color-grade = Цветокоррекция Night City
+ui-options-nc-color-grade-strength = Сила цветокоррекции
+ui-options-nc-neon-glow = Отсвет неона на поверхностях
 ui-options-nc-vignette = Виньетирование
 ui-options-nc-film-grain = Зернистость
 ui-options-nc-film-grain-strength = Интенсивность зернистости

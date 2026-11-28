@@ -70,6 +70,8 @@
   name: mercenary helmet
   description: The combat helmet is commonly used by mercenaries, is strong, light and smells like gunpowder and the jungle.
   components:
+  - type: NCArmor # NC
+    profile: NCArmorCombatHelmet # NC
   - type: Sprite
     sprite: Clothing/Head/Helmets/merc_helmet.rsi
   - type: Clothing
@@ -85,6 +87,10 @@
   name: SWAT helmet
   description: An extremely robust helmet, commonly used by paramilitary forces. This one has the Nanotrasen logo emblazoned on the top.
   components:
+  # NC-Edit-Start: The visor and faceplate seal the head, eyes and mouth.
+  - type: NCArmor
+    profile: NCArmorClosedHelmet
+  # NC-Edit-End
   - type: Sprite
     sprite: Clothing/Head/Helmets/swat.rsi
   - type: Clothing

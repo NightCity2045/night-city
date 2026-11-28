@@ -138,6 +138,10 @@
   id: ClothingOuterArmorBaseCarapace
   abstract: true
   components:
+  # NC-Edit-Start: Rigid chestpieces stop flak-grade hits in zonal combat.
+  - type: NCArmor
+    profile: NCArmorCarapace
+  # NC-Edit-End
   # NC-Edit-Start: Rigid carapaces use the heavy armor mobility profile.
   - type: ClothingSpeedModifier
     walkModifier: 0.90
@@ -204,6 +208,8 @@
   - type: ClothingSpeedModifier
     walkModifier: 0.90
     sprintModifier: 0.80
+  - type: NCArmor
+    profile: NCArmorPlateCarrier
   # NC-Edit-End
   - type: Armor
     modifiers:
@@ -235,6 +241,8 @@
   - type: ClothingSpeedModifier
     walkModifier: 0.90
     sprintModifier: 0.80
+  - type: NCArmor
+    profile: NCArmorPlateCarrier
   # NC-Edit-End
   - type: Armor
     modifiers:
@@ -264,6 +272,10 @@
     # NC-Edit-Start: Mercenary web armor uses the dedicated armor layer.
     slots: [ armor ]
     # NC-Edit-End
+  # NC-Edit-Start: Flexible plating covers the body and limbs like a light armorjack.
+  - type: NCArmor
+    profile: NCArmorLightArmorjack
+  # NC-Edit-End
   - type: Armor
     modifiers:
       coefficients:
@@ -551,6 +563,8 @@
     modifiers:
       coefficients:
         Blunt: 0.9
+  - type: NCArmor # NC
+    profile: NCArmorCardboard # NC
   - type: Construction
     graph: cardArmour
     node: cardarmour

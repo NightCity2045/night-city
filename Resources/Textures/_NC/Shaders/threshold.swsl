@@ -1,14 +1,19 @@
 light_mode unshaded;
 uniform sampler2D SCREEN_TEXTURE;
 uniform highp float threshold;
+uniform highp float knee;
 
 void fragment() {
     highp vec2 screenUV = FRAGCOORD.xy * SCREEN_PIXEL_SIZE.xy;
-    highp vec4 col = texture(SCREEN_TEXTURE, screenUV);
-    highp float brightness = dot(col.rgb, vec3(0.2126, 0.7152, 0.0722));
-    if (brightness > threshold) {
-        COLOR = col;
-    } else {
-        COLOR = vec4(0.0, 0.0, 0.0, 1.0);
-    }
+    highp vec3 col = texture(SCREEN_TEXTURE, screenUV).rgb;
+
+    // The brightest channel rather than luma, so saturated blue and magenta neon blooms as readily as white light.
+    highp float brightness = max(col.r, max(col.g, col.b));
+
+    // Soft knee: pixels just under the threshold fade in instead of popping.
+    highp float soft = clamp(brightness - threshold + knee, 0.0, 2.0 * knee);
+    soft = soft * soft / (4.0 * knee + 0.00001);
+    highp float contribution = max(soft, brightness - threshold) / max(brightness, 0.00001);
+
+    COLOR = vec4(col * contribution, 1.0);
 }
